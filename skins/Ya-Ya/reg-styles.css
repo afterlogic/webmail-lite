@@ -1,0 +1,71 @@
+#registration_screen {
+	padding:20px 0 0;
+}
+#reset_form,
+#reg_form {
+	text-align: center;
+}
+.wm_registration {
+	background:none;
+	color:#323232;
+	font:normal 11px Tahoma,Arial,Helvetica,sans-serif;
+	padding:0 0 20px;
+	/* width:536px; */
+	margin: 0px auto;
+	display: inline-block;
+}
+.wm_registration .a, .wm_registration .b {
+	margin:0px 2px;
+	height:1px;
+	overflow:hidden;
+	background:#BCCCD6;
+}
+.wm_registration .b {
+	margin:0px 1px;
+}
+.login_table {
+	float:left;
+	width:100%;
+}
+.login_table .field {clear:both; text-align:right; padding:0px 0px 12px;min-width:460px;}
+.login_table .fieldset {margin:0px 20px;  float:left;}
+.login_table label {text-align:right;padding:0px 10px;vertical-align:top;}
+.login_table .field .wm_input, .login_table .field select {background:#fff;}
+.login_table .text_desc {float:right; text-align:left; color:#494949}
+.login_table .text {display:block; text-align:left; padding:0px 0px 10px}
+
+.inputfield label  {
+	margin:0px;
+	padding:0px 0px;
+}
+.inputfield,
+.login_table .text_desc  {
+	width:344px;
+	text-align:left;
+}
+.inputfield .wm_input {
+	width:330px;
+}
+.login_table .inputfield  h3 {
+	margin:0px;
+	line-height:14px;
+}
+.captcha {
+	background:url(captcha.png);
+	width:236px;
+	height:93px;
+	display:-moz-inline-box;
+	display:inline-block;
+	/*margin-right:106px;*/
+}
+.captcha, .inputfield, .login_table .text_desc  {
+	display:-moz-inline-box;
+	display:inline-block;
+}
+.login_table .separator{
+	border-bottom:1px solid #BCCCD6;
+	margin:0px 0px 12px;
+}
+#reset_screen {
+	padding:20px 0 0;
+}

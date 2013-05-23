@@ -1,0 +1,694 @@
+html
+{
+	direction: rtl;
+}
+
+label
+{
+	margin-left: 0;
+	margin-right: 4px;
+}
+
+.wm_settings_common label
+{
+	margin-left: 0px;
+	margin-right: 4px;
+}
+
+.wm_print_title, .wm_print_value, .wm_print_body
+{
+	text-align: right;
+}
+
+.wm_print_title
+{
+	border-width: 0px 0px 1px 1px !important;
+}
+
+.wm_print_value
+{
+	border-width: 0px 1px 1px 0px !important;
+}
+
+.wm_tip_arrow
+{
+	background: transparent url(mail.png) no-repeat scroll -600px -200px;
+	left: auto;
+	right: -11px;
+}
+
+.wm_tip_icon
+{
+	left: auto;
+	right: 6px;
+}
+
+.wm_tip_message
+{
+	left: auto;
+	right: 0;
+	margin: 0 32px 0 10px;
+}
+
+.wm_close_info_image {
+	left:4px;
+	right:auto;
+}
+
+.wm_login {
+	text-align: right;
+}
+
+.wm_title {
+	text-align: left !important;/**/
+}
+
+.wm_login_switcher {
+}
+
+.wm_login_button {
+	text-align: left;
+}
+
+.wm_login_error {
+	text-align: right;
+}
+
+.wm_accountslist td
+{
+
+}
+
+.wm_accountslist_email, .wm_accountslist_contacts
+{
+	float: right;
+	border-right: 0;
+	border-left: solid 1px #e981a6;
+}
+
+.wm_accountslist_email
+{
+	border-left: 0;
+}
+
+.wm_accountslist_selection, .wm_accountslist_selection_over, .wm_accountslist_selection_press
+{
+	float: right;
+	border-right: 0;
+	border-left: solid 1px #e981a6;
+}
+
+.wm_accountslist_selection_none
+{
+	float: right;
+	border-right: 0;
+	border-left: solid 1px #e981a6;
+}
+
+.wm_accountslist_settings,
+.wm_accountslist_logout {
+	float: left;
+	border-left: 0;
+	border-right: solid 1px #e981a6;
+}
+.wm_accountslist_logout {
+}
+.wm_account_menu
+{
+	text-align: right;
+}
+.wm_toolbar {
+	text-align:right;
+}
+.wm_toolbar_content {
+	float:right;
+}
+#layout_3pane .wm_toolbar_content {
+	float:none;
+}
+.wm_toolbar_search_item
+{
+	float: left;
+}
+
+.wm_toolbar_search_item_over
+{
+	float: left;
+}
+
+.wm_search_icon, .wm_navigate_icon, .wm_search_icon_standard, .wm_search_icon_advanced
+{
+	
+}
+
+.wm_search_form
+{
+	right: auto;
+	left: 0;
+}
+
+.wm_search_form table
+{
+	text-align: right;
+}
+
+.wm_search_title
+{
+	text-align: left;
+}
+
+.wm_search_value
+{
+	text-align: right;
+}
+
+.wm_popup_menu
+{
+	text-align: right;
+}
+
+.wm_inbox_page_switcher
+{
+	right: auto;
+	left: 16px;
+	direction: ltr;
+}
+.wm_inbox_page_switcher_left
+{
+	background: #f9f9f9;
+	border-top: solid 1px #c3c3c3;
+	position: absolute;
+	margin: -10px 0px 0px -17px;
+	width: 17px;
+	height: 19px;
+}
+
+.wm_inbox_page_switcher_right
+{
+	background-image: transparent url(mail.png) no-repeat -480px -160px;
+	border:none;
+	width: 16px;
+	height: 20px;
+	position: relative;
+	margin: 0px;
+}
+
+.wm_page_switcher_first
+{
+	background-position: -320px -160px;
+	margin-left: 0;
+	margin-right: 1px;
+}
+
+.wm_page_switcher_prev
+{
+	background-position: -360px -160px;
+}
+
+.wm_page_switcher_next
+{
+	background-position: -400px -160px;
+	margin-left: 0;
+	margin-right: 1px;
+}
+
+.wm_page_switcher_last
+{
+	background-position: -280px -160px;
+}
+
+.wm_mail_container td
+{
+	text-align: right;
+}
+
+.wm_vresizer_part
+{
+	text-align: right;
+}
+
+.wm_folders_part
+{
+	border-width:0px 0px 1px 1px;
+	text-align: right;
+}
+
+.wm_folder div, .wm_select_folder div, .wm_folder_over div {
+}
+
+.wm_folder, .wm_select_folder, .wm_folder_over
+{
+	margin-right: 8px;
+	margin-left: 0;
+}
+
+.wm_folders_hide_show
+{
+	text-align:left;
+}
+
+.wm_folders_hide
+{
+	background-position: -600px -80px;
+}
+
+.wm_folders_show
+{
+	background-position: -560px -80px;
+}
+
+.wm_manage_folders
+{
+	padding-left: 0;
+	padding-right: 4px;
+}
+.wm_inbox {
+	border-width: 0px 1px 1px 0px;
+}
+.wm_inbox_headers_from_subject
+{
+	text-align: right !important;
+	padding-left: 0;
+	padding-right: 4px;
+}
+
+.wm_inbox_headers_text
+{
+	padding-left: 0;
+	padding-right: 4px;
+}
+
+.wm_inbox_lines td
+{
+	direction: rtl;
+	text-align: center;
+}
+
+.wm_inbox_lines, .wm_contacts_in_group_lines
+{
+	text-align: right;
+}
+.wm_inbox_lines_replied, .wm_inbox_lines_forwarded, .wm_inbox_lines_rpl_fwd {
+}
+
+.wm_message_container {
+	border-width:1px 1px 1px 0px;
+}
+.wm_message_headers font
+{
+	margin-right: 0;
+	margin-left: 4px;
+}
+
+.wm_message_left
+{
+	float: right;
+	text-align: right;
+}
+
+.wm_message_right
+{
+	float: left;
+}
+
+.wm_message
+{
+	text-align: right;
+}
+
+.wm_new_message, .wm_new_message td
+{
+	text-align: right;
+}
+.wm_new_message .wm_open_in_new_window_control {
+    margin: 1px 0px 0px 10px;
+}
+.wm_new_message_title
+{
+	text-align: left !important;
+}
+
+.wm_new_message_options .wm_editor_switcher {
+	float:left;
+}
+.wm_upload_icon {
+	float:right;
+	margin: 0px 0px 10px 4px;
+}
+.wm_attachment_uploading .wm_upload_cancel {
+	float:left;
+}
+.wm_upload_list {
+	text-align: right;
+}
+.wm_attachment_image
+{
+	float: right;
+	margin-right: 0;
+	margin-left: 4px;
+}
+.wm_upload_list li {
+    margin-right: 0px;
+    margin-left: 6px;
+}
+.wm_auto_filling_img_group
+{
+	margin-right: 0;
+	margin-left: 4px;
+}
+
+.wm_popular_contacts_image
+{
+	right: auto;
+	left: 4px;
+}
+
+.wm_view_message td, .wm_message_viewer_cell
+{
+	padding: 2px 10px 2px 5px;
+	text-align: right;
+}
+
+.wm_view_message_title
+{
+	text-align: left !important;
+}
+
+.wm_view_message_switcher
+{
+	text-align: left !important;
+}
+
+.wm_view_message_switcher img
+{
+	margin-right: 0;
+	margin-left: 6px;
+}
+
+.wm_view_message .wm_add_address_book_img
+{
+	margin-left: 0;
+	margin-right: 4px;
+}
+
+.wm_headers_switcher
+{
+	text-align: left !important;
+}
+
+.wm_hide_headers
+{
+	text-align: left;
+}
+
+.wm_contacts_list
+{
+	float: right;
+}
+
+.wm_contact_list_div
+{
+	border-right: 0;
+	border-left: solid 1px #f6c1d3;
+}
+
+.wm_contacts_view_edit
+{
+	float: right;
+	text-align: right;
+}
+
+.wm_search_by_first_char_pane {
+	border-right: 0;
+	border-left: 1px solid #f6c1d3;
+}
+.wm_search_by_first_char_pane li {
+	float: right;
+}
+
+.wm_contacts_view_edit a
+{
+	text-align: right;
+}
+
+.wm_contacts_view
+{
+	text-align: right;
+}
+
+.wm_contacts_view .wm_hide_section
+{
+	text-align: left;
+}
+
+.wm_contacts_view_title
+{
+	text-align: left !important;
+}
+
+.wm_contacts_save_button
+{
+	text-align: left;
+}
+
+.wm_contacts_tab td
+{
+}
+
+.wm_contacts_tab_name
+{
+	float: right;
+}
+
+.wm_contacts_tab_open_mode, .wm_contacts_tab_close_mode,
+.wm_view_message_open_mode, .wm_view_message_close_mode
+{
+	float: left;
+}
+.wm_settings {
+	text-align:right;
+}
+.wm_settings_row {
+	margin-right:180px;
+	margin-left:0px;
+	border:0px;
+	border-right:1px solid #DBCDCD;
+}
+.wm_settings_nav
+{
+	padding: 10px 10px 10px 0px;
+	float:right;
+	left:0;
+	margin-right: -980px;
+	margin-left:0px;
+}
+
+.wm_settings_item
+{
+	padding: 9px 6px 9px 9px;
+}
+
+.wm_settings_item, .wm_selected_settings_item
+{
+	left: auto;
+	right: 1px;
+}
+.wm_selected_settings_item a, .wm_settings_item a
+{
+	margin:0px 10px 0px 0px;
+}
+.wm_selected_settings_item span, .wm_settings_item span {
+}
+.wm_selected_settings_item
+{
+	border-right: 1px solid #DBCDCD;
+	border-left: 0;
+	padding: 8px 5px 8px 8px;
+}
+
+.wm_settings_cont
+{
+	float:right;
+	text-align: right;
+}
+
+.wm_settings_cont a
+{
+	text-align: right;
+}
+
+.wm_settings_switcher_info
+{
+	float: right;
+}
+
+.wm_settings_switcher_item
+{
+	float: left;
+	border-width: 1px 1px 0 0;
+}
+
+.wm_settings_switcher_select_item
+{
+	float: left;
+}
+
+.wm_settings_switcher_indent
+{
+	float: left;
+	border-left: 0;
+	border-right: solid 1px #8D8C89;
+}
+
+.wm_settings_mf_folder
+{
+	text-align: right !important;
+}
+
+.wm_settings_mf_page_switcher
+{
+	text-align: left !important;
+}
+
+.wm_settings_on_mailserver
+{
+	padding-left: 0;
+	padding-right: 30px;
+}
+
+.wm_settings_title
+{
+	text-align: left;
+}
+
+td.wm_secondary_info
+{
+	text-align: right !important;
+}
+
+label.wm_nextline_info
+{
+	margin-left: 0;
+	margin-right: 16px;
+	$margin-right: 24px;
+}
+
+label.wm_inline_info
+{
+	margin-left: 0;
+	margin-right: 6px;
+}
+
+.wm_settings_buttons, .wm_settings_buttons_cell, .wm_identity_buttons
+{
+    text-align: left;
+}
+
+.wm_settings_buttons td, .wm_settings_add_account_button td, .wm_settings_add_account_button
+{
+	text-align: left;
+}
+
+.wm_delete_button
+{
+	text-align: right !important;
+}
+
+.wm_port_input
+{
+	margin-left: 0;
+	margin-right: 6px;
+}
+
+.wm_settings_para
+{
+	margin-left: 0;
+	margin-right: 15px;
+}
+
+.wm_list_checkbox_container
+{
+	border: 0;
+    border-right: solid 1px White;
+	float: right;
+	text-align: right;
+}
+
+.wm_arranged_by_title, .wm_sort_popup_control, .wm_additional_bar_right_border
+{
+}
+
+.wm_first_toolbar_item
+{
+    float: right;
+    margin: 0 12px 0 0;
+}
+.wm_additional_bar_container  {
+	text-align:right;
+}
+
+.wm_lowtoolbar_messages, .wm_lowtoolbar_space_info
+{
+	padding-left: 0;
+	padding-right: 4px;
+}
+
+.wm_lowtoolbar_messages
+{
+	float: right;
+}
+
+.wm_lowtoolbar_space_info
+{
+	float: left;
+}
+
+.wm_lowtoolbar_plain_html
+{
+	float: right;
+}
+
+.wm_progressbar_used, .wm_progressbar_all_used
+{
+	float: right;
+}
+
+.wm_drag_handle_img, .wm_not_drag_handle_img
+{
+	/* float: right; */
+}
+
+.spell_popup_show 
+{ 
+	float: right;
+}
+
+.spell_backLayer
+{
+	float: right;
+}
+
+.wm_contact_card table td
+{
+	text-align: right;
+}
+
+.wm_contact_card .wm_line_title
+{
+	text-align: left !important;
+}
+.wm_language_place {
+	left:10px;
+	right:auto;
+	text-align:left;
+}
+.wm_mapping_head {
+	float: left;
+	padding-left: 16px;
+}
+.wm_mapping_line {
+	float: left;
+}
+.wm_search_result_clear_button {
+	float:left;
+}

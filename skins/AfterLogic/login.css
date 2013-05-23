@@ -1,0 +1,99 @@
+/*- Language selector CSS -*/
+.wm_language_place {
+	display:none;
+}
+#demo_info .sprite {
+	display:-moz-inline-box;
+	display:inline-block;
+	margin-right:6px;
+	background-image:url(langs.png);
+	background-repeat:no-repeat;
+	padding:1px 6px 1px 28px;
+}
+#demo_info a.sprite {
+	color:#555;
+	text-decoration:none;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	-khtml-border-radius: 3px;
+	border-radius: 3px;
+	outline:none;
+}
+#demo_info a.sprite.active {
+	background-color:#697787;
+	color:#fff !important;
+}
+#demo_info a.sprite:hover  {
+	background-color:#9BB2BF;
+	color:#333;
+}
+#demo_info a.sprite.active {
+	background-color:#697787;
+	color:#fff !important;
+}
+#demo_info .title {
+	margin:0px 0px 10px;
+}
+.lang_arb {background-position:0px 0px;}
+.lang_dan {background-position:0px -20px;}
+.lang_dut {background-position:0px -40px;}
+.lang_eng {background-position:0px -60px; margin:0px 8px 0px -22px !important;}
+.lang_frn {background-position:0px -80px;}
+.lang_gmn {background-position:0px -100px;}
+.lang_hbw {background-position:0px -120px;}
+.lang_hng {background-position:0px -140px;}
+.lang_itl {background-position:0px -160px;}
+.lang_nrw {background-position:0px -180px;}
+.lang_pls {background-position:0px -200px;}
+.lang_prt {background-position:0px -220px;}
+.lang_rss {background-position:0px -240px;}
+.lang_spn {background-position:0px -260px;}
+.lang_swd {background-position:0px -280px;}
+.lang_trk {background-position:0px -300px;}
+.lang_tha {background-position:0px -340px;}
+.lang_ukr {background-position:0px -360px;}
+.lang_grk {background-position:0px -380px;}
+.lang_usa {background-position:0px -323px; width:20px; height:16px; margin:0px 8px 0px -6px !important;padding: 0px !important; vertical-align:middle}
+.lang_jap {background-position:0px -400px;}
+.lang_ch_simple {background-position:0px -420px;}
+.lang_ch_tr {background-position:0px -440px;}
+
+.info {
+	width:380px;
+	margin:0px auto;
+	text-align:left;
+}
+.info div.r2, .info div.r1{
+	display:block;
+	height: 1px;
+	overflow: hidden;
+	margin:0px 2px;
+	background-color: #c7cccf;
+}
+.info div.r1 {
+	margin:0px 1px;
+	overflow:hidden;
+	background-color:#d7dcdf;
+	border-left:1px solid #c7cccf;
+	border-right:1px solid #c7cccf;
+}
+.info div.middle {
+	padding:10px;
+	font-family:Verdana,sans-serif;
+	font-weight:normal;
+	font-size:11px;
+	line-height:160%;
+	background-color: #D7dcdf;
+	border-left:1px solid #c7cccf;
+	border-right:1px solid #c7cccf;
+	color:#464646;
+}
+.info a, .info a:hover, .info a:link {
+	color:#4F75C9;
+	text-decoration:underline;
+}
+#demo_info a.sprite.active {
+	background-color:#697787;
+	color:#fff !important;
+}
+/*- END Language selector CSS -*/

@@ -1,0 +1,531 @@
+html, body {
+	margin:0px;
+	padding:0px;
+	height:100%;
+}
+body {
+	background:#F4F6F8 url(pda-gradients.gif) repeat-x 0px -630px;
+	font:normal 9pt Tahoma,Arial,Helvetica,sans-serif;
+	width:100%;
+}
+form {
+	margin:0px;
+	padding:0px;
+}
+table, td {
+	margin:0px;
+	padding:0px;
+	border:0px;
+}
+.wm_logo {
+	border:0pt none;
+	height:20px;
+	text-align:center;
+	padding:6px 0px 0px; 
+	font:normal 130% "Lucida Grande","Lucida Sans Unicode",Arial,Verdana,sans-serif;
+}
+.wm_hide {
+	display: none;
+}
+.wmpda_clear {
+	clear:both;
+	height:0px;
+	overflow:hidden;
+}
+.wmpda_content {
+	height:100%;
+	background:#C2CCD7;
+	background:#687789;
+}
+.wm_checkbox {
+	display:-moz-inline-box;
+	display:inline-block;
+	vertical-align:bottom;
+}
+
+/*  common  */
+.wmpda_empty {
+	font-size:16pt;
+	color:#778;
+	background:#fff;
+	text-align:center;
+	padding: 16px 20px;
+	border-bottom:1px solid #D7e3f7;
+}
+.wmpda-icon {
+	display:-moz-inline-box;
+	display:inline-block;
+	vertical-align:middle;
+	width:12px;
+	height:14px;
+}
+.wmpda-attach {
+	background:url(pda-icons.png) no-repeat 0px -30px;
+}
+.wmpda-group {
+	background:url(pda-icons.png) no-repeat 0px 0px;
+	padding:0px 2px 0px 0px;
+}
+.wmpda_page_title {
+	font-size:12pt;
+	color:#fff;
+	padding:8px 6px 0px 0px; 
+}
+
+.wmpda_menu_link, .wmpda_menu_link a {
+	color:#575f73;
+	font-weight:bold;
+	font-size:14px;
+	margin:0px 8px 0px 0px;
+	
+}
+.wmpda_menu_link:hover, .wmpda_menu_link a:hover {
+	color:#36394d;
+	font-weight:bold;
+}
+a.wmpda_logout {
+	font-size:12px !important;
+	color:#C2C9CF !important;
+}
+a.wmpda-logout, a.wmpda-logout:hover  {
+	float:right;
+	font-size:100%;
+	text-decoration:none;
+}
+.wm_input textarea {
+	border:0px;
+	border-top:1px solid #e5e5e5;
+	border-bottom:1px solid #d7d7d7;
+	margin:0px;
+}
+.wmpda_header {
+	padding: 0px 6px 6px;
+	background:#a4aebd url(pda-gradients.gif) repeat-x 0px 0px;
+	border-bottom:1px solid #949fa8;
+}
+.wmpda_header table { 
+	width:100%;
+}
+.wmpda_header div.wmpda_menu_link {
+	padding:6px 0px 0px;
+}
+.wmpda_header_links {
+	padding:8px 0px 0px;
+}
+.wmpda_header_pn_links a.wmpda_menu_link {
+	font-size:9pt !important;
+}
+td.wmpda_header_links {
+	text-align:right;
+}
+td.wmpda_header_links a.wmpda_menu_link {
+	font-size:9pt !important;
+	margin:0px 0px 0px 4px;
+}
+.wmpda_tabs {
+	border-top:1px solid #c8d4e0;
+	background:#6a798b url(pda-gradients.gif) repeat-x 0px -430px;
+	padding:4px 4px 8px;
+}
+.wmpda_tabs a {
+	margin:0px 0px 0px 0px;
+	padding:0px 2px 0px 6px;
+	color:#fffcd9;
+	border-left:1px solid #9eAbBf;
+	position:relative;
+	left:-5px;
+	font-size:120%;
+}
+.wmpda_tabs a:hover {
+	color:#dae4ef;
+	color:#fff;
+}
+/*  end common  */
+
+/*login dialog*/
+.wmpda_login {
+	padding: 0px;
+	color: #535C68;
+	font: normal 11px Tahoma, Arial, Helvetica, sans-serif;
+	text-align:left;
+	padding:0px 10px 0px 8px;
+}
+#inc_server, #out_server  {
+	width: 80px;
+}
+#inc_port, #out_port {
+	width: 30px;
+}
+#inc_protocol {
+	width: 58px;
+	height:18px;
+	font-size:11px;
+	vertical-align:top;
+}
+.wm_title {
+	text-align:left;
+	padding:4px 2px 2px;
+}
+.wmpda_login .wm_input, .wmpda_login .wm_input_focus, .wm_advanced_input, .wm_advanced_input_focus {
+	color: Black;
+	border:1px solid #BEBDBD;
+	background: White;
+}
+.wmpda_login .wm_input, .wmpda_login .wm_input_focus {
+	font: bold 14px Arial;
+	width: 100%;
+}
+.wm_password_input {
+	letter-spacing: 1px;
+}
+.wm_advanced_input_focus, .wmpda_login .wm_input_focus {
+	background: #FFFFE5;
+}
+.wm_advanced_input, .wm_advanced_input_focus {
+	font-size: 13px;
+	height:16px;
+	padding:0px;
+}
+.wm_login_switcher {
+	padding:8px 0px 10px 4px;
+	display: block;
+}
+.wm_login_switcher a {
+	color:#ACB0B3;
+	font-size:12px;
+}
+.wm_login_switcher a:hover {
+	color:#505050;
+}
+.wm_login_button {
+	padding-left:6px;
+}
+
+.wm_login_error {
+	background: #FFFFD5 url(pda-icons.png) no-repeat -2px -90px;
+	padding: 6px 10px 6px 26px;
+	border: 1px solid #D5CDC4;
+	text-align: left;
+}
+
+#incoming, #outgoing, #authentication {
+	background:#E0E8EF;
+	white-space:nowrap;
+}
+#incoming {
+	border-top:1px solid #ddd;
+	margin-top:4px;
+}
+#authentication {
+	border-bottom:1px solid #fff;
+	padding-bottom:4px;
+}
+#sign_me_block {
+	margin-top:8px;
+}
+/* end login dialog*/
+
+/* inbox message list*/
+.wmpda_items_counter {
+	padding:8px 0px 0px;
+	color:#fff;
+	font-size:9pt;
+}
+.wmpda_number {
+	font-weight:bold;
+}
+.wmpda_items_list {
+	width:100%;
+	border:0px;
+	border-bottom:0px solid #a7b2c8;
+	padding:0px;
+	table-layout:fixed;
+}
+.wmpda_inbox_item_header, .wmpda_inbox_item_date_size,
+.wmpda_inbox_unread_item_header, .wmpda_inbox_unread_item_date_size,
+.wmpda_list_item_header {
+	cursor:default;
+	font-size:10px;
+	height:12px;
+	text-align:left;
+	background:#fff;
+	padding:4px 0px 0px 8px;
+	color:#7F7F7F;
+	white-space:nowrap;
+}
+.wmpda_inbox_unread_item_header, .wmpda_inbox_unread_item_date_size {
+	background:#f5f6f7;
+	color:#333;
+}
+.wmpda_inbox_unread_item_date_size, .wmpda_inbox_item_date_size {
+	text-align:right;
+}
+.wmpda_inbox_item_date, .wmpda_inbox_unread_item_date {
+	padding-left:0px;
+	color:#687889;
+}
+.wmpda_inbox_item_size, .wmpda_inbox_unread_item_size {
+	padding:0px 10px 0px 10px;
+	display:-moz-inline-box;
+	display:inline-block;
+}
+
+.wmpda_inbox_item, .wmpda_inbox_unread_item,
+.wmpda_contacts_item, .wmpda_list_item {
+	border-bottom:1px solid #E5E5E5;
+	border-bottom:1px solid #d7d7d7;
+	background:#fff;
+	height:26px;
+	padding:0px 0px 0px 8px;
+	white-space:nowrap;
+	overflow:hidden;
+	vertical-align:middle;
+}
+.wmpda_list_item_header, .wmpda_list_item {
+	background:#fff;
+}
+.wmpda_inbox_unread_item {
+	background:#f5f6f7;
+}
+.wmpda_calendar .wmpda_list_item_header {
+	font-size:12pt;
+}
+.wmpda_inbox_item a, .wmpda_inbox_unread_item a, .wmpda_list_item a,
+.wmpda_list_item label {
+	text-decoration:none;
+	color:#3749DF;
+	color:#333;
+	font-size:16px;
+	cursor:pointer;
+}
+.wmpda_inbox_unread_item a {
+	font-weight:bold;
+}
+.wmpda_pagination {
+	width:100%;
+	font-size:100%;
+}
+.wmpda_pagination a, .wmpda_pagination font  {
+	color:#575f73;
+	font-weight:normal;
+	padding:0px 2px 0px;
+}
+.wmpda_pagination font {
+	color:#000;
+	font-weight:bold;
+	background:#f2f7ff;
+}
+.wmpda_pagination_results {
+	color:#555;
+	padding:0px 0px 4px 4px;
+}
+.wmpda_pagination_pages {
+	text-align:right;
+	padding:0px 4px 4px 0px;
+}
+.wmpda_footer {
+	background:#c5cade url(pda-gradients.gif) repeat-x 0px -230px;
+	border-top:1px solid #fff;
+	border-bottom:1px solid #aab5bf;
+	padding:4px 0px;
+}
+.wmpda_footer span {
+	display:block;
+	padding:0px 6px;
+	
+}
+.wmpda_footer span.wmpda_number {
+	padding:0px;
+	font-weight:bold;
+	display:inline;
+}
+.wmpda_footer .wmpda_footer_block {
+	border-bottom:1px solid #D2D9E0;
+}
+.wmpda_footer div {
+	margin:0px 0px 2px;
+	padding:0px 6px 5px;
+}
+div.wm_search_form_container {
+	font-size:11px;
+	font-family:Tahoma;
+	padding:5px 6px 0px 3px;
+}
+.wmpda_header div.wm_search_form_container {
+	padding:5px 0px 0px;
+}
+.wmpda_search_input {
+	width:100px;
+}
+.wmpda_search_button {
+	border:0px;
+	cursor:pointer;
+	height:20px;
+	width:20px;
+	margin:1px 0px 0px 2px;
+	vertical-align:top;
+	background:transparent;
+	display:inline-block;
+}
+/* end inbox message list*/
+
+/* view message */
+.wmpda_msg_header_container {
+	padding:4px 6px 6px;
+	background:#F6F8FA;
+	width:100%;
+}
+.wmpda_view_message_title {
+	color:#687889;
+}
+.wmpda_view_message_subject, .wmpda_view_message_from, .wmpda_view_message_date {
+	padding:2px 6px 0px;
+	font-size:11px;
+	overflow:hidden;
+}
+.wmpda_view_message_subject {
+	font-weight:bold;
+	font-size:14px;
+}
+.wmpda_view_message_date {
+	color:#687889;
+	text-align:right;
+	overflow:visible;
+	white-space:nowrap;
+}
+.wmpda_msg_body_container
+{
+	background:#fff;
+	overflow-x:hidden;
+	overflow-y:auto;
+	padding:6px 10px 10px;
+	border-top:1px solid #e5e5e5;
+	border-bottom:1px solid #d7d7d7;
+}
+/* end view message */
+
+/* new message */
+.wm_new_message {
+	width:100%;
+	background:#F2F4F6;
+	padding:0px 0px 6px;
+	table-layout:fixed;
+}
+.wm_new_message td {
+	padding:0px 2px;
+}
+.wmpda_new_msg_title {
+	/* text-align:right !important;
+	width:50px; */
+	font-size:8pt;
+	color:#555566;
+	padding:2px 6px 0px !important;
+}
+.wmpda_new_msg_col3{
+	border:0px;
+	width:23px;
+	height:20px;
+	padding:0px;
+	background:#F2F4F6;
+	color:#c6d3e7;
+	font-weight:bold;
+	font-size:14pt;
+	display:-moz-inline-box;
+	display:inline-block;
+	vertical-align:top;
+}
+.wmpda_new_msg_input {
+	/* width:130px; */
+	border:1px solid #CCCCCC;
+	text-indent:1px;
+	color:Black;
+	font-size:13px;
+}
+.editor_area, .attachment_area {
+	background:#f7f7f7;
+	padding:4px 0px 0px 2px;
+}
+.attachment_area span {
+	display:-moz-inline-box;
+	display:inline-block;
+	margin: 0px 10px 4px 0px;
+}
+#editor_area {
+	width:98% !important;
+	border:1px solid #CCCCCC;
+}
+.wmpda_adv_f_switcher {
+	font-size:10px; padding:0px 4px; text-align:right;
+}
+.wmpda_adv_f_switcher a {
+	color:#7E8C9C;
+}
+/* End new message */
+
+/* view event */
+.wmpda_event_header_container {
+	padding:2px 6px;
+	overflow:hidden;
+	white-space:nowrap;
+}
+.wmpda_event_header_container span  {
+	display:-moz-inline-box;
+	display:inline-block;
+	vertical-align:top;
+	white-space:normal;
+}
+.wmpda_event_message_title {
+	color:#555566;
+	padding:0px 0px 6px;
+}
+.wmpda_event_message_subject {
+	font-weight:bold;
+}
+.wmpda_event_body_container
+{
+	background:#fff;
+	overflow-x:hidden;
+	overflow-y:auto;
+	padding:6px 10px 10px;
+	border-top:1px solid #E5E5E5;
+	border-bottom:1px solid #D5D5D5;
+}
+/* end view event */
+
+/* Settings */
+.wmpda_settings_block {
+	padding: 6px 8px 4px;
+	border-bottom:1px solid #E0E4EF;
+	background:#fff;
+}
+.wmpda_settings_label {
+	padding: 6px 8px 4px;
+	border-bottom:1px solid #E0E4EF;
+	background:#fff;
+	font-size:14px;
+	font-weight:bold;
+	color:#8fa2b5;
+}
+/* End Settings */
+/* Search Results */
+.wmpda_serarch_results {
+	background:#ffe580;
+	color:#000;
+	padding:0px 2px;
+}
+/* End Search Results */
+
+/*.pda_menu_item {
+	padding:3px;
+	padding-bottom:10px;
+	font-size:12px;
+	padding-bottom:5px;
+}
+
+.pda_message_list_item_cell
+{
+	padding:3px;
+	padding-bottom:10px;
+	font-size:12px;
+	padding-bottom:5px;
+}*/

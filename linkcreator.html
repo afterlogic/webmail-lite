@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+	<head>
+		<link rel="shortcut icon" href="favicon.ico" />
+		<title>Hyperlink</title>
+		<style>
+			body {
+				background: #D4D0C8;
+			}
+			
+			body,table,td,input,select,option,legend {
+				font: normal 11px Tahoma;
+			}
+			
+			.buttons_td {
+				vertical-align: top;
+			}
+			
+			.text_input {
+				width: 220px;
+			}
+			
+			.button {
+				width: 75px;
+				height: 24px;
+				margin: 6px 0px 0px 6px;
+			}	
+		</style>
+		<script type="text/javascript">
+			function SetProtocol(value) {
+				if (window.urlObj) {
+					window.urlObj.value = value;
+				}
+			}
+		
+			function CreateLink() {
+				if (window.urlObj) {
+					window.opener.CreateLinkHandler(urlObj.value);
+				}
+				window.close();
+			}
+		
+			function Close() {
+				window.close();
+			}
+		</script>
+	</head>
+	<body>
+		<table>
+			<tr>
+				<td>
+					<fieldset>
+						<legend> Hyperlink Information </legend>
+						<table>
+							<tr>
+								<td><u>T</u>ype:</td>
+								<td><select onchange="SetProtocol(this.value);">
+									<option value="">(other)</option>
+									<option value="ftp://">ftp:</option>
+									<option value="gopher://">gopher:</option>
+									<option value="http://" selected>http:</option>
+									<option value="https://">https:</option>
+									<option value="mailto:">mailto:</option>
+									<option value="news:">news:</option>
+									<option value="telnet:">telnet:</option>
+									<option value="wais:">wais:</option>
+								</select></td>
+							</tr>
+							<tr>
+								<td><u>U</u>RL:</td>
+								<td><input class="text_input" type="text" value="http://"
+									id="texturl"></td>
+							</tr>
+						</table>
+					</fieldset>
+				</td>
+				<td class="buttons_td">
+					<input class="button" type="button" value="OK" onclick="CreateLink();" />
+					<br />
+					<input class="button" type="button" value="Cancel" onclick="Close();" />
+				</td>
+			</tr>
+		</table>
+		<script type="text/javascript">
+			var urlObj = document.getElementById('texturl');
+		</script>
+		</body>
+</html>

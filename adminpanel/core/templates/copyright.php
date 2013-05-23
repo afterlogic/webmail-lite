@@ -1,0 +1,1 @@
+			Copyright&nbsp;&copy;&nbsp;2002-2012&nbsp;<a href="http://www.afterlogic.com/" target="_blank">AfterLogic&nbsp;Corporation</a>
