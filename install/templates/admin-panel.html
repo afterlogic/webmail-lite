@@ -1,0 +1,43 @@
+<input type="submit" name="next_btn" style="position: absolute; visibility: hidden;" value="Next" />
+
+<h1>
+	Set Admin Panel Password
+</h1>
+
+<p class="description">
+	To restrict access to the admin panel, it's strongly recommended to	set a complex password.
+	<!-- Minimum password length is 5 characters. //-->
+</p>
+
+
+<div class="field_list">
+	<div class="row">
+		<label class="field_label_tiny">Username:</label>
+		<span class="field_value">
+			{{Login}}
+		</span>
+	</div>
+	<div class="row">
+		<label class="field_label_tiny">Password:</label>
+		<span class="field_value">
+			<input name="txtPassword1" class="wm_input" type="password" style="width:250px" maxlength="100" id="txtPassword1"  tabindex="2" value="{{Password1}}" />
+		</span>
+	</div>
+	<div class="row">
+		<label class="field_label_tiny">Confirm password:</label>
+		<span class="field_value">
+			<input name="txtPassword2" class="wm_input" type="password" style="width:250px" maxlength="100" id="txtPassword2" tabindex="3" value="{{Password2}}" />
+			<br />
+			<span class="field_description">
+				<span class="error">
+					{{FootError}}
+				</span>
+			</span>
+		</span>
+	</div>
+</div>
+<div class="buttons">
+	<hr />
+	<input class="wm_button" type="submit" name="back_btn" value="Back" />
+	<input class="wm_button right" type="submit" name="next_btn" value="Next" />
+</div>

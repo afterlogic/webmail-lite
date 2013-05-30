@@ -1,0 +1,24 @@
+<div class="panel_center">
+	<div class="items_list" data-bind="customScrollbar: {x: false}">
+		<div class="scroll-inner">
+			
+			<div class="item selectable ">
+				<a href="javascript: void(0);" class="title" data-bind="click: function () { getPrivateFiles(); }">
+					<span class="name">
+						<span class="icon type1"></span>
+						<span class="text" data-bind="i18n: 'text'" data-i18n="FILESTORAGE/TAB_PRIVATE_FILES"></span>
+					</span>
+				</a>
+			</div>
+
+			<div class="item selectable" data-bind="">
+				<a href="javascript: void(0);" class="title" data-bind="click: function () { getCorporateFiles(); }">
+					<span class="name">
+						<span class="icon type2"></span>
+						<span class="text" data-bind="i18n: 'text'" data-i18n="FILESTORAGE/TAB_CORPORATE_FILES"></span>
+					</span>
+				</a>
+			</div>
+		</div>
+	</div>
+</div>

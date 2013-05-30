@@ -1,0 +1,41 @@
+<div class="panel_top">
+	<div class="additional_bar">
+	<a href="#">Files</a> &raquo; Files
+	</div>
+</div>
+<div class="panel_center unselectable">
+	<div class="items_list" data-bind="customScrollbar: {x: false}">
+		<div class="items_sub_list scroll-inner">
+			<div class="item folder">
+				<div class="item_content">
+					<span class="data">
+						<span class="icon"></span>
+						<span class="name">Folder</span>
+					</span>
+					<span class="controls">
+						<a class="link rename">Rename</a>
+					</span>
+					<div class="separator"></div>
+				</div>
+			</div>
+			<!-- ko foreach: files -->
+			<div class="item file" data-bind="css: type()">
+				<div class="item_content">
+					<span class="author">Added by Alex on 23 Dec</span>
+					<span class="data">
+						<span class="icon"></span>
+						<span class="name" data-bind="text: name()"></span>
+					</span>
+					<span class="controls">
+						<a class="link view">View</a>
+						<a class="link download">Download <span>(64KB)</span></a>
+					</span>
+					<div class="separator"></div>
+				</div>
+			</div>
+			<!-- /ko -->
+		</div>
+	</div>
+</div>
+<div class="panel_bottom unselectable">
+</div>

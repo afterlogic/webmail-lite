@@ -1,0 +1,125 @@
+<div class="toolbar">
+	<span class="content">
+		<a href="javascript: void(0)" class="item" data-bind="attr: {href: composeLink}, visible: bVisibleComposeMessage">
+			<span data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_NEW_MESSAGE"></span>
+		</a>
+		<span class="item" data-bind="command: checkMailCommand, 
+			  css: {disabled: !oMessageList.isEnableCheckMail()}">
+			<span data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_CHECK_MAIL"></span>
+		</span>
+
+		<span data-bind="visible: isVisibleReplyTool" class="group">
+			<span class="item" data-bind="css: {disabled: !oMessagePane.isEnableReply()}">
+				<span data-bind="command: replyCommand, i18n: 'text'" data-i18n="MAILBOX/TOOL_REPLY"></span>
+				<span class="dropdown">
+					<span class="dropdown_helper">
+						<span class="dropdown_helper">
+							<span data-bind="command: replyAllCommand, 
+								  css: {disabled: !oMessagePane.isEnableReplyAll()}, i18n: 'text'"
+								  data-i18n="MAILBOX/TOOL_REPLY_TO_ALL">
+							</span>
+						</span>
+					</span>
+				</span>
+			</span>
+			<span class="item control">
+				<span class="arrow"></span>
+			</span>
+		</span>
+		<span class="item" data-bind="command: forwardCommand, visible: isVisibleForwardTool, 
+			  css: {disabled: !oMessagePane.isEnableForward()}">
+			<span data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_FORWARD"></span>
+		</span>
+		<span class="item" data-bind="command: printCommand, 
+			  css: {disabled: !oMessagePane.isEnablePrint()}">
+			<span data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_PRINT"></span>
+		</span>
+		<span class="item" data-bind="command: saveCommand, 
+			  css: {disabled: !oMessagePane.isEnableSave()}">
+			<span data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_SAVE"></span>
+		</span>
+
+		<span class="group">
+			<span class="item" data-bind="css: {disabled: !oMessageList.isEnableGroupOperations(), 'active': visibleMarkMenu()}">
+				<span data-bind="command: markAsReadCommand, i18n: 'text'" data-i18n="MAILBOX/TOOL_MARK_AS_READ"></span>
+				<span class="dropdown" data-bind="visible: visibleMarkMenu">
+					<span class="dropdown_helper">
+						<span class="dropdown_content">
+							<span class="item" data-bind="command: markAsUnreadCommand, i18n: 'text',
+								 css: {'disabled': !oMessageList.isEnableGroupOperations()}"
+								data-i18n="MAILBOX/TOOL_MARK_AS_UNREAD"></span>
+							<span class="item" data-bind="command: flagCommand, i18n: 'text',
+								 css: {'disabled': !oMessageList.isEnableGroupOperations()}"
+								data-i18n="MAILBOX/TOOL_FLAG"></span>
+							<span class="item" data-bind="command: unflagCommand, i18n: 'text',
+								 css: {'disabled': !oMessageList.isEnableGroupOperations()}"
+								data-i18n="MAILBOX/TOOL_UNFLAG"></span>
+							<span class="item" data-bind="command: markAllReadCommand, i18n: 'text'"
+								data-i18n="MAILBOX/TOOL_MARK_ALL_READ"></span>
+							<span class="item" data-bind="command: markAllUnreadCommand, i18n: 'text'"
+								data-i18n="MAILBOX/TOOL_MARK_ALL_UNREAD"></span>
+						</span>
+					</span>
+				</span>
+			</span>
+			<span class="item control" data-bind="click: changeMarkMenuVisibility, css: {'active': visibleMarkMenu()}">
+				<span class="arrow"></span>
+			</span>
+		</span>
+		<span class="item" data-bind="command: moveToFolderCommand, css: {disabled: !isEnableGroupOperations()}">
+			<span data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_MOVE_TO_FOLDER"></span>
+			<span class="dropdown tree" data-bind="visible: visibleMoveMenu, initDom: domFolderList">
+				<span class="dropdown_helper">
+					<span class="folderList dropdown_content">
+						<!-- ko template: {name: 'Mail_MoveToFolderItem', foreach: folderList().collection} --><!-- /ko -->
+					</span>
+				</span>
+			</span>
+		</span>
+		<span class="group">
+			<span class="item" data-bind="css: {'disabled': !oMessageList.isEnableGroupOperations(), 'active': visibleDeleteMenu()}">
+				<span data-bind="command: deleteCommand, i18n: 'text'" data-i18n="MAILBOX/TOOL_DELETE"></span>
+				<span class="dropdown" data-bind="visible: visibleDeleteMenu">
+					<span class="dropdown_helper">
+						<span class="dropdown_content">
+							<span class="item" data-bind="command: emptyTrashCommand, i18n: 'text'"
+								data-i18n="MAILBOX/TOOL_EMPTY_TRASH"></span>
+							<span class="item" data-bind="command: emptySpamCommand, i18n: 'text'"
+								data-i18n="MAILBOX/TOOL_EMPTY_SPAM"></span>
+						</span>
+					</span>
+				</span>
+			</span>
+			<span class="item control" data-bind="click: changeDeleteMenuVisibility, css: {'active': visibleDeleteMenu()}">
+				<span class="arrow"></span>
+			</span>
+		</span>
+		<span class="item" data-bind="click: changeDeleteMenuVisibility">V</span>
+		<span class="item" data-bind="command: spamCommand, 
+			  css: {disabled: !oMessageList.isEnableGroupOperations()}, 
+			  visible: visibleSpam">
+			<span data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_SPAM"></span>
+		</span>
+		<span class="item" data-bind="command: notSpamCommand, 
+			  css: {disabled: !oMessageList.isEnableGroupOperations()}, 
+			  visible: !visibleSpam()">
+			<span data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_NOT_SPAM"></span>
+		</span>
+	</span>
+</div>
+
+<div class="panel folders">
+	<div class="resize_handler"></div>
+	<div class="panel_content">
+		<div data-bind="template: {name: 'Mail_FolderListViewModel', data: oFolderList}"></div>
+	</div>
+</div>
+<div class="panel messages_list" style="width: 80%">
+	<div class="panel_content" style="height: 200px; overflow: hidden;">
+		<div data-bind="template: {name: 'Mail_MessageListViewModel', data: oMessageList}"></div>
+	</div>
+	<div style="cursor: e-resize; height: 6px; width: 300px;"></div>
+	<div class="panel_content" style="height: 300px;">
+		<div data-bind="template: {name: 'Mail_LayoutBottomPane_MessagePaneViewModel', data: oMessagePane}"></div>
+	</div>
+</div>

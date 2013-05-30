@@ -1,0 +1,173 @@
+<div class="panel_center" data-bind="initDom: domPreviewPane">
+	<div class="message_header" data-bind="initDom: domMessageHeader">
+		<div class="notice" data-bind="visible: visiblePicturesControl">
+			<span class="item">
+				<span data-i18n="MESSAGE/INFO_MESSAGE_BLOCKED" data-bind="i18n: 'text'"></span>
+				<span class="link" data-i18n="MESSAGE/ACTION_SHOW_PICTURES" 
+				   data-bind="i18n: 'text', click: showPictures, visible: visibleShowPicturesLink"></span>
+			</span>
+			<span class="item">
+				<span class="link" data-i18n="MESSAGE/ACTION_ALWAYS_SHOW_PICTURE_THIS_SENDER" 
+				   data-bind="i18n: 'text', click: alwaysShowPictures"></span>
+			</span>
+		</div>
+
+		<div class="notice" data-bind="visible: visibleConfirmationControl">
+			<span data-i18n="MESSAGE/INFO_SENDER_ASKED_NOTIFY" data-bind="i18n: 'text'"></span>
+			<span class="link" data-i18n="MESSAGE/ACTION_NOTIFY_SENDER" data-bind="i18n: 'text'"></span>
+		</div>
+
+		<div class="notice" data-bind="visible: visibleSensivityControl">
+			<span data-i18n="MESSAGE/SENSIVITY_CONFIDENTIAL" data-bind="i18n: 'text'"></span>
+		</div>
+
+		<div class="header_content">
+			<div class="header_row" data-bind="visible: isCurrentMessage">
+				<div class="toolbar">
+					<span class="content">
+						<a class="item new_window" href="javascript: void(0);" data-bind="click: openInNewWindow">
+							<span class="icon"></span>
+							<span class="text" data-bind="i18n: 'text'" data-i18n="MESSAGE/ACTION_OPEN_IN_NEW_WINDOW"></span>
+						</a>
+						<span class="item reply">
+							<span class="icon"></span>
+							<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_REPLY"></span>
+						</span>
+						<span class="item replyall">
+							<span class="icon"></span>
+							<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_REPLY_TO_ALL"></span>
+						</span>
+						<span class="item forward">
+							<span class="icon"></span>
+							<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_FORWARD"></span>
+						</span>
+						<span class="item print">
+							<span class="icon"></span>
+							<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_PRINT"></span>
+						</span>
+						<span class="item save control" data-bind="css: {'active': visibleAddMenu()}, click: changeAddMenuVisibility">
+							<span class="arrow"></span>
+							<span class="dropdown" data-bind="visible: visibleAddMenu">
+								<span class="dropdown_helper">
+									<span class="dropdown_helper">
+										<span data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_SAVE"></span>
+									</span>
+								</span>
+							</span>
+						</span>
+					</span>
+				</div>
+				
+				<span class="link details_show" data-i18n="MESSAGE/ACTION_SHOW_DETAILS" 
+					data-bind="i18n: 'title', click: showDetails, visible: !detailsVisible()"></span>
+				<span class="link details_hide" data-i18n="MESSAGE/ACTION_HIDE_DETAILS"
+					data-bind="i18n: 'title', click: hideDetails, visible: detailsVisible()"></span>
+				
+
+				<div class="message_info" data-bind="visible: !detailsVisible()">
+					<div class="message_info_line">
+						<span class="from" data-bind="text: from"></span>
+						<span class="add_contact" data-i18n="MESSAGE/ACTION_ADD_TO_CONTACTS" data-bind="i18n: 'title', click: addToContacts"></span>
+						<span data-i18n="MESSAGE/HEADER_TO" data-bind="i18n: 'text'"></span>
+						<span data-bind="text: allRecipients"></span>
+					</div>
+				</div>
+				
+				<div class="message_info" data-bind="visible: detailsVisible()">
+					<div class="message_info_line" data-bind="visible: detailsVisible">
+						<span class="title" data-i18n="MESSAGE/HEADER_FROM" data-bind="i18n: 'text'"></span>: 
+						<span data-bind="text: fullFrom"></span>
+						<span class="add_contact" data-i18n="MESSAGE/ACTION_ADD_TO_CONTACTS" data-bind="i18n: 'title', click: addToContacts"></span>
+					</div>
+				
+				
+					<div class="message_info_line" data-bind="visible: to().length > 0">
+						<span class="title" data-i18n="MESSAGE/HEADER_TO" data-bind="i18n: 'text'"></span>: 
+						<span data-bind="text: to"></span>
+					</div>
+					<div class="message_info_line" data-bind="visible: cc().length > 0">
+						<span class="title" data-i18n="MESSAGE/HEADER_CC" data-bind="i18n: 'text'"></span>: 
+						<span data-bind="text: cc"></span>
+					</div>
+					<div class="message_info_line" data-bind="visible: bcc().length > 0">
+						<span class="title" data-i18n="MESSAGE/HEADER_BCC" data-bind="i18n: 'text'"></span>: 
+						<span data-bind="text: bcc"></span>
+					</div>
+					<div class="message_info_line">
+						<span class="title" data-i18n="MESSAGE/HEADER_DATE" data-bind="i18n: 'text'"></span>: 
+						<span data-bind="text: fullDate"></span>
+					</div>
+				</div>
+			</div>
+
+			<div class="header_row" data-bind="visible: isCurrentMessage">
+				<span class="date" data-bind="text: midDate, visible: !detailsVisible()"></span>
+				<span class="wm_importance_img"></span>
+				<h2 class="subject" data-bind="text: subject"></h2>
+			</div>
+		</div>
+	</div>
+	
+	<div class="message" data-bind="css: {'has_bodytext': hasBodyText, 'has_attachments': hasNotInlineAttachments}">
+		<div class="message_content">
+			<div class="wm_appointment_info" data-bind="visible: visibleAppointmentInfo">
+				<div>
+					<select style="float: right;">
+						<option value="Default">Default</option>
+						<option value="F3Yax4CE">rrr</option>
+					</select>
+					<span style="float: right; display: none;"></span>
+					<span class="wm_appointment_title" style="float: right;" data-i18n="MESSAGE/APPOINTMENT_CALENDAR" data-bind="i18n: 'text'"></span>:
+				</div>
+				<div style="display: none;">
+					<span class="wm_appointment_title" data-i18n="MESSAGE/APPOINTMENT_LOCATION" data-bind="i18n: 'text'"></span>:
+					<span></span>
+				</div>
+				<div>
+					<span class="wm_appointment_title" data-i18n="MESSAGE/APPOINTMENT_WHEN" data-bind="i18n: 'text'"></span>:
+					<span>Wed, Aug 01, 2012, 19:00</span>
+				</div>
+				<div class="wm_description" style="display: none;">
+					<span class="wm_appointment_title" data-i18n="MESSAGE/APPOINTMENT_DESCRIPTION" data-bind="i18n: 'text'"></span>:
+					<span></span>
+				</div>
+				<div class="wm_appointment_decision">
+					<a href="#" style="margin: 5px; display: none;" data-i18n="MESSAGE/APPOINTMENT_BUTTON_ACCEPT" data-bind="i18n: 'text'"></a>
+					<a href="#" style="margin: 5px; display: none;" data-i18n="MESSAGE/APPOINTMENT_BUTTON_TENTATIVE" data-bind="i18n: 'text'"></a>
+					<a href="#" style="margin: 5px; display: none;" data-i18n="MESSAGE/APPOINTMENT_BUTTON_DECLINE" data-bind="i18n: 'text'"></a>
+					<span style="margin: 5px;">test1@afterlogic.com canceled</span>
+				</div>
+			</div>
+			
+			<div class="message_body html" data-i18n="MESSAGE/INFO_LOADING" 
+				 data-bind="visible: isLoading, i18n: 'text'"></div>
+			<div class="message_body html" data-bind="initDom: domTextBody"></div>
+			
+			<div class="bodyparts_separator"></div>
+			
+			<div class="attachments" data-bind="visible: attachments().length > 0">
+				<a class="download_all" href="javascript: void(0)"><span class="icon"></span>Download all attachments</a>
+				<div data-bind="foreach: attachments">
+					<div class="attachment">
+						<span class="icon" data-bind="attr: {'title': downloadTitle}, click: downloadAttachment, css: extension"></span>
+						<span class="attachment_content">
+							<span class="file">
+								<span class="name" data-bind="text: fileName"></span>
+								<span class="size" data-bind="text: friendlySize"></span>
+							</span>
+							<br />
+							<span class="buttons">
+								<a class="button view" href="javascript: void(0)" 
+								   data-bind="visible: visibleViewLink, i18n: 'text', click: viewAttachment" 
+								   data-i18n="MESSAGE/ATTACHMENT_VIEW"></a>
+								<a class="button download" href="javascript: void(0)"data-bind="attr: {'title': downloadTitle}, click: downloadAttachment">Download</a>
+							</span>
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- ko template: { name: 'Mail_PrintMessageViewModel'} --><!-- /ko -->

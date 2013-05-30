@@ -1,0 +1,53 @@
+	<span class="content">
+		<span class="item new_contact" data-bind="visible: showPersonalContacts() && selectedGroupType() !== Enums.ContactsGroupListType.Global, command: newContactCommand">
+			<span class="icon" data-bind="i18n: 'title'" data-i18n="CONTACTS/TOOL_NEW_CONTACT"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_NEW_CONTACT"></span>
+		</span>
+		<span class="item new_group" data-bind="visible: showPersonalContacts, command: newGroupCommand">
+			<span class="icon" data-bind="i18n: 'title'" data-i18n="CONTACTS/TOOL_NEW_GROUP"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_NEW_GROUP"></span>
+		</span>
+		<span class="item new_message" data-bind="command: newMessageCommand">
+			<span class="icon" data-bind="i18n: 'title'" data-i18n="CONTACTS/TOOL_NEW_MESSAGE"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_NEW_MESSAGE"></span>
+		</span>
+		<span class="item add_to" data-bind="visible: showPersonalContacts, dropdown: {control: false}, command: addContactsCommand">
+			<span class="icon" data-bind="i18n: 'title'" data-i18n="CONTACTS/TOOL_ADD_CONTACT_TO"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_ADD_CONTACT_TO"></span>
+			<span class="arrow"></span>
+			<span class="dropdown">
+				<span class="dropdown_helper">
+					<span class="dropdown_arrow"><span></span></span>
+					<span class="dropdown_content" data-bind="customScrollbar: {x: false}">
+						<span class="scroll-inner">
+							<!-- ko foreach: $root.groupFullCollection() -->
+							<span class="item" data-bind="text: Name()"></span>
+							<!-- /ko -->
+							<span class="item new-group" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_DROPDOWN_NEW_GROUP"></span>
+						</span>
+					</span>
+				</span>
+			</span>
+		</span>
+		<span class="item delete" data-bind="visible: showPersonalContacts() && selectedGroupType() === Enums.ContactsGroupListType.Personal, command: deleteCommand">
+			<span class="icon" data-bind="i18n: 'title'" data-i18n="CONTACTS/TOOL_DELETE"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_DELETE"></span>
+		</span>
+		<span class="item remove_from" data-bind="visible: showPersonalContacts() && selectedGroupType() === Enums.ContactsGroupListType.SubGroup, command: removeFromGroupCommand">
+			<span class="icon" data-bind="i18n: 'title'" data-i18n="CONTACTS/TOOL_REMOVE"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_REMOVE"></span>
+		</span>
+		
+		<span class="item control" data-bind="visible: showPersonalContacts() && selectedGroupType() === Enums.ContactsGroupListType.Personal, dropdown: {control: false}">
+			<span class="arrow"></span>
+			<span class="dropdown">
+				<span class="dropdown_helper">
+					<span class="dropdown_arrow"><span></span></span>
+					<span class="dropdown_content">
+						<span class="item export" data-bind="i18n: 'text', command: exportCommand" data-i18n="CONTACTS/TOOL_EXPORT"></span>
+						<span class="item import" data-bind="i18n: 'text', command: importCommand" data-i18n="CONTACTS/TOOL_IMPORT"></span>
+					</span>
+				</span>
+			</span>
+		</span>
+	</span>

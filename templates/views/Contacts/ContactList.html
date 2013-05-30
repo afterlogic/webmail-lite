@@ -1,0 +1,61 @@
+<div class="panel_top">
+	<div class="additional_bar">
+		<label class="custom_checkbox" data-bind="css: {'checked': checkAll, 'incomplete': checkAllIncomplite}">
+			<span class="icon"></span>
+			<input type="checkbox" data-bind="checked: checkAll" />
+		</label>
+		<span class="search_block custom_select">
+			<span class="button" data-i18n="CONTACTS/BUTTON_SEARCH" data-bind="i18n: 'text'"></span>
+			<input type="text" data-bind="value: search, onEnter: searchSubmitCommand, hasfocus: isFocused" />
+		</span>
+	</div>
+</div>
+<div class="panel_center unselectable">
+	<div class="items_list contact_list" data-bind="customScrollbar: {x: false}">
+
+		<div data-bind="visible: isEmptyList() && !isLoading()">
+			<span class="list_notification" data-bind="visible: !isSearch() && !inGrooup()">
+				<span data-i18n="CONTACTS/LABEL_NO_CONTACTS" data-bind="i18n: 'text'"></span>
+				<br />
+				<br />
+				<span data-i18n="CONTACTS/LABEL_NO_CONTACTS_DESC" data-bind="i18n: 'text'"></span>
+			</span>
+			<span class="list_notification" data-bind="visible: !isSearch() && inGrooup()">
+				<span data-i18n="CONTACTS/LABEL_NO_CONTACTS_IN_GROUP" data-bind="i18n: 'text'"></span>
+				<br />
+				<br />
+				<span data-i18n="CONTACTS/LABEL_NO_CONTACTS_IN_GROUP_DESC" data-bind="i18n: 'text'"></span>
+			</span>
+			<span class="list_notification" data-bind="visible: isSearch()">
+				<span data-i18n="CONTACTS/LABEL_NO_CONTACTS_FOUND" data-bind="i18n: 'text'"></span>
+				<a href="javascript: void(0)" data-i18n="MAILBOX/LINK_CLEAR_SEARCH" data-bind="i18n: 'text', click: onClearSearchClick"></a>
+			</span>
+		</div>
+
+		<span class="list_notification" data-bind="visible: isSearch() && !isEmptyList()">
+			<span data-bind="text: searchText"></span>
+			<a href="javascript: void(0)" data-i18n="MAILBOX/LINK_CLEAR_SEARCH" data-bind="i18n: 'text', click: onClearSearchClick"></a>
+		</span>
+
+		<div class="items_sub_list contact_sub_list scroll-inner" data-bind="foreach: collection, draggablePlace: dragAndDronHelper">
+			<div class="item dragHandle" data-bind="css: {'checked': checked, 'selected': selected, 'deleted': deleted}">
+				<div class="item_content">
+					<span class="controls">
+						<label class="custom_checkbox" data-bind="css: {'checked': checked}">
+							<span class="icon"></span>
+							<input type="checkbox" data-bind="checked: checked" />
+						</label>
+					</span>
+					<span class="data">
+						<span class="name" data-bind="text: Name(), visible: !!Name()"></span>
+						<span class="email" data-bind="text: Email(), visible: !!Email()"></span>
+					</span>
+					<div class="separator"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="panel_bottom unselectable">
+	<div data-bind="template: {name: 'Common_PageSwitcherViewModel', data: oPageSwitcher}"></div>
+</div>

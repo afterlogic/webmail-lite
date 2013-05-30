@@ -1,0 +1,34 @@
+<div class="item" data-bind="visible: visible(),
+	 css: {'selected': selected, 'selectable': selectable, 'existen': existen, 'subscribed': subscribed, 
+		'system': isSystem, 'user': !isSystem()}">
+	<a href="javascript: void(0);" class="title" data-bind="
+		css: {'recivedAnim': recivedAnim()},
+		attr: {href: routingHash},
+		visible: canBeSelected,
+		droppable: function (oEvent, oUi) { $root.messagesDrop($data, oEvent, oUi); }
+	">
+		<!--<span class="count" data-bind="visible: enableEmptyFolder, click: emptyFolder">e</span>-->
+		<span class="count" data-bind="visible: messageCountToShow() > 0, text: messageCountToShow(),
+			  css: {'unseen': showUnseenMessages}"></span>
+		<span class="name">
+			<span class="icon" data-bind="css: 'type' + type()"></span>
+			<span class="text" data-bind="text: displayName"></span>
+		</span>
+		<!--<span class="count" data-bind="visible: newMessages().lenght > 0, text:  newMessages().lenght"></span>-->
+	</a>
+	<span class="folder" data-bind="visible: !canBeSelected()">
+		<span class="title">
+			<span class="name">
+				<span class="icon" data-bind="css: 'type' + type()"></span>
+				<span class="text" data-bind="text: displayName"></span>
+			</span>
+		</span>
+		<!--<span class="count" data-bind="visible: newMessages().lenght > 0, text:  newMessages().lenght"></span>-->
+	</span>
+	<!-- ko if: !isNamespace() -->
+		<div class="children" data-bind="template: { name: 'Mail_FolderViewModel', foreach: subfolders }"></div>
+	<!-- /ko -->
+</div>
+<!-- ko if: isNamespace -->
+	<!-- ko template: {name: 'Mail_FolderViewModel', foreach: subfolders} --><!-- /ko -->
+<!-- /ko -->

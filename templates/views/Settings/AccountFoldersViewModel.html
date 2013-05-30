@@ -1,0 +1,23 @@
+<div class="fields">
+	<div class="fieldset">
+		<div class="folders items_list">
+			<!-- ko template: {name: 'Settings_AccountFolderItems', foreach: collection} --><!-- /ko -->
+			
+			<div class="item total">
+				<span class="title">
+					<span class="count" data-bind="text: messageCount"></span>
+					<span class="name">
+						<span class="text" data-i18n="SETTINGS/ACCOUNT_FOLDERS_TOTAL" data-bind="i18n: 'text'"></span>
+					</span>
+				</span>
+			</div>
+		</div>
+
+		<div class="hint" data-i18n="SETTINGS/ACCOUNT_FOLDERS_INFO_DELETING_NONEMPTY_FOLDERS" data-bind="i18n: 'text', css: {'highlight': highlighted}"></div>
+		<div class="hint" data-i18n="SETTINGS/ACCOUNT_FOLDERS_INFO_SETUP_SPECIAL_FOLDERS" data-bind="i18n: 'text'"></div>
+		<div class="buttons">
+			<span class="button" data-i18n="SETTINGS/ACCOUNT_FOLDERS_BUTTON_ADD_NEW_FOLDER" data-bind="i18n: 'text', command: addNewFolderCommand"></span>
+			<span class="button" data-i18n="SETTINGS/ACCOUNT_FOLDERS_BUTTON_SETUP_SPECIAL_FOLDERS" data-bind="i18n: 'text', command: systemFoldersCommand"></span>
+		</div>
+	</div>
+</div>

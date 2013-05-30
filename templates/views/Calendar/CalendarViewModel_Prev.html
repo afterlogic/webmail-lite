@@ -1,0 +1,928 @@
+<div class="panel calendar">
+	<div class="panel_content">
+		<div class="toolbar">
+			<span class="content">
+				<span class="item"><span data-bind="i18n: 'text'" data-i18n="CALENDAR/TOOL_NEW_EVENT"></span></span>
+				<span class="item"><span data-bind="i18n: 'text'" data-i18n="CALENDAR/TOOL_TODAY"></span></span>
+				<span class="item"><span data-bind="i18n: 'text'" data-i18n="CALENDAR/TOOL_PREV"></span></span>
+				<span class="item"><span data-bind="i18n: 'text'" data-i18n="CALENDAR/TOOL_NEXT"></span></span>
+
+				<span class="time_tabs" style="display: none;">
+					<span class="tab"><span data-bind="i18n: 'text'" data-i18n="CALENDAR/TABS_DAY"></span></span>
+					<span class="tab"><span data-bind="i18n: 'text'" data-i18n="CALENDAR/TABS_WEEK"></span></span>
+					<span class="tab"><span data-bind="i18n: 'text'" data-i18n="CALENDAR/TABS_MONTH"></span></span>
+				</span>
+
+				<div id="toolbar_interval_switch" style="display: none;">
+					<span onclick="DateBrowse(-1);" onmouseout="this.className='wm_toolbar_item'" onmouseover="this.className='wm_toolbar_item_over'" class="wm_toolbar_item">
+						<span class="calendar_arrow_left"></span>
+					</span>
+
+					<span id="time_title_1" style="display: none;"><strong>30 October 2012</strong></span>
+					<span id="time_title_2" style="display: none;"><strong>28 October 2012 - 3 November 2012</strong></span>
+					<span id="time_title_3"><strong>October 2012</strong></span>
+
+					<span onclick="DateBrowse(1);" onmouseout="this.className='wm_toolbar_item'" onmouseover="this.className='wm_toolbar_item_over'" class="wm_toolbar_item">
+						<span class="calendar_arrow_right"></span>
+					</span>
+				</div>
+
+			</span>
+		</div>
+
+
+		<div class="middle_bar">
+			<div class="right_panel">
+				<div class="calendar">
+					mini calendar
+				</div>
+				<div class="calendar_manager">
+					<div>Calendar 1</div>
+					<div>Calendar 2</div>
+					<div>Calendar 3</div>
+					<div>Calendar 4</div>
+					<div>Calendar 5</div>
+					<div>Calendar 6</div>
+					<div>Calendar 7</div>
+					<div>Calendar 8</div>
+					<div>Calendar 9</div>
+				</div>
+			</div>
+			<div class="left_panel">
+				<div class="grid week" style="display: none;">
+					<div class="grid_header">
+						<span class="cell">Sunday</span>
+						<span class="cell">Monday</span>
+						<span class="cell">Tuesday</span>
+						<span class="cell">Wednesday</span>
+						<span class="cell">Thursday</span>
+						<span class="cell">Friday</span>
+						<span class="cell">Saturday</span>
+					</div>
+					<div class="cells">
+						<div style="top: 0%; left: 0%;" class="cell">
+							<div></div>
+							<div></div>
+						</div>
+						<div style="top: 0%; left: 14.2857%;" class="cell">
+
+						</div>
+						<div style="top: 0%; left: 28.5714%;" class="cell">
+
+						</div>
+						<div style="top: 0%; left: 42.8571%;" class="cell">
+
+						</div>
+						<div style="top: 0%; left: 57.1428%;" class="cell">
+
+						</div>
+						<div style="top: 0%; left: 71.4285%;" class="cell">
+
+						</div>
+						<div style="top: 0%; left: 85.7142%;" class="cell">
+
+						</div>
+
+						<div class="events">
+							<div class="eventcontainer_1" id="container_Default_5"></div>
+							<div class="eventcontainer_1" id="container_i0QJSJRv_5"></div>
+						</div>
+					</div>
+				</div>
+
+
+				<div class="grid month">
+					<div class="grid_header">
+						<span class="cell">Sunday</span>
+						<span class="cell">Monday</span>
+						<span class="cell">Tuesday</span>
+						<span class="cell">Wednesday</span>
+						<span class="cell">Thursday</span>
+						<span class="cell">Friday</span>
+						<span class="cell">Saturday</span>
+					</div>
+					<div class="cells">
+						<div style="top: 0%; left: 0%;" class="cell">
+							<div class="header header_inactiv">23</div>
+						</div>
+						<div style="top: 0%; left: 14.2857%;" class="cell">
+							<div class="header header_inactiv">24</div>
+						</div>
+						<div style="top: 0%; left: 28.5714%;" class="cell">
+							<div class="header header_inactiv">25</div>
+						</div>
+						<div style="top: 0%; left: 42.8571%;" class="cell">
+							<div class="header header_inactiv">26</div>
+						</div>
+						<div style="top: 0%; left: 57.1428%;" class="cell">
+							<div class="header header_inactiv">27</div>
+						</div>
+						<div style="top: 0%; left: 71.4285%;" class="cell">
+							<div class="header header_inactiv">28</div>
+						</div>
+						<div style="top: 0%; left: 85.7142%;" class="cell">
+							<div class="header header_inactiv">29</div>
+						</div>
+						<div style="top: 16.6667%; left: 0%;" class="cell">
+							<div class="header header_inactiv">30</div>
+						</div>
+						<div style="top: 16.6667%; left: 14.2857%;" class="cell">
+							<div class="header">1</div>
+						</div>
+						<div style="top: 16.6667%; left: 28.5714%;" class="cell">
+							<div class="header">2</div>
+						</div>
+						<div style="top: 16.6667%; left: 42.8571%;" class="cell">
+							<div class="header">3</div>
+						</div>
+						<div style="top: 16.6667%; left: 57.1428%;" class="cell">
+							<div class="header">4</div>
+						</div>
+						<div style="top: 16.6667%; left: 71.4285%;" class="cell">
+							<div class="header">5</div>
+						</div>
+						<div style="top: 16.6667%; left: 85.7142%;" class="cell">
+							<div class="header">6</div>
+						</div>
+						<div style="top: 33.3334%; left: 0%;" class="cell">
+							<div class="header">7</div>
+						</div>
+						<div style="top: 33.3334%; left: 14.2857%;" class="cell">
+							<div class="header">8</div>
+						</div>
+						<div style="top: 33.3334%; left: 28.5714%;" class="cell">
+							<div class="header">9</div>
+						</div>
+						<div style="top: 33.3334%; left: 42.8571%;" class="cell">
+							<div class="header">10</div>
+						</div>
+						<div style="top: 33.3334%; left: 57.1428%;" class="cell">
+							<div class="header">11</div>
+						</div>
+						<div style="top: 33.3334%; left: 71.4285%;" class="cell">
+							<div class="header">12</div>
+						</div>
+						<div style="top: 33.3334%; left: 85.7142%;" class="cell">
+							<div class="header">13</div>
+						</div>
+						<div style="top: 50.0001%; left: 0%;" class="cell">
+							<div class="header">14</div>
+						</div>
+						<div style="top: 50.0001%; left: 14.2857%;" class="cell">
+							<div class="header">15</div>
+						</div>
+						<div style="top: 50.0001%; left: 28.5714%;" class="cell">
+							<div class="header">16</div>
+						</div>
+						<div style="top: 50.0001%; left: 42.8571%;" class="cell">
+							<div class="header">17</div>
+						</div>
+						<div style="top: 50.0001%; left: 57.1428%;" class="cell">
+							<div class="header">18</div>
+						</div>
+						<div style="top: 50.0001%; left: 71.4285%;" class="cell">
+							<div class="header">19</div>
+						</div>
+						<div style="top: 50.0001%; left: 85.7142%;" class="cell">
+							<div class="header">20</div>
+						</div>
+						<div style="top: 66.6668%; left: 0%;" class="cell">
+							<div class="header">21</div>
+						</div>
+						<div style="top: 66.6668%; left: 14.2857%;" class="cell">
+							<div class="header">22</div>
+						</div>
+						<div style="top: 66.6668%; left: 28.5714%;" class="cell">
+							<div class="header">23</div>
+						</div>
+						<div style="top: 66.6668%; left: 42.8571%;" class="cell">
+							<div class="header">24</div>
+						</div>
+						<div style="top: 66.6668%; left: 57.1428%;" class="cell">
+							<div class="header">25</div>
+						</div>
+						<div style="top: 66.6668%; left: 71.4285%;" class="cell">
+							<div class="header">26</div>
+						</div>
+						<div style="top: 66.6668%; left: 85.7142%;" class="cell">
+							<div class="header">27</div>
+						</div>
+						<div style="top: 83.3335%; left: 0%;" class="cell">
+							<div class="header">28</div>
+						</div>
+						<div style="top: 83.3335%; left: 14.2857%;" class="cell">
+							<div class="header">29</div>
+						</div>
+						<div style="top: 83.3335%; left: 28.5714%;" class="cell today">
+							<div class="header">30</div>
+						</div>
+						<div style="top: 83.3335%; left: 42.8571%;" class="cell">
+							<div class="header">31</div>
+						</div>
+						<div style="top: 83.3335%; left: 57.1428%;" class="cell">
+							<div class="header header_inactiv">1</div>
+						</div>
+						<div style="top: 83.3335%; left: 71.4285%;" class="cell">
+							<div class="header header_inactiv">2</div>
+						</div>
+						<div style="top: 83.3335%; left: 85.7142%;" class="cell">
+							<div class="header header_inactiv">3</div>
+						</div>
+
+						<div class="events">
+							<div class="eventcontainer_1" id="container_Default_5"></div>
+							<div class="eventcontainer_1" id="container_i0QJSJRv_5"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                <!--<div id="edit_window">
+                    <div class="mask"></div>
+                    <div class="edit_form" id="edit_form">
+                        <div style="height:auto; position:relative;">
+                            <input type="hidden" value="0" id="evform_id" name="evform_id">
+                            <input type="hidden" value="0" id="id_calendar">
+                            <div id="event_black" class="event_black">
+                                <div class="a"></div>
+                                <div class="b"></div>
+                                <div id="edit_event_shadow" class="event_middle"></div>
+                                <div class="b"></div>
+                                <div class="a"></div>
+                            </div>
+                            <div style="position:relative; width:435px;" id="eventcontainer" class="eventcontainer_2">
+                                <div id="eventEdit" class="event_edit">
+                                    <div class="a"></div>
+                                    <div class="b"></div>
+                                    <div class="event_middle">
+                                        <div class="event_text">
+                                            <div id="ef_fulldate" class="time">New Event</div>
+
+											<table style="width: 100%;">
+												<tbody><tr>
+													<td valign="top">
+														<div style="width: 425px; overflow:visible;" id="eventLeftContainer">
+															<div style="width:425px;" class="text">
+																<div class="em_spacer"></div>
+																<div class="row_title">Subject</div>
+																<div><input tabindex="1" maxlength="50" style="width:338px;" name="EventSubject" class="input" id="EventSubject"></div>
+																<div class="em_spacer"></div>
+																<div class="row_title">Calendar</div>
+																<div style="float:left; padding-right:10px; overflow:visible;">
+																	<div id="edit_select_box" class="eventcontainer_bw">
+																		<div class="a"></div>
+																		<div class="b"></div>
+																		<div class="event_middle">
+																			<div style="cursor:pointer; width:145px; position:relative;" class="calendar_text">
+																				<div class="color_pick" id="color_calendar_now"></div>
+																				<div style="white-space:nowrap;" class="text" id="calen_sal"></div>
+																				<div class="vis_check calendar_arrow" id="calendar_arrow"></div>
+																			</div>
+																		</div>
+																		<div class="b"></div>
+																		<div class="a"></div>
+																	</div>
+																	<div id="edit_select_box_list" class="calendar_list"><div style="padding-bottom: 5px;"><div id="clnd_Default" style="position: relative;"><div class="color_pick" style="border: 1px solid rgb(255, 255, 255); margin: 1px 5px 0px 3px; background-color: rgb(239, 149, 84);"></div>My Calendar</div><div id="clnd_i0QJSJRv" style="position: relative;"><div class="color_pick" style="border: 1px solid rgb(255, 255, 255); margin: 1px 5px 0px 3px; background-color: rgb(239, 149, 84);"></div>Default</div></div><div style="border-top: 1px solid rgb(204, 204, 204); padding-top: 5px; display: none;"></div></div>
+																</div>
+																<div id="allday_container">
+																	<input type="checkbox" class="wm_checkbox" id="alldayCbk">&nbsp;
+																	<label for="alldayCbk">All day</label>
+																</div>
+																<div class="em_spacer"></div>
+																<table cellspacing="0" cellpadding="0" border="0" style="float:left;">
+																	<tbody><tr>
+																		<td class="row_title" id="tmp_id">From</td>
+																		<td style="width:60px">
+																			<input tabindex="2" value="" style="display:block; width:60px; text-align: center; margin-right:4px; padding:0px" class="input" name="EventTimeFrom" id="EventTimeFrom">
+																			<div id="EventTimeFrom_dropdown" style="position: absolute; z-index: 10;" class="wm_hide"><div class="ts_text">00:00</div><div class="ts_text">00:30</div><div class="ts_text">01:00</div><div class="ts_text">01:30</div><div class="ts_text">02:00</div><div class="ts_text">02:30</div><div class="ts_text">03:00</div><div class="ts_text">03:30</div><div class="ts_text">04:00</div><div class="ts_text">04:30</div><div class="ts_text">05:00</div><div class="ts_text">05:30</div><div class="ts_text">06:00</div><div class="ts_text">06:30</div><div class="ts_text">07:00</div><div class="ts_text">07:30</div><div class="ts_text">08:00</div><div class="ts_text">08:30</div><div class="ts_text">09:00</div><div class="ts_text">09:30</div><div class="ts_text">10:00</div><div class="ts_text">10:30</div><div class="ts_text">11:00</div><div class="ts_text">11:30</div><div class="ts_text">12:00</div><div class="ts_text">12:30</div><div class="ts_text">13:00</div><div class="ts_text">13:30</div><div class="ts_text">14:00</div><div class="ts_text">14:30</div><div class="ts_text">15:00</div><div class="ts_text">15:30</div><div class="ts_text">16:00</div><div class="ts_text">16:30</div><div class="ts_text">17:00</div><div class="ts_text">17:30</div><div class="ts_text">18:00</div><div class="ts_text">18:30</div><div class="ts_text">19:00</div><div class="ts_text">19:30</div><div class="ts_text">20:00</div><div class="ts_text">20:30</div><div class="ts_text">21:00</div><div class="ts_text">21:30</div><div class="ts_text">22:00</div><div class="ts_text">22:30</div><div class="ts_text">23:00</div><div class="ts_text">23:30</div></div>
+																		</td>
+																		<td style="width:84px">
+																			<input tabindex="3" value="" style="display:block; width:80px; text-align: center;padding:0px" class="input" name="EventDateFrom" id="EventDateFrom">
+																			<div id="st" style="position:absolute;margin-top:-1px;" class="wm_hide">
+																				<table class="Calendar_Title">
+																					<tbody><tr>
+																						<td class="arrow_left"><img src="./calendar/skins/calendar/minicalendar_arrow_left_activ.gif" title="Prev Month" alt="Prev Month" id="st_prevMonthSwitcher" class="calendar_switcher"></td>
+																						<td id="st_monthName" class="middle">
+																						</td>
+																						<td class="arrow_right"><img src="./calendar/skins/calendar/minicalendar_arrow_right_activ.gif" title="Next Month" alt="Next Month" id="st_nextMonthSwitcher" class="calendar_switcher"></td>
+																					</tr>
+																				</tbody></table>
+																				<table cellspacing="0" cellpadding="0" class="calendar_block" id="st_calendarBlock">
+																					<tbody><tr>
+																						<td class="title">S</td><td class="title">M</td><td class="title">T</td><td class="title">W</td><td class="title">T</td><td class="title">F</td><td class="title">S</td>
+																					</tr>
+																					<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																					<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																					<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																					<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																					<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																					<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																					<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																				</tbody></table>
+																				<input type="hidden" name="st_currentMonth" id="st_currentMonth">
+																			</div>
+																		</td>
+																	</tr>
+																</tbody></table>
+																<table cellspacing="0" cellpadding="0" border="0" style="float:left;">
+																	<tbody><tr>
+																		<td style="text-align:center; float:none; width:36px;" class="row_title">till</td>
+																		<td style="width:60px">
+																			<input tabindex="4" value="" style="display:block; width:60px; text-align: center; margin-right:4px;padding:0px" class="input" name="EventTimeTill" id="EventTimeTill">
+																			<div id="EventTimeTill_dropdown" style="position: absolute; z-index: 10;" class="wm_hide"><div class="ts_text">00:00</div><div class="ts_text">00:30</div><div class="ts_text">01:00</div><div class="ts_text">01:30</div><div class="ts_text">02:00</div><div class="ts_text">02:30</div><div class="ts_text">03:00</div><div class="ts_text">03:30</div><div class="ts_text">04:00</div><div class="ts_text">04:30</div><div class="ts_text">05:00</div><div class="ts_text">05:30</div><div class="ts_text">06:00</div><div class="ts_text">06:30</div><div class="ts_text">07:00</div><div class="ts_text">07:30</div><div class="ts_text">08:00</div><div class="ts_text">08:30</div><div class="ts_text">09:00</div><div class="ts_text">09:30</div><div class="ts_text">10:00</div><div class="ts_text">10:30</div><div class="ts_text">11:00</div><div class="ts_text">11:30</div><div class="ts_text">12:00</div><div class="ts_text">12:30</div><div class="ts_text">13:00</div><div class="ts_text">13:30</div><div class="ts_text">14:00</div><div class="ts_text">14:30</div><div class="ts_text">15:00</div><div class="ts_text">15:30</div><div class="ts_text">16:00</div><div class="ts_text">16:30</div><div class="ts_text">17:00</div><div class="ts_text">17:30</div><div class="ts_text">18:00</div><div class="ts_text">18:30</div><div class="ts_text">19:00</div><div class="ts_text">19:30</div><div class="ts_text">20:00</div><div class="ts_text">20:30</div><div class="ts_text">21:00</div><div class="ts_text">21:30</div><div class="ts_text">22:00</div><div class="ts_text">22:30</div><div class="ts_text">23:00</div><div class="ts_text">23:30</div></div>
+																		</td>
+																		<td style="width:84px">
+																			<input tabindex="5" value="" style="display:block; width:84px; text-align: center;padding:0px" class="input" name="EventDateTill" id="EventDateTill">
+																			<div id="en" style="position:absolute;overflow:visible;margin-top:-1px;" class="wm_hide">
+																				<table class="Calendar_Title">
+																					<tbody><tr>
+																						<td class="arrow_left"><img src="./calendar/skins/calendar/minicalendar_arrow_left_activ.gif" title="Prev Month" alt="Prev Month" id="en_prevMonthSwitcher" class="calendar_switcher"></td>
+																						<td id="en_monthName" class="middle"></td>
+																						<td class="arrow_right"><img src="./calendar/skins/calendar/minicalendar_arrow_right_activ.gif" title="Next Month" alt="Next Month" id="en_nextMonthSwitcher" class="calendar_switcher"></td>
+																					</tr>
+																				</tbody></table>
+																				<table cellspacing="0" cellpadding="0" class="calendar_block" id="en_calendarBlock">
+																					<tbody><tr>
+																						<td class="title">S</td><td class="title">M</td><td class="title">T</td><td class="title">W</td><td class="title">T</td><td class="title">F</td><td class="title">S</td>
+																					</tr>
+																					<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																					<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																					<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																					<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																					<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																					<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																					<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																				</tbody></table>
+																				<input type="hidden" name="en_currentMonth" id="en_currentMonth">
+																			</div>
+																		</td>
+																	</tr>
+																</tbody></table>
+																<div class="em_spacer"></div>
+																<div class="row_title">Location</div>
+																<div><input tabindex="6" maxlength="50" style="width:338px;" name="EventLocation" class="input" id="EventLocation"></div>
+																<div class="em_spacer"></div>
+																<div class="row_title">Description</div>
+																<div><textarea tabindex="7" style="background-color:white; color:#696969; width:338px; height:4em;" class="input" id="EventDescription" name="EventDescription"></textarea></div>
+																<div class="em_spacer"></div>
+																<div style="color:#696969;" id="repeatExclusionWarning">
+																	<div class="row_title"></div>
+																	<div>This event has been changed and is no longer part of a series. <a id="undoOneRepeat" style="color:#7E9BAF" href="javascript:void(0)">Undo changes to include in the series.</a></div>
+																</div>
+																<div class="em_spacer"></div>
+																<div id="expandRepeatLinkCont">
+																	<a id="expandRepeatLink" class="link1 row_offset" href="javascript:void(0)">Repeat this event</a>
+																</div>
+																<div style="width: 408px; display: none;" class="repeatCont eventcontainer_gray" id="repeatCont">
+																	<div class="a"></div>
+																	<div class="b"></div>
+																	<div class="event_middle">
+																		<div class="event_text">
+																			<img title="Cancel recurrence" alt="Cancel recurrence" src="./calendar/skins/calendar/close-popup.png" class="closeRepeatForm" id="closeRepeatForm">
+																			<ul class="form_string nolist">
+																				<li class="row_offset"><div id="repeatResult" class="repeatResult"></div></li>
+																				<li>
+																					<div class="row_title">Repeats</div>
+																					<select class="input" name="repeatOpt" id="repeatOpt">
+																						<option value="0">Daily</option>
+																						<option value="1">Weekly</option>
+																						<option value="2">Monthly</option>
+																						<option value="3">Yearly</option>
+																					</select>
+																				</li>
+																				<li style="position:relative; background-color:#fff;" class="weekdaysRepeatChbk" id="weekdaysRepeatChbk">
+																					<div class="row_title">On days</div>
+																					<div>
+																						<input type="checkbox" value="0" class="wm_checkbox" name="weekDay" id="weekDay[0]"><label for="weekDay0">Sun</label>&nbsp;<input type="checkbox" value="1" class="wm_checkbox" name="weekDay" id="weekDay[1]"><label for="weekDay1">Mon</label>&nbsp;<input type="checkbox" value="2" class="wm_checkbox" name="weekDay" id="weekDay[2]"><label for="weekDay2">Tue</label>&nbsp;<input type="checkbox" value="3" class="wm_checkbox" name="weekDay" id="weekDay[3]"><label for="weekDay3">Wed</label>&nbsp;<input type="checkbox" value="4" class="wm_checkbox" name="weekDay" id="weekDay[4]"><label for="weekDay4">Thu</label>&nbsp;<input type="checkbox" value="5" class="wm_checkbox" name="weekDay" id="weekDay[5]"><label for="weekDay5">Fri</label>&nbsp;<input type="checkbox" value="6" class="wm_checkbox" name="weekDay" id="weekDay[6]"><label for="weekDay6">Sat</label>&nbsp;																					</div>
+																				</li>
+																				<li id="advancedRepeatCont1">
+																					<div class="row_title"></div>
+																					<div style="z-index:2;" class="select_box">
+																						<div style="position:relative;width:100%">
+																							<div id="advanced_repeat1" class="advanced_repeat">
+																								<div class="a_round_left"></div>
+																								<div class="b_round_left"></div>
+																								<div class="event_middle"><div class="event_text">
+																										<div id="repeatOnDay"></div>
+																										<div id="repeatWeekDays">
+																											Every																											<select id="weekOrderSelect">
+																												<option value="0">First</option>
+																												<option value="1">Second</option>
+																												<option value="2">Third</option>
+																												<option value="3">Fourth</option>
+																												<option value="4">Last</option>
+																											</select>
+																											<select id="weekdaysRepeatSel">
+																												<option value="0">Sunday</option>
+																												<option value="1">Monday</option>
+																												<option value="2">Tuesday</option>
+																												<option value="3">Wednesday</option>
+																												<option value="4">Thursday</option>
+																												<option value="5">Friday</option>
+																												<option value="6">Saturday</option>
+																											</select>
+																											<span style="vertical-align:middle;" id="yearDate"></span>
+																										</div>
+																									</div>
+																								</div>
+																								<div class="b_round_left"></div>
+																								<div class="a_round_left"></div>
+																							</div>
+																							<div class="arrow">
+																								<div class="a_round_right"></div>
+																								<div class="b_round_right"></div>
+																								<div class="event_middle"><div id="advanced_repeat_arrow1" class="event_text"></div></div>
+																								<div class="b_round_right"></div>
+																								<div class="a_round_right"></div>
+																							</div>
+																						</div>
+																						<div style="z-index:2;" class="select_box_list" id="advanced_list1">
+																							<div class="a qmenu1"></div>
+																							<div class="b qmenu1"></div>
+																							<div class="event_middle"><div class="event_text">
+																									<iframe scrolling="no" frameborder="0" style="position: absolute; top: 0; z-index:1; left: 0; width: 100%; height:30px; filter:alpha(opacity=0)"></iframe>
+																									<div style="z-index:2; position:relative;" class="select_box_opt" id="repeatMonthOpt0"></div>
+																									<div style="z-index:2; border-bottom:0;" class="select_box_opt" id="repeatMonthOpt1">
+																										Every&nbsp;
+																										<select disabled="disabled" id="weekOrderSelect1">
+																											<option value="0">First</option>
+																											<option value="1">Second</option>
+																											<option value="2">Third</option>
+																											<option value="3">Fourth</option>
+																											<option value="4">Last</option>
+																										</select>
+																										<select disabled="disabled" id="weekdaysRepeatSel1">
+																											<option value="0">Sunday</option>
+																											<option value="1">Monday</option>
+																											<option value="2">Tuesday</option>
+																											<option value="3">Wednesday</option>
+																											<option value="4">Thursday</option>
+																											<option value="5">Friday</option>
+																											<option value="6">Saturday</option>
+																										</select>
+																										<span style="vertical-align:middle;" id="yearDate1"></span>
+																									</div>
+																								</div></div>
+																							<div class="b"></div>
+																							<div class="a"></div>
+																						</div>
+																					</div>
+																					<div style="height:0" class="em_spacer"></div>
+																				</li>
+																				<li style="position:relative;" id="repeatOrderCont" class="repeatsEvery">
+																					<div class="row_title">Repeats every</div>
+																					<select name="repeatOrder" id="repeatOrder">
+																						<option value="0">1</option>
+																						<option value="1">2</option>
+																						<option value="2">3</option>
+																						<option value="3">4</option>
+																						<option value="4">5</option>
+																						<option value="5">6</option>
+																						<option value="6">7</option>
+																						<option value="7">8</option>
+																						<option value="8">9</option>
+																						<option value="9">10</option>
+																						<option value="10">11</option>
+																						<option value="11">12</option>
+																						<option value="12">13</option>
+																						<option value="13">14</option>
+																						<option value="14">15</option>
+																						<option value="15">16</option>
+																						<option value="16">17</option>
+																						<option value="17">18</option>
+																						<option value="18">19</option>
+																						<option value="19">20</option>
+																						<option value="20">21</option>
+																						<option value="21">22</option>
+																						<option value="22">23</option>
+																						<option value="23">24</option>
+																						<option value="24">25</option>
+																						<option value="25">26</option>
+																						<option value="26">27</option>
+																						<option value="27">28</option>
+																						<option value="28">29</option>
+																						<option value="29">30</option>
+																					</select>
+																						&nbsp;<span id="repeatIntervalText"></span>
+																				</li>
+																				<li style="height:auto" id="repeatExpiresCont">
+																					<div style="line-height:1.9em;" class="row_title">Set end date</div>
+																					<div style="z-index:1; " class="select_box">
+																						<div style="position:relative; width:100%;">
+																							<div id="advanced_repeat2" class="advanced_repeat">
+																								<div class="a_round_left"></div>
+																								<div class="b_round_left"></div>
+																								<div class="event_middle"><div class="event_text">
+																										<div id="advanced_repeat_text21">No end date</div>
+																										<div id="advanced_repeat_text22">
+																											End after&nbsp;<input type="text" style="width:30px;" class="input" maxlength="3" id="repeatTimes">&nbsp;occurrences																										</div>
+																										<div id="advanced_repeat_text23">
+																											End by&nbsp;<input type="text" style="width:80px;" id="repeatUntil" class="input">
+																										</div>
+																									</div></div>
+																								<div class="b_round_left"></div>
+																								<div class="a_round_left"></div>
+																							</div>
+																							<div class="arrow">
+																								<div class="a_round_right"></div>
+																								<div class="b_round_right"></div>
+																								<div class="event_middle"><div id="advanced_repeat_arrow2" class="event_text">&nbsp;</div></div>
+																								<div class="b_round_right"></div>
+																								<div class="a_round_right"></div>
+																							</div>
+																						</div>
+																						<div id="calRepeatUntil" class="wm_hide">
+																							<table class="Calendar_Title">
+																								<tbody><tr>
+																									<td class="arrow_left"><img src="./calendar/skins/calendar/minicalendar_arrow_left_activ.gif" title="Prev Month" alt="Prev Month" id="calRepeatUntil_prevMonthSwitcher" class="calendar_switcher"></td>
+																									<td id="calRepeatUntil_monthName" class="middle"></td>
+																									<td class="arrow_right"><img src="./calendar/skins/calendar/minicalendar_arrow_right_activ.gif" title="Next Month" alt="Next Month" id="calRepeatUntil_nextMonthSwitcher" class="calendar_switcher"></td>
+																								</tr>
+																							</tbody></table>
+																							<table cellspacing="0" cellpadding="0" class="calendar_block" id="calRepeatUntil_calendarBlock">
+																								<tbody><tr>
+																									<td class="title">S</td><td class="title">M</td><td class="title">T</td><td class="title">W</td><td class="title">T</td><td class="title">F</td><td class="title">S</td>
+																								</tr>
+																								<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																								<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																								<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																								<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																								<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																								<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																								<tr><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td><td><a href="javascript:void(1);"></a></td></tr>
+																							</tbody></table>
+																							<input type="hidden" name="calRepeatUntil_currentMonth" id="calRepeatUntil_currentMonth">
+																						</div>																					<div class="select_box_list" id="advanced_list2">
+																							<div class="a qmenu1"></div>
+																							<div class="b qmenu1"></div>
+																							<div class="event_middle"><div class="event_text">
+																									<div class="select_box_opt" id="repeatExpire0">No end date</div>
+																									<div class="select_box_opt" id="repeatExpire1">
+																										End after&nbsp;<input type="text" disabled="disabled" style="width:30px;" class="input" maxlength="3" value="2" id="repeatTimesDisabled">&nbsp;occurrences																									</div>
+																									<div style="border-bottom:0;" class="select_box_opt" id="repeatExpire2">
+																										End by&nbsp;<input type="text" disabled="disabled" style="width:80px;" class="input">
+																									</div>
+																								</div></div>
+																							<div class="b"></div>
+																							<div class="a"></div>
+																						</div>
+																					</div>
+																					<div style="height:0" class="em_spacer"></div>
+																				</li>
+																			</ul>
+																			<div class="em_spacer"></div>
+																		</div>
+																	</div>
+																	<div class="b"></div>
+																	<div class="a"></div>
+																</div>
+																<div class="em_spacer"></div>
+																<div style="padding-top: 2px; display:none;" id="expandRemindLinkCont">
+																	<a id="expandRemindLink" class="link1 row_offset" href="javascript:void(0)">Remind me about this event</a>
+																</div>
+																<div style="display:none;" id="remindCont">
+																	<div style="padding-bottom:3px;" class="row_offset">
+																		<div style="position: relative;" id="remindParent"></div>
+																		<div id="moreRemindLinkCont" class="remind_line"><a class="link1" href="javascript:void(0)" id="moreRemindLink">More reminders</a></div>
+																	</div>
+																</div>
+																<div class="em_spacer"></div>
+																<div class="row_offset" id="expandAppointmentLinkCont">
+																	<div class="b">Add guests</div>
+																	<a id="expandAppointmentLink" class="link1" href="javascript:void(0)">Add guests</a>
+																	<div class="b bottom">Add guests</div>
+																</div>
+																<div style="height:1.5em;" class="em_spacer"></div>
+															</div>
+															<div style="height:1.5em;" class="em_spacer"></div>
+
+														</div>
+													</td>
+													<td valign="top" class="appointments" rowspan="2">
+														<div style="padding: 0px 5px;" class="appointments" id="eventRightContainer">
+															<div class="em_spacer"></div>
+															<div style="height:300px; vertical-align:top; overflow:auto; padding-left:10px; margin-top:5px;" id="appointmentCont">
+																<div id="yesLinesOpener" class="subtitle">
+																	<div id="yesArrow" class="lines_open_mode"></div>Participants <span class="count" id="yesCount"></span>
+																</div>
+																<div id="linesYes"></div>
+																<div style="margin-top:5px;" id="maybeLinesOpener" class="subtitle">
+																	<div id="maybeArrow" class="lines_open_mode"></div>Not sure yet <span class="count" id="maybeCount"></span>
+																</div>
+																<div id="linesMaybe"></div>
+																<div style="margin-top:5px;" id="awaitingLinesOpener" class="subtitle">
+																	<div id="awaitingArrow" class="lines_open_mode"></div>Awaiting response <span class="count" id="awaitingCount"></span>
+																</div>
+																<div id="linesAwaiting"></div>
+																<div style="margin-top:5px;" id="noLinesOpener" class="subtitle">
+																	<div id="noArrow" class="lines_close_mode"></div>Refused <span class="count" id="noCount"></span>
+																</div>
+																<div id="linesNo"></div>
+															</div>
+															<div style="margin:5px 0;" id="appointmentGuestsRightsCont">
+																<input type="checkbox" style="vertical-align:middle;" id="appointmentGuestsRights"><label style="vertical-align:middle;" for="appointmentGuestsRights">Guests can change event</label>
+															</div>
+															<div style="text-align:center; display:none;" class="appointment_respond" id="appointmentRespondCont">
+																<div style="text-indent: 0px; text-align: center; margin-bottom: 3px;" id="appointmentRespond"></div>
+																<span class="appointment_respond_change" id="appointmentChangeRespond1"></span>
+																<span class="appointment_respond_change" id="appointmentChangeRespond2"></span>
+																<span class="appointment_respond_change" id="appointmentChangeRespond3"></span>
+															</div>
+															<div style="vertical-align:bottom; padding-top: 5px;" id="appointmentAddGuestsCont">
+																<div style="margin-right:10px" id="closeAppointmentLinkCont">
+																	<a style="font-weight:bold; float:right;" id="closeAppointmentLink" class="link1" href="javascript:void(0)">Cancel Meeting</a>
+																</div>
+																<div style="height:10px;" class="em_spacer"></div>
+																<div style="margin-bottom: 3px; margin-left:5px;">Enter email addresses separated by commas and press Save</div>
+																<textarea rows="0" cols="0" tabindex="5" class="input" id="newGuests" name="newGuests"></textarea>
+															</div>
+															<div style="height:1.5em;" class="em_spacer"></div>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div id="eventButtons" class="buttons">
+															<input type="button" tabindex="9" class="wm_button" value="Close" id="closebut">
+															<input type="button" tabindex="7" class="wm_button" value="Save" id="button_save">&nbsp;&nbsp;&nbsp;&nbsp;
+															<input type="button" tabindex="8" class="wm_button normal" value="Cancel" id="cancelbut">&nbsp;&nbsp;&nbsp;&nbsp;
+															<input type="button" tabindex="9" class="wm_button normal" value="Delete" id="delbut" name="delbut">
+														</div>
+													</td>
+												</tr>
+											</tbody></table>
+										</div>
+		                            </div>
+			                        <div class="b"></div>
+					                <div class="a"></div>
+				                </div>
+						    </div>
+						</div>
+					</div>
+				</div>-->
+
+	            <!--<div id="manager_window">
+                    <div class="mask"></div>
+                    <div class="edit_form" id="manager_form">
+                        <div style="height:auto; position:relative;left:-225px; top: -125px;">
+                            <input type="hidden" value="0" id="clndform_id" name="clndform_id">
+                            <input type="hidden" value="0" id="calendarColorNumber">
+
+                            <div class="event_black">
+                                <div class="a"></div>
+                                <div class="b"></div>
+                                <div id="manager_shadow" class="event_middle"></div>
+                                <div class="b"></div>
+                                <div class="a"></div>
+                            </div>
+                            <div style="position:relative" id="calendarcontainer" class="eventcontainer_2">
+                                <div class="event_edit">
+                                    <div class="a"></div>
+                                    <div class="b"></div>
+                                    <div class="event_middle">
+                                        <div class="event_text">
+                                            <div id="ef_fulldate_calendar" style="text-indent:92px;" class="time">New Calendar</div>
+                                            <div class="text">
+                                                <div class="em_spacer"></div>
+                                                <div style="width:8em" class="row_title">Calendar Name</div>
+                                                <div><input tabindex="1" style="width:320px;" class="input" maxlength="50" name="CalendarSubject" id="CalendarSubject"></div>
+                                                <div class="em_spacer"></div>
+                                                <div style="width:8em" class="row_title">Description</div>
+                                                <div><textarea tabindex="2" style="width:320px; height:50px;" class="input" id="CalendarDescription" name="CalendartDescription"></textarea></div>
+                                                <div class="em_spacer"></div>
+                                                <div style="width:8em" class="row_title">Color</div>
+                                                <div style="width:105px; height: 35px; padding:0;" class="calendar_text input">
+                                                    <div onmouseout="this.className='color_pick'" onmouseover="this.className='color_pick_hover'" onclick="CalendarForm.SelectColorForNewCalendar(1, this);" style="background-color: #ef9554;" class="color_pick" id="color_1"></div>
+
+                                                    <div onmouseout="this.className='color_pick'" onmouseover="this.className='color_pick_hover'" onclick="CalendarForm.SelectColorForNewCalendar(2, this);" style="background-color: #f58787;" class="color_pick" id="color_2"></div>
+
+                                                    <div onmouseout="this.className='color_pick'" onmouseover="this.className='color_pick_hover'" onclick="CalendarForm.SelectColorForNewCalendar(3, this);" style="background-color: #6fd0ce;" class="color_pick" id="color_3"></div>
+
+                                                    <div onmouseout="this.className='color_pick'" onmouseover="this.className='color_pick_hover'" onclick="CalendarForm.SelectColorForNewCalendar(4, this);" style="background-color: #90bbe0;" class="color_pick" id="color_4"></div>
+
+                                                    <div onmouseout="this.className='color_pick'" onmouseover="this.className='color_pick_hover'" onclick="CalendarForm.SelectColorForNewCalendar(5, this);" style="background-color: #baa2f3;" class="color_pick" id="color_5"></div>
+
+                                                    <div onmouseout="this.className='color_pick'" onmouseover="this.className='color_pick_hover'" onclick="CalendarForm.SelectColorForNewCalendar(6, this);" style="background-color: #f68bcd;" class="color_pick" id="color_6"></div>
+
+                                                    <div onmouseout="this.className='color_pick'" onmouseover="this.className='color_pick_hover'" onclick="CalendarForm.SelectColorForNewCalendar(7, this);" style="background-color: #d987da;" class="color_pick" id="color_7"></div>
+
+                                                    <div onmouseout="this.className='color_pick'" onmouseover="this.className='color_pick_hover'" onclick="CalendarForm.SelectColorForNewCalendar(8, this);" style="background-color: #4affb8;" class="color_pick" id="color_8"></div>
+
+                                                    <div onmouseout="this.className='color_pick'" onmouseover="this.className='color_pick_hover'" onclick="CalendarForm.SelectColorForNewCalendar(9, this);" style="background-color: #9f9fff;" class="color_pick" id="color_9"></div>
+
+                                                    <div onmouseout="this.className='color_pick'" onmouseover="this.className='color_pick_hover'" onclick="CalendarForm.SelectColorForNewCalendar(10, this);" style="background-color: #5cc9c9;" class="color_pick" id="color_10"></div>
+
+                                                    <div onmouseout="this.className='color_pick'" onmouseover="this.className='color_pick_hover'" onclick="CalendarForm.SelectColorForNewCalendar(11, this);" style="background-color: #76cb76;" class="color_pick" id="color_11"></div>
+
+                                                    <div onmouseout="this.className='color_pick'" onmouseover="this.className='color_pick_hover'" onclick="CalendarForm.SelectColorForNewCalendar(12, this);" style="background-color: #aec9c9;" class="color_pick" id="color_12"></div>
+                                                </div>
+                                                <div class="buttons">
+													<input type="button" tabindex="8" class="wm_button normal" value="Save" id="savebut_calendar">&nbsp;&nbsp;&nbsp;&nbsp;
+													<input type="button" tabindex="9" class="wm_button normal" value="Cancel" id="calncelbut_calendar">&nbsp;&nbsp;&nbsp;&nbsp;
+													<input type="button" tabindex="10" class="wm_button normal" value="Delete" id="delbut_calendar" name="delbut">
+												</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="b"></div>
+                                    <div class="a"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>-->
+
+                <!--<div style="display:none;" id="repeat_choose">
+                    <div class="mask"></div>
+                    <div class="edit_form" id="repeat_choose_form">
+                        <div style="height:auto; position:relative;left:-300px; top: -125px;">
+                            <div class="event_black">
+                                <div class="a"></div>
+                                <div class="b"></div>
+                                <div id="repeat_chose_shadow" class="event_middle"></div>
+                                <div class="b"></div>
+                                <div class="a"></div>
+                            </div>
+                            <div style="position:relative" id="choosecontainer" class="eventcontainer_2">
+                                <div class="event_edit">
+                                    <div class="a"></div>
+                                    <div class="b"></div>
+                                    <div class="event_middle">
+                                        <div class="event_text">
+                                            <div id="ef_fulldate" class="time">Edit Recurring Event</div>
+                                            <div style="margin: 0 5px; width:98%; text-align:center;" class="text">
+                                                <div class="em_spacer"></div>
+                                                <div id="divConfirmEditRepeatEvent" style="color:#696969;">Would you like to change only this event or all events in the series?</div>
+                                                <div class="em_spacer"></div>
+												<div style="padding-bottom:0;" class="buttons">
+		                                            <input type="button" tabindex="1" class="wm_button normal" value="Only this instance" id="savebut_one">
+	                                                <input type="button" tabindex="2" class="wm_button normal" value="All events in the series" id="savebut_all">
+													<input type="button" tabindex="4" class="wm_button normal" value="Cancel" id="cancelbut_repeat1">
+												</div>
+                                                <div class="em_spacer"></div>
+                                                <br>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="b"></div>
+                                    <div class="a"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>-->
+
+                <!--<div id="share_window">
+                    <div class="mask"></div>
+                    <div class="edit_form" id="share_form">
+                        <div style="height:auto; position:relative;left:-225px; top: -125px;">
+                            <input type="hidden" value="" id="publicationHash">
+                            <input type="hidden" value="" id="iCalHash">
+                            <input type="hidden" value="0" id="shareform_id">
+
+                            <div class="event_black">
+                                <div class="a"></div>
+                                <div class="b"></div>
+                                <div id="share_shadow" class="event_middle"></div>
+                                <div class="b"></div>
+                                <div class="a"></div>
+                            </div>
+                            <div style="position:relative" id="sharecontainer" class="eventcontainer_2">
+                                <div class="event_edit">
+                                    <div class="a"></div>
+                                    <div class="b"></div>
+                                    <div class="event_middle">
+                                        <div class="event_text">
+                                            <div style="text-indent:92px;" class="time">Share and publish calendar</div>
+                                            <div class="text">
+
+                                                <div class="em_spacer"></div>
+                                                <div style="padding:0 0.5em 0 0.4em;" class="edit_lightgray">
+                                                    <div class="a"></div>
+                                                    <div class="b"></div>
+                                                    <div style="padding:0.5em 0 0.5em 0.3em ;" class="event_middle wm_hide">
+                                                        <div style="width:7.4em" class="row_title">Principal URL:</div>
+                                                        <div class="inline_string">
+														<textarea readonly="" tabindex="4" rows="2" class="input link_container" id="principalUrl"></textarea>
+														</div>
+                                                    </div>
+                                                    <div style="padding:0.5em 0 0.5em 0.3em ;" class="event_middle">
+                                                        <div style="width:7.4em" class="row_title">DAV URL:</div>
+                                                        <div class="inline_string">
+                                                        <textarea readonly="" tabindex="4" rows="2" class="input link_container" id="calendarUrl"></textarea>
+														</div>
+                                                    </div>
+                                                    <div style="padding:0.5em 0 0.5em 0.3em ;" class="event_middle">
+                                                        <div style="width:7.4em" class="row_title">link to .ics:</div>
+                                                        <div class="inline_string">
+                                                        <textarea style="width: 300px;" readonly="" tabindex="4" rows="2" class="input link_container" id="icsUrl">ccccc</textarea>
+														</div>
+														<div style="float: right; margin-top: -30px; margin-right: 9px;">
+															<a id="icsDownload" href="javascript: void(0)">Download</a>
+														</div>
+                                                    </div>
+                                                    <div class="b"></div>
+                                                    <div class="a"></div>
+                                                </div>
+
+                                                <div style="height:1.5em" class="em_spacer"></div>
+                                                <div style="padding:0 0.5em 0 0.4em;" class="edit_lightgray">
+                                                    <div class="a"></div>
+                                                    <div class="b"></div>
+                                                    <div style="padding:0.5em 0 0.5em 0.3em ;" class="event_middle">
+                                                        <div style="width:7.4em" class="row_title"></div>
+                                                        <div class="inline_string">
+                                                            <input type="checkbox" class="wm_checkbox" tabindex="3" value="1" name="publicateCalendar" id="publicateCalendar">
+                                                            <label for="publicateCalendar">Make public web access to this calendar</label>
+                                                        </div>
+
+                                                        <div id="publicationLevelContainer">
+                                                            <div class="em_spacer"></div>
+                                                            <div style="width:7.4em" class="row_title"></div>
+                                                            <div class="wm_hide">
+                                                                <select class="input" name="publicationLevel" id="publicationLevel">
+                                                                    <option value="1">Can see all event details</option>
+                                                                    <option value="2">Can see only free/busy (hide details)</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="em_spacer"></div>
+                                                            <div style="width:7.4em" class="row_title">Web link:</div>
+                                                            <div>
+                                                                <textarea readonly="" tabindex="4" rows="2" class="input link_container" id="publicationUrl"></textarea>
+                                                            </div>
+                                                        </div>
+
+                                                        <div style="height:1.5em; display: none;" class="em_spacer"></div>
+
+                                                        <div style="width:7.4em" class="row_title"></div>
+                                                        <div style="display: none;" class="inline_string">
+                                                            <input type="checkbox" class="wm_checkbox" tabindex="3" value="1" name="iCalAllow" id="iCalAllow">
+                                                            <label for="iCalAllow">Export to iCalendar</label>
+                                                        </div>
+                                                        <div id="iCalContainer">
+                                                            <div class="em_spacer"></div>
+                                                            <div style="width:7.4em" class="row_title">Web link</div>
+                                                            <div>
+                                                                <textarea readonly="" tabindex="4" rows="2" class="input link_container" id="iCalUrl"></textarea>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="b"></div>
+                                                    <div class="a"></div>
+                                                </div>
+
+                                                <div style="height:1.5em" class="em_spacer"></div>
+                                                <div style="padding:0 0.5em 0 0.4em;" class="edit_lightgray">
+                                                    <div class="a"></div>
+                                                    <div class="b"></div>
+                                                    <div style="padding:0.3em 0 0.3em 0.3em ;" id="share_middle" class="event_middle">
+                                                        <div style="width:7.4em" class="row_title"></div><div style="color:#696969; padding-bottom:0.5em;">Share this calendar</div>
+                                                        <div style="display:inline;" id="shareParent"></div>
+                                                        <div class="share">
+                                                            <div class="col1">
+                                                                <input type="text" tabindex="5" style="color:#aaa;" class="input" value="E-mail" maxlength="100" name="sharedEmail" id="sharedEmail">
+                                                            </div>
+                                                            <div class="col2">
+                                                                <select class="input" tabindex="6" name="sharedPermission" id="sharedPermission">
+                                                                    <option value="1">Can make changes to events</option>
+                                                                    <option selected="selected" value="2">Can see all event details</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col3"><img id="addShare" title="Add" alt="Add" class="imgbtn" src="./calendar/skins/calendar/add.png"></div>
+                                                            <div style="height:0.3em;" class="em_spacer"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="b"></div>
+                                                    <div class="a"></div>
+                                                </div>
+                                                <div class="buttons">
+													<input type="button" tabindex="8" class="wm_button" value="Save" id="share_save">&nbsp;&nbsp;&nbsp;&nbsp;
+													<input type="button" tabindex="9" class="wm_button normal" value="Cancel" id="share_cancel">&nbsp;&nbsp;&nbsp;&nbsp;
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="b"></div>
+                                    <div class="a"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>-->
+
+
+
+		</div>
+	</div>
+</div>

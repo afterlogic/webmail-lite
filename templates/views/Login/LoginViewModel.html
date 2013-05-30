@@ -1,0 +1,77 @@
+<div class="login_panel">
+	<div class="login_panel_content">
+		<div class="header" data-i18n="LOGIN/HEADING" data-bind="i18n: 'text'"></div>
+		<div class="content clearfix">
+			<form class="form" action="#/" onsubmit="return false;" data-bind="command: loginCommand">
+				<div class="form_fieldset">
+					<div class="form_row email" data-bind="visible: emailVisible, css: {'focused': emailFocus(), 'filled': email().length > 0}">
+						<label for="email" class="title placeholder" data-i18n="LOGIN/LABEL_EMAIL" data-bind="i18n: 'text'"></label>
+						<span>
+							<input id="email" class="input" type="text" autocomplete="off" data-bind="value: email, hasfocus: emailFocus, valueUpdate: 'afterkeydown'" />
+						</span>
+					</div>
+					<!--<div class="form_row login" data-bind="visible: loginVisible, css: {'focused': loginFocus(), 'filled': login().length > 0}">
+						<label for="login" class="title placeholder" data-i18n="LOGIN/LABEL_LOGIN" data-bind="i18n: 'text'"></label>
+						<span>
+							<input id="login" class="input" type="text" data-bind="value: login, hasfocus: loginFocus, valueUpdate: 'afterkeydown'" />
+						</span>
+					</div>-->
+					<div class="form_row password" data-bind="css: {'focused': passwordFocus(), 'filled': password().length > 0}">
+						<label for="password" class="title placeholder" data-i18n="LOGIN/LABEL_PASSWORD" data-bind="i18n: 'text'"></label>
+						<span>
+							<input id="password" class="input" type="password" data-bind="value: password, hasfocus: passwordFocus, valueUpdate: 'afterkeydown'" />
+						</span>
+					</div>
+				</div>
+				<div class="form_row buttons">
+					<button type="submit" class="button login" data-bind="text: signInButtonText, command: loginCommand"></button>
+				</div>
+				<div class="form_row signme" data-bind="visible: signMeType() !== Enums.LoginSignMeType.Unuse">
+					<span>
+						<label class="custom_checkbox" data-bind="css: {'checked': signMe}">
+							<span class="icon"></span>
+							<input id="signme" type="checkbox" data-bind="checked: signMe" />
+						</label>
+						<label class="title" for="signme" data-i18n="LOGIN/LABEL_REMEMBER_ME" data-bind="i18n: 'text'"></label>
+					</span>
+				</div>
+			</form>
+			<div class="login_description" data-bind="visible: '' !== loginDescription(), html: loginDescription"></div>
+			<div class="clear"></div>
+			<div class="languages" data-bind="visible: allowLanguages() && viewLanguagesAsDropdown()">
+				<span class="custom_select right" data-bind="dropdown: {}">
+					<span class="name" data-bind="css: currentLanguage">
+						<span class="icon"></span>
+						<span class="text" data-bind="text: currentLanguage"></span>
+					</span>
+					<span class="control">
+						<span class="icon"></span>
+					</span>
+					<span class="dropdown">
+						<span class="dropdown_helper">
+							<span class="dropdown_arrow"><span></span></span>
+							<span class="dropdown_content" data-bind="foreach: aLanguages">
+								<span class="item" data-bind="css: value + ($parent.currentLanguage() === value ? ' selected' : ''), click: function () { $parent.changeLanguage(value); }">
+									<span class="icon"></span>
+									<span class="text" data-bind="text: name"></span>
+								</span>
+							</span>
+						</span>
+					</span>
+				</span>
+			</div>
+			<div class="languages demo" data-bind="visible: allowLanguages() && !viewLanguagesAsDropdown()">
+				<div class="title">WebMail in your language</div>
+				<div data-bind="foreach: aLanguages">
+					<span class="item" data-bind="css: value + ($parent.currentLanguage() === value ? ' selected' : ''), click: function () { $parent.changeLanguage(value); }">
+						<span class="item_content">
+							<span class="icon"></span>
+							<span class="text" data-bind="text: name"></span>
+						</span>
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="vhelper"></div>

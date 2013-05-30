@@ -1,0 +1,69 @@
+<div class="panel_top">
+	<div class="buttons" data-bind="visible: allowUsersAddNewAccounts">
+		<span class="button" data-i18n="SETTINGS/ACCOUNTS_BUTTON_ADD_NEW_ACCOUNT" data-bind="i18n: 'text', click: onAccountAdd"></span>
+	</div>
+	<h2 class="title" data-i18n="SETTINGS/TITLE_EMAIL_ACCOUNTS" data-bind="i18n: 'text'"></h2>
+</div>
+
+<div class="panel_center" data-bind="customScrollbar: {x: false}">
+	<div class="scroll-inner">
+		<div class="accounts_list">
+			<div class="items_list" data-bind="foreach: accounts">
+				<div class="item" data-bind="css: {'selected': id() == $parent.editedAccountId()},  click: function () {$parent.changeAccount(id());}">
+					<span class="title" data-bind="text: email()"></span>
+					<!--<span class="button" data-i18n="SETTINGS/ACCOUNTS_LINK_DELETE" data-bind="i18n: 'text', click: function (item, e) {e.stopPropagation(); $parent.onAccountDelete(id());}"></span>-->
+				</div>
+			</div>
+		</div>
+
+		<div class="tabs">
+			<div class="shortcuts">
+				<span class="item" data-bind="css: {'selected': tab() == Enums.AccountSettingsTab.Properties}">
+					<a href="javascript: void(0);" data-i18n="SETTINGS/ACCOUNTS_TAB_PROPERTIES" 
+					   data-bind="i18n: 'text', click: function () {onTabClick(Enums.AccountSettingsTab.Properties);}"></a>
+				</span>
+				<span class="item" data-bind="css: {'selected': tab() == Enums.AccountSettingsTab.Folders}">
+					<a href="javascript: void(0);" data-i18n="SETTINGS/ACCOUNTS_TAB_MANAGE_FOLDERS" 
+					   data-bind="i18n: 'text', click: function () {onTabClick(Enums.AccountSettingsTab.Folders);}"></a>
+				</span>
+				<span class="item" data-bind="visible: allowForwardExtension, css: {'selected': tab() == Enums.AccountSettingsTab.Forward}">
+					<a href="javascript: void(0);" data-i18n="SETTINGS/ACCOUNTS_TAB_FORWARD" 
+					   data-bind="i18n: 'text', click: function () {onTabClick(Enums.AccountSettingsTab.Forward);}"></a>
+				</span>
+				<span class="item" data-bind="visible: allowAutoresponderExtension, css: {'selected': tab() == Enums.AccountSettingsTab.Autoresponder}">
+					<a href="javascript: void(0);" data-i18n="SETTINGS/ACCOUNTS_TAB_AUTORESPONDER" 
+					   data-bind="i18n: 'text', click: function () {onTabClick(Enums.AccountSettingsTab.Autoresponder);}"></a>
+				</span>
+				<span class="item" data-bind="visible: allowSieveFiltersExtension, css: {'selected': tab() == Enums.AccountSettingsTab.Filters}">
+					<a href="javascript: void(0);" data-i18n="SETTINGS/ACCOUNTS_TAB_FILTERS" 
+					   data-bind="i18n: 'text', click: function () {onTabClick(Enums.AccountSettingsTab.Filters);}"></a>
+				</span>
+				<span class="item" data-bind="css: {'selected': tab() == Enums.AccountSettingsTab.Signature}">
+					<a href="javascript: void(0);" data-i18n="SETTINGS/ACCOUNTS_TAB_SIGNATURE" 
+					   data-bind="i18n: 'text', click: function () {onTabClick(Enums.AccountSettingsTab.Signature);}"></a>
+				</span>
+			</div>
+
+			<div class="tabs_container">
+				<div class="tab properties" data-bind="visible: tab() === Enums.AccountSettingsTab.Properties">
+					<div data-bind="template: {name: 'Settings_AccountPropertiesViewModel', data: oAccountProperties}"></div>
+				</div>
+				<div class="tab properties" data-bind="visible: tab() === Enums.AccountSettingsTab.Signature">
+					<div data-bind="template: {name: 'Settings_AccountSignatureViewModel', data: oAccountSignature}"></div>
+				</div>
+				<div class="tab properties" data-bind="visible: tab() === Enums.AccountSettingsTab.Filters">
+					<div data-bind="template: {name: 'Settings_AccountFiltersViewModel', data: oAccountFilters}"></div>
+				</div>
+				<div class="tab properties" data-bind="visible: tab() === Enums.AccountSettingsTab.Autoresponder">
+					<div data-bind="template: {name: 'Settings_AccountAutoresponderViewModel', data: oAccountAutoresponder}"></div>
+				</div>
+				<div class="tab properties" data-bind="visible: tab() === Enums.AccountSettingsTab.Forward">
+					<div data-bind="template: {name: 'Settings_AccountForwardViewModel', data: oAccountForward}"></div>
+				</div>
+				<div class="tab properties" data-bind="visible: tab() === Enums.AccountSettingsTab.Folders">
+					<div data-bind="template: {name: 'Settings_AccountFoldersViewModel', data: oAccountFolders}"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

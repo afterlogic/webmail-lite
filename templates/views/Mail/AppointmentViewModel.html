@@ -1,0 +1,40 @@
+<div class="fields">
+	<div class="row">
+		<span class="label" data-i18n="MESSAGE/APPOINTMENT_CALENDAR" data-bind="i18n: 'text'"></span>:
+		<select class="value input" data-bind="visible: !calendarIsChosen() && calendars().length > 1, options: calendars,
+				optionsValue: 'id', optionsText: 'name', value: selectedCalendar"></select>
+		<span data-bind="visible: calendarIsChosen, text: chosenCalendarName"></span>
+		<span data-bind="visible: calendars().length === 1, text: firstCalendarName()"></span>
+	</div>
+	<div class="row" data-bind="visible: location() !== ''">
+		<span class="label" data-i18n="MESSAGE/APPOINTMENT_LOCATION" data-bind="i18n: 'text'"></span>:
+		<span class="value" data-bind="text: location"></span>
+	</div>
+	<div class="row">
+		<span class="label" data-i18n="MESSAGE/APPOINTMENT_WHEN" data-bind="i18n: 'text'"></span>:
+		<span class="value" data-bind="text: when"></span>
+	</div>
+	<div class="row description" data-bind="visible: description() !== ''">
+		<span class="label" data-i18n="MESSAGE/APPOINTMENT_DESCRIPTION" data-bind="i18n: 'text'"></span>:
+		<span class="value" data-bind="html: description"></span>
+	</div>
+	<div class="row">
+		<span class="buttons" data-bind="visible: isRequestType, css: {'touched': isAccepted() || isTentative() || isDeclined()}">
+			<span class="button" data-i18n="MESSAGE/APPOINTMENT_BUTTON_ACCEPT" 
+			   data-bind="i18n: 'text', css: {'state': isAccepted}, click: acceptAppointment"></span>
+			<span class="button" data-i18n="MESSAGE/APPOINTMENT_BUTTON_TENTATIVE" 
+			   data-bind="i18n: 'text', css: {'state': isTentative}, click: tentativeAppointment"></span>
+			<span class="button" data-i18n="MESSAGE/APPOINTMENT_BUTTON_DECLINE" 
+			   data-bind="i18n: 'text', css: {'state': isDeclined}, click: declineAppointment"></span>
+		</span>
+		<span data-bind="text: cancelDecision, visible: isCancelType"></span>
+		<span data-bind="text: replyDecision, visible: isReplyType"></span>
+		<span class="buttons" data-bind="visible: isSaveType() && !calendarIsChosen()">
+			<span class="button" data-i18n="MESSAGE/ICAL_BUTTON_ADD" data-bind="i18n: 'text', click: addEvent"></span>
+		</span>
+		<span data-bind="visible: isSaveType() && calendarIsChosen()">
+			<span data-i18n="MESSAGE/ICAL_INFO_SAVED" data-bind="i18n: 'text', visible: isJustSaved"></span>
+			<span data-i18n="MESSAGE/ICAL_INFO_EXISTS" data-bind="i18n: 'text', visible: !isJustSaved()"></span>
+		</span>
+	</div>
+</div>

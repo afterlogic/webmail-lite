@@ -1,0 +1,38 @@
+<div class="mask"></div>
+<div class="popup_panel">
+	<span class="close" data-bind="click: onCancelClick"></span>
+	<span class="title" data-i18n="SETTINGS/ACCOUNT_FOLDERS_SETUP_SPECIAL_FOLDERS" data-bind="i18n: 'text'"></span>
+	
+	<div class="fields">
+		<div class="hint" data-i18n="SETTINGS/ACCOUNT_FOLDERS_INFO_PREDEFINED_FOLDERS" data-bind="i18n: 'text'"></div>
+		<div class="row">
+			<span class="label" data-i18n="SETTINGS/ACCOUNT_FOLDERS_SENT_ITEMS" data-bind="i18n: 'text'"></span>
+			<select class="value input" data-bind="customOptions: options, value: sentFolderFullName,
+				optionsBind: 'value: id, text: name, disable: disable'">
+			</select>
+		</div>
+		<div class="row">
+			<span class="label" data-i18n="SETTINGS/ACCOUNT_FOLDERS_DRAFTS" data-bind="i18n: 'text'"></span>
+			<select class="value input" data-bind="customOptions: options, value: draftsFolderFullName,
+				optionsBind: 'value: id, text: name, disable: disable'">
+			</select>
+		</div>
+		<div class="row">
+			<span class="label" data-i18n="SETTINGS/ACCOUNT_FOLDERS_TRASH" data-bind="i18n: 'text'"></span>
+			<select class="value input" data-bind="customOptions: options, value: trashFolderFullName,
+				optionsBind: 'value: id, text: name, disable: disable'">
+			</select>
+		</div>
+		<div class="row">
+			<span class="label" data-i18n="SETTINGS/ACCOUNT_FOLDERS_SPAM" data-bind="i18n: 'text'"></span>
+			<select class="value input" data-bind="customOptions: options, value: spamFolderFullName,
+				optionsBind: 'value: id, text: name, disable: disable'">
+			</select>
+		</div>
+		<div class="buttons">
+			<span class="button" data-i18n="SETTINGS/ACCOUNT_FOLDERS_BUTTON_OK" data-bind="i18n: 'text', click: onOKClick"></span>
+			<span class="button" data-i18n="MAIN/BUTTON_CANCEL" data-bind="i18n: 'text', click: onCancelClick"></span>
+		</div>
+	</div>
+</div>
+<span class="helper"></span>	

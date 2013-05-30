@@ -1,0 +1,12 @@
+.wm_settings_layout_icon_side,
+.wm_settings_layout_icon_bottom {
+    background:url(../../images/mail.png) no-repeat -240px -240px;
+    width:53px;
+    height:39px;
+	margin: 0px 10px 0px 4px;
+    display:inline-block;
+    vertical-align:middle;
+}
+.wm_settings_layout_icon_bottom {
+    background-position: -320px -240px;
+}

@@ -1,0 +1,295 @@
+html {
+	height:100%;
+	background: #f8f8f8;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	background: #fff;
+	height:expression((document.getElementsByTagName('body')[0].offsetHeight < document.getElementsByTagName('html')[0].offsetHeight) ? '100%' : '');
+	height:100%;
+	position:relative;
+	font:normal 12px/16px Verdana,Arial,sans-serif;
+	color:#424242;
+	/* min-width: 780px; */
+	/* display:table; */
+	margin-left:200px;
+}
+h1 {
+	font:normal 22px/120% Verdana,Arial,sans-serif;
+	color:#000;
+	margin:0px 0px 20px;
+	padding:0px;
+}
+h2 {
+	font:normal 160% Verdana,Arial,sans-serif;
+	margin:0px;
+	padding:0px;
+}
+h3 {
+	font:bold 110% Tahoma,Arial,sans-serif;
+	color:#000;
+	margin:6px 0px;
+	padding:0px;
+}
+ol {
+	margin:0px;
+	padding: 0px 0px 0px 24px;
+}
+form {
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+label {
+	cursor: pointer;
+}
+textarea {
+	resize: none;
+}
+a {
+	color:#4477bb;
+	outline:none;
+}
+img {
+	border: 0;
+}
+p {
+	margin: 0px 0px 10px;
+}
+hr {
+	height:1px;
+	margin:20px 0px 10px;
+	border:solid #777;
+	border-width:1px 0px 0px;
+}
+/*=== Common List ===*/
+.field_list {
+	max-width:650px;
+}
+.field_list .row {
+	padding: 4px 10px;
+}
+.field_list .row0,
+.field_list .row1 {
+	padding: 10px;
+}
+.field_list .row0 {
+	background:#f6f6f6;
+}
+.field_list .field_label,
+.field_list .field_label_tiny {
+	display:inline-block;
+	vertical-align: middle;
+	width: 220px;
+	font-weight:bold;
+}
+.field_list .sub_row {
+	margin:6px 0px 0px;
+}
+.field_list .sub_row .field_label {
+	font-weight:normal;
+	width:200px;
+	margin-left:20px;
+}
+.field_list .field_label.disabled,
+.field_list .field_label_tiny.disabled {
+	color:#aaa;
+}
+.field_list .field_label_tiny {
+	width:160px;
+}
+.field_list .field_description {
+	font-size:11px;
+	color:#777;
+	display: inline-block;
+	margin: 6px 0px 0px;
+}
+.field_list .field_value,
+.field_list .field_value_limit {
+	display: inline-block;
+	vertical-align:top;
+    overflow: hidden;
+}
+.field_list .field_value .disabled,
+.field_list .field_value_limit .disabled {
+	background:#eee;
+	border-color:#aaa;
+}
+.field_list .field_value_limit {
+	width: 400px;
+}
+.field_list .state_ok {
+	color: #297E04;
+}
+.field_list .state_error {
+	color: #F00;
+}
+.field_list .state_warning {
+	color: #FF7F00;
+}
+.field_list .field_error_text {
+	color:#f00;
+	display: inline-block;
+	margin: 6px 0px 0px;
+}
+/*=== END Common List ===*/
+.result_text_ok,
+.result_text_error {
+	background-color: #EEFFEE;
+    margin-top: 30px;
+    padding: 24px 32px;
+}
+.result_text_error {
+	background-color: #FFD9CD;
+}
+.success {
+	color: #297E04;
+}
+.error {
+/* 	padding: 4px 10px; */
+	color: #F92424;
+}
+.description {
+	margin: 30px 0px;
+}
+.license_cont {
+	background: #FCFCFC;
+	border: 1px solid #DEDEDE;
+	padding: 10px 20px;
+}
+.wm_input {
+	border: 1px solid #5B86A8;
+}
+.wm_button {
+	cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    height: 36px;
+    padding: 1px 4px;
+    width: 100px;
+}
+.wrapper {
+	display:table;
+	height:100%;
+	width:100%;
+	
+}
+.wrapper1 {
+	display:table-row;
+}
+
+.pane_common {
+	background:#fff;
+	border-left:1px solid #DEDEDE;
+	display:table-cell;
+}
+.pane_left {
+	width: 200px;
+	margin-left:-201px;
+	float:left;
+	padding:10px 0px;
+	background:#f8f8f8;
+	border-right:1px solid #DEDEDE;
+}
+.pane_center {
+	padding:10px 25px;
+}
+.nav_item {
+	padding:5px;
+	margin:0px 0px 4px 20px;
+	font-weight:bold;
+}
+.nav_item.active {
+	border:solid #DEDEDE;
+	border-width:1px 0px 1px 1px;
+	background:#FAFAFA;
+	padding:4px;
+	margin-right:-1px;
+}
+.nav_item.blocked {
+	color:#999;
+}
+
+.installation_step {
+}
+
+.note {
+	background:#FFFFCD;
+	padding: 8px 10px;
+}
+.buttons {
+	text-align:right;
+	/* border-top: 1px solid #777;
+	margin:20px 0px 0px;
+	padding:10px 0px 0px; */
+}
+.buttons input {
+	float:left;
+}
+.buttons .right {
+	float:none;
+}
+.clear { clear: both; }
+
+.wm_logo {
+	width:100px; height:75px; margin: 0px 0px 0px 15px;	
+}
+.wm_checkbox {
+	padding: 0;
+	margin: 0;
+	vertical-align: middle;
+}
+.wm_input, .wm_input_focus, .wm_button
+{
+	font: normal 13px Tahoma, Arial, Helvetica, sans-serif;
+	color: black;
+}
+.wm_button {
+	padding: 1px 4px;
+	cursor: pointer;
+	cursor: hand;
+	font-weight: bold;
+}
+.wm_delete_button .wm_button
+{
+	$padding: 1px 0;
+	font-size: 11px;
+}
+.wm_input, .wm_input_focus {
+	text-indent: 1px;
+	border: 1px solid #5B86A8;
+}
+.wm_hide {
+	display: none !important;
+}
+.wm_unvisible {
+	visibility: hidden;
+}
+/*=== Copyright ===*/
+.wm_copyright, .wm_copyright a
+{
+	color: #939Cb3;
+	font: normal 11px Tahoma, Arial, Helvetica, sans-serif;
+	border: none;
+}
+.wm_copyright a
+{
+	color: #7DaAC3;
+}
+.wm_copyright a:hover
+{
+	color: #c74848;
+}
+.wm_copyright
+{
+	height: 40px;
+	margin-top: 0px;
+	text-align: center;
+	position:absolute;
+	clear:both;
+	bottom:0px;
+	width:100%;
+}
+/*=== Copyright ===*/
