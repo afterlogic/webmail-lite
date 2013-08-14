@@ -2,7 +2,7 @@
 
 /*
  * Copyright (C) 2002-2013 AfterLogic Corp. (www.afterlogic.com)
- * Distributed under the terms of the license described in COPYING
+ * Distributed under the terms of the license described in LICENSE
  * 
  */
 
