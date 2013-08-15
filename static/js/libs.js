@@ -1131,7 +1131,7 @@ var f=b.data("precompiled");f||(f=b.text()||"",f=F.template(p,"{{ko_with $item.k
 })();
 
 /*! Copyright (c) 2010 Brandon Aaron (http://brandonaaron.net)
- * Licensed under the MIT License (LICENSE.txt).
+ * Licensed under the MIT License.
  *
  * Thanks to: http://adomas.org/javascript-mouse-wheel/ for some pointers.
  * Thanks to: Mathias Bank(http://www.mathias-bank.de) for a scope bug fix.
