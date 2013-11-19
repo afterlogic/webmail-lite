@@ -111,6 +111,9 @@
 		</div>
 	</div>
 	
+	<div class="inline_popup tooltip" data-bind="visible: imageSelected,
+		 style: {'top': tooltipPopupTop() + 'px', 'left': tooltipPopupLeft() + 'px'},
+		 text: tooltipText"></div>
 	
 	<div class="inline_popup" data-bind="visible: visibleLinkPopup, 
 			style: {'top': linkPopupTop() + 'px', 'left': linkPopupLeft() + 'px'}">

@@ -122,7 +122,7 @@ class DigestAuth extends AbstractAuth {
      */
     public function getUsername() {
 
-        return $this->digestParts['username'];
+		return $this->digestParts['username'];
 
     }
 

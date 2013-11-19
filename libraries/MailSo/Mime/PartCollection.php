@@ -53,18 +53,4 @@ class PartCollection extends \MailSo\Base\Collection
 
 		return $rResult;
 	}
-	
-	/**
-	 * @return \MailSo\Mime\PartCollection
-	 */
-	public function Rewind()
-	{
-		$aParts =& $this->GetAsArray();
-		foreach ($aParts as /* @var $oPart \MailSo\Mime\Part */ &$oPart)
-		{
-			$oPart->Rewind();
-		}
-
-		return $this;
-	}
 }

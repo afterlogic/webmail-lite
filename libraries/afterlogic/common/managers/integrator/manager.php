@@ -1635,12 +1635,12 @@ class CApiIntegratorManager extends AApiManager
 '<div class="pSevenMain"><div id="pSevenLoading"></div><div id="pSevenContent"></div><div id="pSevenHidden"></div>'.
 '<div>'.
 $this->compileTemplates($sTheme).
+'<script src="'.$sWebPath.'/static/js/libs.js?'.CApi::VersionJs().'"></script>'.
 $this->compileLanguage($sLanguage).
 $this->compileAppData($bHelpdesk, $iHelpdeskIdTenant, $sHelpdeskHash, $sCalendarPubHash).
-'<script src="'.$sWebPath.'/static/js/libs.js?'.CApi::VersionJs().'"></script>'.
 '<script src="'.$sWebPath.'/static/js/app'.($bHelpdesk ? '-helpdesk' :
 	(empty($sCalendarPubHash) ? '' : '-calendar-pub')).(CApi::GetConf('labs.use-app-min-js', false) ? '.min' : '').'.js?'.CApi::VersionJs().'"></script>'.
-	(CApi::Plugin()->HasJsFiled() ? '<script src="?/Plugins/js/'.CApi::Plugin()->Hash().'/"></script>' : '').
+	(CApi::Plugin()->HasJsFiles() ? '<script src="?/Plugins/js/'.CApi::Plugin()->Hash().'/"></script>' : '').
 '</div></div>'."\r\n".'<!-- '.CApi::Version().' -->'
 		;
 	}

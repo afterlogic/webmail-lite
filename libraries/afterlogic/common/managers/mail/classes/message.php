@@ -145,6 +145,11 @@ class CApiMailMessage
 	/**
 	 * @var array
 	 */
+	private $aCustom;
+
+	/**
+	 * @var array
+	 */
 	private $aThreads;
 
 	/**
@@ -194,6 +199,7 @@ class CApiMailMessage
 		$this->oAttachments = null;
 		$this->aDraftInfo = null;
 		$this->aExtend = null;
+		$this->aCustom = array();
 
 		$this->aThreads = array();
 
@@ -242,6 +248,27 @@ class CApiMailMessage
 	public function GetExtend($sName)
 	{
 		return isset($this->aExtend[$sName]) ? $this->aExtend[$sName] : null;
+	}
+
+	/**
+	 * @param string $mValue
+	 * @param mixed $sName
+	 *
+	 * @return CApiMailMessage
+	 */
+	public function AddCustom($sName, $mValue)
+	{
+		$this->aCustom[$sName] = $mValue;
+
+		return $this;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function Custom()
+	{
+		return $this->aCustom;
 	}
 
 	/**
@@ -742,6 +769,8 @@ class CApiMailMessage
 					$this->aDraftInfo = array($sType, $sUid, $sFolder);
 				}
 			}
+
+			\CApi::Plugin()->RunHook('api-mail-message-headers-parse', array(&$this, $oHeaders));
 		}
 
 		if (is_array($aTextParts) && 0 < count($aTextParts))
@@ -824,6 +853,8 @@ class CApiMailMessage
 				}
 			}
 		}
+
+		\CApi::Plugin()->RunHook('api-mail-message-parse', array(&$this, $oFetchResponse, $oBodyStructure, $sRfc822SubMimeIndex));
 
 		return $this;
 	}

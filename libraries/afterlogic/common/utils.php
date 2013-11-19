@@ -1399,6 +1399,7 @@ class api_Utils
 			'spanish' => 'es',
 			'russian' => 'ru',
 			'romanian' => 'ro',
+			'portuguese-portuguese' => 'pt',
 			'portuguese-brazil' => 'pt-br',
 //			'persian' => '', // TODO name? Farsi
 			'latvian' => 'lv',

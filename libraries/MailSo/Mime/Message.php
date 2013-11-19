@@ -24,19 +24,14 @@ class Message
 	private $oAttachmentCollection;
 
 	/**
-	 * @var string
+	 * @var bool
 	 */
-	private $sMessageId;
-
-	/**
-	 * @var string
-	 */
-	private $sCustomXMailer;
+	private $bAddEmptyTextPart;
 
 	/**
 	 * @var bool
 	 */
-	private $bNeedRewind;
+	private $bAddDefaultXMailer;
 
 	/**
 	 * @access private
@@ -46,10 +41,8 @@ class Message
 		$this->aHeadersValue = array();
 		$this->aAlternativeParts = array();
 		$this->oAttachmentCollection = AttachmentCollection::NewInstance();
-		$this->sMessageId = '';
-		$this->sCustomXMailer = '';
 		$this->bAddEmptyTextPart = true;
-		$this->bNeedRewind = false;
+		$this->bAddDefaultXMailer = true;
 	}
 
 	/**
@@ -61,11 +54,23 @@ class Message
 	}
 
 	/**
-	 * @return void
+	 * @return \MailSo\Mime\Message
 	 */
 	public function DoesNotCreateEmptyTextPart()
 	{
 		$this->bAddEmptyTextPart = false;
+
+		return $this;
+	}
+
+	/**
+	 * @return \MailSo\Mime\Message
+	 */
+	public function DoesNotAddDefaultXMailer()
+	{
+		$this->bAddDefaultXMailer = false;
+		
+		return $this;
 	}
 
 	/**
@@ -73,7 +78,12 @@ class Message
 	 */
 	public function MessageId()
 	{
-		return $this->sMessageId;
+		$sResult = '';
+		if (!empty($this->aHeadersValue[\MailSo\Mime\Enumerations\Header::MESSAGE_ID]))
+		{
+			$sResult = $this->aHeadersValue[\MailSo\Mime\Enumerations\Header::MESSAGE_ID];
+		}
+		return $sResult;
 	}
 
 	/**
@@ -83,7 +93,7 @@ class Message
 	 */
 	public function SetMessageId($sMessageId)
 	{
-		$this->sMessageId = $sMessageId;
+		$this->aHeadersValue[\MailSo\Mime\Enumerations\Header::MESSAGE_ID] = $sMessageId;
 	}
 
 	/**
@@ -102,6 +112,22 @@ class Message
 	public function Attachments()
 	{
 		return $this->oAttachmentCollection;
+	}
+
+	/**
+	 * @return \MailSo\Mime\Email|null
+	 */
+	public function GetFrom()
+	{
+		$oResult = null;
+
+		if (isset($this->aHeadersValue[\MailSo\Mime\Enumerations\Header::FROM_]) &&
+			$this->aHeadersValue[\MailSo\Mime\Enumerations\Header::FROM_] instanceof \MailSo\Mime\Email)
+		{
+			$oResult = $this->aHeadersValue[\MailSo\Mime\Enumerations\Header::FROM_];
+		}
+
+		return $oResult;
 	}
 
 	/**
@@ -279,7 +305,7 @@ class Message
 	 */
 	public function SetXMailer($sXMailer)
 	{
-		$this->sCustomXMailer = $sXMailer;
+		$this->aHeadersValue[\MailSo\Mime\Enumerations\Header::X_MAILER] = $sXMailer;
 
 		return $this;
 	}
@@ -304,6 +330,18 @@ class Message
 	public function SetTo(\MailSo\Mime\EmailCollection $oEmails)
 	{
 		$this->aHeadersValue[\MailSo\Mime\Enumerations\Header::TO_] = $oEmails;
+
+		return $this;
+	}
+
+	/**
+	 * @param $iDateTime $iDateTime
+	 *
+	 * @return \MailSo\Mime\Message
+	 */
+	public function SetDate($iDateTime)
+	{
+		$this->aHeadersValue[\MailSo\Mime\Enumerations\Header::DATE] = gmdate('r', $iDateTime);
 
 		return $this;
 	}
@@ -754,16 +792,25 @@ class Message
 	 */
 	private function setDefaultHeaders($oIncPart, $bWithoutBcc = false)
 	{
-		$oIncPart->Headers->SetByName(\MailSo\Mime\Enumerations\Header::DATE, \gmdate('r'), true);
-		if (0 < \strlen($this->sMessageId))
+		if (!isset($this->aHeadersValue[\MailSo\Mime\Enumerations\Header::DATE]))
 		{
-			$oIncPart->Headers->SetByName(\MailSo\Mime\Enumerations\Header::MESSAGE_ID, $this->sMessageId, true);
+			$oIncPart->Headers->SetByName(\MailSo\Mime\Enumerations\Header::DATE, \gmdate('r'), true);
 		}
 
-		$oIncPart->Headers->SetByName(\MailSo\Mime\Enumerations\Header::X_MAILER,
-			0 === \strlen($this->sCustomXMailer) ? \MailSo\Version::XMailer() : $this->sCustomXMailer, true);
+		if (!isset($this->aHeadersValue[\MailSo\Mime\Enumerations\Header::MESSAGE_ID]))
+		{
+			$oIncPart->Headers->SetByName(\MailSo\Mime\Enumerations\Header::MESSAGE_ID, $this->generateNewMessageId(), true);
+		}
 
-		$oIncPart->Headers->SetByName(\MailSo\Mime\Enumerations\Header::MIME_VERSION, '1.0', true);
+		if (!isset($this->aHeadersValue[\MailSo\Mime\Enumerations\Header::X_MAILER]) && $this->bAddDefaultXMailer)
+		{
+			$oIncPart->Headers->SetByName(\MailSo\Mime\Enumerations\Header::X_MAILER, \MailSo\Version::XMailer(), true);
+		}
+
+		if (!isset($this->aHeadersValue[\MailSo\Mime\Enumerations\Header::MIME_VERSION]))
+		{
+			$oIncPart->Headers->SetByName(\MailSo\Mime\Enumerations\Header::MIME_VERSION, '1.0', true);
+		}
 
 		foreach ($this->aHeadersValue as $sName => $mValue)
 		{
@@ -787,21 +834,15 @@ class Message
 
 	/**
 	 * @param bool $bWithoutBcc = false
-	 * @param bool $bRewind = false
 	 *
 	 * @return \MailSo\Mime\Part
 	 */
-	public function ToPart($bWithoutBcc = false, $bRewind = false)
+	public function ToPart($bWithoutBcc = false)
 	{
 		$oPart = $this->createNewMessageSimpleOrAlternativeBody();
 		$oPart = $this->createNewMessageRelatedBody($oPart);
 		$oPart = $this->createNewMessageMixedBody($oPart);
 		$oPart = $this->setDefaultHeaders($oPart, $bWithoutBcc);
-
-		if ($bRewind)
-		{
-			$oPart->Rewind();
-		}
 
 		return $oPart;
 	}
@@ -813,10 +854,7 @@ class Message
 	 */
 	public function ToStream($bWithoutBcc = false)
 	{
-		$bNeedRewind = $this->bNeedRewind;
-		
-		$this->bNeedRewind = true;
-		return $this->ToPart($bWithoutBcc, $bNeedRewind)->ToStream();
+		return $this->ToPart($bWithoutBcc)->ToStream();
 	}
 
 	/**

@@ -26,6 +26,8 @@ class Service
 		$this->oActions = Actions::NewInstance();
 		$this->oActions->SetHttp($this->oHttp);
 
+		\CApi::Plugin()->SetActions($this->oActions);
+		
 		@\set_error_handler(array(&$this, 'LogPhpError'));
 	}
 
@@ -204,7 +206,7 @@ class Service
 				@header('Content-Type: text/plain; charset=utf-8');
 				$sResult = 'Pong';
 			}
-			else if (('ajax' ===$sFirstPart))
+			else if (('ajax' === $sFirstPart))
 			{
 				@ob_start();
 
@@ -230,6 +232,7 @@ class Service
 						}
 						else if (\CApi::Plugin()->JsonHookExists($sMethodName))
 						{
+							$this->oActions->SetActionParams($this->oHttp->GetPostAsArray());
 							$aResponseItem = \CApi::Plugin()->RunJsonHook($this->oActions, $sMethodName);
 						}
 					}
@@ -533,11 +536,12 @@ class Service
 				
 				\CApi::LogObject($aPaths);
 				\CApi::LogObject($_REQUEST);
-				
+				\CApi::LogObject($this->oHttp->GetRequest('Direction'));
+
 				$bDirection = $this->oHttp->GetRequest('Direction') === 'inbound' ? true : false;
 				$sDigits = $this->oHttp->GetRequest('Digits');
 				
-				$sTenantId = $aPaths[1];
+				$sTenantId = isset($aPaths[1]) ? $aPaths[1] : null;
 				
 				$bAllowTwilio = false;
 
@@ -556,9 +560,10 @@ class Service
 				$aResult[] = '<Response>';
 				
 				\CApi::Log($bAllowTwilio);
-				
-				if ($bAllowTwilio) {
-					
+				\CApi::Log($bDirection);
+
+				if ($bAllowTwilio)
+				{
 					if ($bDirection) // inbound
 					{
 						if (!$sDigits)
@@ -586,12 +591,12 @@ class Service
 						$oAccount = $oApiIntegrator->GetLogginedDefaultAccount();
 						\CApi::LogObject($oAccount);
 						\CApi::Log($oApiCapability->IsVoiceSupported($oAccount));
-						if ($oApiCapability->IsVoiceSupported($oAccount))
-						{
+//						if ($oApiCapability->IsVoiceSupported($oAccount))
+//						{
 							$sPhoneNumber = $this->oHttp->GetRequest('PhoneNumber');
 							$aResult[] = '<Say>Call to phone number '.$sPhoneNumber.'</Say>';
 							$aResult[] = '<Dial callerId="17064030887">'.$sPhoneNumber.'</Dial>';
-						}
+//						}
 					}
 				} else {
 					$aResult[] = '<Say>This functionality doesn\'t allowed</Say>';

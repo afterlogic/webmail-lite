@@ -93,21 +93,6 @@ class Part
 
 		return $this;
 	}
-	
-	/**
-	 * @return \MailSo\Mime\Part
-	 */
-	public function Rewind()
-	{
-		if (\is_resource($this->Body))
-		{
-			\rewind($this->Body);
-		}
-
-		$this->SubParts->Rewind();
-
-		return $this;
-	}
 
 	/**
 	 * @return string

@@ -387,6 +387,7 @@ abstract class ActionsBase
 					$mResult['Threads'] = $mResponse->Threads();
 				}
 
+				$mResult['Custom'] = $this->responseObject($oAccount, $mResponse->Custom(), $sParent, $aParameters);
 				$mResult['Subject'] = \MailSo\Base\Utils::Utf8Clear($mResult['Subject']);
 			}
 			else if ('CApiMailIcs' === $sClassName)
@@ -663,7 +664,7 @@ abstract class ActionsBase
 			else if ('CGroup' === $sClassName)
 			{
 				$aContacts = $this->ApiContacts()->GetContactItems(
-					$mResponse->IdUser, \EContactSortField::Name, \ESortOrder::ASC, 0, 99, '', '', $mResponse->IdGroup);
+					$mResponse->IdUser, \EContactSortField::Name, \ESortOrder::ASC, 0, 299, '', '', $mResponse->IdGroup);
 
 				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), array(
 					'IdUser' => $mResponse->IdUser,

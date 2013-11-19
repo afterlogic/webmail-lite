@@ -62,7 +62,12 @@ class CApiPluginManager
 	protected $bIsEnabled;
 
 	/**
-	 * @var CApiGlobalManager
+	 * @var \ProjectSeven\Actions
+	 */
+	protected $_oActions;
+
+	/**
+	 * @var \ProjectS
 	 */
 	protected $_oApiGlobalManager;
 
@@ -78,6 +83,7 @@ class CApiPluginManager
 		$this->_mState = null;
 
 		$this->_oApiGlobalManager = $oApiGlobalManager;
+		$this->_oActions = null;
 
 		$this->bIsEnabled = (bool) CApi::GetConf('plugins', false);
 
@@ -111,6 +117,22 @@ class CApiPluginManager
 				}
 			}
 		}
+	}
+
+	/**
+	 * @return CApiGlobalManager
+	 */
+	public function SetActions($oActions)
+	{
+		$this->_oActions = $oActions;
+	}
+
+	/**
+	 * @return \ProjectSeven\Actions|null
+	 */
+	public function Actions()
+	{
+		return $this->_oActions;
 	}
 
 	/**
@@ -237,7 +259,7 @@ class CApiPluginManager
 	/**
 	 * @return bool
 	 */
-	public function HasJsFiled()
+	public function HasJsFiles()
 	{
 		return 0 < count($this->_aJsFiles);
 	}
@@ -336,6 +358,23 @@ class CApiPluginManager
 	{
 		// @deprecated
 	}
+	
+	/**
+	 * @param string $sHookName
+	 * @param mixed $mJsonHookCallback
+	 */
+	public function AddJsonHook($sHookName, $mJsonHookCallback)
+	{
+		if ($this->bIsEnabled)
+		{
+			if (!isset($this->_aJsonHooks[$sHookName]))
+			{
+				$this->_aJsonHooks[$sHookName] = array();
+			}
+
+			$this->_aJsonHooks[$sHookName][] = $mJsonHookCallback;
+		}
+	}
 
 	/**
 	 * @param string $sAction
@@ -395,7 +434,7 @@ class CApiPluginManager
 	}
 
 	/**
-	 * @param CAppServer $oServer
+	 * @param \ProjectSeven\Actions $oServer
 	 * @param string $sJsonHookName
 	 */
 	public function RunJsonHook(&$oServer, $sJsonHookName)
@@ -407,10 +446,12 @@ class CApiPluginManager
 				foreach ($this->_aJsonHooks[$sJsonHookName] as $mHookCallbak)
 				{
 					$this->logCallback('JSONHOOK', $sJsonHookName, $mHookCallbak);
-					call_user_func_array($mHookCallbak, array(&$oServer));
+					return call_user_func_array($mHookCallbak, array(&$oServer));
 				}
 			}
 		}
+
+		return null;
 	}
 
 	/**

@@ -128,6 +128,8 @@ class CReminder
 	 */
 	private function createBodyHtml($oAccount, $sEventName, $sDateStr, $sCalendarName, $sEventText, $sCalendarColor)
 	{
+		$sEventText = nl2br($sEventText);
+		
 		return sprintf('
 <div style="padding: 10px; font-size: 12px; text-align: center;">
 	<div style="border: 4px solid %s; padding: 15px; width: 370px;">
@@ -311,7 +313,7 @@ class CReminder
 						}
 						else if ($oAccount->User->DefaultDateFormat === EDateFormat::DD_MONTH_YYYY)
 						{
-							$sDateFormat = 'd l Y';
+							$sDateFormat = 'd m Y';
 						}
 
 						if ($oAccount->User->DefaultTimeFormat == ETimeFormat::F24)

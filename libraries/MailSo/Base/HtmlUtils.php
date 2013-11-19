@@ -278,6 +278,58 @@ class HtmlUtils
 			{
 				$sTagNameLower = \strtolower($oElement->tagName);
 
+				// convert body attributes to styles
+				if ('body' === $sTagNameLower)
+				{
+					$aMargins = array(
+						$oElement->hasAttribute('topmargin')
+							? \trim($oElement->getAttribute('topmargin')) : '',
+						$oElement->hasAttribute('leftmargin')
+							? \trim($oElement->getAttribute('leftmargin')) : '',
+						$oElement->hasAttribute('bottommargin')
+							? \trim($oElement->getAttribute('bottommargin')) : '',
+						$oElement->hasAttribute('rightmargin')
+							? \trim($oElement->getAttribute('rightmargin')) : '',
+					);
+
+					$sText = $oElement->hasAttribute('text') ? \trim($oElement->getAttribute('text')) : '';
+
+					$aStyles = array();
+					if (!empty($sText))
+					{
+						$aStyles[] = 'color: '.$sText;
+						$oElement->removeAttribute('text');
+					}
+
+					foreach ($aMargins as $iIndex => $sItem)
+					{
+						if ('' !== $sItem)
+						{
+							switch ($iIndex) {
+								case 0:
+									$aStyles[] = 'margin-top: '.((int) $sItem).'px';
+									$oElement->removeAttribute('topmargin');
+									break;
+								case 1:
+									$aStyles[] = 'margin-left: '.((int) $sItem).'px';
+									$oElement->removeAttribute('leftmargin');
+									break;
+								case 2:
+									$aStyles[] = 'margin-bottom: '.((int) $sItem).'px';
+									$oElement->removeAttribute('bottommargin');
+									break;
+								case 3:
+									$aStyles[] = 'margin-right: '.((int) $sItem).'px';
+									$oElement->removeAttribute('rightmargin');
+									break;
+							}
+						}
+					}
+
+					$sStyles = $oElement->hasAttribute('style') ? $oElement->getAttribute('style') : '';
+					$oElement->setAttribute('style', (empty($sStyles) ? '' : $sStyles.'; ').\implode('; ', $aStyles));
+				}
+
 				if ('iframe' === $sTagNameLower || 'frame' === $sTagNameLower)
 				{
 					$oElement->setAttribute('src', 'javascript:false');
@@ -476,6 +528,11 @@ class HtmlUtils
 					$oElement->setAttribute('style', $sStyles);
 					$aFoundCids[] = $sCid;
 				}
+			}
+
+			if ($oElement->hasAttribute('data-x-div-type'))
+			{
+				$oElement->removeAttribute('data-x-div-type');
 			}
 
 			if ($oElement->hasAttribute('data-x-style-url'))

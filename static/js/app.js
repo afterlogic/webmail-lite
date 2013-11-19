@@ -164,6 +164,11 @@
 			oXhr = null
 		;
 		
+		if (AfterLogicApi.runPluginHook)
+		{
+			AfterLogicApi.runPluginHook('ajax-default-request', [oParameters.Action, oParameters]);
+		}
+		
 		if (AppData.Token)
 		{
 			oParameters.Token = AppData.Token;
@@ -404,6 +409,11 @@
 		if (!oData)
 		{
 			oData = {'Result': false, 'ErrorCode': 0};
+		}
+		
+		if (AfterLogicApi.runPluginHook)
+		{
+			AfterLogicApi.runPluginHook('ajax-default-response', [oParameters.Action, oData]);
 		}
 		
 		if (typeof fResponseHandler === 'function')
@@ -2628,6 +2638,7 @@
 		}, 100);
 	
 		this.defaultScreen = Enums.Screens.Mailbox;
+		this.currentScreen = Enums.Screens.Mailbox;
 		this.lastMailboxRouting = '';
 	
 		this.currentHash = '';
@@ -2789,6 +2800,8 @@
 				sScreen === Enums.Screens.SingleHelpdesk)
 		;
 		
+		this.currentScreen = sScreen;
+		
 		return bSingleMode;
 	};
 	
@@ -2838,7 +2851,9 @@
 		{
 			aHash = _.union(aHash, aAddParams);
 		}
-	
+		
+		this.currentScreen = sScreen;
+		
 		switch (sScreen)
 		{
 			case Enums.Screens.SingleMessageView:
@@ -4635,6 +4650,9 @@
 			case 'Polish':
 				iResult = (iNumber === 1 ? 0 : iNumber % 10 >= 2 && iNumber % 10 <= 4 && (iNumber % 100 < 10 || iNumber % 100 >= 20) ? 1 : 2);
 				break;
+			case 'Portuguese-Portuguese':
+				iResult = (iNumber === 1 ? 0 : 1);
+				break;
 			case 'Portuguese-Brazil':
 				iResult = (iNumber === 1 ? 0 : 1);
 				break;
@@ -4894,11 +4912,10 @@
 				else if (window.webkitNotifications && window.webkitNotifications.checkPermission)
 				{
 					winNotification = window.webkitNotifications;
-	
 					iPermission = window.webkitNotifications.checkPermission();
 				}
 	
-				//	if (winNotification && iPermission !== Enums.DesctopNotifications.Allowed) {winNotification.requestPermission()}
+				//	if (winNotification && iPermission !== Enums.DesktopNotifications.Allowed) {winNotification.requestPermission()}
 	
 				if (winNotification && iPermission === Enums.DesktopNotifications.Allowed)
 				{
@@ -4908,6 +4925,12 @@
 	
 					notification = new window.Notification(sTitle, oOptions);
 	
+					clearTimeout(timeoutID);
+					if(iTimeout) {
+						timeoutID = setTimeout(function() { notification.close(); }, iTimeout);
+					}
+	
+					// events
 					notification.onclick = function ()
 					{
 						if(fnCallback)
@@ -4916,15 +4939,9 @@
 						}
 						notification.close();
 					};
-					notification.onshow = function () {};
+					/*notification.onshow = function () {};
 					notification.onclose = function () {};
-					notification.onerror = function () {};
-	
-					clearTimeout(timeoutID);
-	//				timeoutID = setTimeout(function() { notification.close(); }, 5000);
-					if(iTimeout) {
-						timeoutID = setTimeout(function() { notification.close(); }, iTimeout);
-					}
+					notification.onerror = function () {};*/
 				}
 			}
 			else if (sAction === 'hide' && notification)
@@ -6186,8 +6203,11 @@
 	 */
 	AfterLogicApi.addSettingsTab = function (oViewModelClass)
 	{
-		Enums.SettingsTab[oViewModelClass.TabName] = oViewModelClass.TabName;
-		AfterLogicApi.aSettingsTabs.push(oViewModelClass);
+		if (oViewModelClass.TabName)
+		{
+			Enums.SettingsTab[oViewModelClass.TabName] = oViewModelClass.TabName;
+			AfterLogicApi.aSettingsTabs.push(oViewModelClass);
+		}
 	};
 	
 	/**
@@ -6196,6 +6216,61 @@
 	AfterLogicApi.getPluginsSettingsTabs = function ()
 	{
 		return AfterLogicApi.aSettingsTabs;
+	};
+	
+	/**
+	 * @param {string} sSettingName
+	 * 
+	 * @return {string}
+	 */
+	AfterLogicApi.getSetting = function (sSettingName)
+	{
+		return AppData.App[sSettingName];
+	};
+	
+	AfterLogicApi.oPluginHooks = {};
+	
+	/**
+	 * @param {string} sName
+	 * @param {Function} fCallback
+	 */
+	AfterLogicApi.addPluginHook = function (sName, fCallback)
+	{
+		if (Utils.isFunc(fCallback))
+		{
+			if (!$.isArray(this.oPluginHooks[sName]))
+			{
+				this.oPluginHooks[sName] = [];
+			}
+			
+			this.oPluginHooks[sName].push(fCallback);
+		}
+	};
+	
+	/**
+	 * @param {string} sName
+	 * @param {Array=} aArguments
+	 */
+	AfterLogicApi.runPluginHook = function (sName, aArguments)
+	{
+		if ($.isArray(this.oPluginHooks[sName]))
+		{
+			aArguments = aArguments || [];
+			
+			_.each(this.oPluginHooks[sName], function (fCallback) {
+				fCallback.apply(null, aArguments);
+			});
+		}
+	};
+	
+	/**
+	 * @param {Object} oParameters
+	 * @param {Function=} fResponseHandler
+	 * @param {Object=} oContext
+	 */
+	AfterLogicApi.sendAjaxRequest = function (oParameters, fResponseHandler, oContext)
+	{
+		App.Ajax.send(oParameters, fResponseHandler, oContext);
 	};
 	
 	/**
@@ -6235,20 +6310,8 @@
 	//	this.PhoneFlash = null;
 	
 		this.phoneReport = ko.observable('');
-		this.action = ko.observable('');
-		this.action.subscribe(function(sAction) {
-			if (sAction === 'connection_end') {
-				var self = this;
-				_.delay(function () {
-					self.action('standby');
-				}, 500);
-			}
-			
-	//		if (sAction === 'connection_end') {
-	//
-	//		}
-		}, this);
-		
+		this.action = ko.observable('offline');
+	
 		this.timerValue = ko.observable('');
 		/*this.action.subscribe(function(sAction) {
 			switch(sAction)
@@ -6268,7 +6331,8 @@
 	//	this.voiceApp = App.voiceApp;
 		this.voiceApp = ko.observable(false);
 	
-		this.interval = 0;
+		this.reconnectInterval = 0;
+		this.timerInterval = 0;
 	}
 	
 	CPhone.prototype.init = function ()
@@ -6280,7 +6344,7 @@
 		this.provider = new CPhoneTwilio(function (bResult) {
 				self.voiceApp(bResult);
 			});
-		
+	
 	//	if (true) //Twilio
 	//	{
 	//		this.provider = new CPhoneTwilio(function (bResult) {
@@ -6307,11 +6371,11 @@
 	//	});
 	};
 	
-	CPhone.prototype.log = function (sDesc)
+	CPhone.prototype.log = function ()
 	{
 		if (window.console && window.console.log)
 		{
-			window.console.log('*************************************************** ' + sDesc);
+			window.console.log.apply(window.console, arguments);
 		}
 	};
 	
@@ -6334,17 +6398,24 @@
 	
 	CPhone.prototype.hideAll = function ()
 	{
+		var self = this;
+	
 		App.Screens.hidePopup(PhonePopup);
 		App.desktopNotify('hide');
+		this.timer('stop');
+	
+		setTimeout(function() {
+			self.phoneReport('');
+		}, 3000);
 	};
 	
 	CPhone.prototype.reconnect = function (iSeconds, fnConnect, bShowError)
 	{
 		var self = this,
-			secondsLeft = iSeconds
+			iSecondsLeft
 		;
 	
-		clearInterval(this.interval);
+		clearInterval(this.reconnectInterval);
 	
 		/*if(bShowError || !this.notShowErrorMore())
 		{
@@ -6352,37 +6423,57 @@
 			this.action('info');
 		}*/
 	
-		this.interval = setInterval(function() {
-			if (secondsLeft > 0)
-			{
-				self.phoneReport(Utils.i18n('Reconnect in ' + secondsLeft + ' seconds'));
+		if (arguments.length)
+		{
+			iSecondsLeft = iSeconds;
+	
+			this.reconnectInterval = setInterval(function() {
+				if (iSecondsLeft > 0)
+				{
+					self.phoneReport(Utils.i18n('Reconnect in ' + iSecondsLeft + ' seconds'));
+				}
+				else if (iSecondsLeft <= 0)
+				{
+					self.phoneReport(Utils.i18n('Connecting...'));
+					clearInterval(self.reconnectInterval);
+					iSecondsLeft = iSeconds;
+					fnConnect();
+				}
+	
+				iSecondsLeft--;
+			}, 1000);
+		}
+	};
+	
+	CPhone.prototype.timer = function (sAction)
+	{
+		var self = this,
+			iSeconds = 0,
+			iMinutes = 0,
+			fAddNull = function (iItem) {
+				var sItem = iItem.toString();
+				return sItem.length === 1 ? sItem = '0' + sItem : sItem;
 			}
-			else if (secondsLeft <= 0)
-			{
-				self.phoneReport(Utils.i18n('Connecting...'));
-				self.reconnectStop();
-				secondsLeft = iSeconds;
-				fnConnect();
-			}
+		;
 	
-			secondsLeft--;
-		}, 1000);
+		if (sAction === 'start')
+		{
+			this.timerInterval = setInterval(function() {
+				if(iSeconds === 60)
+				{
+					iSeconds = 0;
+					iMinutes++;
+				}
+				self.phoneReport(Utils.i18n('passed time ' + fAddNull(iMinutes) + ':' + fAddNull(iSeconds)));
+				iSeconds++;
+			}, 1000);
+		}
+		else if (sAction === 'stop')
+		{
+			clearInterval(this.timerInterval);
+		}
 	};
 	
-	CPhone.prototype.reconnectStop = function ()
-	{
-		clearInterval(this.interval);
-	};
-	
-	CPhone.prototype.timer = function ()
-	{
-		clearInterval(this.interval);
-	};
-	
-	CPhone.prototype.timerStop = function ()
-	{
-		clearInterval(this.interval);
-	};
 	
 	CPhone.prototype.showError = function (iErrCode)
 	{
@@ -6410,6 +6501,16 @@
 	{
 		App.Screens.hidePopup(PhonePopup);
 	};
+	
+	//CPhone.prototype.clearReport = function ()
+	//{
+	//	var self = this;
+	//
+	//	setTimeout(function() {
+	//		self.phoneReport('');
+	//	}, 3000);
+	//};
+	
 	/**
 	 * @constructor
 	 */
@@ -6931,11 +7032,9 @@
 		this.connection = null;
 		
 		this.phone = App.Phone;
-	
 		this.phoneReport = App.Phone.phoneReport;
-	//	this.isIncoming = App.Phone.isIncoming;
 	
-	//	this.sessionid = ko.observable('');
+	//	this.sessionId = ko.observable('');
 	//	this.callState = ko.observable('');
 	//	this.connectStatus = ko.observable(false);
 	
@@ -6948,14 +7047,6 @@
 		App.Ajax.send( {'Action': 'GetTwilioToken'}, this.onTokenResponse, this);
 	};
 	
-	CPhoneTwilio.prototype.log = function ()
-	{
-	//	if (window.console && window.console.log)
-	//	{
-	//		window.console.log.apply(console, arguments);
-	//	}
-	};
-	
 	CPhoneTwilio.prototype.onTokenResponse = function (oResult, oRequest)
 	{
 		var 
@@ -6965,7 +7056,6 @@
 		if (oResult && oResult.Result)
 		{
 			$.ajaxSettings.cache = true;
-	//		$.getScript("static/js/twilio-1.1.min.js")
 			$.getScript(
 				"//static.twilio.com/libs/twiliojs/1.1/twilio.min.js",
 				function(sData, sStatus, jqXHR)
@@ -6984,59 +7074,60 @@
 		var 
 			self = this
 		;
+	
+	//	var interval = setInterval(function() {
+	//		console.log(Twilio.Device.status());
+	//	}, 1000);
 		
 		this.device = Twilio.Device;
 		this.device.setup(sToken, {
-	//		rtc: flase,
+	//		rtc: false,
 	//		debug: true
 		});
-		
+	
+		self.phone.action('offline');
+	
 		// events
 		this.device.ready(function (oDevice) {
-	//		App.Api.showReport(Utils.i18n('Ready'));
-			self.log('**************** ready ', oDevice);
+			self.phone.log('**************** ready ', oDevice);
 	
 			self.fCallback(true);
-			
-			App.Api.showReport(Utils.i18n('Twilio ready'));
 			self.phone.action('standby');
 		});
 	
 		this.device.offline(function (oDevice) {
-			self.log('**************** offline ', oDevice);
+			self.phone.log('**************** offline ', oDevice);
 	
 			self.phone.action('offline');
-			App.Api.showReport('Offline');
 	//		self.phoneReport('Offline');
 		});
 		
 		this.device.error(function (oError) {
-			self.log('**************** error ', oError);
+			self.phone.log('**************** error ', oError);
 	
-	//		self.phone.showError(oError);
-			App.Api.showError(oError['message'], false, true);
+	//		console.log(oError);
+	//		App.Api.showError(oError['message'], false, true);
 		});
 		
-		// This is triggered when a connection is opened (incomming|outgoing)
+		// This is triggered when a connection is opened (incoming||outgoing)
 		this.device.connect(function (oConnection) {
-			self.log('**************** connect ', oConnection);
+			self.phone.log('**************** connect ', oConnection);
 	
 			self.phone.action('outgoing');
-			App.Api.showReport(Utils.i18n('Connected'));
-	//		self.phoneReport(Utils.i18n('Connected'));
-			
+			self.phoneReport(Utils.i18n('Connected'));
+			self.phone.timer('start');
 		});
 	
 		this.device.disconnect(function (oConnection) {
-			self.log('**************** disconnect ', oConnection);
+			self.phone.log('**************** disconnect ', oConnection);
 	
 			self.phone.action('connection_end');
-			App.Api.showReport('Call ended');
-	//		self.phoneReport('Call ended');
+			self.phoneReport('Call ended');
+			self.phone.hideAll();
 		});
 	
 		this.device.incoming(function (oConnection) {
-			self.log('**************** incoming ', oConnection);
+			self.phone.log('**************** incoming ', oConnection);
 			
 			self.phone.action('incoming');
 			
@@ -7055,15 +7146,15 @@
 		
 		// This is triggered when an incoming connection is canceled by the caller before it is accepted by the device.
 		this.device.cancel( function (oConnection) {
-			self.log('**************** cancel ', oConnection);
-		
+			self.phone.log('**************** cancel ', oConnection);
+	
+			self.phone.hideAll();
 		});
 		
 		// Register a handler function to be called when availability state changes for any client currently associated with your Twilio account.
 		this.device.presence( function ( presenceEvent) {
-			self.log('**************** presence ', presenceEvent);
+			self.phone.log('**************** presence ', presenceEvent);
 	
-	//		console.log("Presence Event: " + presenceEvent.from + " " + presenceEvent.available);
 		});
 	};
 	
@@ -7071,30 +7162,33 @@
 	{
 		var 
 			params = {
-				"PhoneNumber": sPhoneNumber
+				"PhoneNumber": sPhoneNumber,
+				"Direction": 'outbound'
 			},
 			self = this
 		;
 	
 		this.connection = this.device.connect(params);
-		
-		_.delay(function () {
-			self.connection.disconnect();
+	//	var interval = setInterval(function() {
+	//		console.log(self.connection._status);
+	//	}, 1000);
+	
+		// _.delay(function () {
+	//		self.connection.disconnect();
 	//		self.device.disconnectAll();
-		}, 10000);
+	//	}, 10000);
 	};
 	
 	CPhoneTwilio.prototype.answer = function ()
-	{	
-		this.phone.action('connection_in');
+	{
+		this.phone.action('connected_in');
 		this.phoneReport('Incoming: ' + this.connection.parameters.From);
 		
 		this.connection.accept();
 	};
 	
 	CPhoneTwilio.prototype.hangup = function ()
-	{	
-	//	console.log('disconnectAll');
+	{
 	//	if (this.phone.action === 'incoming') {
 		if (this.connection.status() === 'pending') {
 			this.connection.reject();
@@ -9649,7 +9743,7 @@
 	
 		if (this.action() === Enums.PhoneAction.Incoming)
 		{
-			App.desktopNotify('show', this.phoneNumber() + ' calling...', 'Click here to answer.\r\n To drop the call, click End in the web interface.', this.phone.answer);
+			App.desktopNotify('show', this.phoneNumber() + ' calling...', 'Click here to answer.\r\n To drop the call, click End in the web interface.', false, this.phone.answer.bind(this.phone));
 		}
 	};
 	
@@ -12604,6 +12698,8 @@
 		this.vcard = ko.observable(null);
 		
 		this.domMessageForPrint = ko.observable(null);
+		
+		this.Custom = {};
 	}
 	
 	/**
@@ -12730,6 +12826,11 @@
 			this.flagged(!!oData.IsFlagged);
 			this.answered(!!oData.IsAnswered);
 			this.forwarded(!!oData.IsForwarded);
+			
+			if (oData.Custom)
+			{
+				this.Custom = oData.Custom;
+			}
 		}
 		
 		if (oData['@Object'] === 'Object/Message' || oData['@Object'] === 'Object/MessageListItem')
@@ -15822,8 +15923,16 @@
 		this.visibleLinkHref = ko.observable(false);
 	
 		this.visibleImagePopup = ko.observable(false);
+		this.visibleImagePopup.subscribe(function () {
+			this.onImageOut();
+		}, this);
 		this.imagePopupTop = ko.observable(0);
 		this.imagePopupLeft = ko.observable(0);
+		this.imageSelected = ko.observable(false);
+		
+		this.tooltipText = ko.observable('');
+		this.tooltipPopupTop = ko.observable(0);
+		this.tooltipPopupLeft = ko.observable(0);
 	
 		this.visibleInsertImagePopup = ko.observable(false);
 		this.imageUploaderButton = ko.observable(null);
@@ -15951,13 +16060,13 @@
 		switch (sSize)
 		{
 			case Enums.HtmlEditorImageSizes.Small:
-			  oParams.width = '100px';
-			  break;
-			case Enums.HtmlEditorImageSizes.Medium:
 			  oParams.width = '300px';
 			  break;
-			case Enums.HtmlEditorImageSizes.Large:
+			case Enums.HtmlEditorImageSizes.Medium:
 			  oParams.width = '600px';
+			  break;
+			case Enums.HtmlEditorImageSizes.Large:
+			  oParams.width = '1200px';
 			  break;
 			case Enums.HtmlEditorImageSizes.Original:
 			  oParams.width = 'auto';
@@ -15967,6 +16076,43 @@
 		this.oCrea.changeCurrentImage(oParams);
 		
 		this.visibleImagePopup(false);
+	};
+	
+	CHtmlEditorViewModel.prototype.onImageOver = function (oEvent)
+	{
+		if (oEvent.target.nodeName === 'IMG' && !this.visibleImagePopup())
+		{
+			this.imageSelected(true);
+			
+			this.tooltipText(Utils.i18n('HTMLEDITOR/CLICK_TO_EDIT_IMAGE'));
+			
+			var 
+				self = this,
+				$workarea = $(this.workareaDom()),
+				oWorkareaPos = $workarea.position(),
+				oWorkareaOffset = $workarea.offset()
+			;
+			
+			$workarea.bind('mousemove.image', function (oEvent) {
+				self.tooltipPopupTop(Math.round(oEvent.pageY + oWorkareaPos.top - oWorkareaOffset.top));
+				self.tooltipPopupLeft(Math.round(oEvent.pageX + oWorkareaPos.left - oWorkareaOffset.left));
+			});
+		}
+		
+		return true;
+	};
+	
+	CHtmlEditorViewModel.prototype.onImageOut = function (oEvent)
+	{
+		if (this.imageSelected())
+		{
+			this.imageSelected(false);
+			
+			var $workarea = $(this.workareaDom());
+			$workarea.unbind('mousemove.image');
+		}
+		
+		return true;
 	};
 	
 	/**
@@ -15990,8 +16136,10 @@
 				'onFocus': _.bind(this.onCreaFocus, this),
 				'onUrlIn': _.bind(this.showLinkPopup, this),
 				'onUrlOut': _.bind(this.hideLinkPopup, this),
-				'onImageIn': _.bind(this.showImagePopup, this),
-				'onImageOut': _.bind(this.hideImagePopup, this)
+				'onImageSelect': _.bind(this.showImagePopup, this),
+				'onImageBlur': _.bind(this.hideImagePopup, this),
+				'onItemOver': _.bind(this.onImageOver, this),
+				'onItemOut': _.bind(this.onImageOut, this)
 			});
 		}
 		else
@@ -16327,35 +16475,42 @@
 			hash = Math.random().toString()
 		;
 		
-		if (AppData.App.AllowInsertImage && oData && oData.File.type && 0 === oData.File.type.indexOf('image/'))
+		if (oData && oData.File.type)
 		{
-			oFile = oData.File;
-			if (AppData.App.ImageUploadSizeLimit > 0 && oFile.size > AppData.App.ImageUploadSizeLimit)
+			if (AppData.App.AllowInsertImage && 0 === oData.File.type.indexOf('image/'))
 			{
-				App.Screens.showPopup(AlertPopup, [Utils.i18n('COMPOSE/UPLOAD_ERROR_SIZE')]);
+				oFile = oData.File;
+				if (AppData.App.ImageUploadSizeLimit > 0 && oFile.size > AppData.App.ImageUploadSizeLimit)
+				{
+					App.Screens.showPopup(AlertPopup, [Utils.i18n('COMPOSE/UPLOAD_ERROR_SIZE')]);
+				}
+				else
+				{
+					oReader = new window.FileReader();
+					bCreaFocused = this.oCrea.bFocused;
+					if (!bCreaFocused)
+					{
+						this.oCrea.setFocus(true);
+					}
+					this.oCrea.insertHtml('<img id="' + oFile.name + '_' + hash + '" src="skins/Default/images/wait.gif" />');
+					if (!bCreaFocused)
+					{
+						this.oCrea.fixFirefoxCursorBug();
+					}
+	
+					oReader.onload = (function () {
+						return function (oEvent) {
+							self.oCrea.$editableArea.find('img[id="' + oFile.name + '_' + hash + '"]').attr('src', oEvent.target.result);
+						};
+					}());
+	
+					oReader.readAsDataURL(oFile);
+				}	
 			}
 			else
 			{
-				oReader = new window.FileReader();
-				bCreaFocused = this.oCrea.bFocused;
-				if (!bCreaFocused)
-				{
-					this.oCrea.setFocus(true);
-				}
-				this.oCrea.insertHtml('<img id="' + oFile.name + '_' + hash + '" src="skins/Default/images/wait.gif" />');
-				if (!bCreaFocused)
-				{
-					this.oCrea.fixFirefoxCursorBug();
-				}
-			
-				oReader.onload = (function () {
-					return function (oEvent) {
-						self.oCrea.$editableArea.find('img[id="' + oFile.name + '_' + hash + '"]').attr('src', oEvent.target.result);
-					};
-				}());
-	
-				oReader.readAsDataURL(oFile);
-			}	
+				App.Screens.showPopup(AlertPopup, [Utils.i18n('HTMLEDITOR/UPLOAD_ERROR_NOT_IMAGE')]);
+			}
 		}
 		
 		return false;
@@ -16499,10 +16654,29 @@
 		this.provider = App.Phone.provider;
 		this.phoneReport = App.Phone.phoneReport;
 		this.action = App.Phone.action;
+		this.action.subscribe(function(sAction) {
+			if (sAction === 'connection_end') {
+				var self = this;
+				_.delay(function () {
+					self.action('standby');
+				}, 500);
+			}
+		}, this);
 		
 		this.state = ko.observable('offline');
 		this.input = ko.observable('');
 		this.inputFocus = ko.observable(false);
+		this.inputFocus.subscribe(function(bFocus) {
+			if(!bFocus)
+			{
+				var self = this;
+				_.delay(function () {
+					if (self.action() === 'active') {
+							self.action('standby');
+					}
+				}, 200);
+			}
+		}, this);
 	
 		this.phoneAutocompleteItem = ko.observable(null);
 		
@@ -16528,7 +16702,7 @@
 	CPhoneViewModel.prototype.end = function ()
 	{
 		this.action('');
-		this.phone.reconnectStop();
+		this.phone.reconnect();
 	};
 	
 	CPhoneViewModel.prototype.multiAction = function ()
@@ -16537,20 +16711,23 @@
 			self = this
 		;
 	
+		// offline, standby, active, dial, outgoing, connected_out, incoming, connected_in
+	
 		if (this.action() === 'standby') {
-			this.action('ready');
+			this.action('active');
 			
 			_.delay(function () {
 				self.inputFocus(true);
 			}, 500);
 			
-		} else if (this.action() === 'ready' && this.input().length > 0) {
+		} else if (this.action() === 'active' && this.input().length > 0) {
+			this.action('dial');
 			this.call();
-		} else if (this.action() === 'ready' && this.input().length === 0) {
+		} else if (this.action() === 'active' && this.input().length === 0) {
 			this.action('standby');
 		} else if (
-			this.action() === 'connection_in' ||
-			this.action() === 'connection_out' ||
+			this.action() === 'connected_in' ||
+			this.action() === 'connected_out' ||
 			this.action() === 'outgoing' ||
 			this.action() === 'incoming'
 		)
@@ -16609,6 +16786,8 @@
 		this.login = ko.observable('');
 		this.password = ko.observable('');
 		
+		this.rtl = ko.observable(Utils.isRTL());
+		
 		this.loginDescription = ko.observable('');
 	
 		this.emailFocus = ko.observable(false);
@@ -16653,8 +16832,6 @@
 		this.allowLanguages = ko.observable(AppData.App.AllowLanguageOnLogin);
 		this.viewLanguagesAsDropdown = ko.observable(!AppData.App.FlagsLangSelect);
 		
-	//	this.rtl = ko.observable(Utils.isRTL());
-	
 		this.canBeLogin = ko.computed(function () {
 	
 			var
@@ -16685,30 +16862,7 @@
 		this.loginDescription(AppData.App.LoginDescription || '');
 	}
 	
-	CLoginViewModel.prototype.onApplyBindings = function ()
-	{
-		if (AppData.App.UseReCaptcha)
-		{
-			this.startRecaptcha();
-		}
-	};
-	
-	CLoginViewModel.prototype.startRecaptcha = function ()
-	{
-		var
-			fShowRecaptcha = function () {
-				if (window.Recaptcha)
-				{
-					window.Recaptcha.create(AppData.App.ReCaptchaPublicKey, 'recaptcha-place', {
-						'theme': 'white',
-						'lang': AppData.App.DefaultLanguageShort
-					});
-				}
-			}
-		;
-	
-		$.getScript('//www.google.com/recaptcha/api/js/recaptcha_ajax.js', fShowRecaptcha);
-	};
+	CLoginViewModel.prototype.__name = 'CLoginViewModel';
 	
 	CLoginViewModel.prototype.onShow = function ()
 	{
@@ -16738,15 +16892,8 @@
 		if (false === oData.Result)
 		{
 			this.loading(false);
-			if (window.Recaptcha)
-			{
-				window.Recaptcha.reload();
-			}
+			
 			App.Api.showErrorByCode(oData.ErrorCode, Utils.i18n('WARNING/LOGIN_PASS_INCORRECT'));
-			if (oData['Captcha'] === true)
-			{
-				this.startRecaptcha();
-			}
 		}
 		else
 		{
@@ -16766,12 +16913,6 @@
 			}
 		;
 		
-		if (window.Recaptcha)
-		{
-			oParameters['ReCaptchaChallengeField'] = window.Recaptcha.get_challenge();
-			oParameters['ReCaptchaResponseField'] = window.Recaptcha.get_response();
-		}
-	
 		this.loading(true);
 		App.Ajax.send(oParameters, this.onResponse, this);
 	};
@@ -24121,8 +24262,8 @@
 	
 			if (!oWeekGrid.hasClass('scroll-wrap'))
 			{
-				oWeekGrid.css({'overflow': 'hidden'}).attr('data-bind', 'customScrollbar: {x: false, relativeToInner: true}');
-				oWeekGridInner.addClass('scroll-inner');
+				oWeekGrid.attr('data-bind', 'customScrollbar: {x: false, relativeToInner: true}');
+				oWeekGridInner.css({'overflow': 'hidden'}).addClass('scroll-inner');
 	
 				ko.applyBindings({}, oWeekGrid[0]);
 			}
@@ -27615,6 +27756,14 @@
 				{
 					this.onShow(mParams);
 				}
+				if (AfterLogicApi.runPluginHook)
+				{
+					if (this.__name)
+					{
+						AfterLogicApi.runPluginHook('view-model-on-show', [this.__name, this]);
+					}
+				}
+				
 				this.bShown = true;
 			}
 		};
@@ -27947,6 +28096,13 @@
 		this.messagesLoadingError = ko.observable(false);
 		
 		this.currentMessage = ko.observable(null);
+		this.currentMessage.subscribe(function () {
+			if (this.currentMessage())
+			{
+				AfterLogicApi.runPluginHook('view-message', 
+					[AppData.Accounts.currentId(), this.currentMessage().folder(), this.currentMessage().uid()]);
+			}
+		}, this);
 	
 		this.deletedDraftMessageUid = ko.observable('');
 		
@@ -28368,6 +28524,18 @@
 				oToFolder.markHasChanges();
 	
 				App.Ajax.send(oParameters, this.onMoveMessagesResponse, this);
+				
+				if (oToFolder && oToFolder.type() === Enums.FolderTypes.Trash)
+				{
+					AfterLogicApi.runPluginHook('move-messages-to-trash', 
+						[AppData.Accounts.currentId(), oParameters.Folder, aExtUids]);
+				}
+				
+				if (oToFolder && oToFolder.type() === Enums.FolderTypes.Spam)
+				{
+					AfterLogicApi.runPluginHook('move-messages-to-spam', 
+						[AppData.Accounts.currentId(), oParameters.Folder, aExtUids]);
+				}
 			}
 		}
 	};
@@ -28440,6 +28608,9 @@
 		this.excludeDeletedMessages();
 	
 		App.Ajax.send(oParameters, this.onMoveMessagesResponse, this);
+		
+		AfterLogicApi.runPluginHook('delete-messages', 
+			[AppData.Accounts.currentId(), oParameters.Folder, aExtUids]);
 	};
 	
 	/**
@@ -28715,6 +28886,11 @@
 					bCheckMailStarted = bCheckMailStarted || this.setFolderCounts(oResponse.AccountID, sFullName, iCount, iUnseenCount, sUidNext, sHash);
 				}
 			}, this);
+			
+			if (oResponse.AccountID !== this.currentAccountId())
+			{
+				this.checkMailStarted(false);
+			}
 		}
 		
 		this.checkMailStarted(bCheckMailStarted);
@@ -28789,7 +28965,8 @@
 			bHasFolderChanges = false,
 			bCurrentFolder = false,
 			bCurrentList = false,
-			bCurrentPage = false
+			bCurrentPage = false,
+			aNewFolderMessages = []
 		;
 		
 		if (oResult !== false && oResult['@Object'] === 'Collection/MessageCollection')
@@ -28814,7 +28991,11 @@
 				oFolderMessage.parse(oRawMessage, oResponse.AccountID, false, bTrustThreadInfo);
 				
 				oFolder.oMessages[oFolderMessage.uid()] = oFolderMessage;
+				aNewFolderMessages.push(oFolderMessage);
 			}, this);
+			
+			AfterLogicApi.runPluginHook('response-custom-messages', 
+				[oResponse.AccountID, oFolder.fullName(), aNewFolderMessages]);
 	
 			bCurrentFolder = this.currentAccountId() === oResponse.AccountID &&
 					this.folderList().currentFolderFullName() === oResult.FolderName;
@@ -29353,7 +29534,7 @@
 			AppData.SingleMode = this.Routing.isSingleMode();
 			this.MailCache.init();
 			
-			if (AppData.HelpdeskRedirect)
+			if (AppData.HelpdeskRedirect && this.Routing.currentScreen !== Enums.Screens.Helpdesk)
 			{
 				this.Routing.setHash([Enums.Screens.Helpdesk]);
 			}
@@ -29378,7 +29559,7 @@
 			}
 		}
 	
-		if (AppData.User.AllowVoice)
+		if (AppData.User.AllowVoice && !AppData.SingleMode)
 		{
 			this.Phone.init();
 		}

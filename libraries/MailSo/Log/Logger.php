@@ -211,4 +211,35 @@ class Logger extends \MailSo\Base\Collection
 
 		return false;
 	}
+
+	/**
+	 * @param \Exception $oException
+	 * @param int $iDescType = \MailSo\Log\Enumerations\Type::NOTICE
+	 * @param string $sName = ''
+	 * @param bool $bSearchSecretWords = true
+	 *
+	 * @return bool
+	 */
+	public function WriteMixed($mData, $iDescType = null, $sName = '', $bSearchSecretWords = true)
+	{
+		$iType = null === $iDescType ? \MailSo\Log\Enumerations\Type::INFO : $iType;
+		if (\is_array($mData) || \is_object($mData))
+		{
+			if ($mData instanceof \Exception)
+			{
+				$iType = null === $iDescType ? \MailSo\Log\Enumerations\Type::NOTICE : $iType;
+				return $this->WriteException($mData, $iType, $sName, $bSearchSecretWords);
+			}
+			else
+			{
+				return  $this->WriteDump($mData, $iType, $sName, $bSearchSecretWords);
+			}
+		}
+		else
+		{
+			return $this->Write($mData, $iType, $sName, $bSearchSecretWords);
+		}
+
+		return false;
+	}
 }

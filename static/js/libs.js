@@ -744,8 +744,10 @@ function handler(event) {
 			'onFocus': function () {},
 			'onUrlIn': function () {},
 			'onUrlOut': function () {},
-			'onImageIn': function () {},
-			'onImageOut': function () {}
+			'onImageSelect': function () {},
+			'onImageBlur': function () {},
+			'onItemOver':  function () {},
+			'onItemOut':  function () {}
 		}, (typeof oOptions === 'undefined') ? {} : oOptions);
 		
 		this.start();
@@ -811,15 +813,21 @@ function handler(event) {
 			var oImage = $(this);
 			self.bInImage = true;
 			self.oCurrImage = oImage;
-			self.oOptions.onImageIn(oImage, ev);
+			self.oOptions.onImageSelect(oImage, ev);
 			ev.stopPropagation();
 		});
 		this.$editableArea.on('click', function (ev) {
 			self.bInImage = false;
 			self.oCurrImage = null;
-			self.oOptions.onImageOut();
+			self.oOptions.onImageBlur();
 		});
-
+		
+		this.$editableArea.on('mouseover', function (ev) {
+			self.oOptions.onItemOver(ev);
+		});
+		this.$editableArea.on('mouseout', function (ev) {
+			self.oOptions.onItemOut(ev);
+		});
 		
 		this.setTabIndex(this.oOptions.tabindex);
 		this.initContentEditable();
@@ -1464,11 +1472,22 @@ function handler(event) {
 			this.oCurrImage.remove();
 			this.oCurrImage = null;
 			this.bInImage = false;
-			this.oOptions.onImageOut();
+			this.oOptions.onImageBlur();
 		}
 	};
 	
 	Crea.prototype.changeCurrentImage = function (aParams)
+	{
+		if (this.oCurrImage && aParams !== undefined)
+		{
+			var image = this.oCurrImage;
+			$.each(aParams, function (key, value) {
+				image.css(key, value);
+			});
+		}
+	};
+	
+	Crea.prototype.showImageTooltip = function (aParams)
 	{
 		if (this.oCurrImage && aParams !== undefined)
 		{

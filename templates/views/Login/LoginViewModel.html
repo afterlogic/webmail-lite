@@ -27,7 +27,7 @@
 					</div>
 				</div>
 				<div class="languages" data-bind="visible: allowLanguages() && viewLanguagesAsDropdown()">
-					<span class="custom_select " data-bind="dropdown: {'control': false}">
+					<span class="custom_select" data-bind="dropdown: {'control': false}, css: {'right': !rtl()}">
 						<span class="name" data-bind="css: currentLanguage">
 							<span class="icon"></span>
 							<span class="text" data-bind="text: currentLanguage"></span>
@@ -48,7 +48,6 @@
 						</span>
 					</span>
 				</div>
-				<div class="row buttons" id="recaptcha-place" style="margin-left: -40px;"></div>
 				{%INCLUDE-START/Login-Before-Submit-Button/INCLUDE-END%}
 				<div class="row buttons">
 					<button type="submit" class="button login" data-bind="text: signInButtonText, command: loginCommand"></button>

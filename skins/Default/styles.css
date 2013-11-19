@@ -365,7 +365,7 @@ html.rtl .custom_checkbox {
 	border-radius: 2px;
 	width: 12px !important;
 	height: 12px !important;
-	background: url('images/sprites.png?7.1.1') no-repeat -1px -241px !important;
+	background: url('images/sprites.png?7.1.1.1') no-repeat -1px -241px !important;
 }
 .custom_checkbox.checked .icon {
 	background-position: -21px -241px !important;
@@ -881,7 +881,7 @@ html.rtl .toolbar .group .item:last-child {
 .toolbar .item .icon {
 	display: inline-block;
 	vertical-align: middle;
-	background: url("images/sprites.png?7.1.1") repeat-x 0px 0px;
+	background: url("images/sprites.png?7.1.1.1") repeat-x 0px 0px;
 	width: 18px;
 	height: 18px;
 }
@@ -889,7 +889,7 @@ html.rtl .toolbar .group .item:last-child {
 	background-position: -160px -40px;
 }
 .no-cssanimations .toolbar .checkmail .icon {
-	background: url("images/check.png?7.1.1") no-repeat 0px 0px;
+	background: url("images/check.png?7.1.1.1") no-repeat 0px 0px;
 }
 .toolbar .mark .icon { background-position: 0px -40px; }
 .toolbar .move .icon { background-position: -40px -40px; }
@@ -912,7 +912,7 @@ html.rtl .toolbar .group .item:last-child {
 	vertical-align: middle;
 	height: 8px;
     width: 13px;
-	background: url("images/sprites.png?7.1.1") no-repeat -320px -45px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -320px -45px;
 }
 .dropdown {
 	overflow: hidden;
@@ -1133,7 +1133,7 @@ html.rtl .pagination {
 .pagination .item.last {
 	width: 14px;
 	height: 16px;
-	background-image: url("images/sprites.png?7.1.1");
+	background-image: url("images/sprites.png?7.1.1.1");
 	background-repeat: no-repeat;
 }
 .pagination .item.first {
@@ -1553,14 +1553,14 @@ html.rtl .languages .custom_select .control {
 	width: 16px;
 	height: 11px;
 	margin-right: 4px;
-	background: url("images/sprites.png?7.1.1") no-repeat 40px -400px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat 40px -400px;
 }
 .languages .name .text {
 	display: none;
 }
 .languages .custom_select .control .icon {
 	width: 10px;
-	background: url("images/sprites.png?7.1.1") no-repeat -320px -44px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -320px -44px;
 }
 .languages .custom_select.expand .control .icon {
 	background-position: -340px -44px;
@@ -1639,10 +1639,11 @@ html.rtl .languages .custom_select .control {
 .languages .Turkish .icon { background-position: -280px -520px; }
 .languages .Ukrainian .icon { background-position: -320px -520px; }
 .languages .Serbian .icon { background-position: -400px -520px; }
+.languages .Portuguese-Portuguese .icon { background-position: -800px -480px; }
 /*=== END Custom select CSS ===*/
 /*=== Files CSS ===*/
 .file .icon {
-	background-image: url("images/sprites.png?7.1.1");
+	background-image: url("images/sprites.png?7.1.1.1");
 	background-repeat: no-repeat;
 	background-position: 0px -360px;
 	display: inline-block;
@@ -1783,7 +1784,7 @@ html.rtl .search_block input {
 	vertical-align: middle;
 	text-indent: -1000px;
 	overflow: hidden;
-	background: #fff url("images/sprites.png?7.1.1") no-repeat -313px -79px;
+	background: #fff url("images/sprites.png?7.1.1.1") no-repeat -313px -79px;
 	cursor: pointer;
 }
 html.rtl .search_block .button {
@@ -1798,7 +1799,7 @@ html.rtl .search_block .button {
 	vertical-align: middle;
 	height: 8px;
     width: 13px;
-	background: url("images/sprites.png?7.1.1") no-repeat -320px -45px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -320px -45px;
 	cursor: pointer;
 	margin: 0px 0px 0px 4px;
 }
@@ -1959,7 +1960,7 @@ html.rtl .search_block .fields .row .label {
 	display: inline-block;
 	width: 16px;
 	height: 17px;
-	background: url("images/sprites.png?7.1.1") no-repeat -400px -80px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -400px -80px;
 	margin-left: -23px;
 	float: left;
 	display: none;
@@ -2150,12 +2151,12 @@ html.rtl .fields .input:last-child {
 	overflow: hidden;
 	height: 95px;
 	margin-top: 10px;
-	background: url("images/logo.png?7.1.1") no-repeat center top;
+	background: url("images/logo.png?7.1.1.1") no-repeat center top;
 }
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5),
     only screen and (min-resolution: 144dpi) {
 		.login_panel .header {
-			background-image: url("images/logo2x.png?7.1.1");
+			background-image: url("images/logo2x.png?7.1.1.1");
 			background-size: 124px 95px;
 		}
 	}
@@ -2167,6 +2168,10 @@ html.rtl .fields .input:last-child {
 	position: absolute;
 	top: 20px;
 	right: 20px;
+}
+html.rtl .login_panel .languages {
+	right: auto;
+	left: 20px;
 }
 .login_panel .description {
 	color: #929292;
@@ -2231,16 +2236,16 @@ html.rtl .fields .input:last-child {
 }
 
 .login_panel .email .title {
-	background: url("images/sprites.png?7.1.1") no-repeat -360px -80px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -360px -80px;
 }
 .login_panel .password .title {
-	background: url("images/sprites.png?7.1.1") no-repeat -400px -80px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -400px -80px;
 }
 .login_panel .name .title {
-	background: url("images/sprites.png?7.1.1") no-repeat -840px -80px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -840px -80px;
 }
 .login_panel .login .title {
-	background: url("images/sprites.png?7.1.1") no-repeat -840px -80px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -840px -80px;
 }
 .login_panel .row .input {
 	border: 1px solid #BEBDBD;
@@ -2382,7 +2387,7 @@ html.rtl .tabs_panel .item {
 	margin: 0px 0px 0px 6px;
 	padding: 0px;
 	cursor: pointer;
-	background: url("images/sprites.png?7.1.1") no-repeat -8px -160px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -8px -160px;
 }
 .tabs_panel .settings,
 .tabs_panel .logout {
@@ -2674,7 +2679,7 @@ html.rtl .panel.storages .item .count {
 	vertical-align: middle;
 	width: 20px;
 	height: 17px;
-	background: url("images/sprites.png?7.1.1") no-repeat 0px 0px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat 0px 0px;
 }
 .panel.groups .title .icon {
 	display: none;
@@ -2847,7 +2852,7 @@ html.rtl .message_viewer .message_header .toolbar {
 	width: 20px;
 	height: 16px;
 	overflow: hidden;
-	background-image: url("images/sprites.png?7.1.1");
+	background-image: url("images/sprites.png?7.1.1.1");
 	background-repeat: no-repeat;
 	display: inline-block;
 	text-indent: -1000px;
@@ -2887,7 +2892,7 @@ html.rtl .message_viewer .message_header .message_info {
 	width: 14px;
 	height: 16px;
 	position: absolute;
-	background: url("images/sprites.png?7.1.1") no-repeat -240px -80px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -240px -80px;
 }
 html.rtl .message_viewer .message_header .details_show,
 html.rtl .message_viewer .message_header .details_hide {
@@ -2954,7 +2959,7 @@ html.rtl .message_viewer .message_header .from {
 	display: inline-block;
 	width: 20px;
 	height: 20px;
-	background: url("images/sprites.png?7.1.1") no-repeat -200px -240px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -200px -240px;
 	overflow: hidden;
 	/*float: right;*/
 }
@@ -2967,7 +2972,7 @@ html.rtl .message_viewer .message_header .from {
 	vertical-align: middle;
 	width: 11px;
 	height: 11px;
-	background: url("images/sprites.png?7.1.1") no-repeat -280px -80px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -280px -80px;
 }
 .thread_viewer .panel_top .title .contact_card .dropdown_content,
 .message_viewer .message_header .contact_card .dropdown_content {
@@ -3102,7 +3107,7 @@ html.rtl .message_viewer .message_header .from {
 	vertical-align: middle;
 	width: 16px;
 	height: 16px;
-	background: url("images/sprites.png?7.1.1") no-repeat -440px -80px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -440px -80px;
 	margin-right: 8px;
 }
 .item_viewer .attachments .attachment_content {
@@ -3205,7 +3210,7 @@ html.rtl .message_viewer .message_header .from {
 }
 
 .contact_viewer .panel_content {
-	background: url("images/contacts-bg.png?7.1.1") repeat 0 0;
+	background: url("images/contacts-bg.png?7.1.1.1") repeat 0 0;
     margin: 0 !important;
     padding: 2px 4px 0 2px !important;
 }
@@ -3373,7 +3378,7 @@ html.rtl .contact_viewer .panel_center .toolbar .content {
 }
 .contact_data_groups .address .label.address {
 	float: left;
-	background: url("images/sprites.png?7.1.1") no-repeat -520px -80px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -520px -80px;
 	width: 20px;
 	height: 20px;
 	text-indent: 20px;
@@ -3390,7 +3395,7 @@ html.rtl .contact_viewer .panel_center .toolbar .content {
 .contact_data_groups .mobile .label,
 .contact_data_groups .phone .label,
 .contact_data_groups .fax .label {
-	background: url("images/sprites.png?7.1.1") no-repeat -560px -80px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -560px -80px;
 	width: 20px;
 	height: 20px;
 	text-indent: 20px;
@@ -3688,7 +3693,7 @@ html.rtl .panel.threads {
 	position: absolute;
 	right: 2px;
 	top: 0px;
-	background: url('images/sprites.png?7.1.1') no-repeat 0px -200px;
+	background: url('images/sprites.png?7.1.1.1') no-repeat 0px -200px;
 }
 .messages .items_list .answered .marker{
 	display: inline-block;
@@ -3703,7 +3708,7 @@ html.rtl .panel.threads {
 	background-position: -80px -200px;
 }
 .messages .items_list .item .has_attachments {
-	background: url("images/sprites.png?7.1.1") no-repeat -120px -120px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -120px -120px;
 }
 .messages .items_list .item.selected .has_attachments {
 	background-position: -140px -120px;
@@ -3711,7 +3716,7 @@ html.rtl .panel.threads {
 .messages .items_list .item .flag {
 	margin-top: 10px;
 	cursor: pointer;
-	background: url("images/sprites.png?7.1.1") no-repeat 0px -120px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat 0px -120px;
 }
 .messages .items_list .selected .flag {
 	background-position: -40px -120px;
@@ -4063,7 +4068,7 @@ html.rtl .compose .wm_label {
 		-transition: opacity 1000ms ease 1s;
 	}
 	.upload_list .cancel {
-		background: url("images/sprites.png?7.1.1") no-repeat -80px -240px;
+		background: url("images/sprites.png?7.1.1.1") no-repeat -80px -240px;
 		display: block;
 		float: right;
 		font-size: 0;
@@ -4074,7 +4079,7 @@ html.rtl .compose .wm_label {
 		cursor: pointer;
 	}
 	.upload_list .spinner {
-		background: url("images/wait.gif?7.1.1") no-repeat left top;
+		background: url("images/wait.gif?7.1.1.1") no-repeat left top;
 		display:inline-block;
 		width:20px;
 		height:20px;
@@ -4199,7 +4204,7 @@ html.non-adjustable .panels.settings .panel {
 	width: 18px;
 	height: 18px;
 	margin-right: 4px;
-	background: url("images/sprites.png?7.1.1") no-repeat 100px 0px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat 100px 0px;
 }
 .panels.settings .navigation .common .icon {
 	background-position: -120px -160px;
@@ -4330,7 +4335,7 @@ html.non-adjustable .panels.settings .panel {
 	width: 24px;
 	height: 24px;
 	margin-top: -7px;
-	background: url("images/sprites.png?7.1.1") no-repeat -240px -200px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -240px -200px;
 	transition: opacity 300ms ease 0s;
 }
 .panels.settings .ios_profile:hover .icon {
@@ -4405,7 +4410,7 @@ html.non-adjustable .panels.settings .panel {
 .settings .accounts_list .item.fetcher .icon {
 	display: inline-block;
 	vertical-align: middle;
-	background: url("images/sprites.png?7.1.1") repeat-x -120px -240px;
+	background: url("images/sprites.png?7.1.1.1") repeat-x -120px -240px;
 	width: 18px;
 	height: 18px;
 }
@@ -4485,7 +4490,7 @@ html.non-adjustable .panels.settings .panel {
 	padding-right: 0px;
 }
 .settings .folders.items_list .canDrag .title:hover {
-	background: rgba(0,0,0, 0.03) url("images/sprites.png?7.1.1") no-repeat -1080px -120px;
+	background: rgba(0,0,0, 0.03) url("images/sprites.png?7.1.1.1") no-repeat -1080px -120px;
 }
 .settings .folders.items_list .title.cannotDrag:hover {
 	background: rgba(0,0,0, 0.03);
@@ -4504,7 +4509,7 @@ html.rtl .settings .folders.items_list .controls {
 	width: 20px;
 	height: 20px;
 	cursor: pointer;
-	background: url("images/sprites.png?7.1.1") no-repeat -200px 0px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -200px 0px;
 }
 .settings .folders.items_list .controls .button.disabled {
 	background-position: 40px 40px;
@@ -4663,7 +4668,7 @@ html.rtl .settings .signature .editor_row .editor {
 	height: 16px;
 }
 .contacts .items_list .group_marker.group {
-	background: url('images/sprites.png?7.1.1') no-repeat -400px -120px;
+	background: url('images/sprites.png?7.1.1.1') no-repeat -400px -120px;
 }
 .contacts .right_panel {
 	overflow-x: hidden;
@@ -4839,7 +4844,7 @@ html.rtl .panel.files .items_list .item {
 	display: block;
 }
 .panel.files .items_list .item .cancel {
-	background: url("images/sprites.png?7.1.1") no-repeat -80px -240px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -80px -240px;
 	display: none;
 	float: right;
 	font-size: 0;
@@ -4859,7 +4864,7 @@ html.rtl .panel.files .items_list .item {
 	position: relative;
 	overflow: hidden;
 	margin-top: 5px;
-	background: #64AEDC url("images/sprites.png?7.1.1") no-repeat -818px -98px;
+	background: #64AEDC url("images/sprites.png?7.1.1.1") no-repeat -818px -98px;
 	right: 41px;
     top: 76px;
 	height: 18px;
@@ -4966,7 +4971,7 @@ html.rtl .panel.files .items_list .item {
 	display: inline-block;
 	width: 35px;
 	height: 30px;
-	background: url("images/sprites.png?7.1.1");
+	background: url("images/sprites.png?7.1.1.1");
 	background-position: -440px -360px;
 }
 .panel.files .items_list .large .folder .icon {
@@ -5006,7 +5011,7 @@ html.rtl .panel.files .toolbar .search_block {
     width: 280px;
 	margin: 0px auto;
 	padding: 130px 20px 20px;
-	background: url("images/logo.png?7.1.1") no-repeat center 20px;
+	background: url("images/logo.png?7.1.1.1") no-repeat center 20px;
 	text-align: center;
 }
 .sharing_panel .item {
@@ -5022,7 +5027,7 @@ html.rtl .panel.files .toolbar .search_block {
 .sharing_panel .item .icon {
 	display: inline-block;
 	float: left;
-	background: url("images/sprites.png?7.1.1") no-repeat 80px 0px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat 80px 0px;
 	width: 70px;
 	width: 55px;
 	height: 65px;
@@ -5182,7 +5187,7 @@ html.rtl .HelpdeskLayout .AgentArea .panel.threads .toolbar {
 	vertical-align: middle;
 	width: 16px;
 	height: 16px;
-	background: url("images/sprites.png?7.1.1") no-repeat -120px -120px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -120px -120px;
 }
 .panel.thread_viewer .new_request .buttons .button.upload.dragOver {
 	margin: 0px;
@@ -5460,7 +5465,7 @@ html.rtl .panel.thread_viewer .toolbar {
 	margin: 2px -6px 0 10px;
 	width: 10px;
 	cursor: pointer;
-	background: url("images/sprites.png?7.1.1") no-repeat -240px -260px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -240px -260px;
 	visibility: hidden;
 }
 html.rtl .panel.thread_viewer .post .header .close {
@@ -5562,7 +5567,7 @@ html.rtl .panel.thread_viewer .post .header .date {
 }
 .panel.thread_viewer .post.internal .content::before {
 	float: left;
-	background: url("images/sprites.png?7.1.1") repeat -280px -200px;
+	background: url("images/sprites.png?7.1.1.1") repeat -280px -200px;
 	content: "";
 	width: 60px;
 	height: 40px;
@@ -5642,7 +5647,7 @@ html.rtl .panel.thread_viewer .post .header .date {
 		width: 100%;
 	}
 	.panel.thread_viewer .upload_list .attachment .cancel {
-		background: url("images/sprites.png?7.1.1") no-repeat -80px -240px;
+		background: url("images/sprites.png?7.1.1.1") no-repeat -80px -240px;
 		display: block;
 		float: right;
 		font-size: 0;
@@ -5655,7 +5660,7 @@ html.rtl .panel.thread_viewer .post .header .date {
 		margin-right: -20px;
 	}
 	.panel.thread_viewer .upload_list .attachment .spinner {
-		background: url("images/wait.gif?7.1.1") no-repeat left top;
+		background: url("images/wait.gif?7.1.1.1") no-repeat left top;
 		background-color: rgba(255, 255, 255, 0.8);
 		border-radius: 10px 10px 10px 10px;
 		box-shadow: 0 0 5px #FFFFFF;
@@ -5799,7 +5804,7 @@ html.rtl .panel.thread_viewer .quick_reply .buttons .button.upload {
 	vertical-align: middle;
 	width: 16px;
 	height: 16px;
-	background: url("images/sprites.png?7.1.1") no-repeat -120px -120px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -120px -120px;
 }
 .panel.thread_viewer .quick_reply .buttons .button.upload.dragOver {
 	margin: 0px;
@@ -5883,7 +5888,7 @@ html.rtl .panel.thread_viewer .quick_reply .buttons .button.upload {
 	width: 31px;
 	height: 31px;
 	margin-right: 4px;
-	background: url("images/sprites.png?7.1.1") no-repeat -400px -411px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -400px -411px;
 }
 .HelpdeskLayout .details .product .name {
 	font-size:12pt;
@@ -6185,7 +6190,7 @@ html.rtl .panel.calendar_manager .dropdowns .colors .item:hover {
 	margin: 0px 0px 6px 6px;
 }
 .panel.calendar_manager .dropdowns .colors .item.color_pick.selected {
-	background-image: url("images/sprites.png?7.1.1");
+	background-image: url("images/sprites.png?7.1.1.1");
 	background-position: -279px -240px;
 }
 
@@ -6222,7 +6227,7 @@ html.rtl .panel.calendar_manager .dropdowns .colors .item:hover {
 	height: 16px;
 	float: right;
 	margin-left: 6px;
-	background: url("images/sprites.png?7.1.1") no-repeat -720px -240px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -720px -240px;
 }
 .panel.calendar_manager .calendars .item .control {
 	float: right;
@@ -6231,7 +6236,7 @@ html.rtl .panel.calendar_manager .dropdowns .colors .item:hover {
     width: 16px;
 	margin-left: 4px;
 	cursor: pointer;
-	background: url("images/sprites.png?7.1.1") no-repeat -160px -240px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -160px -240px;
 }
 .panel.calendar_manager .calendars .item .control:hover {
 	background-position: -160px -260px;
@@ -6244,7 +6249,7 @@ html.rtl .panel.calendar_manager .dropdowns .colors .item:hover {
 .panel.calendar_manager .calendars .section_title .control {
 	width: 16px;
 	height: 16px;
-	background: url("images/sprites.png?7.1.1") no-repeat -320px -240px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -320px -240px;
 	cursor: pointer;
 }
 
@@ -6315,7 +6320,7 @@ html.rtl .panel.calendar_manager .dropdowns .colors .item:hover {
 	margin-right: 10ex;
 }
 .panel.calendar .date_select .item .control {
-	background: url("images/sprites.png?7.1.1") no-repeat -440px -240px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -440px -240px;
 	display: inline-block;
 	vertical-align: middle;
 	width: 16px;
@@ -6434,7 +6439,7 @@ table.ui-datepicker-calendar td a {
 	border: solid 1px #bababa;
 }
 .colors .color_pick.selected {
-	background-image: url("images/sprites.png?7.1.1");
+	background-image: url("images/sprites.png?7.1.1.1");
 	background-position: -280px -240px;
 }
 .calendar .toolbar .item.selected {
@@ -6586,7 +6591,7 @@ html.rtl .popup.calendar_popup .title {
 	height: 12px;
     margin: -7px -7px 0px 0px;
     width: 12px;
-	background: url("images/sprites.png?7.1.1") no-repeat -200px -240px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -200px -240px;
 }
 .popup.calendar_popup .buttons {
 	margin: 16px 0px 0px;
@@ -6676,7 +6681,7 @@ html.rtl .popup.calendar_event .row.add_attender .placeholder {
 	height: 18px;
 	float: right;
 /*	margin: 2px -28px 0px 0px;*/
-	background: url("images/sprites.png?7.1.1") no-repeat -240px -120px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -240px -120px;
 }
 .popup.calendar_getlink .web_access .row.web_access_switch {
 	text-align: center;
@@ -6712,7 +6717,7 @@ html.rtl .popup.calendar_share .input {
 	width: 20px;
 	height: 20px;
 	cursor: pointer;
-	background: url("images/sprites.png?7.1.1") no-repeat -160px -120px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -160px -120px;
 }
 html.rtl .popup.calendar_share .share_item .control {
 	float: left;
@@ -6925,9 +6930,11 @@ html.rtl .popup.calendar_event .subforms .dates_form {
     margin-right: 53px;
 	float: right;
 }
-.popup.calendar_event .subforms .alarm_form .custom_selector {
+.popup.calendar_event .subforms .alarm_form .custom_selector,
+.popup.calendar_event .subforms .dates_form .custom_selector{
 	display: inline-block;
 	position: relative;
+	vertical-align: middle;
 }
 .popup.calendar_event .subforms .alarm_form .item {
 	display: block;
@@ -6969,6 +6976,7 @@ html.rtl .popup.calendar_event .subforms .dates_form .date {
 	width: 50px;
 	border: 1px solid #CCCCCC;
 	vertical-align: middle;
+	margin-right: 13px;
 }
 .popup.calendar_event .subforms .dates_form .ui-datepicker-trigger {
 	display: inline-block;
@@ -7055,7 +7063,7 @@ html.rtl .popup.calendar_event .subforms .dates_form .ui-datepicker-trigger {
 	vertical-align: middle;
 	width: 16px;
 	height: 16px;
-	background: url("images/sprites.png?7.1.1") no-repeat -680px -240px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -680px -240px;
 }
 html.rtl .popup.calendar_event .side_panel .attender .link {
 	float: left;
@@ -7076,7 +7084,7 @@ html.rtl .popup.calendar_event .side_panel .attender .link {
 	vertical-align: middle;
 	width: 12px;
 	height: 12px;
-	background: url("images/sprites.png?7.1.1") no-repeat 0px 0px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat 0px 0px;
 }
 .popup.calendar_event .side_panel .attender.pending .icon {
 	background-position: -520px -240px;
@@ -7111,7 +7119,7 @@ html.rtl .popup.calendar_event .side_panel .add_attender .input {
 	width: 16px;
 	height: 16px;
 	margin-top: 3px;
-	background: url("images/sprites.png?7.1.1") no-repeat -640px -240px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -640px -240px;
 }
 html.rtl .popup.calendar_event .side_panel .add_attender .link {
 	float: left;
@@ -7220,7 +7228,7 @@ html.rtl .popup_panel {
 	display: inline-block;
 	width: 30px;
 	height: 30px;
-	background: url("images/sprites.png?7.1.1") no-repeat -480px 0px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -480px 0px;
 	float: right;
 	margin: -30px -30px 0 0;
 	cursor: pointer;
@@ -7355,6 +7363,9 @@ html.rtl .popup_panel .close {
 .html_editor .workarea .crea-content-editable p {
 	margin: 0;
 }
+.html_editor .workarea .crea-content-editable img {
+	cursor: pointer;
+}
 .html_editor .inline_popup {
 	padding: 4px 8px;
 	position: absolute;
@@ -7378,6 +7389,12 @@ html.rtl .popup_panel .close {
 }
 .html_editor .inline_popup .button:hover {
 	text-decoration: none;
+}
+.html_editor .inline_popup.tooltip {
+	border: solid 1px #eee;
+	margin: 10px 0px 0px 10px;
+	opacity: 0.7;
+	filter: Alpha(opacity=70);
 }
 .html_editor .toolbar {
 	border: 1px solid #CCCCCC;
@@ -7450,8 +7467,6 @@ html.rtl .popup_panel .close {
 	cursor: default;
 	background: none;
 }
-
-
 .html_editor .toolbar .item.select {
 	padding: 0px 0px;
 }
@@ -7501,7 +7516,7 @@ html.rtl .popup_panel .close {
 	vertical-align: middle;
 	width: 16px;
 	height: 16px;
-	background-image: url("images/sprites.png?7.1.1");
+	background-image: url("images/sprites.png?7.1.1.1");
 	background-repeat: no-repeat;
 }
 .html_editor .toolbar .item.link .icon {
@@ -7594,12 +7609,13 @@ html.rtl .popup_panel .close {
 .tabs_panel .phone {
 	float: right;
 	display: inline-block;
-	background: red;
+	background: #fc6e6e;
 	border-radius: 20px;
 	box-shadow: 0px 0px 4px #D6D6D6;
 	margin: 16px 30px 0px 0px;
 	padding: 0px 0px 0px 4px;
 	text-align: right;
+	position: relative;
 }
 .tabs_panel .phone.standby {
 	background: #fff;
@@ -7607,14 +7623,17 @@ html.rtl .popup_panel .close {
 .tabs_panel .phone.outgoing {
 	background: #FFC939;
 
-	background: url("images/progress.gif?7.1.1") repeat-x 0px 0px;
+	/*background: url("images/progress.gif?7.1.1.1") repeat-x 0px 0px;*/
 }
 
 
 .tabs_panel .phone .call_report {
 	float: left;
-	margin-right: 10px;
-	line-height: 23px
+	line-height: 32px;
+	margin-left: 10px;
+}
+.tabs_panel .phone .call_report.empty {
+	margin-left: 0px;
 }
 .tabs_panel .phone .buttons {
 	margin: 0px;
@@ -7640,7 +7659,7 @@ html.rtl .popup_panel .close {
 	vertical-align: middle;
 	width: 16px;
 	height: 16px;
-	background: url("images/sprites.png?7.1.1") no-repeat -440px -200px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -440px -200px;
 
 
 	-webkit-transition: -webkit-transform 300ms ease 0s;
@@ -7696,10 +7715,12 @@ html.rtl .popup_panel .close {
 .tabs_panel .phone.active .text.direction {
 	max-width: 100px;
 	opacity: 1;
+	margin-left: 10px;
 }
 
 .tabs_panel .phone .input {
-	width: 0px;
+	display: none;
+	width: 160px;
 	border: 0px;
 	box-shadow: none;
 	padding: 0px 2px;
@@ -7711,7 +7732,15 @@ html.rtl .popup_panel .close {
 	transition: width 500ms ease 0s;
 }
 .tabs_panel .phone.active .input {
-	width: 160px;
+	display: inline-block;
+}
+.tabs_panel .phone input:focus {
+	outline: 0px;
+}
+.tabs_panel .phone .indicator {
+	position: absolute;
+	top: 0px;
+	right: 0px;
 }
 
 
@@ -7892,7 +7921,7 @@ html.no-boxshadow {
 
 .html_editor .toolbar .item .icon
 		{
-			background-image: url("images/sprites2x.png?7.1.1");
+			background-image: url("images/sprites2x.png?7.1.1.1");
 			background-size: 1120px 560px;
 		}
     }
@@ -8005,7 +8034,7 @@ html.rtl .search_block .search_span {
 	top: 2px;
 	height: 12px;
 	width: 12px;
-	background: url("images/sprites.png?7.1.1") no-repeat -200px -240px;
+	background: url("images/sprites.png?7.1.1.1") no-repeat -200px -240px;
 }
 
 

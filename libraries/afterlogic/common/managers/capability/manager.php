@@ -242,13 +242,11 @@ class CApiCapabilityManager extends AApiManager
 	 */
 	public function IsOutlookSyncSupported($oAccount = null)
 	{
-		return false; // TODO
-
 		$bResult = $this->IsNotLite() && $this->IsDavSupported() && $this->IsCollaborationSupported();
-		if ($bResult && $oAccount)
-		{
-			$bResult = $oAccount->User->GetCapa(ECapa::OUTLOOK_SYNC);
-		}
+//		if ($bResult && $oAccount)
+//		{
+//			$bResult = $oAccount->User->GetCapa(ECapa::OUTLOOK_SYNC);
+//		}
 
 		return $bResult;
 	}
