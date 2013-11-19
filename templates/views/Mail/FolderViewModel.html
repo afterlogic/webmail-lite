@@ -1,6 +1,6 @@
 <div class="item" data-bind="visible: visible(),
-	 css: {'selected': selected, 'selectable': selectable, 'existen': existen, 'subscribed': subscribed, 
-		'system': isSystem, 'user': !isSystem()}">
+	 css: { 'selected': selected, 'selectable': selectable, 'existen': existen, 'subscribed': subscribed,
+		'system': isSystem, 'user': !isSystem(), 'virtualEmpty': virtualEmpty}">
 	<a href="javascript: void(0);" class="title" data-bind="
 		css: {'recivedAnim': recivedAnim()},
 		attr: {href: routingHash},
@@ -10,9 +10,10 @@
 		<!--<span class="count" data-bind="visible: enableEmptyFolder, click: emptyFolder">e</span>-->
 		<span class="count" data-bind="visible: messageCountToShow() > 0, text: messageCountToShow(),
 			  css: {'unseen': showUnseenMessages}"></span>
-		<span class="name">
+		<span class="name fade">
 			<span class="icon" data-bind="css: 'type' + type()"></span>
-			<span class="text" data-bind="text: displayName"></span>
+			<span class="text animGoal" data-bind="text: displayName"></span>
+			<!--<span class="fade" data-bind="css: {'fade_clean': !messageCountToShow(), 'fade_count': messageCountToShow() && !selected, 'fade_selected': selected}"></span>-->
 		</span>
 		<!--<span class="count" data-bind="visible: newMessages().lenght > 0, text:  newMessages().lenght"></span>-->
 	</a>
@@ -20,7 +21,7 @@
 		<span class="title">
 			<span class="name">
 				<span class="icon" data-bind="css: 'type' + type()"></span>
-				<span class="text" data-bind="text: displayName"></span>
+				<span class="text animGoal" data-bind="text: displayName"></span>
 			</span>
 		</span>
 		<!--<span class="count" data-bind="visible: newMessages().lenght > 0, text:  newMessages().lenght"></span>-->

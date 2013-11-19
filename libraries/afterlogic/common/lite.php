@@ -7,7 +7,8 @@
 
 	$this->SetConf('WebMail/AllowUsersAddNewAccounts', false);
 	$this->SetConf('Calendar/AllowCalendar', false);
-	$this->SetConf('Contacts/GlobalAddressBook/Mode', EContactsGABMode::Off);
-	$this->SetConf('Contacts/GlobalAddressBook/Sql/Visibility', EContactsGABVisibility::Off);
+	$this->SetConf('Files/AllowFiles', false);
+	$this->SetConf('Helpdesk/AllowHelpdesk', false);
+	$this->SetConf('Contacts/GlobalAddressBookVisibility', EContactsGABVisibility::Off);
 	
 	

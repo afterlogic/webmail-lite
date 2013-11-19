@@ -200,60 +200,102 @@ class BodyStructure
 	}
 
 	/**
+	 * return string
+	 */
+	public function ContentLocation()
+	{
+		return (null === $this->sLocation) ? '' : $this->sLocation;
+	}
+
+	/**
 	 * return bool
 	 */
 	public function IsInline()
 	{
-		return (null === $this->sDisposition) ? false : ('inline' === strtolower($this->sDisposition));
+		return (null === $this->sDisposition) ?
+			(0 < strlen($this->ContentID())) : ('inline' === strtolower($this->sDisposition));
 	}
 
 	/**
-	 * @return \MailSo\Imap\BodyStructure|null
+	 * return bool
 	 */
-	public function SearchPlainPart()
+	public function IsImage()
 	{
-		$oReturn = null;
+		return 'image' === \MailSo\Base\Utils::ContentTypeType($this->ContentType(), $this->FileName());
+	}
+
+	/**
+	 * return bool
+	 */
+	public function IsArchive()
+	{
+		return 'archive' === \MailSo\Base\Utils::ContentTypeType($this->ContentType(), $this->FileName());
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function IsPdf()
+	{
+		return 'pdf' === \MailSo\Base\Utils::ContentTypeType($this->ContentType(), $this->FileName());
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function IsDoc()
+	{
+		return 'doc' === \MailSo\Base\Utils::ContentTypeType($this->ContentType(), $this->FileName());
+	}
+
+	/**
+	 * @return array|null
+	 */
+	public function SearchPlainParts()
+	{
+		$aReturn = array();
 		$aParts = $this->SearchByContentType('text/plain');
 		foreach ($aParts as $oPart)
 		{
 			if (!$oPart->isAttachBodyPart())
 			{
-				$oReturn = $oPart;
-				break;
+				$aReturn[] = $oPart;
 			}
 		}
-		return $oReturn;
+		return $aReturn;
 	}
 
 	/**
-	 * @return \MailSo\Imap\BodyStructure|null
+	 * @return array|null
 	 */
-	public function SearchHtmlPart()
+	public function SearchHtmlParts()
 	{
-		$oReturn = null;
+		$aReturn = array();
 		$aParts = $this->SearchByContentType('text/html');
+
 		foreach ($aParts as $oPart)
 		{
 			if (!$oPart->isAttachBodyPart())
 			{
-				$oReturn = $oPart;
-				break;
+				$aReturn[] = $oPart;
 			}
 		}
-		return $oReturn;
+
+		return $aReturn;
 	}
 
 	/**
-	 * @return \MailSo\Imap\BodyStructure|null
+	 * @return array|null
 	 */
-	public function SearchHtmlOrPlainPart()
+	public function SearchHtmlOrPlainParts()
 	{
-		$oResult = $this->SearchHtmlPart();
-		if (null === $oResult)
+		$mResult = $this->SearchHtmlParts();
+		if (null === $mResult || (is_array($mResult) && 0 === count($mResult)))
 		{
-			$oResult = $this->SearchPlainPart();
+			$mResult = $this->SearchPlainParts();
 		}
-		return $oResult;
+		
+		return $mResult;
 	}
 
 	/**
@@ -263,12 +305,26 @@ class BodyStructure
 	{
 		$sResult = '';
 
-		$oPart = $this->SearchHtmlPart();
-		$sResult = $oPart ? $oPart->Charset() : '';
-		if (0 === strlen($sResult))
+		$mHtmlParts = $this->SearchHtmlParts();
+		$mPlainParts = $this->SearchPlainParts();
+		$mParts = array();
+		if (is_array($mHtmlParts) && 0 < count($mHtmlParts))
 		{
-			$oPart = $this->SearchPlainPart();
+			$mParts = array_merge($mParts, $mHtmlParts);
+		}
+
+		if (is_array($mPlainParts) && 0 < count($mPlainParts))
+		{
+			$mParts = array_merge($mParts, $mPlainParts);
+		}
+
+		foreach ($mParts as $oPart)
+		{
 			$sResult = $oPart ? $oPart->Charset() : '';
+			if (!empty($sResult))
+			{
+				break;
+			}
 		}
 
 		if (0 === strlen($sResult))
@@ -296,7 +352,6 @@ class BodyStructure
 	protected function isAttachBodyPart()
 	{
 		$bResult = (
-//			(null !== $this->sFileName && 0 < strlen($this->sFileName)) ||
 			(null !== $this->sDisposition && 'attachment' === strtolower($this->sDisposition))
 		);
 
@@ -392,7 +447,7 @@ class BodyStructure
 	 * @param array $aParams
 	 * @param string $sParamName
 	 * @param string $sCharset = \MailSo\Base\Enumerations\Charset::UTF_8
-	 *
+	 * 
 	 * @return string
 	 */
 	private static function decodeAttrParamenter($aParams, $sParamName, $sCharset = \MailSo\Base\Enumerations\Charset::UTF_8)
@@ -435,7 +490,7 @@ class BodyStructure
 							$sValue = $aValueParts[1];
 						}
 					}
-
+					
 					$aFileNames[0] = $sValue;
 				}
 				else if ($sParamName.'*0*' !== $sName && preg_match('/^'.preg_quote($sParamName, '/').'\*([0-9]+)\*$/i', $sName, $aMatches) && 0 < strlen($aMatches[1]))
@@ -588,7 +643,7 @@ class BodyStructure
 					{
 						$sCharset = $aBodyParams['charset'];
 					}
-
+					
 					if (is_array($aBodyParams))
 					{
 						$sName = self::decodeAttrParamenter($aBodyParams, 'name', $sContentType);
@@ -601,7 +656,7 @@ class BodyStructure
 					{
 						return null;
 					}
-
+					
 					$sContentID = $aBodyStructure[3];
 				}
 
@@ -611,7 +666,7 @@ class BodyStructure
 					{
 						return null;
 					}
-
+					
 					$sDescription = $aBodyStructure[4];
 				}
 
@@ -759,7 +814,8 @@ class BodyStructure
 				$sMailEncodingName,
 				$sDisposition,
 				$aDispositionParams,
-				null === $sFileName || 0 === strlen($sFileName) ? $sName : $sFileName,
+				\MailSo\Base\Utils::Utf8Clear(
+					null === $sFileName || 0 === strlen($sFileName) ? $sName : $sFileName),
 				$sLanguage,
 				$sLocation,
 				$iSize,
@@ -791,7 +847,7 @@ class BodyStructure
 	/**
 	 * @param array $aList
 	 * @param string $sPartID
-	 *
+	 * 
 	 * @return array|null
 	 */
 	private static function findPartByIndexInArray(array $aList, $sPartID)

@@ -137,6 +137,28 @@ class CApiUsersDbStorage extends CApiUsersStorage
 	}
 
 	/**
+	 * @param string $sEmail
+	 * @return int
+	 */
+	public function GetAccountUsedSpaceInKBytesByEmail($sEmail)
+	{
+		$iResult = 0;
+		if ($this->oConnection->Execute($this->oCommandCreator->GetAccountUsedSpaceInKBytesByEmail($sEmail)))
+		{
+			$oRow = $this->oConnection->GetNextRecord();
+			if ($oRow)
+			{
+				$sQuotaUsageBytes = (string) $oRow->main_usage;
+				if (0 < strlen($sQuotaUsageBytes) && is_numeric($sQuotaUsageBytes))
+				{
+					$iResult = (int) ($sQuotaUsageBytes / 1024);
+				}
+			}
+		}
+		return $iResult;
+	}
+
+	/**
 	 * @param int $iIdentityId
 	 * @return CIdentity | bool
 	 */
@@ -292,6 +314,7 @@ class CApiUsersDbStorage extends CApiUsersStorage
 			{
 				$oAccount->IdUser = $iUserId;
 				$oAccount->User->IdUser = $iUserId;
+				$oAccount->User->CreatedTime = time();
 
 				$bUserExist = $this->oConnection->Execute($this->oCommandCreator->CreateUser($oAccount->User));
 			}
@@ -432,7 +455,7 @@ class CApiUsersDbStorage extends CApiUsersStorage
 							$bResult &= $this->oConnection->Execute($this->oCommandCreator->DeleteSenders($iUserId));
 							$bResult &= $this->oConnection->Execute($this->oCommandCreator->DeleteIdentitiesByUserId($iUserId));
 
-							// Calendar // TODO
+							// Calendar
 							$bResult &= $this->oConnection->Execute($this->oCommandCreator->DeleteCalendarEvents($iUserId));
 							$bResult &= $this->oConnection->Execute($this->oCommandCreator->DeleteCalendarCalendars($iUserId));
 							$bResult &= $this->oConnection->Execute($this->oCommandCreator->DeleteCalendarUserData($iUserId));

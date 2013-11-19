@@ -344,6 +344,7 @@ class CApiSieveManager extends AApiManager
 				{
 					case EFilterAction::DeleteFromServerImmediately:
 						$sAction = 'discard ;';
+						$sAction .= 'stop ;';
 						break;
 					case EFilterAction::MoveToFolder:
 						$sAction = 'fileinto "'.$this->quoteValue($sFolderFullName).'" ;'."\n";

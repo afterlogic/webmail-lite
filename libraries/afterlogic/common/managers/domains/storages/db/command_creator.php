@@ -125,8 +125,10 @@ class CApiDomainsCommandCreator extends api_CommandCreator
 
 		if (!empty($sSearchDesc))
 		{
+			$sSearchDescEsc = '\'%'.$this->escapeString(strtolower($sSearchDesc), true, true).'%\'';
+
 			$sWhere = empty($sWhere) ? ' WHERE ': $sWhere.' AND ';
-			$sWhere .= 'name LIKE '.$this->escapeString('%'.strtolower($sSearchDesc).'%');
+			$sWhere .= 'name LIKE '.$sSearchDescEsc;
 		}
 
 		$sSql = 'SELECT COUNT(id_domain) as domains_count FROM %sawm_domains%s';
@@ -230,8 +232,10 @@ class CApiDomainsCommandCreatorMySQL extends CApiDomainsCommandCreator
 
 		if (!empty($sSearchDesc))
 		{
+			$sSearchDescEsc = '\'%'.$this->escapeString(strtolower($sSearchDesc), true, true).'%\'';
+
 			$sWhere = empty($sWhere) ? ' WHERE ': $sWhere.' AND ';
-			$sWhere .= 'name LIKE '.$this->escapeString('%'.$sSearchDesc.'%');
+			$sWhere .= 'name LIKE '.$sSearchDescEsc;
 		}
 
 		$sOrderBy = empty($sOrderBy) ? 'name' : $sOrderBy;

@@ -144,6 +144,22 @@ class CApiMailAttachment
 	}
 
 	/**
+	 * @return bool
+	 */
+	public function IsVcard()
+	{
+		return in_array($this->MimeType(), array('text/vcard', 'text/x-vcard'));
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function IsIcal()
+	{
+		return in_array($this->MimeType(), array('text/calendar', 'text/x-calendar'));
+	}
+
+	/**
 	 * @return CApiMailAttachment
 	 */
 	public static function NewInstance()

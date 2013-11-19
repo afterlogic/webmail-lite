@@ -142,9 +142,7 @@ abstract class ap_Module
 	public function InitScreen($sInitType, ap_Screen &$oScreen)
 	{
 		$sTab = $this->oAdminPanel->Tab();
-		$sSSName = 'ap_Standard_Screen';
-		$sTSName = 'ap_Table_Screen';
-		if ($oScreen instanceof $sSSName)
+		if ($oScreen instanceof ap_Standard_Screen)
 		{
 			if ('first' === $sInitType)
 			{
@@ -159,7 +157,7 @@ abstract class ap_Module
 				#
 			}
 		}
-		else if ($oScreen instanceof $sTSName)
+		else if ($oScreen instanceof ap_Table_Screen)
 		{
 			if ('first' === $sInitType)
 			{

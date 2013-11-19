@@ -10,7 +10,7 @@ final class Version
 	/**
 	 * @var string
 	 */
-	const VERSION = '1.0.0';
+	const APP_VERSION = '1.2.2';
 
 	/**
 	 * @var string
@@ -20,9 +20,9 @@ final class Version
 	/**
 	 * @return string
 	 */
-	public static function Version()
+	public static function AppVersion()
 	{
-		return \MailSo\Version::VERSION;
+		return \MailSo\Version::APP_VERSION;
 	}
 
 	/**
@@ -30,7 +30,7 @@ final class Version
 	 */
 	public static function XMailer()
 	{
-		return \MailSo\Version::MIME_X_MAILER.'/'.\MailSo\Version::VERSION;
+		return \MailSo\Version::MIME_X_MAILER.'/'.\MailSo\Version::APP_VERSION;
 	}
 
 	/**

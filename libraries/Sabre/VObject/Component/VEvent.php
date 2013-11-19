@@ -8,8 +8,8 @@ use Sabre\VObject;
  *
  * This component contains some additional functionality specific for VEVENT's.
  *
- * @copyright Copyright (C) 2007-2012 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/)
+ * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
+ * @author Evert Pot (http://evertpot.com/)
  * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
 class VEvent extends VObject\Component {
@@ -55,7 +55,7 @@ class VEvent extends VObject\Component {
         } elseif (isset($this->DURATION)) {
             $effectiveEnd = clone $effectiveStart;
             $effectiveEnd->add( VObject\DateTimeParser::parseDuration($this->DURATION) );
-        } elseif ($this->DTSTART->getDateType() == VObject\Property\DateTime::DATE) {
+        } elseif (!$this->DTSTART->hasTime()) {
             $effectiveEnd = clone $effectiveStart;
             $effectiveEnd->modify('+1 day');
         } else {

@@ -14,8 +14,8 @@ use Sabre\DAV;
  * $lockPlugin = new Sabre\DAV\Locks\Plugin($lockBackend);
  * $server->addPlugin($lockPlugin);
  *
- * @copyright Copyright (C) 2007-2012 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/)
+ * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
+ * @author Evert Pot (http://evertpot.com/)
  * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
 class Plugin extends DAV\ServerPlugin {
@@ -621,11 +621,14 @@ class Plugin extends DAV\ServerPlugin {
      */
     protected function parseLockRequest($body) {
 
-        $xml = simplexml_load_string($body,null,LIBXML_NOWARNING);
-        $xml->registerXPathNamespace('d','DAV:');
+        $xml = simplexml_load_string(
+            DAV\XMLUtil::convertDAVNamespace($body),
+            null,
+            LIBXML_NOWARNING);
+        $xml->registerXPathNamespace('d','urn:DAV');
         $lockInfo = new LockInfo();
 
-        $children = $xml->children("DAV:");
+        $children = $xml->children("urn:DAV");
         $lockInfo->owner = (string)$children->owner;
 
         $lockInfo->token = DAV\UUIDUtil::getUUID();

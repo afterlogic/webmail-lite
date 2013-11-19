@@ -60,6 +60,14 @@ class CDbTable
 	/**
 	 * @return array
 	 */
+	public function &GetFields()
+	{
+		return $this->aFields;
+	}
+
+	/**
+	 * @return array
+	 */
 	public function GetFieldNames()
 	{
 		$aField = array();
@@ -109,11 +117,11 @@ class CDbTable
 	}
 
 	/**
-	 * @param CMySqlHelper $oHelper
+	 * @param IDbHelper $oHelper
 	 * @param bool $bAddDropTable = false
 	 * @return string
 	 */
-	public function ToString(CMySqlHelper $oHelper, $bAddDropTable = false)
+	public function ToString($oHelper, $bAddDropTable = false)
 	{
 		$sResult = '';
 		if ($bAddDropTable)
@@ -154,11 +162,11 @@ class CDbTable
 	}
 
 	/**
-	 * @param CMySqlHelper $oHelper
+	 * @param IDbHelper $oHelper
 	 * @param array $aFieldsToAdd
 	 * @return string
 	 */
-	public function GetAlterAddFields(CMySqlHelper $oHelper, $aFieldsToAdd)
+	public function GetAlterAddFields($oHelper, $aFieldsToAdd)
 	{
 		if (0 < count($aFieldsToAdd))
 		{
@@ -178,11 +186,11 @@ class CDbTable
 	}
 
 	/**
-	 * @param CMySqlHelper $oHelper
+	 * @param IDbHelper $oHelper
 	 * @param array $aFieldsToDelete
 	 * @return string
 	 */
-	public function GetAlterDeleteFields(CMySqlHelper $oHelper, $aFieldsToDelete)
+	public function GetAlterDeleteFields($oHelper, $aFieldsToDelete)
 	{
 		if (0 < count($aFieldsToDelete))
 		{
@@ -199,11 +207,11 @@ class CDbTable
 	}
 
 	/**
-	 * @param CMySqlHelper $oHelper
+	 * @param IDbHelper $oHelper
 	 * @param array $aIndexesToCreate
 	 * @return string
 	 */
-	public function GetAlterCreateIndexes(CMySqlHelper $oHelper, $aIndexesToCreate)
+	public function GetAlterCreateIndexes($oHelper, $aIndexesToCreate)
 	{
 		if (0 < count($aIndexesToCreate))
 		{
@@ -218,11 +226,11 @@ class CDbTable
 	}
 
 	/**
-	 * @param CMySqlHelper $oHelper
+	 * @param IDbHelper $oHelper
 	 * @param string $sIndexesName
 	 * @return string
 	 */
-	public function GetAlterDeleteIndexes(CMySqlHelper $oHelper, $sIndexesName)
+	public function GetAlterDeleteIndexes($oHelper, $sIndexesName)
 	{
 		if (!empty($sIndexesName))
 		{
@@ -313,19 +321,19 @@ class CDbField
 
 	/**
 	 * @param string $sTableName
-	 * @param CMySqlHelper $oHelper
+	 * @param IDbHelper $oHelper
 	 * @return string
 	 */
-	public function ToAlterString($sTableName, CMySqlHelper $oHelper)
+	public function ToAlterString($sTableName, $oHelper)
 	{
 		return sprintf('ALTER TABLE %s ADD %s',
 			$oHelper->EscapeColumn($sTableName), $this->ToString($oHelper));
 	}
 
 	/**
-	 * @return striong
+	 * @return string
 	 */
-	public function ToString(CMySqlHelper $oHelper)
+	public function ToString($oHelper)
 	{
 		$sResult = $oHelper->EscapeColumn($this->sName).' ';
 		switch ($this->iType)
@@ -484,9 +492,9 @@ class CDbKey
 	}
 
 	/**
-	 * @return striong
+	 * @return string
 	 */
-	public function ToString(CMySqlHelper $oHelper, $sTableName)
+	public function ToString($oHelper, $sTableName)
 	{
 		$sResult = '';
 		if (0 < count($this->aFields))
@@ -557,11 +565,11 @@ class CDbFunction
 	}
 
 	/**
-	 * @param CMySqlHelper $oHelper
+	 * @param IDbHelper $oHelper
 	 * @param bool $bAddDropFunction = false
 	 * @return string
 	 */
-	public function ToString(CMySqlHelper $oHelper, $bAddDropFunction = false)
+	public function ToString($oHelper, $bAddDropFunction = false)
 	{
 		$sResult = '';
 		if ($bAddDropFunction)

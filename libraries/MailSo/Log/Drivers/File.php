@@ -15,73 +15,51 @@ class File extends \MailSo\Log\Driver
 	private $sLoggerFileName;
 
 	/**
-	 * @var bool
-	 */
-	private $bUseWriteCache;
-
-	/**
 	 * @var string
 	 */
 	private $sCrLf;
-
-	/**
-	 * @var array
-	 */
-	private $aWriteCache;
-
+	
 	/**
 	 * @access protected
 	 *
 	 * @param string $sLoggerFileName
-	 * @param bool $bUseWriteCache = false
 	 * @param string $sCrLf = "\r\n"
 	 */
-	protected function __construct($sLoggerFileName, $bUseWriteCache = false, $sCrLf = "\r\n")
+	protected function __construct($sLoggerFileName, $sCrLf = "\r\n")
 	{
 		parent::__construct();
 
 		$this->sLoggerFileName = $sLoggerFileName;
-		$this->bUseWriteCache = $bUseWriteCache;
 		$this->sCrLf = $sCrLf;
-		$this->aWriteCache = array();
 	}
 
 	/**
 	 * @param string $sLoggerFileName
-	 * @param bool $bUseWriteCache = false
+	 */
+	public function SetLoggerFileName($sLoggerFileName)
+	{
+		$this->sLoggerFileName = $sLoggerFileName;
+	}
+
+	/**
+	 * @param string $sLoggerFileName
 	 * @param string $sCrLf = "\r\n"
 	 *
 	 * @return \MailSo\Log\Drivers\File
 	 */
-	public static function NewInstance($sLoggerFileName, $bUseWriteCache = false, $sCrLf = "\r\n")
+	public static function NewInstance($sLoggerFileName, $sCrLf = "\r\n")
 	{
-		return new self($sLoggerFileName, $bUseWriteCache, $sCrLf);
+		return new self($sLoggerFileName, $sCrLf);
 	}
 
 	/**
-	 * @param string $sDesc
+	 * @param string|array $mDesc
 	 *
 	 * @return bool
 	 */
-	protected function writeImplementation($sDesc)
+	protected function writeImplementation($mDesc)
 	{
-		$bResult = false;
-		if ($this->bUseWriteCache)
-		{
-			if (0 === count($this->aWriteCache))
-			{
-				\register_shutdown_function(array(&$this, '__cacheShutDown'));
-			}
-
-			$this->aWriteCache[] = $sDesc;
-			$bResult = true;
-		}
-		else
-		{
-			$bResult = $this->writeToLogFile($sDesc);
-		}
-
-		return $bResult;
+		return $this->writeToLogFile($mDesc);
 	}
 
 	/**
@@ -93,32 +71,17 @@ class File extends \MailSo\Log\Driver
 	}
 
 	/**
-	 * @param string $sDesc
+	 * @param string|array $mDesc
 	 *
 	 * @return bool
 	 */
-	private function writeToLogFile($sDesc)
+	private function writeToLogFile($mDesc)
 	{
-		return \error_log($sDesc.$this->sCrLf, 3, $this->sLoggerFileName);
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function WriteEmptyLine()
-	{
-		return $this->writeImplementation('');
-	}
-
-	/**
-	 * @return void
-	 */
-	public function __cacheShutDown()
-	{
-		if (0 < count($this->aWriteCache))
+		if (is_array($mDesc))
 		{
-			$this->writeToLogFile(\implode($this->sCrLf, $this->aWriteCache));
-			$this->aWriteCache = array();
+			$mDesc = \implode($this->sCrLf, $mDesc);
 		}
+		
+		return \error_log($mDesc.$this->sCrLf, 3, $this->sLoggerFileName);
 	}
 }

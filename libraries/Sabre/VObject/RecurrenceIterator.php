@@ -41,8 +41,10 @@ namespace Sabre\VObject;
  * you may get unexpected results. The effect is that in some applications the
  * specified recurrence may look incorrect, or is missing.
  *
- * @copyright Copyright (C) 2007-2012 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/)
+ * The recurrence iterator also does not yet support THISANDFUTURE.
+ *
+ * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
+ * @author Evert Pot (http://evertpot.com/)
  * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
 class RecurrenceIterator implements \Iterator {
@@ -69,7 +71,6 @@ class RecurrenceIterator implements \Iterator {
      * @var DateTime
      */
     public $currentDate;
-
 
     /**
      * List of dates that are excluded from the rules.
@@ -104,7 +105,6 @@ class RecurrenceIterator implements \Iterator {
      * @var array
      */
     public $overriddenEvents = array();
-
 
     /**
      * Frequency is one of: secondly, minutely, hourly, daily, weekly, monthly,
@@ -297,6 +297,13 @@ class RecurrenceIterator implements \Iterator {
     private $nextDate;
 
     /**
+     * This counts the number of overridden events we've handled so far
+     *
+     * @var int
+     */
+    private $handledOverridden = 0;
+
+    /**
      * Creates the iterator
      *
      * You should pass a VCALENDAR component, as well as the UID of the event
@@ -308,7 +315,7 @@ class RecurrenceIterator implements \Iterator {
     public function __construct(Component $vcal, $uid=null) {
 
         if (is_null($uid)) {
-            if ($vcal->name === 'VCALENDAR') {
+            if ($vcal instanceof Component\VCalendar) {
                 throw new \InvalidArgumentException('If you pass a VCALENDAR object, you must pass a uid argument as well');
             }
             $components = array($vcal);
@@ -326,8 +333,21 @@ class RecurrenceIterator implements \Iterator {
                 }
             }
         }
+
+        ksort($this->overriddenEvents);
+
         if (!$this->baseEvent) {
-            throw new \InvalidArgumentException('Could not find a base event with uid: ' . $uid);
+            // No base event was found. CalDAV does allow cases where only
+            // overridden instances are stored.
+            //
+            // In this barticular case, we're just going to grab the first
+            // event and use that instead. This may not always give the
+            // desired result.
+            if (!count($this->overriddenEvents)) {
+                throw new \InvalidArgumentException('Could not find an event with uid: ' . $uid);
+            }
+            ksort($this->overriddenEvents, SORT_NUMERIC);
+            $this->baseEvent = array_shift($this->overriddenEvents);
         }
 
         $this->startDate = clone $this->baseEvent->DTSTART->getDateTime();
@@ -338,26 +358,22 @@ class RecurrenceIterator implements \Iterator {
         } else {
             $this->endDate = clone $this->startDate;
             if (isset($this->baseEvent->DURATION)) {
-                $this->endDate->add(DateTimeParser::parse($this->baseEvent->DURATION->value));
-            } elseif ($this->baseEvent->DTSTART->getDateType()===Property\DateTime::DATE) {
+                $this->endDate->add(DateTimeParser::parse((string)$this->baseEvent->DURATION));
+            } elseif (!$this->baseEvent->DTSTART->hasTime()) {
                 $this->endDate->modify('+1 day');
             }
         }
         $this->currentDate = clone $this->startDate;
 
-        $rrule = (string)$this->baseEvent->RRULE;
-
-        $parts = explode(';', $rrule);
+        $rrule = $this->baseEvent->RRULE;
 
         // If no rrule was specified, we create a default setting
         if (!$rrule) {
             $this->frequency = 'daily';
             $this->count = 1;
-        } else foreach($parts as $part) {
+        } else foreach($rrule->getParts() as $key=>$value) {
 
-            list($key, $value) = explode('=', $part, 2);
-
-            switch(strtoupper($key)) {
+            switch($key) {
 
                 case 'FREQ' :
                     if (!in_array(
@@ -398,39 +414,39 @@ class RecurrenceIterator implements \Iterator {
                     break;
 
                 case 'BYSECOND' :
-                    $this->bySecond = explode(',', $value);
+                    $this->bySecond = (array)$value;
                     break;
 
                 case 'BYMINUTE' :
-                    $this->byMinute = explode(',', $value);
+                    $this->byMinute = (array)$value;
                     break;
 
                 case 'BYHOUR' :
-                    $this->byHour = explode(',', $value);
+                    $this->byHour = (array)$value;
                     break;
 
                 case 'BYDAY' :
-                    $this->byDay = explode(',', strtoupper($value));
+                    $this->byDay = (array)$value;
                     break;
 
                 case 'BYMONTHDAY' :
-                    $this->byMonthDay = explode(',', $value);
+                    $this->byMonthDay = (array)$value;
                     break;
 
                 case 'BYYEARDAY' :
-                    $this->byYearDay = explode(',', $value);
+                    $this->byYearDay = (array)$value;
                     break;
 
                 case 'BYWEEKNO' :
-                    $this->byWeekNo = explode(',', $value);
+                    $this->byWeekNo = (array)$value;
                     break;
 
                 case 'BYMONTH' :
-                    $this->byMonth = explode(',', $value);
+                    $this->byMonth = (array)$value;
                     break;
 
                 case 'BYSETPOS' :
-                    $this->bySetPos = explode(',', $value);
+                    $this->bySetPos = (array)$value;
                     break;
 
                 case 'WKST' :
@@ -519,9 +535,9 @@ class RecurrenceIterator implements \Iterator {
         unset($event->RDATE);
         unset($event->EXRULE);
 
-        $event->DTSTART->setDateTime($this->getDTStart(), $event->DTSTART->getDateType());
+        $event->DTSTART->setDateTime($this->getDTStart());
         if (isset($event->DTEND)) {
-            $event->DTEND->setDateTime($this->getDtEnd(), $event->DTSTART->getDateType());
+            $event->DTEND->setDateTime($this->getDtEnd());
         }
         if ($this->counter > 0) {
             $event->{'RECURRENCE-ID'} = (string)$event->DTSTART;
@@ -552,8 +568,18 @@ class RecurrenceIterator implements \Iterator {
         if (!is_null($this->count)) {
             return $this->counter < $this->count;
         }
-        if (!is_null($this->until)) {
-            return $this->currentDate <= $this->until;
+        if (!is_null($this->until) && $this->currentDate > $this->until) {
+
+            // Need to make sure there's no overridden events past the
+            // until date.
+            foreach($this->overriddenEvents as $overriddenEvent) {
+
+                if ($overriddenEvent->DTSTART->getDateTime() >= $this->currentDate) {
+
+                    return true;
+                }
+            }
+            return false;
         }
         return true;
 
@@ -608,92 +634,105 @@ class RecurrenceIterator implements \Iterator {
      */
     public function next() {
 
-        /*
-        if (!is_null($this->count) && $this->counter >= $this->count) {
-            $this->currentDate = null;
-        }*/
-
-
         $previousStamp = $this->currentDate->getTimeStamp();
 
-        while(true) {
+        // Finding the next overridden event in line, and storing that for
+        // later use.
+        $overriddenEvent = null;
+        $overriddenDate = null;
+        $this->currentOverriddenEvent = null;
 
-            $this->currentOverriddenEvent = null;
+        foreach($this->overriddenEvents as $index=>$event) {
+            if ($index > $previousStamp) {
+                $overriddenEvent = $event;
+                $overriddenDate = clone $event->DTSTART->getDateTime();
+                break;
+            }
+        }
 
-            // If we have a next date 'stored', we use that
-            if ($this->nextDate) {
+        // If we have a stored 'next date', we will use that.
+        if ($this->nextDate) {
+            if (!$overriddenDate || $this->nextDate < $overriddenDate) {
                 $this->currentDate = $this->nextDate;
                 $currentStamp = $this->currentDate->getTimeStamp();
                 $this->nextDate = null;
             } else {
-
-                // Otherwise, we calculate it
-                switch($this->frequency) {
-
-                    case 'hourly' :
-                        $this->nextHourly();
-                        break;
-
-                    case 'daily' :
-                        $this->nextDaily();
-                        break;
-
-                    case 'weekly' :
-                        $this->nextWeekly();
-                        break;
-
-                    case 'monthly' :
-                        $this->nextMonthly();
-                        break;
-
-                    case 'yearly' :
-                        $this->nextYearly();
-                        break;
-
-                }
-                $currentStamp = $this->currentDate->getTimeStamp();
-
-                // Checking exception dates
-                foreach($this->exceptionDates as $exceptionDate) {
-                    if ($this->currentDate == $exceptionDate) {
-                        $this->counter++;
-                        continue 2;
-                    }
-                }
-                foreach($this->overriddenDates as $overriddenDate) {
-                    if ($this->currentDate == $overriddenDate) {
-                        continue 2;
-                    }
-                }
-
+                $this->currentDate = clone $overriddenDate;
+                $this->currentOverriddenEvent = $overriddenEvent;
             }
+            $this->counter++;
+            return;
+        }
 
-            // Checking overridden events
-            foreach($this->overriddenEvents as $index=>$event) {
-                if ($index > $previousStamp && $index <= $currentStamp) {
+        while(true) {
 
-                    // We're moving the 'next date' aside, for later use.
-                    $this->nextDate = clone $this->currentDate;
+            // Otherwise, we find the next event in the normal RRULE
+            // sequence.
+            switch($this->frequency) {
 
-                    $this->currentDate = $event->DTSTART->getDateTime();
-                    $this->currentOverriddenEvent = $event;
-
+                case 'hourly' :
+                    $this->nextHourly();
                     break;
+
+                case 'daily' :
+                    $this->nextDaily();
+                    break;
+
+                case 'weekly' :
+                    $this->nextWeekly();
+                    break;
+
+                case 'monthly' :
+                    $this->nextMonthly();
+                    break;
+
+                case 'yearly' :
+                    $this->nextYearly();
+                    break;
+
+            }
+            $currentStamp = $this->currentDate->getTimeStamp();
+
+
+            // Checking exception dates
+            foreach($this->exceptionDates as $exceptionDate) {
+                if ($this->currentDate == $exceptionDate) {
+                    $this->counter++;
+                    continue 2;
                 }
             }
-
+            foreach($this->overriddenDates as $check) {
+                if ($this->currentDate == $check) {
+                    continue 2;
+                }
+            }
             break;
 
         }
 
-        /*
-        if (!is_null($this->until)) {
-            if($this->currentDate > $this->until) {
-                $this->currentDate = null;
-            }
-        }*/
 
+
+        // Is the date we have actually higher than the next overiddenEvent?
+        if ($overriddenDate && $this->currentDate > $overriddenDate) {
+            $this->nextDate = clone $this->currentDate;
+            $this->currentDate = clone $overriddenDate;
+            $this->currentOverriddenEvent = $overriddenEvent;
+            $this->handledOverridden++;
+        }
         $this->counter++;
+
+
+        /*
+         * If we have overridden events left in the queue, but our counter is
+         * running out, we should grab one of those.
+         */
+        if (!is_null($overriddenEvent) && !is_null($this->count) && count($this->overriddenEvents) - $this->handledOverridden >= ($this->count - $this->counter)) {
+
+            $this->currentOverriddenEvent = $overriddenEvent;
+            $this->currentDate = clone $overriddenDate;
+            $this->handledOverridden++;
+
+        }
 
     }
 
@@ -708,7 +747,9 @@ class RecurrenceIterator implements \Iterator {
             $this->currentDate->modify('+' . $this->interval . ' hours');
             return;
         }
+        // @codeCoverageIgnoreStart
     }
+    // @codeCoverageIgnoreEnd
 
     /**
      * Does the processing for advancing the iterator for daily frequency.

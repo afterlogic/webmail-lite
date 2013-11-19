@@ -22,7 +22,6 @@
  * @property int $DefaultDateFormat
  * @property bool $AllowRegistration
  * @property bool $AllowPasswordReset
- * @property bool $AllowWebMail
  * @property int $IncomingMailProtocol
  * @property string $IncomingMailServer
  * @property int $IncomingMailPort
@@ -43,10 +42,8 @@
  * @property bool $AllowUsersAddNewAccounts
  * @property int $Layout
  * @property int $SaveMail
- * @property bool $AllowContacts
  * @property int $ContactsPerPage
  * @property int $GlobalAddressBook
- * @property bool $AllowCalendar
  * @property bool $CalendarShowWeekEnds
  * @property int $CalendarWorkdayStarts
  * @property int $CalendarWorkdayEnds
@@ -57,6 +54,12 @@
  * @property string $ExternalHostNameOfLocalImap
  * @property string $ExternalHostNameOfLocalSmtp
  * @property string $ExternalHostNameOfDAVServer
+ * @property bool $UseThreads
+ * @property bool $AllowWebMail
+ * @property bool $AllowContacts
+ * @property bool $AllowCalendar
+ * @property bool $AllowFiles
+ * @property bool $AllowHelpdesk
  *
  * @package Domains
  * @subpackage Classes
@@ -88,6 +91,7 @@ class CDomain extends api_AContainer
 
 			'IsDefaultDomain'	=> false,
 			'IsInternal'		=> false,
+			'UseThreads'		=> true,
 			'OverrideSettings'	=> true
 		);
 
@@ -212,6 +216,7 @@ class CDomain extends api_AContainer
 
 			'Layout'	=> array('int', 'layout'),
 			'DetectSpecialFoldersWithXList'	=> array('int', 'xlist'),
+			'UseThreads'					=> array('bool', 'use_threads'),
 
 			// Contacts
 			'AllowContacts'			=> array('bool', 'allow_contacts'),
@@ -225,7 +230,10 @@ class CDomain extends api_AContainer
 			'CalendarWorkdayEnds'	=> array('int', 'cal_workday_ends'),
 			'CalendarShowWorkDay'	=> array('bool', 'cal_show_workday'),
 			'CalendarWeekStartsOn'	=> array('int', 'cal_week_starts_on'),
-			'CalendarDefaultTab'	=> array('int', 'cal_default_tab')
+			'CalendarDefaultTab'	=> array('int', 'cal_default_tab'),
+			
+			'AllowFiles'			=> array('bool', 'allow_files'),
+			'AllowHelpdesk'			=> array('bool', 'allow_helpdesk')
 		);
 	}
 
@@ -235,6 +243,12 @@ class CDomain extends api_AContainer
 	public function InitBeforeChange()
 	{
 		parent::InitBeforeChange();
+
+		if (0 < $this->IdTenant)
+		{
+			$this->OverrideSettings = true;
+		}
+
 		if (!$this->OverrideSettings && !$this->IsDefaultDomain)
 		{
 			/* @var $oApiDomainsManager CApiDomainsManager */
@@ -313,7 +327,10 @@ class CDomain extends api_AContainer
 			'CalendarWorkdayEnds',
 			'CalendarShowWorkDay',
 			'CalendarWeekStartsOn',
-			'CalendarDefaultTab'
+			'CalendarDefaultTab',
+			
+			'AllowFiles',
+			'AllowHelpdesk'
 		);
 	}
 
@@ -332,7 +349,6 @@ class CDomain extends api_AContainer
 			'AllowRegistration'		=> 'Common/AllowRegistration',
 			'AllowPasswordReset'	=> 'Common/AllowPasswordReset',
 
-			'AllowWebMail'			=> 'WebMail/AllowWebMail',
 			'IncomingMailProtocol'	=> 'WebMail/IncomingMailProtocol',
 			'IncomingMailServer'	=> 'WebMail/IncomingMailServer',
 			'IncomingMailPort'		=> 'WebMail/IncomingMailPort',
@@ -361,17 +377,21 @@ class CDomain extends api_AContainer
 			'Layout'	=> 'WebMail/Layout',
 			'DetectSpecialFoldersWithXList'	=> 'WebMail/DetectSpecialFoldersWithXList',
 
-			'AllowContacts'			=> 'Contacts/AllowContacts',
 			'ContactsPerPage'		=> 'Contacts/ContactsPerPage',
-			'GlobalAddressBook'		=> 'Contacts/GlobalAddressBook/Sql/Visibility',
+			'GlobalAddressBook'		=> 'Contacts/GlobalAddressBookVisibility',
 
-			'AllowCalendar'			=> 'Calendar/AllowCalendar',
 			'CalendarShowWeekEnds'	=> 'Calendar/ShowWeekEnds',
 			'CalendarWorkdayStarts'	=> 'Calendar/WorkdayStarts',
 			'CalendarWorkdayEnds'	=> 'Calendar/WorkdayEnds',
 			'CalendarShowWorkDay'	=> 'Calendar/ShowWorkDay',
 			'CalendarWeekStartsOn'	=> 'Calendar/WeekStartsOn',
 			'CalendarDefaultTab'	=> 'Calendar/DefaultTab',
+
+			'AllowWebMail'			=> 'WebMail/AllowWebMail',
+			'AllowContacts'			=> 'Contacts/AllowContacts',
+			'AllowCalendar'			=> 'Calendar/AllowCalendar',
+			'AllowFiles'			=> 'Files/AllowFiles',
+			'AllowHelpdesk'			=> 'Helpdesk/AllowHelpdesk',
 		);
 	}
 }

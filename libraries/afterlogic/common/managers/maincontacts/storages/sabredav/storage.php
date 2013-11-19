@@ -12,34 +12,9 @@
 class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 {
 	/**
-	 * @var api_Settings
-	 */
-	protected $Settings;
-
-	/**
 	 * @var string
 	 */
 	public $Principal;
-
-	/**
-	 * @var bool
-	 */
-	protected $Connected;
-
-	/**
-	 * @var string
-	 */
-	protected $User;
-
-	/**
-	 * @var string
-	 */
-	protected $TimeZone;
-
-	/**
-	 * @var string
-	 */
-	protected $DbPrefix;
 
 	/**
 	 * @var CAccount
@@ -69,13 +44,7 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 	{
 		parent::__construct('sabredav', $oManager);
 
-		$this->Settings = CApi::GetSettings();
-		$this->User = null;
 		$this->Account = null;
-		$this->DbPrefix = $this->Settings->GetConf('Common/DBPrefix');
-		$this->Connected = false;
-
-		$this->CalendarHomeSet = '';
 
 		$this->aAddressBooksCache = array();
 		$this->aContactItemsCache = array();
@@ -94,39 +63,31 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 	public function InitByAccount($oAccount)
 	{
 		$bResult = false;
-		if ($oAccount != null && ($this->User != $oAccount->Email ||
-			$this->Account->Email != $oAccount->Email))
+		if ($oAccount != null && $this->Account == null || $this->Account->Email != $oAccount->Email)
 		{
 			$this->Account = $oAccount;
-			$this->User = $oAccount->Email;
+			$this->aAddressBooksCache = array();
+			$this->aContactItemsCache = array();
+			$this->aGroupItemsCache = array();
 
-			if ($this->Account)
+			$this->ContactsCache = array();
+			$this->GroupsCache = array();
+
+			$this->Server = new \afterlogic\DAV\Server();
+			
+			$this->Server->getPlugin('auth')->setCurrentAccount($oAccount);
+			\afterlogic\DAV\Auth\Backend\Helper::CheckPrincipals($oAccount->Email);
+
+			$oPrincipal = null;
+			$oPrincipalCollection = $this->Server->tree->getNodeForPath('principals');
+			if ($oPrincipalCollection->childExists($oAccount->Email))
 			{
-				$this->aAddressBooksCache = array();
-				$this->aContactItemsCache = array();
-				$this->aGroupItemsCache = array();
-
-				$this->ContactsCache = array();
-				$this->GroupsCache = array();
-
-				$this->Server = new \afterlogic\DAV\Server();
-				$oPdo = CApi::GetPDO();
-				$oHelper = new \afterlogic\DAV\Auth\Backend\Helper($oPdo, $this->DbPrefix);
-				$oHelper->CheckPrincipals($oAccount->Email);
-
-				$oPrincipal = null;
-				$oPrincipalCollection = $this->Server->tree->getNodeForPath('principals');
-				if ($oPrincipalCollection->childExists($this->User))
-				{
-					$oPrincipal = $oPrincipalCollection->getChild($this->User);
-				}
-				if (isset($oPrincipal))
-				{
-					$aProperties = $oPrincipal->getProperties(array('uri'));
-					$this->Principal = $aProperties['uri'];
-				}
-
-				$this->Connected = true;
+				$oPrincipal = $oPrincipalCollection->getChild($oAccount->Email);
+			}
+			if (isset($oPrincipal))
+			{
+				$aProperties = $oPrincipal->getProperties(array('uri'));
+				$this->Principal = $aProperties['uri'];
 			}
 		}
 
@@ -164,14 +125,15 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 	/**
 	 * @param int $iUserId
 	 * @param mixed $mContactId
+	 * @param string $sAddressBookName
 	 * @return CContact | false
 	 */
-	public function GetContactById($iUserId, $mContactId)
+	public function GetContactById($iUserId, $mContactId, $sAddressBookName = \afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME)
 	{
 		$oContact = false;
 		if($this->Init($iUserId))
 		{
-			$oAddressBook = $this->getAddressBook($iUserId, \afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
+			$oAddressBook = $this->getAddressBook($iUserId, $sAddressBookName);
 			$oContactItem = $this->geItem($iUserId, $oAddressBook, $mContactId);
 			if ($oContactItem)
 			{
@@ -205,8 +167,18 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 	 */
 	public function GetContactByStrId($iUserId, $sContactStrId)
 	{
-		$this->GetContactById($iUserId, $sContactStrId);
+		return $this->GetContactById($iUserId, $sContactStrId);
 	}
+	
+	/**
+	 * @param int $iUserId
+	 * @param string $sContactStrId
+	 * @return CContact
+	 */
+	public function GetSuggestContactByEmail($iUserId, $sContactStrId)
+	{
+		return $this->GetContactByEmail($iUserId, $sContactStrId);
+	}	
 
 	/**
 	 * @param CContact $oContact
@@ -387,25 +359,25 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 				foreach ($aItems as $oItem)
 				{
 					$sItemId = $oItem->getName();
-					$vCard = false;
+					$oVCard = false;
 					try
 					{
-						$vCard = \Sabre\VObject\Reader::read($oItem->get());
+						$oVCard = \Sabre\VObject\Reader::read($oItem->get());
 					}
 					catch(Exception $ex)
 					{
 						CApi::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
 					}
-					if ($vCard)
+					if ($oVCard)
 					{
 						$sFullName = $sFirstName = $sLastName = $sTitle = $sNickName = '';
-						if (isset($vCard->FN))
+						if (isset($oVCard->FN))
 						{
-							$sFullName = $vCard->FN->value;
+							$sFullName = (string)$oVCard->FN;
 						}
-						if (isset($vCard->N))
+						if (isset($oVCard->N))
 						{
-							$aNames = explode(';', $vCard->N->value);
+							$aNames = $oVCard->N->getParts();
 							if (!empty($aNames[0]))
 							{
 								$sLastName = $aNames[0];
@@ -419,17 +391,17 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 								$sTitle = $aNames[3];
 							}
 						}
-						if (isset($vCard->NICKNAME))
+						if (isset($oVCard->NICKNAME))
 						{
-							$sNickName = $vCard->NICKNAME->value;
+							$sNickName = (string)$oVCard->NICKNAME;
 						}
 
 						$bFindEmail = false;
-						if (isset($vCard->EMAIL))
+						if (isset($oVCard->EMAIL))
 						{
-							foreach($vCard->EMAIL as $oEmail)
+							foreach($oVCard->EMAIL as $oEmail)
 							{
-								if (stripos($oEmail->value, $sSearch) !== false)
+								if (stripos((string)$oEmail, $sSearch) !== false)
 								{
 									$bFindEmail = true;
 									break;
@@ -438,10 +410,10 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 						}
 
 						$sCategories = '';
-						if (isset($vCard->CATEGORIES))
+						if (isset($oVCard->CATEGORIES))
 						{
-							$sCategories = $vCard->CATEGORIES->value;
-							$aCategories = explode(',', $vCard->CATEGORIES->value);
+							$sCategories = (string)$oVCard->CATEGORIES;
+							$aCategories = explode(',', (string)$oVCard->CATEGORIES);
 							foreach($aCategories as $sCategory)
 							{
 								$sCategory = trim($sCategory);
@@ -460,14 +432,14 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 							(empty($sGroupId) || (!empty($sGroupId) && strpos($sCategories, $sGroupId) !== false)))
 						{
 							$oContactItem = new CContactListItem();
-							$oContactItem->InitBySabreCardDAVCard($vCard);
+							$oContactItem->InitBySabreCardDAVCard($oVCard);
 							$oContactItem->Id = $sItemId;
 							$oContactItem->ETag = $oItem->getETag();
 							$aResult[] = $oContactItem;
 							unset($oContactItem);
 						}
 					}
-					unset($vCard);
+					unset($oVCard);
 				}
 				$this->ContactsCache[$sName] = $aResult;
 			}
@@ -490,22 +462,20 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 			foreach ($aItems as $oItem)
 			{
 				$sItemId = $oItem->getName();
-				$vCard = false;
+				$oVCard = false;
 				try
 				{
-					$vCard = \Sabre\VObject\Reader::read($oItem->get());
+					$oVCard = \Sabre\VObject\Reader::read($oItem->get());
 				}
 				catch(Exception $ex)
 				{
 					CApi::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
 				}
-				if ($vCard)
+				if ($oVCard)
 				{
-					$sCategories = '';
-					if (isset($vCard->CATEGORIES))
+					if (isset($oVCard->CATEGORIES))
 					{
-						$sCategories = $vCard->CATEGORIES->value;
-						$aCategories = explode(',', $vCard->CATEGORIES->value);
+						$aCategories = $oVCard->CATEGORIES->getParts();
 						foreach($aCategories as $sCategory)
 						{
 							$sCategory = trim($sCategory);
@@ -516,7 +486,7 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 						}
 					}
 				}
-				unset($vCard);
+				unset($oVCard);
 			}
 		}
 	}
@@ -585,25 +555,25 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 		foreach ($aContactItems as $oItem)
 		{
 			$sItemId = $oItem->getName();
-			$vCard = null;
+			$oVCard = null;
 			try
 			{
-				$vCard = \Sabre\VObject\Reader::read($oItem->get());
+				$oVCard = \Sabre\VObject\Reader::read($oItem->get());
 			}
 			catch(Exception $ex)
 			{
 				CApi::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
 			}
-			if (isset($vCard))
+			if (isset($oVCard))
 			{
 				$oContactItem = new CContactListItem();
-				$oContactItem->InitBySabreCardDAVCard($vCard);
+				$oContactItem->InitBySabreCardDAVCard($oVCard);
 				$oContactItem->Id = $oItem->getName();
 
 				$aResult[] = $oContactItem;
 				unset($oContactItem);
 			}
-			unset($vCard);
+			unset($oVCard);
 		}
 
 		if ($iOffset < 0 &&  $iRequestLimit < 0)
@@ -766,8 +736,7 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 	 */
 	public function GetGroupItemsCount($iUserId, $sSearch, $sFirstCharacter)
 	{
-		$iCount = count($this->getGroupItemsWithoutOrder($iUserId, $sSearch, $sFirstCharacter));
-		return $iCount;
+		return count($this->getGroupItemsWithoutOrder($iUserId, $sSearch, $sFirstCharacter));
 	}
 
 	/**
@@ -792,19 +761,19 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 		foreach ($aContactItems as $oItem)
 		{
 			$sItemId = $oItem->getName();
-			$vCard = null;
+			$oVCard = null;
 			try
 			{
-				$vCard = \Sabre\VObject\Reader::read($oItem->get());
+				$oVCard = \Sabre\VObject\Reader::read($oItem->get());
 			}
 			catch(Exception $ex)
 			{
 				CApi::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
 			}
-			if (isset($vCard))
+			if (isset($oVCard))
 			{
 				$oContactItem = new CContactListItem();
-				$oContactItem->InitBySabreCardDAVCard($vCard);
+				$oContactItem->InitBySabreCardDAVCard($oVCard);
 				$oContactItem->Id = $oItem->getName();
 
 				if (empty($sSearch) ||
@@ -816,7 +785,7 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 				unset($oContactItem);
 			}
 
-			unset($vCard);
+			unset($oVCard);
 		}
 
 		$this->sortItems($aResult, EContactSortField::Frequency, ESortOrder::ASC);
@@ -845,14 +814,14 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 			}
  */
 
-			$vCard = \Sabre\VObject\Reader::read($sData);
-			if ($vCard)
+			$oVCard = \Sabre\VObject\Reader::read($sData);
+			if ($oVCard)
 			{
-				CApiContactsVCardHelper::UpdateVCardFromContact($oContact, $vCard);
-				$oContactItem->put($vCard->serialize());
+				CApiContactsVCardHelper::UpdateVCardFromContact($oContact, $oVCard);
+				$oContactItem->put($oVCard->serialize());
 				$bResult = true;
 			}
-			unset($vCard);
+			unset($oVCard);
 		}
 
 		return $bResult;
@@ -896,8 +865,7 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 //						$sCategories = '';
 //						if (isset($vCard->CATEGORIES))
 //						{
-//							$sCategories = $vCard->CATEGORIES->value;
-//							$aCategories = explode(',', $vCard->CATEGORIES->value);
+//							$sCategories = $vCard->CATEGORIES->getParts();
 //							$aResultCategories = array();
 //							foreach ($aCategories as $sCategory)
 //							{
@@ -922,7 +890,7 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 //							$sCategories = $sGroupName;
 //						}
 //
-//						$vCard->CATEGORIES->value = $sCategories;
+//						$vCard->CATEGORIES->setValue($sCategories);
 //						$oContact->put($vCard->serialize());
 //					}
 //				}
@@ -935,14 +903,13 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 //						$oContact = $oAddressBook->GetChild($sContactId);
 //						$vCard = \Sabre\VObject\Reader::read($oContact->get());
 //
-//						$sCategories = '';
+//						$aResultCategories = array();
 //						if (isset($vCard->CATEGORIES))
 //						{
-//							$sCategories = $vCard->CATEGORIES->value;
+//							$sCategories = (string)$vCard->CATEGORIES;
 //							if (strpos($sCategories, $sGroupId) !== false)
 //							{
-//								$aCategories = explode(',', $vCard->CATEGORIES->value);
-//								$aResultCategories = array();
+//								$aCategories = $vCard->CATEGORIES->getParts());
 //								foreach($aCategories as $sCategory)
 //								{
 //									if ($oGroup->IdGroup !== $sCategory)
@@ -950,16 +917,8 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 //										$aResultCategories[] = $sCategory;
 //									}
 //								}
-//								$sCategories = implode(',', array_unique($aResultCategories));
 //							}
-//							if (empty($sCategories))
-//							{
-//								unset($vCard->CATEGORIES);
-//							}
-//							else
-//							{
-//								$vCard->CATEGORIES->value = $sCategories;
-//							}
+//							$vCard->CATEGORIES->setValue(array_unique($aResultCategories));
 //							$oContact->put($vCard->serialize());
 //						}
 //					}
@@ -989,32 +948,15 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 					$oContact->IdContactStr = $sUUID. '.vcf';
 				}
 
-				$vCard = new \Sabre\VObject\Component('VCARD');
-				CApiContactsVCardHelper::UpdateVCardFromContact($oContact, $vCard);
+				$oVCard = new \Sabre\VObject\Component\VCard();
+				CApiContactsVCardHelper::UpdateVCardFromContact($oContact, $oVCard);
 
-				$oAddressBook->createFile($oContact->IdContactStr, $vCard->serialize());
+				$oAddressBook->createFile($oContact->IdContactStr, $oVCard->serialize());
 				$bResult = true;
 			}
 
-			$sEmail = '';
-			switch($oContact->PrimaryEmail)
-			{
-				case EPrimaryEmailType::Home:
-					$sEmail = $oContact->HomeEmail;
-					break;
-				case EPrimaryEmailType::Business:
-					$sEmail = $oContact->BusinessEmail;
-					break;
-				case EPrimaryEmailType::Other:
-					$sEmail = $oContact->OtherEmail;
-					break;
-				default:
-					$sEmail = $oContact->HomeEmail;
-					break;
-
-			}
 			$oAddressBook = $this->getAddressBook($oContact->IdUser, \afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME);
-			$aContactsIds = $this->searchContactItemsByEmail($oContact->IdUser, $sEmail, $oAddressBook);
+			$aContactsIds = $this->searchContactItemsByEmail($oContact->IdUser, $oContact->ViewEmail, $oAddressBook);
 
 			$this->deleteContactsByAddressBook($oContact->IdUser, $aContactsIds, $oAddressBook);
 		}
@@ -1070,6 +1012,18 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 
 	/**
 	 * @param int $iUserId
+	 * @param array $aContactsIds
+	 * @return bool
+	 */
+	public function DeleteSuggestContacts($iUserId, $aContactsIds)
+	{
+		$this->Init($iUserId);
+		$oAddressBook = $this->getAddressBook($iUserId, \afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME);
+		return $this->deleteContactsByAddressBook($iUserId, $aContactsIds, $oAddressBook);
+	}
+	
+	/**
+	 * @param int $iUserId
 	 * @param array $aGroupsIds
 	 * @return bool
 	 */
@@ -1093,15 +1047,13 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 						if ($oAddressBook->childExists($sContactId))
 						{
 							$oContact = $oAddressBook->GetChild($sContactId);
-							$vCard = \Sabre\VObject\Reader::read($oContact->get());
+							$oVCard = \Sabre\VObject\Reader::read($oContact->get());
 
-							$sCategories = '';
-							if (isset($vCard->CATEGORIES))
+							if (isset($oVCard->CATEGORIES))
 							{
-								$sCategories = $vCard->CATEGORIES->value;
 								if (strpos($sCategories, $sGroupsId) !== false)
 								{
-									$aCategories = explode(',', $vCard->CATEGORIES->value);
+									$aCategories = $oVCard->CATEGORIES->getParts();
 									$aResultCategories = array();
 									foreach($aCategories as $sCategory)
 									{
@@ -1111,16 +1063,8 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 											$aResultCategories[] = $sCategory;
 										}
 									}
-									$sResultCategories = implode(',', $aResultCategories);
-									if (empty($sResultCategories))
-									{
-										unset($vCard->CATEGORIES);
-									}
-									else
-									{
-										$vCard->CATEGORIES->value = $sResultCategories;
-									}
-									$oContact->put($vCard->serialize());
+									$oVCard->CATEGORIES->setValue($aResultCategories);
+									$oContact->put($oVCard->serialize());
 									$this->aContactItemsCache[$sName][$oContact->getName()] = $oContact;
 								}
 							}
@@ -1154,19 +1098,19 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 			$mFindContact = false;
 			foreach ($aCollectedContactItems as $oCollectedContactItem)
 			{
-				$vCard = \Sabre\VObject\Reader::read($oCollectedContactItem->get());
-				if (isset($vCard->EMAIL))
+				$oVCard = \Sabre\VObject\Reader::read($oCollectedContactItem->get());
+				if (isset($oVCard->EMAIL))
 				{
-					foreach ($vCard->EMAIL as $oEmail)
+					foreach ($oVCard->EMAIL as $oEmail)
 					{
-						if (strtolower($oEmail->value) == strtolower($sEmail))
+						if (strtolower((string)$oEmail) == strtolower($sEmail))
 						{
 							$mFindContact = $oCollectedContactItem;
 							break;
 						}
 					}
 				}
-				unset($vCard);
+				unset($oVCard);
 			}
 
 			$aDefaultContactIds = $this->searchContactItemsByEmail($iUserId, $sEmail, $oDefautltAB);
@@ -1178,28 +1122,28 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 					$oContact = new CContact();
 					$oContact->FullName = $sName;
 					$oContact->HomeEmail = $sEmail;
-					$oContact->IdContact = $sUUID;
+					$oContact->IdContactStr = $sUUID;
 
-					$vCard = new \Sabre\VObject\Component('VCARD');
-					$vCard->{'X-AFTERLOGIC-USE-FREQUENCY'} = '1';
-					CApiContactsVCardHelper::UpdateVCardFromContact($oContact, $vCard);
+					$oVCard = new \Sabre\VObject\Component\VCard();
+					$oVCard->{'X-AFTERLOGIC-USE-FREQUENCY'} = '1';
+					CApiContactsVCardHelper::UpdateVCardFromContact($oContact, $oVCard);
 
-					$oCollectedAB->createFile($sUUID . '.vcf', $vCard->serialize());
+					$oCollectedAB->createFile($sUUID . '.vcf', $oVCard->serialize());
 					$bResult = true;
 				}
 				else if ($mFindContact instanceof \Sabre\CardDAV\Card)
 				{
-					$vCard = \Sabre\VObject\Reader::read($mFindContact->get());
-					if (isset($vCard->{'X-AFTERLOGIC-USE-FREQUENCY'}))
+					$oVCard = \Sabre\VObject\Reader::read($mFindContact->get());
+					if (isset($oVCard->{'X-AFTERLOGIC-USE-FREQUENCY'}))
 					{
-						$vCard->{'X-AFTERLOGIC-USE-FREQUENCY'}->value = (int)$vCard->{'X-AFTERLOGIC-USE-FREQUENCY'}->value + 1;
+						$oVCard->{'X-AFTERLOGIC-USE-FREQUENCY'} = (int)$oVCard->{'X-AFTERLOGIC-USE-FREQUENCY'}->getValue() + 1;
 					}
 					else
 					{
-						$vCard->{'X-AFTERLOGIC-USE-FREQUENCY'} = '1';
+						$oVCard->{'X-AFTERLOGIC-USE-FREQUENCY'} = '1';
 					}
-					$mFindContact->put($vCard->serialize());
-					unset($vCard);
+					$mFindContact->put($oVCard->serialize());
+					unset($oVCard);
 				}
 			}
 			else
@@ -1209,17 +1153,17 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 					$mDefaultContact = $this->geItem($iUserId, $oDefautltAB, $sDefaultContactId);
 					if ($mDefaultContact !== false)
 					{
-						$vCard = \Sabre\VObject\Reader::read($mDefaultContact->get());
-						if (isset($vCard->{'X-AFTERLOGIC-USE-FREQUENCY'}))
+						$oVCard = \Sabre\VObject\Reader::read($mDefaultContact->get());
+						if (isset($oVCard->{'X-AFTERLOGIC-USE-FREQUENCY'}))
 						{
-							$vCard->{'X-AFTERLOGIC-USE-FREQUENCY'}->value = (int)$vCard->{'X-AFTERLOGIC-USE-FREQUENCY'}->value + 1;
+							$oVCard->{'X-AFTERLOGIC-USE-FREQUENCY'} = (int)$oVCard->{'X-AFTERLOGIC-USE-FREQUENCY'}->getValue() + 1;
 						}
 						else
 						{
-							$vCard->{'X-AFTERLOGIC-USE-FREQUENCY'} = '1';
+							$oVCard->{'X-AFTERLOGIC-USE-FREQUENCY'} = '1';
 						}
-						$mDefaultContact->put($vCard->serialize());
-						unset($vCard);
+						$mDefaultContact->put($oVCard->serialize());
+						unset($oVCard);
 					}
 				}
 
@@ -1238,36 +1182,36 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 	 * @param array $aContactIds
 	 * @return bool
 	 */
-	public function DeleteContactsExceptIds($iUserId, $aContactIds)
-	{
-		$this->Init($iUserId);
-
-		$oAddressBook = $this->getAddressBook($iUserId, \afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
-		if ($oAddressBook)
-		{
-			$aContactItems = $this->getObjectItems($iUserId);
-			foreach ($aContactItems as $oContactItem)
-			{
-				$vCard = \Sabre\VObject\Reader::read($oContactItem->get());
-				if (isset($vCard->UID) && !in_array($vCard->UID->value, $aContactIds))
-				{
-					$oContactItem->delete();
-				}
-			}
-			return true;
-		}
-		return false;
-	}
+//	public function DeleteContactsExceptIds($iUserId, $aContactIds)
+//	{
+//		$this->Init($iUserId);
+//
+//		$oAddressBook = $this->getAddressBook($iUserId, \afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
+//		if ($oAddressBook)
+//		{
+//			$aContactItems = $this->getObjectItems($iUserId);
+//			foreach ($aContactItems as $oContactItem)
+//			{
+//				$vCard = \Sabre\VObject\Reader::read($oContactItem->get());
+//				if (isset($vCard->UID) && !in_array((string)$vCard->UID, $aContactIds))
+//				{
+//					$oContactItem->delete();
+//				}
+//			}
+//			return true;
+//		}
+//		return false;
+//	}
 
 	/**
 	 * @param int $iUserId
 	 * @param array $aGroupIds
 	 * @return bool
 	 */
-	public function DeleteGroupsExceptIds($iUserId, $aGroupIds)
-	{
-		return true;
-	}
+//	public function DeleteGroupsExceptIds($iUserId, $aGroupIds)
+//	{
+//		return true;
+//	}
 
 	/**
 	 * @return bool
@@ -1309,31 +1253,6 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 		return $bResult;
 	}
 
-	/**
-	 * @param CContact $oContact
-	 * @param array $mGroupId
-	 * @return bool
-	 */
-	public function AddContactToGroup($oContact, $aGroupIds)
-	{
-		$bResult = true;
-
-		return (bool) $bResult;
-	}
-
-	/**
-	 * @deprecated
-	 * @param mixed $mContactId
-	 * @param array $aGroupIds
-	 * @return bool
-	 */
-	public function DeleteContactFromGroup($mContactId, $aGroupIds)
-	{
-		$bResult = true;
-
-		return (bool) $bResult;
-	}
-	
 	/**
 	 * @param CGroup $oGroup
 	 * @param array $aContactIds

@@ -10,8 +10,8 @@ namespace Sabre\DAV;
  *
  * NOTE: This class is experimental, it's api will likely change in the future.
  *
- * @copyright Copyright (C) 2007-2012 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/)
+ * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
+ * @author Evert Pot (http://evertpot.com/)
  * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
 class Client {
@@ -59,6 +59,13 @@ class Client {
     protected $authType;
 
     /**
+     * Indicates if SSL verification is enabled or not.
+     *
+     * @var boolean
+     */
+    protected $verifyPeer;
+
+    /**
      * Constructor
      *
      * Settings are provided through the 'settings' argument. The following
@@ -103,13 +110,22 @@ class Client {
     /**
      * Add trusted root certificates to the webdav client.
      *
-     * The parameter certificates should be a absulute path to a file
+     * The parameter certificates should be a absolute path to a file
      * which contains all trusted certificates
      *
      * @param string $certificates
      */
     public function addTrustedCertificates($certificates) {
         $this->trustedCertificates = $certificates;
+    }
+
+    /**
+     * Enables/disables SSL peer verification
+     *
+     * @param boolean $value
+     */
+    public function setVerifyPeer($value) {
+        $this->verifyPeer = $value;
     }
 
     /**
@@ -304,6 +320,10 @@ class Client {
             CURLOPT_MAXREDIRS => 5,
         );
 
+        if($this->verifyPeer !== null) {
+            $curlSettings[CURLOPT_SSL_VERIFYPEER] = $this->verifyPeer;
+        }
+
         if($this->trustedCertificates) {
             $curlSettings[CURLOPT_CAINFO] = $this->trustedCertificates;
         }
@@ -311,7 +331,7 @@ class Client {
         switch ($method) {
             case 'HEAD' :
 
-                // do not read body with HEAD requests (this is neccessary because cURL does not ignore the body with HEAD
+                // do not read body with HEAD requests (this is necessary because cURL does not ignore the body with HEAD
                 // requests when the Content-Length header is given - which in turn is perfectly valid according to HTTP
                 // specs...) cURL does unfortunately return an error in this case ("transfer closed transfer closed with
                 // ... bytes remaining to read") this can be circumvented by explicitly telling cURL to ignore the
@@ -504,17 +524,19 @@ class Client {
      */
     public function parseMultiStatus($body) {
 
+        $body = XMLUtil::convertDAVNamespace($body);
+
         $responseXML = simplexml_load_string($body, null, LIBXML_NOBLANKS | LIBXML_NOCDATA);
         if ($responseXML===false) {
             throw new \InvalidArgumentException('The passed data is not valid XML');
         }
 
-        $responseXML->registerXPathNamespace('d', 'DAV:');
+        $responseXML->registerXPathNamespace('d', 'urn:DAV');
 
         $propResult = array();
 
         foreach($responseXML->xpath('d:response') as $response) {
-            $response->registerXPathNamespace('d', 'DAV:');
+            $response->registerXPathNamespace('d', 'urn:DAV');
             $href = $response->xpath('d:href');
             $href = (string)$href[0];
 
@@ -522,11 +544,14 @@ class Client {
 
             foreach($response->xpath('d:propstat') as $propStat) {
 
-                $propStat->registerXPathNamespace('d', 'DAV:');
+                $propStat->registerXPathNamespace('d', 'urn:DAV');
                 $status = $propStat->xpath('d:status');
                 list($httpVersion, $statusCode, $message) = explode(' ', (string)$status[0],3);
 
-                $properties[$statusCode] = XMLUtil::parseProperties(dom_import_simplexml($propStat), $this->propertyMap);
+                // Only using the propertymap for results with status 200.
+                $propertyMap = $statusCode==='200' ? $this->propertyMap : array();
+
+                $properties[$statusCode] = XMLUtil::parseProperties(dom_import_simplexml($propStat), $propertyMap);
 
             }
 

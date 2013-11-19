@@ -105,7 +105,7 @@ class FetchResponse
 
 	/**
 	 * @param string $sRfc822SubMimeIndex = ''
-	 *
+	 * 
 	 * @return \MailSo\Imap\BodyStructure|null
 	 */
 	public function GetFetchBodyStructure($sRfc822SubMimeIndex = '')
@@ -172,9 +172,9 @@ class FetchResponse
 		$sReturn = '';
 		$bNextIsValue = false;
 
-		$sRfc822SubMimeIndex = 0 < strlen($sRfc822SubMimeIndex) ? ''.$sRfc822SubMimeIndex.'.' : '';
+		$sRfc822SubMimeIndex = 0 < \strlen($sRfc822SubMimeIndex) ? ''.$sRfc822SubMimeIndex.'.' : '';
 
-		if (isset($this->oImapResponse->ResponseList[3]) && is_array($this->oImapResponse->ResponseList[3]))
+		if (isset($this->oImapResponse->ResponseList[3]) && \is_array($this->oImapResponse->ResponseList[3]))
 		{
 			foreach ($this->oImapResponse->ResponseList[3] as &$mItem)
 			{
@@ -184,7 +184,10 @@ class FetchResponse
 					break;
 				}
 
-				if (is_string($mItem) && ('BODY['.$sRfc822SubMimeIndex.'HEADER]' === $mItem || 0 === strpos($mItem, 'BODY['.$sRfc822SubMimeIndex.'HEADER.FIELDS')))
+				if (\is_string($mItem) && (
+					$mItem === 'BODY['.$sRfc822SubMimeIndex.'HEADER]' ||
+					0 === \strpos($mItem, 'BODY['.$sRfc822SubMimeIndex.'HEADER.FIELDS') ||
+					$mItem === 'BODY['.$sRfc822SubMimeIndex.'MIME]'))
 				{
 					$bNextIsValue = true;
 				}

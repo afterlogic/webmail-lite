@@ -79,7 +79,11 @@ class CApiUsersManager extends AApiManagerWithStorage
 					if (EMailProtocol::IMAP4 === $oAccount->IncomingMailProtocol)
 					{
 						$oAccount->EnableExtension(CAccount::SpamFolderExtension);
-						$oAccount->EnableExtension(CAccount::SpamLearningExtension);
+					}
+
+					if (CApi::GetConf('labs.webmail.disable-folders-manual-sort', false))
+					{
+						$oAccount->EnableExtension(CAccount::DisableFoldersManualSort);
 					}
 
 					if (CApi::GetConf('sieve', false))
@@ -200,6 +204,24 @@ class CApiUsersManager extends AApiManagerWithStorage
 	}
 
 	/**
+	 * @param string $sEmail
+	 * @return int
+	 */
+	public function GetAccountUsedSpaceInKBytesByEmail($sEmail)
+	{
+		$iResult = 0;
+		try
+		{
+			$iResult = $this->oStorage->GetAccountUsedSpaceInKBytesByEmail($sEmail);
+		}
+		catch (CApiBaseException $oException)
+		{
+			$this->setLastException($oException);
+		}
+		return $iResult;
+	}
+
+	/**
 	 * @param CIdentity &$oIdentity
 	 * @return bool
 	 */
@@ -226,6 +248,64 @@ class CApiUsersManager extends AApiManagerWithStorage
 		}
 
 		return $bResult;
+	}
+
+	/**
+	 * @param CAccount $oAccount
+	 * @param CTenant $oTenant
+	 * @param bool $bUpdate
+	 *
+	 * @return bool
+	 *
+	 * @throws CApiManagerException
+	 */
+	private function validateAccountSubscriptionLimits(&$oAccount, $oTenant, $bCreate = false)
+	{
+		if (CApi::GetConf('capa', false) && $oAccount && $oTenant)
+		{
+			$oSubscriptionsApi = CApi::Manager('subscriptions');
+			/* @var $oSubscriptionsApi CApiSubscriptionsManager */
+
+			$oTenantsApi = CApi::Manager('tenants');
+			/* @var $oTenantsApi CApiTenantsManager */
+
+			if ($oSubscriptionsApi && $oTenantsApi && $oAccount->IsDefaultAccount && !$oAccount->IsDisabled)
+			{
+				if (0 < $oAccount->User->IdSubscription)
+				{
+					$oSub = $oSubscriptionsApi->GetSubscriptionById($oAccount->User->IdSubscription);
+					if (/* @var $oSub CSubscription */ $oSub)
+					{
+						$aUsage = $oTenantsApi->GetSubscriptionUserUsage($oTenant->IdTenant,
+							$bCreate ? null : $oAccount->IdUser);
+
+						$iLimit = is_array($aUsage) && isset($aUsage[$oAccount->User->IdSubscription])
+							? $aUsage[$oAccount->User->IdSubscription] : 0;
+
+						if ($iLimit + 1 <= $oSub->Limit)
+						{
+							if ($bCreate)
+							{
+								$oAccount->User->Capa = $oSub->Capa;
+							}
+
+							return true;
+						}
+					}
+
+					if ($bCreate)
+					{
+						throw new CApiManagerException(Errs::TenantsManager_AccountCreateUserLimitReached);
+					}
+					else
+					{
+						throw new CApiManagerException(Errs::TenantsManager_AccountUpdateUserLimitReached);
+					}
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -279,17 +359,18 @@ class CApiUsersManager extends AApiManagerWithStorage
 							}
 							else
 							{
-								if (0 < $oTenant->UserCountLimit &&
-									$oTenant->UserCountLimit <= $oTenant->GetUserCount())
+								if (0 < $oTenant->UserCountLimit && $oTenant->UserCountLimit <= $oTenant->GetUserCount())
 								{
 									throw new CApiManagerException(Errs::TenantsManager_AccountCreateUserLimitReached);
 								}
+
+								$this->validateAccountSubscriptionLimits($oAccount, $oTenant, true);
 							}
 
 							if (0 < $oTenant->QuotaInMB)
 							{
 								$iSize = $oTenantsApi->GetTenantAllocatedSize($oTenant->IdTenant);
-								if (((int) ($oAccount->RealQuotaSize()/ 1024)) + $iSize > $oTenant->QuotaInMB)
+								if (((int) ($oAccount->RealQuotaSize() / 1024)) + $iSize > $oTenant->QuotaInMB)
 								{
 									throw new CApiManagerException(Errs::TenantsManager_QuotaLimitExided);
 								}
@@ -297,25 +378,49 @@ class CApiUsersManager extends AApiManagerWithStorage
 						}
 					}
 
-					/* @var $oApiWebmailManager CApiWebmailManager */
-					$oApiWebmailManager = CApi::Manager('webmail');
-
 					$bConnectValid = true;
 					$aConnectErrors = array(false, false);
 					if ($bWithMailConnection && !$oAccount->IsMailingList && !$oAccount->IsInternal)
 					{
-						$sNamespace = '';
-						$bConnectValid = $oApiWebmailManager->TestConnectionWithMailServer($aConnectErrors,
-							$oAccount->IncomingMailProtocol, $oAccount->IncomingMailLogin, $oAccount->IncomingMailPassword,
-							$oAccount->IncomingMailServer, $oAccount->IncomingMailPort, $oAccount->IncomingMailUseSSL, $sNamespace);
+						$bConnectValid = false;
+						$oLogger = \MailSo\Log\Logger::NewInstance()
+							->Add(
+								\MailSo\Log\Drivers\Callback::NewInstance(function ($sDesc) {
+									CApi::Log($sDesc);
+								})->DisableTimePrefix()
+							)
+							->AddForbiddenType(\MailSo\Log\Enumerations\Type::TIME);
 
-						$oAccount->Namespace = $sNamespace;
-					}
+						$iConnectTimeOut = CApi::GetConf('socket.connect-timeout', 10);
+						$iSocketTimeOut = CApi::GetConf('socket.get-timeout', 20);
 
-					if ($oAccount->IsInternal)
-					{
-						$oAccount->Namespace = '';
-						$oAccount->Delimiter = '/';
+						CApi::Plugin()->RunHook('webmail-imap-update-socket-timeouts',
+							array(&$iConnectTimeOut, &$iSocketTimeOut));
+
+						try
+						{
+							$oImapClient = \MailSo\Imap\ImapClient::NewInstance();
+							$oImapClient->SetTimeOuts($iConnectTimeOut, $iSocketTimeOut);
+							$oImapClient->SetLogger($oLogger);
+
+							$oImapClient->Connect($oAccount->IncomingMailServer, $oAccount->IncomingMailPort,
+								$oAccount->IncomingMailUseSSL
+									? \MailSo\Net\Enumerations\ConnectionSecurityType::SSL
+									: \MailSo\Net\Enumerations\ConnectionSecurityType::NONE);
+
+							$aConnectErrors[0] = true;
+
+							$sProxyAuthUser = !empty($oAccount->CustomFields['ProxyAuthUser'])
+								? $oAccount->CustomFields['ProxyAuthUser'] : '';
+
+							$oImapClient->Login($oAccount->IncomingMailLogin, $oAccount->IncomingMailPassword, $sProxyAuthUser);
+
+							$aConnectErrors[1] = true;
+							$bConnectValid = true;
+
+							$oImapClient->LogoutAndDisconnect();
+						}
+						catch (\Exception $oExceprion) {}
 					}
 
 					if ($bConnectValid)
@@ -325,7 +430,26 @@ class CApiUsersManager extends AApiManagerWithStorage
 							throw new CApiManagerException(Errs::UserManager_AccountCreateFailed);
 						}
 
-						$oAccount->UpdateInternalStorageQuota(true);
+						if ($oAccount && $oAccount->IsDefaultAccount)
+						{
+							/* @var $oApiContactsManager CApiContactsManager */
+							$oApiContactsManager = CApi::Manager('maincontacts');
+
+							if ($oApiContactsManager && 'db' === CApi::GetManager()->GetStorageByType('maincontacts'))
+							{
+								$oContact = $oApiContactsManager->NewContactObject();
+								$oContact->BusinessEmail = $oAccount->Email;
+								$oContact->PrimaryEmail = EPrimaryEmailType::Business;
+								$oContact->FullName = $oAccount->FriendlyName;
+								$oContact->Type = EContactType::GlobalAccounts;
+
+								$oContact->IdTypeLink = $oAccount->IdUser;
+								$oContact->IdDomain = 0 < $oAccount->IdDomain ? $oAccount->IdDomain : 0;
+								$oContact->IdTenant = $oAccount->Domain ? $oAccount->Domain->IdTenant : 0;
+
+								$oApiContactsManager->CreateContact($oContact);
+							}
+						}
 
 						CApi::Plugin()->RunHook('statistics.signup', array(&$oAccount));
 					}
@@ -407,10 +531,15 @@ class CApiUsersManager extends AApiManagerWithStorage
 						}
 						else
 						{
+							$this->validateAccountSubscriptionLimits($oAccount, $oTenant, false);
+							
 							if (0 < $oTenant->QuotaInMB)
 							{
+								$iAccountStorageQuota = $oAccount->GetObsoleteValue('StorageQuota');
 								$iSize = $oTenantsApi->GetTenantAllocatedSize($oTenant->IdTenant);
-								if (((int) ($oAccount->RealQuotaSize()/ 1024)) + $iSize > $oTenant->QuotaInMB)
+								$iSize -= (int) ($iAccountStorageQuota / 1024);
+								
+								if (((int) ($oAccount->RealQuotaSize() / 1024)) + $iSize > $oTenant->QuotaInMB)
 								{
 									throw new CApiManagerException(Errs::TenantsManager_QuotaLimitExided);
 								}
@@ -421,21 +550,49 @@ class CApiUsersManager extends AApiManagerWithStorage
 
 				$bUseOnlyHookUpdate = false;
 				CApi::Plugin()->RunHook('api-update-account', array(&$oAccount, &$bUseOnlyHookUpdate));
-				if ($bUseOnlyHookUpdate || $this->oStorage->UpdateAccount($oAccount))
+				if (!$bUseOnlyHookUpdate)
 				{
-					if (!$bUseOnlyHookUpdate)
+					if (!$this->oStorage->UpdateAccount($oAccount))
 					{
-						$oAccount->UpdateInternalStorageQuota(false);
+						$this->moveStorageExceptionToManager();
+						throw new CApiManagerException(Errs::UserManager_AccountUpdateFailed);
 					}
 				}
-				else
-				{
-					$this->moveStorageExceptionToManager();
-					throw new CApiManagerException(Errs::UserManager_AccountUpdateFailed);
-				}
-			}
 
-			$bResult = true;
+				if ($oAccount->IsDefaultAccount && 0 < $oAccount->User->IdHelpdeskUser)
+				{
+					/* @var $oApiHelpdeskManager CApiHelpdeskManager */
+					$oApiHelpdeskManager = CApi::Manager('helpdesk');
+					if ($oApiHelpdeskManager)
+					{
+						$oHelpdeskUser = $oApiHelpdeskManager->GetUserById($oAccount->IdTenant, $oAccount->User->IdHelpdeskUser);
+						if ($oHelpdeskUser)
+						{
+							$oHelpdeskUser->MailNotifications = $oAccount->User->AllowHelpdeskNotifications;
+							$oHelpdeskUser->Name = $oAccount->FriendlyName;
+							$oApiHelpdeskManager->UpdateUser($oHelpdeskUser);
+						}
+					}
+				}
+
+				if ($oAccount->IsDefaultAccount && null !== $oAccount->GetObsoleteValue('FriendlyName') &&
+					$oAccount->GetObsoleteValue('FriendlyName') !== $oAccount->FriendlyName)
+				{
+					/* @var $oApiGContactsManager CApiGcontactsManager */
+					$oApiGContactsManager = CApi::Manager('gcontacts');
+					if ($oApiGContactsManager)
+					{
+						$oContact = $oApiGContactsManager->GetContactByTypeId($oAccount, $oAccount->IdUser);
+						if ($oContact)
+						{
+							$oContact->FullName = $oAccount->FriendlyName;
+							$oApiGContactsManager->UpdateContact($oContact);
+						}
+					}
+				}
+
+				$bResult = true;
+			}
 		}
 		catch (CApiBaseException $oException)
 		{
@@ -523,6 +680,34 @@ class CApiUsersManager extends AApiManagerWithStorage
 
 	/**
 	 * @param CAccount $oAccount
+	 * @param int $iAppendSize
+	 * @return bool
+	 */
+	public function UpdateAccountFilesQuotaUsage($oAccount, $iAppendSize)
+	{
+		$bResult = false;
+		try
+		{
+			// TODO
+//			if (!$this->oStorage->UpdateAccountLastLoginAndCount($iUserId))
+//			{
+//				$this->moveStorageExceptionToManager();
+//				throw new CApiManagerException(Errs::UserManager_AccountUpdateFailed);
+//			}
+
+			$bResult = true;
+		}
+		catch (CApiBaseException $oException)
+		{
+			$bResult = false;
+			$this->setLastException($oException);
+		}
+
+		return $bResult;
+	}
+
+	/**
+	 * @param CAccount $oAccount
 	 * @return bool
 	 */
 	public function AccountExists(CAccount $oAccount)
@@ -574,11 +759,37 @@ class CApiUsersManager extends AApiManagerWithStorage
 		$bResult = false;
 		try
 		{
-			if (!$oAccount || !$oAccount->Domain->AllowUsersChangeEmailSettings)
+			if (!$oAccount)
 			{
 				$this->setLastException(new CApiManagerException(Errs::Main_UnknownError));
+				return false;
 			}
-			else if ($oAccount && $this->oStorage->DeleteAccount($oAccount->IdAccount))
+
+			if ($oAccount->IsDefaultAccount)
+			{
+				if (0 === $oAccount->IdTenant && \strtolower($oAccount->Email) === \strtolower($this->oSettings->GetConf('Helpdesk/AdminEmailAccount')))
+				{
+					$this->setLastException(new CApiManagerException(Errs::HelpdeskManager_AccountCannotBeDeleted));
+					return false;
+				}
+				else if (0 < $oAccount->IdTenant)
+				{
+					$oApiTenantsManager = CApi::Manager('tenants');
+					/* @var $oApiTenantsManager CApiTenantsManager */
+					if ($oApiTenantsManager)
+					{
+						$oTenant = $oApiTenantsManager->GetTenantById($oAccount->IdTenant);
+						/* @var $oTenant CTenant */
+						if (\strtolower($oAccount->Email) === $oTenant->HelpdeskAdminEmailAccount)
+						{
+							$this->setLastException(new CApiManagerException(Errs::HelpdeskManager_AccountCannotBeDeleted));
+							return false;
+						}
+					}
+				}
+			}
+
+			if ($oAccount && $this->oStorage->DeleteAccount($oAccount->IdAccount))
 			{
 				if ($oAccount->IsInternal)
 				{
@@ -613,6 +824,23 @@ class CApiUsersManager extends AApiManagerWithStorage
 					if ($oApiDavManager)
 					{
 						$oApiDavManager->DeletePrincipal($oAccount);
+					}
+					
+					/* @var $oApiFilestorageManager CApiFilestorageManager */
+					$oApiFilestorageManager = CApi::Manager('filestorage');
+					if ($oApiFilestorageManager)
+					{
+						$oApiFilestorageManager->ClearAllFiles($oAccount);
+					}
+
+					if (0 < $oAccount->User->IdHelpdeskUser)
+					{
+						/* @var $oApiHelpdeskManager CApiHelpdeskManager */
+						$oApiHelpdeskManager = CApi::Manager('helpdesk');
+						if ($oApiHelpdeskManager)
+						{
+							$oApiHelpdeskManager->SetUserAsBlocked($oAccount->IdTenant, $oAccount->User->IdHelpdeskUser);
+						}
 					}
 				}
 
@@ -744,7 +972,7 @@ class CApiUsersManager extends AApiManagerWithStorage
 		$aResult = false;
 		try
 		{
-			$aResult = $this->oStorage->ClearSafetySenders($iUserId, $sEmail);
+			$aResult = $this->oStorage->ClearSafetySenders($iUserId);
 		}
 		catch (CApiBaseException $oException)
 		{

@@ -19,12 +19,71 @@ class CApiFilestorageStorage extends AApiManagerStorage
 		parent::__construct('filestorage', $sStorageName, $oManager);
 	}
 	
-	public function GetPrivateFiles($sPath)
+	/**
+	 * @param CAccount $oAccount
+	 */
+	public function Init($oAccount)
+	{
+	
+	}
+	
+	public function FileExists($oAccount, $iType, $sPath, $sName)
+	{
+		return false;
+	}
+	
+	
+	public function GetFile($oAccount, $iType, $sPath, $sName)
+	{
+
+	}
+
+	public function GetFiles($oAccount, $iType, $sPath, $sPattern)
 	{
 		
 	}
 	
-	public function GetCorporateFiles($sPath)
+	public function CreateFolder($oAccount, $iType, $sPath, $sFolderName)
+	{
+
+	}
+	
+	public function CreateFile($oAccount, $iType, $sPath, $sFileName, $sData)
+	{
+
+	}
+	
+	public function Delete($oAccount, $iType, $sPath, $sName)
+	{
+
+	}
+
+	public function Rename($oAccount, $iType, $sPath, $sName, $sNewName)
+	{
+
+	}
+	
+	public function Copy($oAccount, $iFromType, $iToType, $sFromPath, $sToPath, $sName, $sNewName)
+	{
+		
+	}
+
+	public function GetQuota($oAccount, $iType)
+	{
+
+	}
+	
+	public function GetNonExistingFileName($oAccount, $iType, $sPath, $sFileName)
+	{
+	
+	}	
+	
+	public function ClearPrivateFiles($oAccount)
+	{
+		
+	}
+
+	public function ClearCorporateFiles($oAccount)
 	{
 		
 	}

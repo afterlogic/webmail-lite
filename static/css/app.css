@@ -5,14 +5,3 @@ body {
 label {
   cursor: pointer;
 }
-.draggeble {
-  z-index: 10002;
-  color: #fff;
-  background-color: #333;
-  background-color: rgba(0,0,0,0.5);
-  padding: 4px 10px;
-  min-width: 30px;
-  height: 20px;
-  cursor: pointer;
-  cursor: move;
-}

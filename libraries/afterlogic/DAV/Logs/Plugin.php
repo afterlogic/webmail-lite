@@ -4,8 +4,7 @@ namespace afterlogic\DAV\Logs;
 
 class Plugin extends \Sabre\DAV\ServerPlugin
 {
-
-    /**
+	/**
      * Reference to main server object
      *
      * @var \Sabre\DAV\Server
@@ -25,8 +24,6 @@ class Plugin extends \Sabre\DAV\ServerPlugin
     {
         $this->server = $server;
         $this->server->subscribeEvent('beforeMethod', array($this, 'beforeMethod'),30);
-		$this->server->subscribeEvent('afterWriteContent', array($this, 'afterWriteContent'), 30);
-		$this->server->subscribeEvent('afterCreateFile', array($this, 'afterCreateFile'), 30);
     }
 
     /**
@@ -56,25 +53,17 @@ class Plugin extends \Sabre\DAV\ServerPlugin
 
     	\CApi::Log($sMethod . ' ' . $path, \ELogLevel::Full, 'sabredav-');
     	\CApi::LogObject($aHeaders, \ELogLevel::Full, 'sabredav-');
-    	\CApi::Log('-------------------------------------------', \ELogLevel::Full, 'sabredav-');
+
+		if (\afterlogic\DAV\Constants::LOG_BODY)
+		{
+			$body = $this->server->httpRequest->getBody(true); 		
+			$this->server->httpRequest->setBody($body);
+			\CApi::LogObject($body, \ELogLevel::Full, 'sabredav-');
+		}
+    	
+		\CApi::Log('-------------------------------------------', \ELogLevel::Full, 'sabredav-');
 
     	return;
     }
-	
-	function afterCreateFile($path, \Sabre\DAV\ICollection $parent)
-	{
-    	\CApi::Log($path, \ELogLevel::Full, 'sabredav-');
-		$node = $parent->getChild(basename($path));
-    	\CApi::LogObject($node->get(), \ELogLevel::Full, 'sabredav-');
-    	\CApi::Log('-------------------------------------------', \ELogLevel::Full, 'sabredav-');
-	}
-
-	function afterWriteContent($path, \Sabre\DAV\IFile $node)
-	{
-    	\CApi::Log($path, \ELogLevel::Full, 'sabredav-');
-    	\CApi::LogObject($node->get(), \ELogLevel::Full, 'sabredav-');
-    	\CApi::Log('-------------------------------------------', \ELogLevel::Full, 'sabredav-');
-	}
-
 }
 

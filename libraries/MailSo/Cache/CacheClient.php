@@ -39,16 +39,21 @@ class CacheClient
 	 * @param string $sKey
 	 * @param string $sValue
 	 *
-	 * @return \MailSo\Cache\CacheClient
+	 * @return bool
 	 */
 	public function Set($sKey, $sValue)
 	{
-		if ($this->oDriver)
-		{
-			$this->oDriver->Set($sKey.$this->sCacheIndex, $sValue);
-		}
-
-		return $this;
+		return $this->oDriver ? $this->oDriver->Set($sKey.$this->sCacheIndex, $sValue) : false;
+	}
+	
+	/**
+	 * @param string $sKey
+	 *
+	 * @return bool
+	 */
+	public function SetTimer($sKey)
+	{
+		return $this->Set($sKey.'/TIMER', time());
 	}
 
 	/**
@@ -66,6 +71,23 @@ class CacheClient
 		}
 
 		return $sValue;
+	}
+
+	/**
+	 * @param string $sKey
+	 *
+	 * @return int
+	 */
+	public function GetTimer($sKey)
+	{
+		$iTimer = 0;
+		$sValue = $this->Get($sKey.'/TIMER');
+		if (0 < strlen($sValue) && is_numeric($sValue))
+		{
+			$iTimer = (int) $sValue;
+		}
+
+		return $iTimer;
 	}
 
 	/**
@@ -96,6 +118,16 @@ class CacheClient
 	}
 
 	/**
+	 * @param int $iTimeToClearInHours = 24
+	 *
+	 * @return bool
+	 */
+	public function GC($iTimeToClearInHours = 24)
+	{
+		return $this->oDriver ? $this->oDriver->GC($iTimeToClearInHours) : false;
+	}
+
+	/**
 	 * @return bool
 	 */
 	public function IsInited()
@@ -106,10 +138,12 @@ class CacheClient
 	/**
 	 * @param string $sCacheIndex
 	 *
-	 * @return void
+	 * @return \MailSo\Cache\CacheClient
 	 */
 	public function SetCacheIndex($sCacheIndex)
 	{
 		$this->sCacheIndex = 0 < \strlen($sCacheIndex) ? "\x0".$sCacheIndex : '';
+
+		return $this;
 	}
 }

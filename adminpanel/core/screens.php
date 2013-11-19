@@ -243,6 +243,14 @@ class ap_Screen_Data
 	/**
 	 * @param string $sName
 	 */
+	function PrintEncodedHtmlValue($sName)
+	{
+		echo api_Utils::EncodeSpecialXmlChars($this->GetValueAsString($sName));
+	}
+
+	/**
+	 * @param string $sName
+	 */
 	function PrintValue($sName)
 	{
 		echo $this->GetValueAsString($sName);

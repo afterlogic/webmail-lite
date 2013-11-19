@@ -83,25 +83,13 @@ class Plugin extends \Sabre\DAV\ServerPlugin {
 
 	public static function isEvent($uri)
 	{
-		$uriExt = pathinfo($uri, PATHINFO_EXTENSION);
-		$isEvent = false;
-		if ($uriExt != null && strtoupper($uriExt) == 'ICS')
-		{
-			$isEvent = true;
-		}
-		
-		return $isEvent;
+		$sUriExt = pathinfo($uri, PATHINFO_EXTENSION);
+		return ($sUriExt != null && strtoupper($sUriExt) == 'ICS');
 	}
 	
 	public static function isCalendar($uri)
 	{
-		$bResult = false;
-		if (strpos($uri, 'calendars/') !== false ||	strpos($uri, 'delegation/') !== false)
-		{
-			$bResult = true;
-		}
-		
-		return $bResult;
+		return (strpos($uri, 'calendars/') !== false ||	strpos($uri, 'delegation/') !== false);
 	}
 	
 	protected function getUser()
@@ -180,8 +168,7 @@ class Plugin extends \Sabre\DAV\ServerPlugin {
 	{
 		if (self::isCalendar($uri) && self::isEvent($uri))
 		{
-			$calendarUri = $this->getCalendarUri($uri);
-			$calendarUri = trim($calendarUri, '/');
+			$calendarUri = trim($this->getCalendarUri($uri), '/');
 			$eventId = $this->getEventId($uri);
 			
 			$aReminder = $this->getReminder($eventId);
@@ -189,42 +176,45 @@ class Plugin extends \Sabre\DAV\ServerPlugin {
 
 			$vCal = \Sabre\VObject\Reader::read($data);
 			$aBaseEvents = $vCal->getBaseComponents('VEVENT');
-			$oBaseEvent = $aBaseEvents[0];
-			
-			$oNowDT = new \DateTime('now', new \DateTimeZone('UTC'));
-			$iReminderStartTS = $oNowDT->getTimestamp();
-			if ($aReminder)
+			if (isset($aBaseEvents[0]))
 			{
-				$iReminderStartTS = $aReminder['starttime'];
-			}
+				$oBaseEvent = $aBaseEvents[0];
 
-			$oStartDT = $oBaseEvent->DTSTART->getDateTime();
-			$oStartDT->setTimezone(new \DateTimeZone('UTC'));
-
-			$oEndDT = $oBaseEvent->DTEND->getDateTime();
-			$oEndDT->setTimezone(new \DateTimeZone('UTC'));
-
-			$oInterval = $oStartDT->diff($oEndDT);
-
-			$oStartDT = \CCalendarHelper::_getNextRepeat($oNowDT, $oBaseEvent);
-			$iReminderTime = \CCalendarHelper::GetActualReminderTime($oBaseEvent, $oNowDT, $oStartDT);
-			
-			if ($iReminderTime === false && $oBaseEvent->RRULE)
-			{
-				$iStartTS = $oStartDT->getTimestamp();
-				if ($iStartTS == $iReminderStartTS)
+				$oNowDT = new \DateTime('now', new \DateTimeZone('UTC'));
+				$iReminderStartTS = $oNowDT->getTimestamp();
+				if ($aReminder)
 				{
-					$oStartDT->add($oInterval);
-					$oStartDT = \CCalendarHelper::_getNextRepeat($oStartDT, $oBaseEvent);
+					$iReminderStartTS = $aReminder['starttime'];
 				}
-				
+
+				$oStartDT = $oBaseEvent->DTSTART->getDateTime();
+				$oStartDT->setTimezone(new \DateTimeZone('UTC'));
+
+				$oEndDT = $oBaseEvent->DTEND->getDateTime();
+				$oEndDT->setTimezone(new \DateTimeZone('UTC'));
+
+				$oInterval = $oStartDT->diff($oEndDT);
+
+				$oStartDT = \CCalendarHelper::getNextRepeat($oNowDT, $oBaseEvent);
 				$iReminderTime = \CCalendarHelper::GetActualReminderTime($oBaseEvent, $oNowDT, $oStartDT);
-			}
-			
-			if ($iReminderTime !== false)
-			{
-				$iStartTS = $oStartDT->getTimestamp();
-				$this->addReminder($user, $calendarUri, $eventId, $iReminderTime, $iStartTS);
+
+				if ($iReminderTime === false && isset($oBaseEvent->RRULE))
+				{
+					$iStartTS = $oStartDT->getTimestamp();
+					if ($iStartTS == $iReminderStartTS)
+					{
+						$oStartDT->add($oInterval);
+						$oStartDT = \CCalendarHelper::getNextRepeat($oStartDT, $oBaseEvent);
+					}
+
+					$iReminderTime = \CCalendarHelper::GetActualReminderTime($oBaseEvent, $oNowDT, $oStartDT);
+				}
+
+				if ($iReminderTime !== false)
+				{
+					$iStartTS = $oStartDT->getTimestamp();
+					$this->addReminder($user, $calendarUri, $eventId, $iReminderTime, $iStartTS);
+				}
 			}
 		}
 	}

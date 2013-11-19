@@ -164,6 +164,10 @@ class EmailCollection extends \MailSo\Base\Collection
 					if (!$bIsInAngleBrackets)
 					{
 						$bIsInAngleBrackets = true;
+						if ($bIsInQuotes)
+						{
+							$bIsInQuotes = false;
+						}
 					}
 					break;
 
@@ -199,12 +203,12 @@ class EmailCollection extends \MailSo\Base\Collection
 							$this->Add(
 								\MailSo\Mime\Email::Parse(\substr($sWorkingRecipients, $iEmailStartPos, $iEmailEndPos - $iEmailStartPos))
 							);
+							
+							$iEmailStartPos = $iCurrentPos + 1;
 						}
 						catch (\MailSo\Base\Exceptions\InvalidArgumentException $oException)
 						{
 						}
-
-						$iEmailStartPos = $iCurrentPos + 1;
 					}
 					break;
 			}

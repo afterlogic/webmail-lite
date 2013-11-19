@@ -14,9 +14,11 @@ interface IDbHelper
 {
 	/**
 	 * @param string $sValue
+	 * @param bool $bWithOutQuote = false
+	 * @param bool $bSearch = false
 	 * @return string
 	 */
-	public function EscapeString($sValue);
+	public function EscapeString($sValue, $bWithOutQuote = false, $bSearch = false);
 
 	/**
 	 * @param string $sValue

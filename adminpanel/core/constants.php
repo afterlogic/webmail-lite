@@ -2,7 +2,7 @@
 
 /*
  * Copyright (C) 2002-2013 AfterLogic Corp. (www.afterlogic.com)
- * Distributed under the terms of the license described in LICENSE
+ * Distributed under the terms of the license described in COPYING
  *
  */
 
@@ -45,15 +45,15 @@
 
 	define('AP_SESS_DOMAIN_NEXT_EDIT_ID', 'apsessdomainnexteditid');
 
-	define('AP_TAB_SERVICES', 'services');
 	define('AP_TAB_DOMAINS', 'domains');
 	define('AP_TAB_USERS', 'users');
 	define('AP_TAB_TENANTS', 'tenants');
 	define('AP_TAB_CHANNELS', 'channels');
 	define('AP_TAB_SYSTEM', 'system');
+	define('AP_TAB_COMMON', 'common');
 
 	define('AP_TAB_DEFAULT', AP_TAB_SYSTEM);
-	define('AP_TAB_TENANT_DEFAULT', AP_TAB_DOMAINS);
+	define('AP_TAB_TENANT_DEFAULT', AP_TAB_COMMON);
 
 	define('AP_ORDER_ASC', 0);
 	define('AP_ORDER_DESC', 1);

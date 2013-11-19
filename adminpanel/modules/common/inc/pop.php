@@ -16,10 +16,10 @@ class CCommonPopAction extends ap_CoreModuleHelper
 		$sType = isset($_GET['type']) ? $_GET['type'] : '';
 		$sAction = isset($_GET['action']) ? $_GET['action'] : '';
 
-		echo '<html><head><title>Update</title></head><body><font color="black" size="3" style="font-family: Tahoma, Verdana;"><h3>AfterLogic WebMail PHP Db Script:</h3>';
-		
 		if ('db' === $sType && ('create' === $sAction || 'update' === $sAction))
 		{
+			echo '<html><head><title>Update</title></head><body><font color="black" size="3" style="font-family: Tahoma, Verdana;"><h3>AfterLogic Db Script:</h3>';
+
 			/* @var $oApiDbManager CApiDbManager */
 			$oApiDbManager = CApi::Manager('db');
 
@@ -37,9 +37,10 @@ class CCommonPopAction extends ap_CoreModuleHelper
 			{
 				echo '<br /><br /><font color="'.CCommonPopAction::COLOR_RED.'"><b>Failed!</b></font></font>';
 			}
+
+			echo '</font></body></html>';
 		}
 		
-		echo '</font></body></html>';
 	}
 
 	/**

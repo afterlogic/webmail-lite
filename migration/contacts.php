@@ -7,9 +7,12 @@
  */
 
 // remove the following line for real use
-exit('remove this line');
+//exit('remove this line');
 
 require_once dirname(__FILE__).'/../libraries/afterlogic/api.php';
+
+$sStorageFrom = 'db';
+$sStorageTo = 'sabredav';
 
 $iItemsPerPage = 20;
 $iCurDomainId = -1;
@@ -22,13 +25,13 @@ $oApiDomainsManager = CApi::Manager('domains');
 /* @var $oApiUsersManager CApiUsersManager */
 $oApiUsersManager = CApi::Manager('users');
 
-/* @var $oApiContactsManagerDB CApiContactsManager */
-$oApiContactsManagerDB = CApi::Manager('maincontacts', 'db');
+/* @var $oApiContactsManagerFrom CApiContactsManager */
+$oApiContactsManagerFrom = CApi::Manager('maincontacts', $sStorageFrom);
 
-/* @var $oApiContactsManagerSabreDAV CApiContactsManager */
-$oApiContactsManagerSabreDAV = CApi::Manager('maincontacts', 'sabredav');
+/* @var $oApiContactsManagerTo CApiContactsManager */
+$oApiContactsManagerTo = CApi::Manager('maincontacts', $sStorageTo);
 
-$sFilePath = CApi::DataPath().'/mirgation';
+$sFilePath = CApi::DataPath().'/migration';
 if (file_exists($sFilePath))
 {
 	$handle = fopen($sFilePath, 'r');
@@ -90,50 +93,54 @@ foreach ($aDomains as $iDomainId => $oDomainItem)
 			foreach ($aUsers as $aUserItem)
 			{
 				$iUserId = (int) $aUserItem[4];
-				CApi::Log('Process user - START: ' . $aUserItem[1], ELogLevel::Full, 'migration-');
+				CApi::Log('Process user: ' . $aUserItem[1], ELogLevel::Full, 'migration-');
 				if (!$bFindUser && $iCurUserId !== 0 && $iCurUserId !== $iUserId)
 				{
 					CApi::Log('Skip user: ' . $aUserItem[1], ELogLevel::Full, 'migration-');
+					CApi::Log('--------------------', ELogLevel::Full, 'migration-');
 					continue;
 				}
 				$bFindUser = true;
 				file_put_contents($sFilePath, $iDomainId . ':' . $iCurUsersPage . ':' . $iUserId);
 
 				/* @var $aUserListItems array */
-				$aUserListItems = $oApiContactsManagerSabreDAV->GetContactItemsWithoutOrder($iUserId, -1, -1);
+				$aUserListItems = $oApiContactsManagerFrom->GetContactItemsWithoutOrder($iUserId, 0, 9999);
+				CApi::Log('Contacts count: ' . count($aUserListItems), ELogLevel::Full, 'migration-');
 
 				/* @var $oListItem CContactListItem */
 				foreach ($aUserListItems as $oListItem)
 				{
-					CApi::Log('Process contact - START: ' . $oListItem->Id, ELogLevel::Full, 'migration-');
-					/* @var $oContact CContact */
+					/* @var $oContactTo CContact */
 					
-					$oContactDb = $oApiContactsManagerDB->GetContactByStrId($iUserId, $oListItem->Id);
-					if (!$oContactDb)
+					$oContactFrom = $oApiContactsManagerTo->GetContactByStrId($iUserId, $oListItem->Id);
+					if (!$oContactFrom)
 					{
-						$oContact = $oApiContactsManagerSabreDAV->GetContactById($iUserId, $oListItem->Id);
+						$oContactTo = $oApiContactsManagerFrom->GetContactById($iUserId, $oListItem->Id);
+//						$oContactTo = $oApiContactsManagerFrom->GetContactByStrId($iUserId, $oListItem->Id);
 
-						$oContact->IdContact = '';
-						if (empty($oContact->FullName))
+						$oContactTo->IdContact = '';
+						if (empty($oContactTo->FullName))
 						{
-							$oContact->FullName = $oContact->FirstName . ' ' . $oContact->LastName;
+							$oContactTo->FullName = $oContactTo->FirstName . ' ' . $oContactTo->LastName;
 						}
 
-						CApi::Log('Add contact to SabreDAV - START: ' . $oListItem->Id, ELogLevel::Full, 'migration-');
-						$oContact->__SKIP_VALIDATE__ = true;
-						CApi::LogObject($oContact, ELogLevel::Full, 'migration-');
-						$oApiContactsManagerDB->CreateContact($oContact);
+						CApi::Log('Add contact: ' . $oListItem->Id, ELogLevel::Full, 'migration-');
+						$oContactTo->__SKIP_VALIDATE__ = true;
+						$oApiContactsManagerTo->CreateContact($oContactTo);
 
-						CApi::Log('Process contact - END: ' . $oListItem->Id, ELogLevel::Full, 'migration-');
-
-						unset($oContact);
+						unset($oContactTo);
+					}
+					else 
+					{
+						CApi::Log('Skip contact: ' . $oListItem->Id, ELogLevel::Full, 'migration-');
 					}
 					set_time_limit(30);
 				}
 
-				CApi::Log('Process user - END: ' . $aUserItem[1], ELogLevel::Full, 'migration-');
+				CApi::Log('--------------------', ELogLevel::Full, 'migration-');
 			}
 		}
 		$iCurUsersPage++;
 	}
+	$iCurUsersPage = 0;
 }

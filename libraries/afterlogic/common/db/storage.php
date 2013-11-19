@@ -41,7 +41,7 @@ class CDbCreator
 
 	/**
 	 * @param array $aData
-	 * @return CDbMySql
+	 * @return CDbSql
 	 */
 	public static function ConnectorFabric($aData)
 	{
@@ -50,18 +50,26 @@ class CDbCreator
 		{
 			$iDbType = $aData['Type'];
 
-			switch ($iDbType)
+			if (EDbType::PostgreSQL === $iDbType)
 			{
-				default:
-				case EDbType::MySQL:
-					if (isset($aData['DBHost'], $aData['DBLogin'], $aData['DBPassword'], $aData['DBName']))
+//				CApi::Inc('common.db.pdo.postgres');
+//				$oConnector = new CDbPdoPostgres($aData['DBHost'], $aData['DBLogin'], $aData['DBPassword'], $aData['DBName']);
+			}
+			else
+			{
+				if (isset($aData['DBHost'], $aData['DBLogin'], $aData['DBPassword'], $aData['DBName']))
+				{
+					if (CApi::GetConf('labs.force-depricated-mysql', false))
 					{
 						CApi::Inc('common.db.mysql.mysql');
-
-						$oConnector = new CDbMySql($aData['DBHost'], $aData['DBLogin'],
-							$aData['DBPassword'], $aData['DBName']);
+						$oConnector = new CDbMySql($aData['DBHost'], $aData['DBLogin'], $aData['DBPassword'], $aData['DBName']);
 					}
-					break;
+					else
+					{
+						CApi::Inc('common.db.pdo.mysql');
+						$oConnector = new CDbPdoMySql($aData['DBHost'], $aData['DBLogin'], $aData['DBPassword'], $aData['DBName']);
+					}
+				}
 			}
 		}
 
@@ -70,18 +78,28 @@ class CDbCreator
 
 	/**
 	 * @param int $iDbType = EDbType::MySQL
-	 * @return CMySqlHelper
+	 * @return IDbHelper
 	 */
 	public static function CommandCreatorHelperFabric($iDbType = EDbType::MySQL)
 	{
 		$oHelper = null;
-		switch ($iDbType)
+		if (EDbType::PostgreSQL === $iDbType)
 		{
-			default:
-			case EDbType::MySQL:
+//			CApi::Inc('common.db.pdo.postgres_helper');
+//			$oHelper = new CPdoPostgresHelper();
+		}
+		else
+		{
+			if (CApi::GetConf('labs.force-depricated-mysql', false))
+			{
 				CApi::Inc('common.db.mysql.helper');
 				$oHelper = new CMySqlHelper();
-				break;
+			}
+			else
+			{
+				CApi::Inc('common.db.pdo.mysql_helper');
+				$oHelper = new CPdoMySqlHelper();
+			}
 		}
 
 		return $oHelper;
@@ -122,7 +140,7 @@ class CDbCreator
 
 	/**
 	 * @param api_Settings $oSettings
-	 * @return &CMySqlHelper
+	 * @return &IDbHelper
 	 */
 	public static function &CreateCommandCreatorHelper(api_Settings $oSettings)
 	{
@@ -150,12 +168,12 @@ class CDbStorage
 	protected $sPrefix;
 
 	/**
-	 * @var CDbMySql
+	 * @var CDbSql
 	 */
 	protected $oConnector;
 
 	/**
-	 * @var CDbMySql
+	 * @var CDbSql
 	 */
 	protected $oSlaveConnector;
 
@@ -193,7 +211,7 @@ class CDbStorage
 	}
 
 	/**
-	 * @return &CDbMySql
+	 * @return &CDbSql
 	 */
 	public function &GetConnector()
 	{
@@ -201,7 +219,7 @@ class CDbStorage
 	}
 
 	/**
-	 * @return &CDbMySql
+	 * @return &CDbSql
 	 */
 	public function &GetSlaveConnector()
 	{

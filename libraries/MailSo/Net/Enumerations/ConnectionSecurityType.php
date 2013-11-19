@@ -47,14 +47,14 @@ class ConnectionSecurityType
 	/**
 	 * @param bool $bSupported
 	 * @param int $iSecurityType
+	 * @param bool $bHasSupportedAuth = true
 	 *
 	 * @return bool
 	 */
-	public static function UseStartTLS($bSupported, $iSecurityType)
+	public static function UseStartTLS($bSupported, $iSecurityType, $bHasSupportedAuth = true)
 	{
 		return ($bSupported &&
-			(self::STARTTLS === $iSecurityType || self::AUTO_DETECT === $iSecurityType) &&
-			\function_exists('stream_socket_enable_crypto') &&
-			\defined('STREAM_CRYPTO_METHOD_TLS_CLIENT'));
+			(self::STARTTLS === $iSecurityType || (self::AUTO_DETECT === $iSecurityType && !$bHasSupportedAuth)) &&
+			\defined('STREAM_CRYPTO_METHOD_TLS_CLIENT') && \MailSo\Base\Utils::FunctionExistsAndEnabled('stream_socket_enable_crypto'));
 	}
 }

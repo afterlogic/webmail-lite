@@ -32,7 +32,7 @@ class LinkFinder
 	/**
 	 * @var int
 	 */
-	private $iHhtmlSpecialCharsFlags;
+	private $iHtmlSpecialCharsFlags;
 
 	/**
 	 * @var mixed
@@ -40,12 +40,24 @@ class LinkFinder
 	private $fMailWrapper;
 
 	/**
+	 * @var int
+	 */
+	private $iOptimizationLimit;
+
+	/**
 	 * @access private
 	 */
 	private function __construct()
 	{
-		$this->iHhtmlSpecialCharsFlags = (\defined('ENT_QUOTES') && \defined('ENT_SUBSTITUTE') && \defined('ENT_HTML401'))
+		$this->iHtmlSpecialCharsFlags = (\defined('ENT_QUOTES') && \defined('ENT_SUBSTITUTE') && \defined('ENT_HTML401'))
 			? ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 : ENT_QUOTES;
+
+		if (\defined('ENT_IGNORE'))
+		{
+			$this->iHtmlSpecialCharsFlags |= ENT_IGNORE;
+		}
+
+		$this->iOptimizationLimit = 300000;
 
 		$this->Clear();
 	}
@@ -122,7 +134,7 @@ class LinkFinder
 			}
 
 			$sNameLink = $sLink;
-			if ($bShortLink && !\preg_match('/^[a-z]{3-5}:\/\//i', \ltrim($sLink)))
+			if (!\preg_match('/^[a-z]{3,5}\:\/\//i', \ltrim($sLink)))
 			{
 				$sLink = 'http://'.\ltrim($sLink);
 			}
@@ -145,7 +157,8 @@ class LinkFinder
 	 */
 	public function CompileText($bUseHtmlSpecialChars = true, $bFindShortLinks = true)
 	{
-		$sText = $this->sText;
+		$sText = \substr($this->sText, 0, $this->iOptimizationLimit);
+		$sSubText = \substr($this->sText, $this->iOptimizationLimit);
 
 		$this->aPrepearPlainStringUrls = array();
 		if (null !== $this->fLinkWrapper && \is_callable($this->fLinkWrapper))
@@ -163,23 +176,32 @@ class LinkFinder
 			$sText = $this->findShortLinks($sText, $this->fLinkWrapper);
 		}
 
+		$sResult = '';
 		if ($bUseHtmlSpecialChars)
 		{
-			$sText = @\htmlspecialchars($sText, $this->iHhtmlSpecialCharsFlags, 'UTF-8');
+			$sResult = @\htmlentities($sText.$sSubText, $this->iHtmlSpecialCharsFlags, 'UTF-8');
 		}
+		else
+		{
+			$sResult = $sText.$sSubText;
+		}
+
+		unset($sText, $sSubText);
 
 		if (0 < \count($this->aPrepearPlainStringUrls))
 		{
-			for ($iIndex = 0, $iLen = \count($this->aPrepearPlainStringUrls); $iIndex < $iLen; $iIndex++)
-			{
-				$sText = \str_replace(\MailSo\Base\LinkFinder::OPEN_LINK.$iIndex.
-					\MailSo\Base\LinkFinder::CLOSE_LINK, $this->aPrepearPlainStringUrls[$iIndex], $sText);
-			}
+			$aPrepearPlainStringUrls = $this->aPrepearPlainStringUrls;
+			$sResult = \preg_replace_callback('/'.\preg_quote(\MailSo\Base\LinkFinder::OPEN_LINK, '/').
+				'([\d]+)'.\preg_quote(\MailSo\Base\LinkFinder::CLOSE_LINK, '/').'/',
+					function ($aMatches) use ($aPrepearPlainStringUrls) {
+						$iIndex = (int) $aMatches[1];
+						return isset($aPrepearPlainStringUrls[$iIndex]) ? $aPrepearPlainStringUrls[$iIndex] : '';
+					}, $sResult);
 
 			$this->aPrepearPlainStringUrls = array();
 		}
 
-		return $sText;
+		return $sResult;
 	}
 
 	/**
@@ -191,7 +213,7 @@ class LinkFinder
 	private function findLinks($sText, $fWrapper)
 	{
 		$sPattern = '/([\W]|^)((?:https?:\/\/)|(?:svn:\/\/)|(?:git:\/\/)|(?:s?ftps?:\/\/)|(?:www\.))'.
-			'((\S+?)(\\/)?)((?:&gt;)?|[^\w\=\\/;\(\)\[\]]*?)(?=<|\s|$)/im';
+			'((\S+?)(\\/)?)((?:&gt;)?|[^\w\=\\/;\(\)\[\]]*?)(?=<|\s|$)/imu';
 
 		$aPrepearPlainStringUrls = $this->aPrepearPlainStringUrls;
 		$sText = \preg_replace_callback($sPattern, function ($aMatch) use ($fWrapper, &$aPrepearPlainStringUrls) {

@@ -10,13 +10,13 @@
 			</div>
 		</div>
 			
-		<div class="row">
-			<label style="float: left; margin-right: 4px;" class="custom_radio" data-bind="css: {'checked': options() == 1}">
+		<div class="row editor_row">
+			<label class="custom_radio" data-bind="css: {'checked': options() == 1}">
 				<span class="icon"></span>
-				<input type="radio" id="useSignature" value="1" data-bind="checked: options" />
+				<input type="radio" id="useSignature" value="1" data-bind="checked: options, enable: isEnabled" />
 			</label>
 			
-			<div style="height: 200px; padding-top: 1px; margin-left: 18px;" data-bind="template: {name: 'Common_HtmlEditorViewModel', data: oHtmlEditor}"></div>
+			<div class="editor" data-bind="template: {name: 'Common_HtmlEditorViewModel', data: oHtmlEditor}"></div>
 		</div>
 <!--
 		<div class="input wm_plain_editor_container">
@@ -27,6 +27,7 @@
 -->					
 	</div>
 	<div class="buttons">
-		<span class="button" data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', click: onSaveClick"></span>
+		<span class="button" data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', click: onSaveClick, visible: !loading()"></span>
+		<span class="button" data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', click: onSaveClick, visible: loading()"></span>
 	</div>
 </div>

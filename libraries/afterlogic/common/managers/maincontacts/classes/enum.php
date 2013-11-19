@@ -85,4 +85,5 @@ class EContactType extends AEnumeration
 {
 	const Personal = 0;
 	const Global_ = 1;
+	const GlobalAccounts = 2;
 }

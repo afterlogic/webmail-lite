@@ -48,29 +48,30 @@
 			<div class="row">
 				<span class="label" data-i18n="SETTINGS/CALENDAR_DEFAULT_TAB" data-bind="i18n: 'text'"></span>
 				<span class="value">
-					<label class="custom_radio" data-bind="css: {'checked': defaultTab() == 1}">
+					<label class="custom_radio" data-bind="css: {'checked': defaultTab() == Enums.CalendarDefaultTab.Day}">
 						<span class="icon"></span>
-						<input type="radio" id="set_tab_1" value="1" data-bind="checked: defaultTab" />
+						<input type="radio" id="tab_day" data-bind="checked: defaultTab, attr: {'value': Enums.CalendarDefaultTab.Day}" />
 					</label>
-					<label for="set_tab_1" data-i18n="DATETIME/DAY" data-bind="i18n: 'text'"></label>
+					<label for="tab_day" data-i18n="DATETIME/DAY" data-bind="i18n: 'text'"></label>
 
-					<label class="custom_radio" data-bind="css: {'checked': defaultTab() == 2}">
+					<label class="custom_radio" data-bind="css: {'checked': defaultTab() == Enums.CalendarDefaultTab.Week}">
 						<span class="icon"></span>
-						<input type="radio" id="set_tab_2" value="2" data-bind="checked: defaultTab" />
+						<input type="radio" id="tab_week" data-bind="checked: defaultTab, attr: {'value': Enums.CalendarDefaultTab.Week}" />
 					</label>
-					<label for="set_tab_2" data-i18n="DATETIME/WEEK" data-bind="i18n: 'text'"></label>
+					<label for="tab_week" data-i18n="DATETIME/WEEK" data-bind="i18n: 'text'"></label>
 
-					<label class="custom_radio" data-bind="css: {'checked': defaultTab() == 3}">
+					<label class="custom_radio" data-bind="css: {'checked': defaultTab() == Enums.CalendarDefaultTab.Month}">
 						<span class="icon"></span>
-						<input type="radio" id="set_tab_3" value="3" data-bind="checked: defaultTab" />
+						<input type="radio" id="tab_month" data-bind="checked: defaultTab, attr: {'value': Enums.CalendarDefaultTab.Month}" />
 					</label>
-					<label for="set_tab_3" data-i18n="DATETIME/MONTH" data-bind="i18n: 'text'"></label>
+					<label for="tab_month" data-i18n="DATETIME/MONTH" data-bind="i18n: 'text'"></label>
 				</span>
 			</div>
 		</div>
 		<div class="buttons">
 			<span class="button" data-bind="click: onSaveClick">
-				<span data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text'"></span>
+				<span data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', visible: !loading()"></span>
+				<span data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', visible: loading()"></span>
 			</span>
 		</div>
 	</div>

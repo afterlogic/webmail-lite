@@ -84,9 +84,10 @@ class CApiImap4MailProtocol extends CApiNetAbstract
 	 * @param string $sLogin
 	 * @param string $sPassword
 	 * @param string $sLoginAuthKey = ''
+	 * @param string $sProxyAuthUser = ''
 	 * @return bool
 	 */
-	public function Login($sLogin, $sPassword, $sLoginAuthKey = '')
+	public function Login($sLogin, $sPassword, $sLoginAuthKey = '', $sProxyAuthUser = '')
 	{
 		$bReturn = false;
 
@@ -106,8 +107,13 @@ class CApiImap4MailProtocol extends CApiNetAbstract
 		else
 		{
 			$bReturn = $this->SendCommand('LOGIN '.
-				$this->escapeString($sLogin, true).' '.$this->escapeString($sPassword, true),
-				array($this->escapeString($sPassword)));
+				$this->escapeString($sLogin, true).' '.$this->escapeString($sPassword, true));
+
+			if ($bReturn && 0 < strlen($sProxyAuthUser))
+			{
+				$bReturn = $this->SendCommand('LOGIN '.
+					$this->escapeString($sLogin, true).' '.$this->escapeString($sPassword, true));
+			}
 		}
 
 		return $bReturn;
@@ -256,7 +262,7 @@ class CApiImap4MailProtocol extends CApiNetAbstract
 	 */
 	protected function escapeString($sLineForEscape, $bAddQuot = false)
 	{
-		$sReturn = strtr($sLineForEscape, array('"' => '\\"'));
+		$sReturn = str_replace(array('\\', '"'), array('\\\\', '\\"'), $sLineForEscape);
 		return ($bAddQuot) ? '"'.$sReturn.'"' : $sReturn;
 	}
 }

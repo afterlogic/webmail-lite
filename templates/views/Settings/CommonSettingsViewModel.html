@@ -1,13 +1,13 @@
 <div class="panel_top">
 	<h2 class="title" data-i18n="SETTINGS/TITLE_COMMON" data-bind="i18n: 'text'"></h2>
 </div>
-<div class="panel_center" data-bind="customScrollbar: {x: false}">
+<div class="panel_center">
 	<div class="fields scroll-inner">
 		<div class="fieldset">
-<!--			<div class="row">
+			<div class="row" data-bind="visible: aSkins.length > 1">
 				<span class="label" data-i18n="SETTINGS/COMMON_SKIN" data-bind="i18n: 'text'"></span>
 				<select class="value input" data-bind="value: selectedSkin, options: aSkins"></select>
-			</div>-->
+			</div>
 <!--			<div class="row">
 				<span class="label" data-i18n="SETTINGS/COMMON_LAYOUT" data-bind="i18n: 'text'"></span>
 				<input type="radio" id="layout_1" name="layout" value="0" data-bind="checked: layout" />
@@ -26,12 +26,12 @@
 			<div class="row">
 				<span class="label" data-i18n="SETTINGS/COMMON_MESSAGES_PER_PAGE" data-bind="i18n: 'text'"></span>
 				<!--<input class="value input" type="text" maxlength="2" data-bind="value: messagesPerPage" />-->
-				<select class="value input" data-bind="options: rangeOfNumbers, value: messagesPerPage" /></select>
+				<select class="value input" data-bind="options: messagesPerPageValues, value: messagesPerPage"></select>
 			</div>
 			<div class="row" data-bind="visible: bAllowContacts">
 				<span class="label" data-i18n="SETTINGS/COMMON_CONTACTS_PER_PAGE" data-bind="i18n: 'text'"></span>
 				<!--<input class="value input" type="text" maxlength="2" data-bind="value: contactsPerPage" />-->
-				<select class="value input" data-bind="options: rangeOfNumbers, value: contactsPerPage" /></select>
+				<select class="value input" data-bind="options: contactsPerPageValues, value: contactsPerPage"></select>
 			</div>
 			<div class="row">
 				<span class="label" data-i18n="SETTINGS/COMMON_AUTOCHECKMAIL_EVERY" data-bind="i18n: 'text'"></span>
@@ -57,29 +57,39 @@
 				<span class="label" data-i18n="SETTINGS/COMMON_TIME_FORMAT" data-bind="i18n: 'text'"></span>
 				
 				<span class="value">
-					<label class="custom_radio" data-bind="css: {'checked': timeFormat() == 1}">
+					<label class="custom_radio" data-bind="css: {'checked': timeFormat() == Enums.TimeFormat.F12}">
 						<span class="icon"></span>
-						<input type="radio" id="def_TimeFormat_1" value="1" data-bind="checked: timeFormat" />
+						<input type="radio" id="timeformat_12" data-bind="checked: timeFormat, attr: {'value': Enums.TimeFormat.F12}" />
 					</label>
-					<label for="def_TimeFormat_1" data-i18n="SETTINGS/COMMON_TIME_FORMAT_12" data-bind="i18n: 'text'"></label>
+					<label for="timeformat_12" data-i18n="SETTINGS/COMMON_TIME_FORMAT_12" data-bind="i18n: 'text'"></label>
 
-
-					<label class="custom_radio" data-bind="css: {'checked': timeFormat() == 0}">
+					<label class="custom_radio" data-bind="css: {'checked': timeFormat() == Enums.TimeFormat.F24}">
 						<span class="icon"></span>
-						<input type="radio" id="def_TimeFormat_0" value="0" data-bind="checked: timeFormat" />
+						<input type="radio" id="timeformat_24" data-bind="checked: timeFormat, attr: {'value': Enums.TimeFormat.F24}" />
 					</label>
-					<label for="def_TimeFormat_0" data-i18n="SETTINGS/COMMON_TIME_FORMAT_24" data-bind="i18n: 'text'"></label>
+					<label for="timeformat_24" data-i18n="SETTINGS/COMMON_TIME_FORMAT_24" data-bind="i18n: 'text'"></label>
 				</span>
 			</div>
 			<div class="row" data-bind="visible: bAllowCalendar">
 				<span class="label" data-i18n="SETTINGS/COMMON_DATE_FORMAT" data-bind="i18n: 'text'"></span>
-				<select class="value input" data-bind="value: dateFormat, options: aDateFormats"></select>
+				<select class="value input" data-bind="value: dateFormat, options: aDateFormats, optionsText: 'name', optionsValue: 'value'"></select>
+			</div>
+			<div class="row" data-bind="visible: bAllowThreads">
+				<span class="label"></span>
+				<span class="value">
+					<label class="custom_checkbox" data-bind="css: {'checked': useThreads}">
+						<span class="icon"></span>
+						<input type="checkbox" id="useThreads" data-bind="checked: useThreads" />
+					</label>
+					<label for="useThreads" data-i18n="SETTINGS/COMMON_USE_THREADING" data-bind="i18n: 'text'"></label>
+				</span>
 			</div>
 		</div>
 
 		<div class="buttons">
 			<span class="button" data-bind="click: onSaveClick">
-				<span data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text'"></span>
+				<span data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', visible: !loading()"></span>
+				<span data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', visible: loading()"></span>
 			</span>
 		</div>
 	</div>

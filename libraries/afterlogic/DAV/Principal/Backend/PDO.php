@@ -53,8 +53,8 @@ class PDO extends \Sabre\DAVACL\PrincipalBackend\PDO {
             return array();
         }
 
-        $stmt = $this->pdo->prepare('SELECT '.$this->TableName.'.uri as uri FROM `'.$this->delegatesTableName.'` 
-		LEFT JOIN `'.$this->TableName.'` ON '.$this->delegatesTableName.'.principalid = '.$this->TableName.'.id WHERE calendarid = ? AND mode = ?');
+        $stmt = $this->pdo->prepare('SELECT '.$this->TableName.'.uri as uri FROM '.$this->delegatesTableName.'
+		LEFT JOIN '.$this->TableName.' ON '.$this->delegatesTableName.'.principalid = '.$this->TableName.'.id WHERE calendarid = ? AND mode = ?');
 
         $stmt->execute(array(
             $matches[1], 
@@ -82,7 +82,7 @@ class PDO extends \Sabre\DAVACL\PrincipalBackend\PDO {
         $principal = $this->getPrincipalByPath($principal);
         if (!$principal) return array();
 
-        $stmt = $this->pdo->prepare('SELECT calendarid, mode FROM `'.$this->delegatesTableName.'` WHERE principalid = ?');
+        $stmt = $this->pdo->prepare('SELECT calendarid, mode FROM '.$this->delegatesTableName.' WHERE principalid = ?');
         $stmt->execute(array($principal['id']));
         $result = $stmt->fetchAll();
 
@@ -93,7 +93,7 @@ class PDO extends \Sabre\DAVACL\PrincipalBackend\PDO {
             } else if ($row['mode'] == self::WRITE) {
                 $response[] = 'delegation/' . $row['calendarid'] . '/principal/calendar-proxy-write';
             } else {
-                throw new \Sabre\DAV\Exception('Incorrect mode for principal in `'.$this->delegatesTableName.'` table');
+                throw new \Sabre\DAV\Exception('Incorrect mode for principal in '.$this->delegatesTableName.' table');
             }
         }
         return $response;
@@ -128,14 +128,14 @@ class PDO extends \Sabre\DAVACL\PrincipalBackend\PDO {
      */
 	public function createPrincipal($uri, $email = '', $displayname = '') {
 
-        $stmt = $this->pdo->prepare('SELECT count(id) FROM `'.$this->tableName.'` WHERE uri = ?;');
+        $stmt = $this->pdo->prepare('SELECT count(id) FROM '.$this->tableName.' WHERE uri = ?;');
         $stmt->execute(array($uri));
 		$rowCount = $stmt->fetchColumn();
 		$stmt->closeCursor();
 		
 		if ($rowCount == 0)
 		{
-			$stmt = $this->pdo->prepare('INSERT INTO `'.$this->tableName.'` (uri, email, displayname) VALUES (?, ?, ?);');
+			$stmt = $this->pdo->prepare('INSERT INTO '.$this->tableName.' (uri, email, displayname) VALUES (?, ?, ?);');
 			
 			$stmt->execute(array($uri, $email, $displayname));
 			$stmt->execute(array($uri . "/calendar-proxy-write", "", ""));
@@ -149,7 +149,7 @@ class PDO extends \Sabre\DAVACL\PrincipalBackend\PDO {
      */
 	public function deletePrincipal($uri) {
 
-        $stmt = $this->pdo->prepare('DELETE FROM `'.$this->tableName.'` WHERE uri = ?;');
+        $stmt = $this->pdo->prepare('DELETE FROM '.$this->tableName.' WHERE uri = ?;');
         
 		$stmt->execute(array($uri));
         $stmt->execute(array($uri . "/calendar-proxy-write"));
@@ -161,7 +161,7 @@ class PDO extends \Sabre\DAVACL\PrincipalBackend\PDO {
      */
 	public function getAllPrincipals() {
 
-        $stmt = $this->pdo->prepare('SELECT * FROM `'.$this->tableName.'`;');
+        $stmt = $this->pdo->prepare('SELECT * FROM '.$this->tableName.';');
 		$stmt->execute();
         return $stmt->fetchAll();
     } 	

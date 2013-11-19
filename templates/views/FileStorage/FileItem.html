@@ -1,0 +1,38 @@
+<div class="item dragHandle file" draggable="true"
+	 data-bind="
+		event: { 'dragstart': eventDragStart },
+		draggablePlace: $parent.dragAndDropHelperBinded,
+		draggableDragStartCallback: function() {$root.dragover(true);},
+		draggableDragStopCallback: function() {$root.dragover(false);},
+		css: {'selected': selected(), 
+			'checked': checked(),
+			'deleted': deleted(),
+			'incomplete': !uploaded(),
+			'shared': shared()
+		}">
+	<div class="item_content ui-droppable">
+		<span class="cancel" data-bind="click: function (oItem) {$root.onCancelUpload(oItem.uploadUid());}, i18n: 'title'" data-i18n="COMPOSE/UPLOAD_CANCEL"></span>
+		<span class="shared_icon" data-bind="i18n: 'title', click: function (oItem) {$root.onShareIconClick(oItem)}" data-i18n="COMPOSE/FILES_SHARED"></span>						
+		<span class="header">
+			<span class="author" data-bind="text: ownerHeaderText"></span>
+			<span class="date" data-bind="text: lastModifiedHeaderText"></span>
+		</span>
+		<span class="data">
+			<span class="icon" data-bind="css: extension().toLowerCase()"></span>
+			<span class="name" data-bind="text: name(), visible: !edited()"></span>
+			<input type="text" class="input" maxlength="30" data-bind="value: nameForEdit(), visible: edited, hasfocus: edited" />
+			<span class="progress" data-bind="visible: !uploaded()">
+				<span data-bind="style: {'width': progress() + '%'}"></span>
+				<span class="percent" data-bind="text: progress() + '%'"></span>
+			</span>
+		</span>
+		<span class="controls">
+			<!--
+			<a class="link view" data-bind="visible: isViewable()">View</a>
+			<a class="link download" data-bind="click: onDownloadClick">Download <span data-bind="text: '(' + friendlySize() + ')'"></span></a>
+			-->
+			<span class="name" data-bind="text: friendlySize()"></span>
+		</span>
+		<div class="separator"></div>
+	</div>
+</div>

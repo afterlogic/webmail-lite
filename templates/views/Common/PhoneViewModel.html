@@ -1,0 +1,56 @@
+<span class="phone" data-bind="css: {
+		'active': action() === 'ready' || action() === 'outgoing' || action() === 'connection_out' || action() === 'connection_in',
+		'standby': action() !== 'offline',
+		'outgoing': action() === 'outgoing',
+		'incoming': action() === 'incoming',
+		'ready': action() === 'ready' && input().length > 0
+		
+	}">
+	<span class="text call_report" data-bind="text: phoneReport"></span>
+	<span class="text direction" data-bind="">To:</span>
+	<input class="input" data-bind="value: input, hasfocus: inputFocus, valueUpdate: 'afterkeydown', onEnter: call" />
+	<!--<input class="input" type="text" autocomplete="on" data-bind="value: input, hasfocus: inputFocus, valueUpdate: ['blur', 'afterkeydown'], autocompleteSimple: {callback: autocompleteCallback.bind($data), dataAccessor: phoneAutocompleteItem}" />-->
+
+	<span class="buttons">
+		<span class="button" data-bind="css: {
+				'hangup': action() === 'connection_out' || action() === 'connection_in'
+			  },
+			  click: multiAction">
+			<span class="icon"></span>
+		</span>
+
+		<!--<span class="button answer" data-i18n="PHONE/BUTTON_ANSWER" data-bind="i18n: 'title', visible: action() === 'incoming', click: answer">-->
+			<!--<span class="icon"></span>-->
+		<!--</span>-->
+<!--		<span class="button hangup" data-i18n="PHONE/BUTTON_END_CALL" data-bind="i18n: 'title', click: hangup, visible: action() === 'incoming' || action() === 'outgoing'">
+			<span class="icon"></span>
+		</span>-->
+		<!--<span class="button end" data-i18n="End" data-bind="i18n: 'title', click: end, visible: action() === 'info'">-->
+			<!--<span class="icon"></span>-->
+		<!--</span>-->
+		<!--<span class="button close" data-i18n="Close" data-bind="i18n: 'text', click: hidePopup, visible: infoOnly()"></span>-->
+		<!--<span class="button call" data-bind="dropdown: {'passClick': false}">
+			<span class="text" data-i18n="PHONE/BUTTON_CALL" data-bind="i18n: 'text'"></span>
+			<span class="control"><span class="arrow">V</span></span>
+			<span class="dropdown dialer">
+				<span class="dropdown_helper">
+					<span class="dropdown_arrow"><span></span></span>
+					<span class="dropdown_content">
+						<span data-i18n="1" data-bind="i18n: 'text'" class="item command"></span>
+						<span data-i18n="2" data-bind="i18n: 'text'" class="item command"></span>
+						<span data-i18n="3" data-bind="i18n: 'text'" class="item command"></span>
+						<span data-i18n="4" data-bind="i18n: 'text'" class="item command"></span>
+						<span data-i18n="5" data-bind="i18n: 'text'" class="item command"></span>
+						<span data-i18n="6" data-bind="i18n: 'text'" class="item command"></span>
+						<span data-i18n="7" data-bind="i18n: 'text'" class="item command"></span>
+						<span data-i18n="8" data-bind="i18n: 'text'" class="item command"></span>
+						<span data-i18n="9" data-bind="i18n: 'text'" class="item command"></span>
+						<span data-i18n="*" data-bind="i18n: 'text'" class="item command"></span>
+						<span data-i18n="0" data-bind="i18n: 'text'" class="item command"></span>
+						<span data-i18n="#" data-bind="i18n: 'text'" class="item command"></span>
+					</span>
+				</span>
+			</span>
+		</span>-->
+	</span>
+</span>

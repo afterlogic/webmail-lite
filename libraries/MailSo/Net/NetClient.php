@@ -210,8 +210,15 @@ abstract class NetClient
 
 		if ($this->rConnect)
 		{
-			\stream_set_timeout($this->rConnect, $this->iSocketTimeOut);
-			\stream_set_blocking($this->rConnect, 1);
+			if (\MailSo\Base\Utils::FunctionExistsAndEnabled('stream_set_timeout'))
+			{
+				@\stream_set_timeout($this->rConnect, $this->iSocketTimeOut);
+			}
+			
+			if (\MailSo\Base\Utils::FunctionExistsAndEnabled('stream_set_blocking'))
+			{
+				@\stream_set_blocking($this->rConnect, 1);
+			}
 		}
 	}
 

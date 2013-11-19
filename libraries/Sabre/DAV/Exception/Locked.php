@@ -9,8 +9,8 @@ use Sabre\DAV;
  *
  * The 423 is thrown when a client tried to access a resource that was locked, without supplying a valid lock token
  *
- * @copyright Copyright (C) 2007-2012 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/) 
+ * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
+ * @author Evert Pot (http://evertpot.com/)
  * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
 class Locked extends DAV\Exception {
@@ -59,8 +59,12 @@ class Locked extends DAV\Exception {
         if ($this->lock) {
             $error = $errorNode->ownerDocument->createElementNS('DAV:','d:lock-token-submitted');
             $errorNode->appendChild($error);
-            if (!is_object($this->lock)) var_dump($this->lock);
-            $error->appendChild($errorNode->ownerDocument->createElementNS('DAV:','d:href',$this->lock->uri));
+
+            $href = $errorNode->ownerDocument->createElementNS('DAV:','d:href');
+            $href->appendChild($errorNode->ownerDocument->createTextNode($this->lock->uri));
+            $error->appendChild(
+                $href
+            );
         }
 
     }

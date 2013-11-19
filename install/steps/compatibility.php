@@ -52,6 +52,8 @@ class CCompatibilityStep extends AInstallerStep
 		$this->aCompatibility['curl.valid'] = (int) function_exists('curl_init');
 		$this->aCompatibility['mbstring.valid'] = (int) function_exists('mb_detect_encoding');
 		$this->aCompatibility['openssl.valid'] = (int) extension_loaded('openssl');
+		$this->aCompatibility['xml.valid'] = (int) class_exists('DOMDocument');
+		$this->aCompatibility['json.valid'] = (int) function_exists('json_decode');
 
 		$this->aCompatibility['ini-get.valid'] = (int) function_exists('ini_get');
 		$this->aCompatibility['ini-set.valid'] = (int) function_exists('ini_set');
@@ -93,11 +95,12 @@ class CCompatibilityStep extends AInstallerStep
 		$this->aCompatibility['compatibility'] = (int)
 			$this->aCompatibility['php.version.valid'] &&
 			$this->aCompatibility['safe-mode.valid'] &&
-			$this->aCompatibility['mysql.valid'] &&
 			$this->aCompatibility['pdo.valid'] &&
 			$this->aCompatibility['iconv.valid'] &&
-			$this->aCompatibility['curl.valid'] &&
 			$this->aCompatibility['mbstring.valid'] &&
+			$this->aCompatibility['curl.valid'] &&
+			$this->aCompatibility['json.valid'] &&
+			$this->aCompatibility['xml.valid'] &&
 			$this->aCompatibility['socket.valid'] &&
 			$this->aCompatibility['session.valid'] &&
 			$this->aCompatibility['data.dir.valid'] &&
@@ -127,10 +130,10 @@ In case of a shared hosting, you need to ask your hosting provider to perform th
 'You need to <a href="http://php.net/manual/en/ini.sect.safe-mode.php" target="_blank">disable it in your php.ini</a>
 or contact your hosting provider and ask to do this.'),
 
-			'MySQL' => ($this->aCompatibility['mysql.valid'])
-				? $this->getSuccessHtmlValue('OK')
-				: $this->getErrorHtmlValue('Error, PHP MySQL extension not detected.',
-'You need to install this PHP extension or enable it in php.ini file.'),
+//			'MySQL' => ($this->aCompatibility['mysql.valid'])
+//				? $this->getSuccessHtmlValue('OK')
+//				: $this->getErrorHtmlValue('Error, PHP MySQL extension not detected.',
+//'You need to install this PHP extension or enable it in php.ini file.'),
 			
 			'PDO MySQL' => ($this->aCompatibility['pdo.valid'])
 				? $this->getSuccessHtmlValue('OK')
@@ -145,6 +148,16 @@ or contact your hosting provider and ask to do this.'),
 			'curl' => ($this->aCompatibility['curl.valid'])
 				? $this->getSuccessHtmlValue('OK')
 				: $this->getErrorHtmlValue('Error, curl extension not detected.',
+'You need to install this PHP extension or enable it in php.ini file.'),
+
+			'xml' => ($this->aCompatibility['xml.valid'])
+				? $this->getSuccessHtmlValue('OK')
+				: $this->getErrorHtmlValue('Error, xml (DOM) extension not detected.',
+'You need to install this PHP extension or enable it in php.ini file.'),
+
+			'json' => ($this->aCompatibility['json.valid'])
+				? $this->getSuccessHtmlValue('OK')
+				: $this->getErrorHtmlValue('Error, JSON extension not detected.',
 'You need to install this PHP extension or enable it in php.ini file.'),
 
 			'mb_string' => ($this->aCompatibility['mbstring.valid'])
@@ -195,28 +208,28 @@ In case of a shared hosting, you need to ask your hosting provider to do this.')
 			'CreatingDeletingFolders' => ($this->aCompatibility['data.dir.create'] && $this->aCompatibility['data.dir.delete'])
 				? $this->getSuccessHtmlValue('OK')
 				: $this->getErrorHtmlValue('Error, can\'t create/delete sub-folders in the data folder.', '
-You need to grant read/write permission over Webmail Pro data folder and all its contents to your web server user.
-For instructions, please refer to this section of Webmail Pro documentation and our
+You need to grant read/write permission over data folder and all its contents to your web server user.
+For instructions, please refer to this section of documentation and our
 <a href="http://www.afterlogic.com/support/faq-webmail-pro-php#3.1" target="_blank">FAQ</a>.'),
 
 			'CreatingDeletingFiles' => ($this->aCompatibility['data.file.create'] && $this->aCompatibility['data.file.delete'])
 				? $this->getSuccessHtmlValue('OK')
 				: $this->getErrorHtmlValue('Error, can\'t create/delete files in the data folder.', '
-You need to grant read/write permission over Webmail Pro data folder and all its contents to your web server user.
-For instructions, please refer to this section of Webmail Pro documentation and our
+You need to grant read/write permission over data folder and all its contents to your web server user.
+For instructions, please refer to this section of documentation and our
 <a href="http://www.afterlogic.com/support/faq-webmail-pro-php#3.1" target="_blank">FAQ</a>.'),
 			
 			'WebMailSettingsFile' => ($this->aCompatibility['settings.file.exist'])
 				? $this->getSuccessHtmlValue('Found')
 				: $this->getErrorHtmlValue('Not Found, can\'t find "'.$this->aCompatibility['settings.file'].'" file.', '
-Make sure you completely copied the data folder with all its contents from AfterLogic Webmail installation package.
+Make sure you completely copied the data folder with all its contents from installation package.
 By default, the data folder is webmail subfolder, and if it\'s not the case make sure its location matches one specified in inc_settings_path.php file.'),
 			
 			'ReadWriteSettingsFile' => ($this->aCompatibility['settings.file.read'] && $this->aCompatibility['settings.file.write'])
 				? $this->getSuccessHtmlValue('OK / OK')
 				: $this->getErrorHtmlValue('Not Found, can\'t find "'.$this->aCompatibility['settings.file'].'" file.', '
-You should grant read/write permission over AfterLogic Webmail settings file to your web server user.
-For instructions, please refer to this section of Webmail Pro documentation and our
+You should grant read/write permission over settings file to your web server user.
+For instructions, please refer to this section of documentation and our
 <a href="http://www.afterlogic.com/support/faq-webmail-pro-php#3.1" target="_blank">FAQ</a>.'),
 
 			'Result' => ($this->aCompatibility['compatibility']) ?

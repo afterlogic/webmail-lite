@@ -13,7 +13,7 @@
 abstract class api_CommandCreator
 {
 	/**
-	 * @var CMySqlHelper
+	 * @var IDbHelper
 	 */
 	protected $oHelper;
 
@@ -23,7 +23,7 @@ abstract class api_CommandCreator
 	protected $sPrefix;
 
 	/**
-	 * @param CMySqlHelper $oHelper
+	 * @param IDbHelper $oHelper
 	 * @param string $sPrefix
 	 */
 	public function __construct($oHelper, $sPrefix)
@@ -39,11 +39,13 @@ abstract class api_CommandCreator
 
 	/**
 	 * @param string $sValue
+	 * @param bool $bWithOutQuote = false
+	 * @param bool $bSearch = false
 	 * @return string
 	 */
-	protected function escapeString($sValue)
+	protected function escapeString($sValue, $bWithOutQuote = false, $bSearch = false)
 	{
-		return $this->oHelper->EscapeString($sValue);
+		return $this->oHelper->EscapeString($sValue, $bWithOutQuote, $bSearch);
 	}
 
 	/**

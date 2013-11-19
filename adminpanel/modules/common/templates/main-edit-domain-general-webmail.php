@@ -21,7 +21,8 @@
 			<input type="text" class="wm_input override" name="txtWebDomain" id="txtWebDomain"
 				value="<?php $this->Data->PrintInputValue('txtWebDomain'); ?>" />
 			&nbsp;&nbsp;&nbsp;
-			<a href="<?php echo CApi::I18N('ADMIN_PANEL/URL_HELP_WEBDOMAIN');?>" target="_blank"><?php echo CApi::I18N('ADMIN_PANEL/DOMAINS_GENERAL_WEBDOMAIN_MORE');?></a>
+			<a class="<?php $this->Data->PrintInputValue('classLinkWebDomain'); ?>"
+				href="<?php $this->Data->PrintInputValue('linkWebDomain'); ?>" target="_blank"><?php echo CApi::I18N('ADMIN_PANEL/DOMAINS_GENERAL_WEBDOMAIN_MORE');?></a>
 		</td>
 	</tr>
 	<tr>

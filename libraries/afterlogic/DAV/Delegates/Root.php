@@ -44,7 +44,7 @@ class Root extends \Sabre\DAV\Collection {
 
         // Making fields a comma-delimited list 
         $fields = implode(', ', $fields);
-        $stmt = $this->pdo->query('SELECT ' . $fields . ' FROM `'.$this->calendarBackend->calendarTableName.'`'); 
+        $stmt = $this->pdo->query('SELECT ' . $fields . ' FROM '.$this->calendarBackend->calendarTableName.''); 
 
         $calendars = array();
         while($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
@@ -82,7 +82,7 @@ class Root extends \Sabre\DAV\Collection {
 
         // Making fields a comma-delimited list 
         $fields = implode(', ', $fields);
-        $stmt = $this->pdo->prepare('SELECT ' . $fields . ' FROM `'.$this->calendarBackend->calendarTableName.'` WHERE id = ?'); 
+        $stmt = $this->pdo->prepare('SELECT ' . $fields . ' FROM '.$this->calendarBackend->calendarTableName.' WHERE id = ?'); 
         $stmt->execute(array($name));
 
         if(!$row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
@@ -111,4 +111,3 @@ class Root extends \Sabre\DAV\Collection {
 
 }
 
-?>

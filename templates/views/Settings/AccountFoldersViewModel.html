@@ -1,11 +1,23 @@
 <div class="fields">
 	<div class="fieldset">
 		<div class="folders items_list">
-			<!-- ko template: {name: 'Settings_AccountFolderItems', foreach: collection} --><!-- /ko -->
+			
+			<!-- ko if: !showMovedWithMouseItem() -->
+				<!-- ko template: {name: 'Settings_AccountFolderItem', foreach: collection} --><!-- /ko -->
+			<!-- /ko -->
+			
+			<!-- ko if: showMovedWithMouseItem() -->
+			<div data-bind="sortable: {data: collection, connectClass: 'first_sortable_container', 
+				 afterMove: $root.folderListOrderUpdateDebounce, options: {axis: 'y', revert: true}}">
+				<div class="item canDrag" data-bind="visible: !virtual(), 
+					 template: { name: 'Settings_AccountFolderItemMovedWithMouse'},
+					 css: {'canSubscribe': canSubscribe, 'canRename': canRename, 'canDelete': canDelete}"></div>
+			</div>
+			<!-- /ko -->
 			
 			<div class="item total">
 				<span class="title">
-					<span class="count" data-bind="text: messageCount"></span>
+					<span class="count" data-bind="text: totalMessageCount"></span>
 					<span class="name">
 						<span class="text" data-i18n="SETTINGS/ACCOUNT_FOLDERS_TOTAL" data-bind="i18n: 'text'"></span>
 					</span>

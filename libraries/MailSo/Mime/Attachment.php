@@ -39,9 +39,20 @@ class Attachment
 	private $bIsLinked;
 
 	/**
+	 * @var array
+	 */
+	private $aCustomContentTypeParams;
+
+	/**
+	 * @var string
+	 */
+	private $sContentLocation;
+
+	/**
 	 * @access private
 	 */
-	private function __construct($rResource, $sFileName, $iFileSize, $bIsInline, $bIsLinked, $sCID)
+	private function __construct($rResource, $sFileName, $iFileSize, $bIsInline, $bIsLinked, $sCID,
+		$aCustomContentTypeParams = array(), $sContentLocation = '')
 	{
 		$this->rResource = $rResource;
 		$this->sFileName = $sFileName;
@@ -49,6 +60,8 @@ class Attachment
 		$this->bIsInline = $bIsInline;
 		$this->bIsLinked = $bIsLinked;
 		$this->sCID = $sCID;
+		$this->aCustomContentTypeParams = $aCustomContentTypeParams;
+		$this->sContentLocation = $sContentLocation;
 	}
 
 	/**
@@ -58,12 +71,15 @@ class Attachment
 	 * @param bool $bIsInline = false
 	 * @param bool $bIsLinked = false
 	 * @param string $sCID = ''
+	 * @param array $aCustomContentTypeParams = array()
+	 * @param string $sContentLocation = ''
 	 *
 	 * @return \MailSo\Mime\Attachment
 	 */
-	public static function NewInstance($rResource, $sFileName = '', $iFileSize = 0, $bIsInline = false, $bIsLinked = false, $sCID = '')
+	public static function NewInstance($rResource, $sFileName = '', $iFileSize = 0, $bIsInline = false,
+		$bIsLinked = false, $sCID = '', $aCustomContentTypeParams = array(), $sContentLocation = '')
 	{
-		return new self($rResource, $sFileName, $iFileSize, $bIsInline, $bIsLinked, $sCID);
+		return new self($rResource, $sFileName, $iFileSize, $bIsInline, $bIsLinked, $sCID, $aCustomContentTypeParams, $sContentLocation);
 	}
 
 	/**
@@ -83,11 +99,27 @@ class Attachment
 	}
 
 	/**
+	 * @return array
+	 */
+	public function CustomContentTypeParams()
+	{
+		return $this->aCustomContentTypeParams;
+	}
+
+	/**
 	 * @return string
 	 */
 	public function CID()
 	{
 		return $this->sCID;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function ContentLocation()
+	{
+		return $this->sContentLocation;
 	}
 
 	/**
@@ -112,6 +144,38 @@ class Attachment
 	public function IsInline()
 	{
 		return $this->bIsInline;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function IsImage()
+	{
+		return 'image' === \MailSo\Base\Utils::ContentTypeType($this->ContentType(), $this->FileName());
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function IsArchive()
+	{
+		return 'archive' === \MailSo\Base\Utils::ContentTypeType($this->ContentType(), $this->FileName());
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function IsPdf()
+	{
+		return 'pdf' === \MailSo\Base\Utils::ContentTypeType($this->ContentType(), $this->FileName());
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function IsDoc()
+	{
+		return 'doc' === \MailSo\Base\Utils::ContentTypeType($this->ContentType(), $this->FileName());
 	}
 
 	/**

@@ -25,8 +25,8 @@
 	<div class="buttons" data-bind="visible: available">
 		<span class="button addlink" data-i18n="SETTINGS/ACCOUNT_FILTERS_ADD" data-bind="i18n: 'text', click: addFilter"></span>
 		<span class="button save" data-bind="click: onSaveClick">
-			<span data-bind="visible: loading">*</span>
-			<span data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text'"></span>
+			<span data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', visible: !loading()"></span>
+			<span data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', visible: loading()"></span>
 		</span>
 	</div>
 </div>

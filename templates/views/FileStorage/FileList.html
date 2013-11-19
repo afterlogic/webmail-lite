@@ -1,41 +1,40 @@
-<div class="panel_top">
-	<div class="additional_bar">
-	<a href="#">Files</a> &raquo; Files
-	</div>
+<div class="panel_top pathway">
+	<!-- ko foreach: aPath() -->
+		<!-- ko if: $parent.iPathIndex() !== $index() || $index() === 0 || $parent.searchPattern() !== '' -->		
+		<!-- ko if: $index() > 0 -->&raquo;<!-- /ko --> <a data-bind="
+				   text: displayName(), 
+				   click: function () { $parent.getFiles(storageType(), $parent.getPathByIndex($index())); },
+				   droppable: function (oEvent, oUi) {$root.filesDrop($data, oEvent, oUi);}
+				   "></a>
+		<!-- /ko -->
+		<!-- ko if: $parent.iPathIndex() === $index() && $index() > 0 &&  $parent.searchPattern() === '' -->		
+		&raquo; <b data-bind="text: displayName()"></b>
+		<!-- /ko -->
+	<!-- /ko -->
+	<!-- ko if: searchPattern() !== '' -->		
+	&raquo; <b data-bind="i18n: 'text'" data-i18n="FILESTORAGE/SEARCH_RESULTS"></b> (<a class="text" data-bind="i18n: 'text', click: clearSearch" data-i18n="FILESTORAGE/SEARCH_CLEAR"></a>)
+	<!-- /ko -->
 </div>
 <div class="panel_center unselectable">
-	<div class="items_list" data-bind="customScrollbar: {x: false}">
-		<div class="items_sub_list scroll-inner">
-			<div class="item folder">
-				<div class="item_content">
-					<span class="data">
-						<span class="icon"></span>
-						<span class="name">Folder</span>
-					</span>
-					<span class="controls">
-						<a class="link rename">Rename</a>
-					</span>
-					<div class="separator"></div>
-				</div>
+	<div class="items_list scroll-inner" data-bind="customScrollbar: {x: false}, css: {dragover: dragover()}">
+		<div class="scroll-inner">
+			<span class="list_notification" data-bind="visible: fileListInfoText()!==''">
+				<span class="description" data-bind="text: fileListInfoText()"></span>
+			</span>
+			<div class="items_sub_list large" data-bind="columnCalc: {'prop': columnCount, 'itemSelector': '.item.helper'}">
+				<!-- ko foreach: collection -->
+					<!-- ko if: isFolder() -->
+						<!-- ko template: {name: 'FileStorage_FolderItem'} --><!-- /ko -->
+					<!-- /ko -->
+					<!-- ko if: !isFolder() -->
+						<!-- ko template: {name: 'FileStorage_FileItem'} --><!-- /ko -->
+					<!-- /ko -->
+				<!-- /ko -->
+				<div class="item helper"></div>
 			</div>
-			<!-- ko foreach: files -->
-			<div class="item file" data-bind="css: type()">
-				<div class="item_content">
-					<span class="author">Added by Alex on 23 Dec</span>
-					<span class="data">
-						<span class="icon"></span>
-						<span class="name" data-bind="text: name()"></span>
-					</span>
-					<span class="controls">
-						<a class="link view">View</a>
-						<a class="link download">Download <span>(64KB)</span></a>
-					</span>
-					<div class="separator"></div>
-				</div>
-			</div>
-			<!-- /ko -->
+		</div>
+		<div class="uploader_mask" data-bind="initDom: uploaderArea, css: {'active': bDragActiveComp}">
+			<div class="inner"></div>
 		</div>
 	</div>
-</div>
-<div class="panel_bottom unselectable">
 </div>

@@ -30,9 +30,11 @@ class CApiPop3MailProtocol extends CApiNetAbstract
 	/**
 	 * @param string $sLogin
 	 * @param string $sPassword
+	 * @param string $sLoginAuthKey = ''
+	 * @param string $sProxyAuthUser = ''
 	 * @return bool
 	 */
-	public function Login($sLogin, $sPassword)
+	public function Login($sLogin, $sPassword, $sLoginAuthKey = '', $sProxyAuthUser = '')
 	{
 		return $this->SendCommand('USER '.$sLogin) && $this->SendCommand('PASS '.$sPassword, array($sPassword));
 	}

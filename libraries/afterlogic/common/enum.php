@@ -160,6 +160,7 @@ class ELogLevel extends AEnumeration
 class EDbType extends AEnumeration
 {
 	const MySQL = 3;
+	const PostgreSQL = 4;
 
 	/**
 	 * @var array
@@ -251,6 +252,7 @@ class ETimeFormat extends AEnumeration
  */
 class EDateFormat extends AEnumeration
 {
+	const DD_MONTH_YYYY = 'DD Month YYYY';
 	const MMDDYYYY = 'MM/DD/YYYY';
 	const DDMMYYYY = 'DD/MM/YYYY';
 	const MMDDYY = 'MM/DD/YY';
@@ -260,6 +262,7 @@ class EDateFormat extends AEnumeration
 	 * @var array
 	 */
 	protected $aConsts = array(
+		'DD Month YYYY' => self::DD_MONTH_YYYY,
 		'MM/DD/YYYY' => self::MMDDYYYY,
 		'DD/MM/YYYY' => self::DDMMYYYY,
 		'MM/DD/YY' => self::MMDDYY,
@@ -312,18 +315,36 @@ class ESaveMail extends AEnumeration
 class ELoginFormType extends AEnumeration
 {
 	const Email = 0;
-	const LoginAtDomainDropdown = 1;
-	const LoginAtDomain = 2;
 	const Login = 3;
+	const Both = 4;
 
 	/**
 	 * @var array
 	 */
 	protected $aConsts = array(
 		'Email' => self::Email,
-		'LoginAtDomainDropdown' => self::LoginAtDomainDropdown,
-		'LoginAtDomain' => self::LoginAtDomain,
 		'Login' => self::Login,
+		'Both' => self::Both
+	);
+}
+
+/**
+ * @package Api
+ * @subpackage Enum
+ */
+class ELoginSignMeType extends AEnumeration
+{
+	const DefaultOff = 0;
+	const DefaultOn = 1;
+	const Unuse = 2;
+
+	/**
+	 * @var array
+	 */
+	protected $aConsts = array(
+		'DefaultOff' => self::DefaultOff,
+		'DefaultOn' => self::DefaultOn,
+		'Unuse' => self::Unuse
 	);
 }
 
@@ -344,47 +365,6 @@ class EImapSortUsage extends AEnumeration
 		'Always' => self::Always,
 		'DateOnly' => self::DateOnly,
 		'Never' => self::Never
-	);
-}
-
-
-/**
- * @package Api
- * @subpackage Enum
- */
-class EContactsPABMode extends AEnumeration
-{
-	const Off = 0;
-	const Sql = 1;
-	const Ldap = 2;
-
-	/**
-	 * @var array
-	 */
-	protected $aConsts = array(
-		'Off' => self::Off,
-		'Sql' => self::Sql,
-		'Ldap' => self::Ldap
-	);
-}
-
-/**
- * @package Api
- * @subpackage Enum
- */
-class EContactsGABMode extends AEnumeration
-{
-	const Off = 0;
-	const Sql = 1;
-	const Ldap = 2;
-
-	/**
-	 * @var array
-	 */
-	protected $aConsts = array(
-		'Off' => self::Off,
-		'Sql' => self::Sql,
-		'Ldap' => self::Ldap
 	);
 }
 
@@ -532,6 +512,27 @@ class ESortOrder extends AEnumeration
  * @package Api
  * @subpackage Enum
  */
+class ECapa extends AEnumeration
+{
+	const WEBMAIL = 'WEBMAIL';
+	const CALENDAR = 'CALENDAR';
+	const CAL_SHARING = 'CAL_SHARING';
+	const MEETINGS = 'MEETINGS';
+	const PAB = 'PAB';
+	const GAB = 'GAB';
+	const FILES = 'FILES';
+	const VOICE = 'VOICE';
+	const HELPDESK = 'HELPDESK';
+	const MOBILE_SYNC = 'MOBILE_SYNC';
+	const OUTLOOK_SYNC = 'OUTLOOK_SYNC';
+	
+	const NO = 'NO';
+}
+
+/**
+ * @package Api
+ * @subpackage Enum
+ */
 class ECalendarPermission extends AEnumeration
 {
 	const RemovePermission = -1;
@@ -548,4 +549,75 @@ class ECalendarPermission extends AEnumeration
 		'Read' => self::Read
 
 	);
+}
+	
+/**
+ * @package Api
+ * @subpackage Enum
+ */
+class EFileStorageType extends AEnumeration
+{
+	const Private_ = 0;
+	const Corporate = 1;
+
+	/**
+	 * @var array
+	 */
+	protected $aConsts = array(
+		'Private_' => self::Private_,
+		'Corporate' => self::Corporate
+
+	);
+}
+
+/**
+ * @package Api
+ * @subpackage Enum
+ */
+class EPeriod extends AEnumeration
+{
+	const Secondly = 'secondly';
+	const Minutely = 'minutely';
+	const Hourly   = 'hourly';
+	const Daily	   = 'daily';
+	const Weekly   = 'weekly';
+	const Monthly  = 'monthly';
+	const Yearly   = 'yearly';
+
+	/**
+	 * @var array
+	 */
+	protected $aConsts = array(
+		'Secondly' => self::Secondly,
+		'Minutely' => self::Minutely,
+		'Hourly'   => self::Hourly,
+		'Daily'	   => self::Daily,
+		'Weekly'   => self::Weekly,
+		'Monthly'  => self::Monthly,
+		'Yearly'   => self::Yearly
+	);
+
+}
+
+/**
+ * @package Api
+ * @subpackage Enum
+ */
+class EAttendeeStatus extends AEnumeration
+{
+	const Unknown = 0;
+	const Accepted = 1;
+	const Declined = 2;
+	const Tentative = 3;
+
+	/**
+	 * @var array
+	 */
+	protected $aConsts = array(
+		'Unknown' => self::Unknown,
+		'Accepted' => self::Accepted,
+		'Declined' => self::Declined,
+		'Tentative'   => self::Tentative
+	);
+
 }

@@ -60,6 +60,11 @@ class CContactListItem
 	/**
 	 * @var bool
 	 */
+	public $ItsMe;
+
+	/**
+	 * @var bool
+	 */
 	public $OnlyRead;
 
 	public function __construct()
@@ -68,59 +73,54 @@ class CContactListItem
 		$this->IdStr = null;
 		$this->ETag = null;
 		$this->IsGroup = false;
-		$this->ReadOnly = false;
 		$this->Name = '';
 		$this->Email = '';
 		$this->Frequency = 0;
 		$this->UseFriendlyName = false;
 		$this->Global = false;
+		$this->ItsMe = false;
+		$this->ReadOnly = false;
 	}
 
 	/**
-	 * @param \Sabre\CardDAV\Card $vCard
+	 * @param \Sabre\CardDAV\Card $oVCard
 	 */
-	public function InitBySabreCardDAVCard($vCard)
+	public function InitBySabreCardDAVCard($oVCard)
 	{
-		if ($vCard)
+		if ($oVCard)
 		{
-			if ($vCard->name == 'VCARD')
+			if ($oVCard->name == 'VCARD')
 			{
-				if (isset($vCard->UID))
+				if (isset($oVCard->UID))
 				{
-					$this->Id = $vCard->UID->value;
+					$this->Id = (string)$oVCard->UID;
 					$this->IdStr = $this->Id;
 				}
 				$this->IsGroup = false;
 
-				if (isset($vCard->FN))
+				if (isset($oVCard->FN))
 				{
-					$this->Name = $vCard->FN->value;
+					$this->Name = (string)$oVCard->FN;
 				}
 
-				if (isset($vCard->EMAIL))
+				if (isset($oVCard->EMAIL))
 				{
-					$this->Email = $vCard->EMAIL[0]->value;
-					foreach($vCard->EMAIL as $oEmail)
+					$this->Email = (string)$oVCard->EMAIL[0];
+					foreach($oVCard->EMAIL as $oEmail)
 					{
-						if ($oEmail->offsetExists('TYPE'))
+						if ($oTypes = $oEmail['TYPE'])
 						{
-							$aTypes = array();
-							$oTypes = $oEmail->offsetGet('TYPE');
-							foreach ($oTypes as $oType)
+							if ($oTypes->has('PREF'))
 							{
-								$aTypes[] = strtoupper($oType->value);
-							}
-							if (in_array('PREF', $aTypes))
-							{
-								$this->Email = $oEmail->value;
+								$this->Email = (string)$oEmail;
 								break;
 							}
 						}
 					}
 				}
-				if (isset($vCard->{'X-AFTERLOGIC-USE-FREQUENCY'}))
+				if (isset($oVCard->{'X-AFTERLOGIC-USE-FREQUENCY'}))
 				{
-					$this->Frequency = (int)$vCard->{'X-AFTERLOGIC-USE-FREQUENCY'}->value;
+					$this->Frequency = (int)$oVCard->{'X-AFTERLOGIC-USE-FREQUENCY'}->getValue();
 				}
 				else
 				{
@@ -128,9 +128,9 @@ class CContactListItem
 				}
 
 				$this->UseFriendlyName = true;
-				if (isset($vCard->{'X-AFTERLOGIC-USE-FRIENDLY-NAME'}))
+				if (isset($oVCard->{'X-AFTERLOGIC-USE-FRIENDLY-NAME'}))
 				{
-					$this->UseFriendlyName = '1' === (string) $vCard->{'X-AFTERLOGIC-USE-FRIENDLY-NAME'}->value;
+					$this->UseFriendlyName = '1' === (string)$oVCard->{'X-AFTERLOGIC-USE-FRIENDLY-NAME'};
 				}
 			}
 		}
@@ -173,45 +173,61 @@ class CContactListItem
 	/**
 	 * @param string $sDbRowType
 	 * @param stdClass $oRow
+	 * @param mixed $mItsMeTypeId = null
 	 */
-	public function InitByDbRowWithType($sDbRowType, $oRow)
+	public function InitByDbRowWithType($sDbRowType, $oRow, $mItsMeTypeId = null)
 	{
 		if ($oRow)
 		{
 			switch ($sDbRowType)
 			{
 				case 'contact':
-					$this->Id = (int) $oRow->id_addr;
-					$this->IdStr = (string) $oRow->str_id;
-					$this->IsGroup = false;
-					$this->Name = (string) $oRow->fullname;
-					$this->Email = (string) $oRow->view_email;
-					switch ((int) $oRow->primary_email)
-					{
-						case EPrimaryEmailType::Home:
-							$this->Email = (string) $oRow->h_email;
-							break;
-						case EPrimaryEmailType::Business:
-							$this->Email = (string) $oRow->b_email;
-							break;
-						case EPrimaryEmailType::Other:
-							$this->Email = (string) $oRow->other_email;
-							break;
-					}
-					$this->Frequency = (int) $oRow->use_frequency;
-					$this->UseFriendlyName = (bool) $oRow->use_friendly_nm;
-					break;
-
 				case 'suggest-contacts':
 					$this->Id = (int) $oRow->id_addr;
 					$this->IdStr = (string) $oRow->str_id;
 					$this->IsGroup = false;
 					$this->Name = (string) $oRow->fullname;
-					if (0 === strlen($this->Name))
+					$this->Email = (string) $oRow->view_email;
+
+//					if (0 === strlen($this->Name))
+//					{
+//						$this->Name = (string) $oRow->firstname;
+//					}
+
+					switch ((int) $oRow->primary_email)
 					{
-						$this->Name = (string) $oRow->firstname;
+						case EPrimaryEmailType::Home:
+							$this->Email = (string) $oRow->h_email;
+							break;
+						case EPrimaryEmailType::Business:
+							$this->Email = (string) $oRow->b_email;
+							break;
+						case EPrimaryEmailType::Other:
+							$this->Email = (string) $oRow->other_email;
+							break;
 					}
-					
+					$this->Frequency = (int) $oRow->use_frequency;
+					$this->UseFriendlyName = (bool) $oRow->use_friendly_nm;
+
+					if (null !== $mItsMeTypeId &&
+						(int) $oRow->type === EContactType::Global_ &&
+						(string) $oRow->type_id === (string) $mItsMeTypeId
+					)
+					{
+						$this->ItsMe = true;
+						$this->ReadOnly = false;
+					}
+
+					break;
+
+				case 'global':
+				case 'suggest-global':
+					$this->Id = (int) $oRow->id_addr;
+					$this->IdStr = (string) $oRow->str_id;
+					$this->IsGroup = false;
+					$this->ReadOnly = true;
+					$this->Global = true;
+					$this->Name = (string) $oRow->fullname;
 					$this->Email = (string) $oRow->view_email;
 					switch ((int) $oRow->primary_email)
 					{
@@ -227,21 +243,18 @@ class CContactListItem
 					}
 					$this->Frequency = (int) $oRow->use_frequency;
 					$this->UseFriendlyName = (bool) $oRow->use_friendly_nm;
-					break;
 
-				case 'global':
-				case 'suggest-global':
-					$this->Id = (int) $oRow->id_acct;
-					$this->IdStr = $this->Id;
-					$this->IsGroup = false;
-					$this->ReadOnly = true;
-					$this->Global = true;
-					$this->Name = (string) $oRow->friendly_nm;
-					$this->Email = (string) $oRow->email;
-					$this->Frequency = 0;
-					$this->UseFriendlyName = true;
-					break;
+					if (null !== $mItsMeTypeId &&
+						(int) $oRow->type === EContactType::GlobalAccounts &&
+						(string) $oRow->type_id === (string) $mItsMeTypeId
+					)
+					{
+						$this->ItsMe = true;
+						$this->ReadOnly = false;
+					}
 
+					break;
+				
 				case 'group':
 					$this->Id = (int) $oRow->id_group;
 					$this->IsGroup = true;

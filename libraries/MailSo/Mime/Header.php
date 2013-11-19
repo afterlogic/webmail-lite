@@ -74,7 +74,7 @@ class Header
 		if (0 < \strlen($this->sFullValue) && $this->IsParameterized())
 		{
 			$aRawExplode = \explode(';', $this->sFullValue, 2);
-			if (2 === count($aRawExplode))
+			if (2 === \count($aRawExplode))
 			{
 				$this->sValue = $aRawExplode[0];
 				$this->oParameters =
@@ -116,7 +116,7 @@ class Header
 		{
 			return self::NewInstance(
 				\trim($aParts[0]),
-				\trim(\MailSo\Base\Utils::DecodeHeaderValue(trim($aParts[1]), $sIncomingCharset)),
+				\trim(\MailSo\Base\Utils::DecodeHeaderValue(\trim($aParts[1]), $sIncomingCharset)),
 				\trim($aParts[1])
 			);
 		}
@@ -203,7 +203,7 @@ class Header
 
 		if ($this->IsSubject())
 		{
-			if (!\MailSo\Base\Utils::IsAscii($sResult))
+			if (!\MailSo\Base\Utils::IsAscii($sResult) && \function_exists('iconv_mime_encode'))
 			{
 				$aPreferences = array(
 //					'scheme' => \MailSo\Base\Enumerations\Encoding::QUOTED_PRINTABLE_SHORT,
@@ -266,6 +266,27 @@ class Header
 			\strtolower(\MailSo\Mime\Enumerations\Header::RETURN_PATH),
 			\strtolower(\MailSo\Mime\Enumerations\Header::SENDER)
 		));
+	}
+
+	/**
+	 * @return string
+	 */
+	public function ValueWithCharsetAutoDetect()
+	{
+		$sValue = $this->Value();
+		if (!\MailSo\Base\Utils::IsAscii($sValue) &&
+			0 < \strlen($this->sEncodedValueForReparse) &&
+			!\MailSo\Base\Utils::IsAscii($this->sEncodedValueForReparse))
+		{
+			$sValueCharset = \MailSo\Base\Utils::CharsetDetect($this->sEncodedValueForReparse);
+			if (0 < \strlen($sValueCharset))
+			{
+				$this->SetParentCharset($sValueCharset);
+				$sValue = $this->Value();
+			}
+		}
+
+		return $sValue;
 	}
 
 	/**

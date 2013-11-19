@@ -56,27 +56,6 @@ class Binary
 
 	/**
 	 * @param string $sContentTransferEncoding
-	 *
-	 * @return string
-	 */
-	public static function GetInlineDecodeFunctionName($sContentTransferEncoding)
-	{
-		$sFunctionName = 'InlineNullDecode';
-		switch (strtolower($sContentTransferEncoding))
-		{
-			case 'base64':
-				$sFunctionName = 'InlineBase64Decode';
-				break;
-			case 'quoted-printable':
-				$sFunctionName = 'InlineQuotedPrintableDecode';
-				break;
-		}
-
-		return $sFunctionName;
-	}
-
-	/**
-	 * @param string $sContentTransferEncoding
 	 * @param bool $bDecode = true
 	 *
 	 * @return string
@@ -87,9 +66,11 @@ class Binary
 		switch (strtolower($sContentTransferEncoding))
 		{
 			case \MailSo\Base\Enumerations\Encoding::BASE64_LOWER:
-				$sFunctionName = $bDecode ? 'convert.base64-decode' : 'convert.base64-encode';
+				// InlineBase64Decode
+				$sFunctionName = $bDecode ? 'InlineBase64Decode' : 'convert.base64-encode';
 				break;
 			case \MailSo\Base\Enumerations\Encoding::QUOTED_PRINTABLE_LOWER:
+				// InlineQuotedPrintableDecode
 				$sFunctionName = $bDecode ? 'convert.quoted-printable-decode' : 'convert.quoted-printable-encode';
 				break;
 		}
@@ -183,12 +164,12 @@ class Binary
 			stream_wrapper_register(self::STREAM_NAME, '\MailSo\Base\StreamWrappers\Binary');
 		}
 
-		if (0 === strlen($sUtilsDecodeOrEncodeFunctionName))
+		if (null === $sUtilsDecodeOrEncodeFunctionName || 0 === strlen($sUtilsDecodeOrEncodeFunctionName))
 		{
 			$sUtilsDecodeOrEncodeFunctionName = 'InlineNullDecode';
 		}
 
-		$sHashName = md5(microtime(true).mt_rand(1000, 9999));
+		$sHashName = md5(microtime(true).rand(1000, 9999));
 
 		if (null !== $sFromEncoding && null !== $sToEncoding && $sFromEncoding !== $sToEncoding)
 		{
@@ -201,13 +182,13 @@ class Binary
 			'convert.quoted-printable-decode', 'convert.quoted-printable-encode'
 		)))
 		{
-			$rFilter = stream_filter_append($rStream, $sUtilsDecodeOrEncodeFunctionName,
+			$rFilter = \stream_filter_append($rStream, $sUtilsDecodeOrEncodeFunctionName,
 				STREAM_FILTER_READ, array(
 					'line-length' => \MailSo\Mime\Enumerations\Constants::LINE_LENGTH,
 					'line-break-chars' => \MailSo\Mime\Enumerations\Constants::CRLF
 				));
 
-			return is_resource($rFilter) ? $rStream : false;
+			return \is_resource($rFilter) ? $rStream : false;
 		}
 
 		self::$aStreams[$sHashName] =
@@ -215,7 +196,7 @@ class Binary
 
 		\MailSo\Base\Loader::IncStatistic('CreateStream/Binary');
 
-		return fopen(self::STREAM_NAME.'://'.$sHashName, 'rb');
+		return \fopen(self::STREAM_NAME.'://'.$sHashName, 'rb');
 	}
 
 	/**

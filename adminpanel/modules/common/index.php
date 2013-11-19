@@ -54,7 +54,6 @@ class CCommonModule extends ap_Module
 		$this->aTabs[] = AP_TAB_DOMAINS;
 		$this->aTabs[] = AP_TAB_SYSTEM;
 
-		//$this->aQueryActions[] = 'new';
 		$this->aQueryActions[] = 'edit';
 		$this->aQueryActions[] = 'list';
 
@@ -65,8 +64,8 @@ class CCommonModule extends ap_Module
 
 		$aTabs =& $oAdminPanel->GetTabs();
 		array_push($aTabs,
-			array(CApi::I18N('ADMIN_PANEL/TABNAME_SERVICES'), AP_TAB_SERVICES),
-			array(CApi::I18N('ADMIN_PANEL/TABNAME_DOMAINS'), AP_TAB_DOMAINS)
+			array(CApi::I18N('ADMIN_PANEL/TABNAME_DOMAINS'), AP_TAB_DOMAINS),
+			array(CApi::I18N('ADMIN_PANEL/TABNAME_SYSTEM'), AP_TAB_SYSTEM)
 		);
 	}
 
@@ -132,12 +131,9 @@ class CCommonModule extends ap_Module
 		switch ($sTab)
 		{
 			case AP_TAB_SYSTEM:
-				if ($this->oAdminPanel->PType && $this->oAdminPanel->LType || !$this->oAdminPanel->PType)
-				{
-					$oScreen->AddMenuItem(CM_MODE_DB, CM_MODE_DB_NAME, $this->sPath.'/templates/db.php');
-					$oScreen->AddMenuItem(CM_MODE_SECURITY, CM_MODE_SECURITY_NAME, $this->sPath.'/templates/security.php');
-					$oScreen->SetDefaultMode(CM_MODE_DB);
-				}
+				$oScreen->AddMenuItem(CM_MODE_DB, CM_MODE_DB_NAME, $this->sPath.'/templates/db.php');
+				$oScreen->AddMenuItem(CM_MODE_SECURITY, CM_MODE_SECURITY_NAME, $this->sPath.'/templates/security.php');
+				$oScreen->SetDefaultMode(CM_MODE_DB);
 				break;
 		}
 	}
@@ -186,7 +182,7 @@ class CCommonModule extends ap_Module
 			$bAddDefaultDomain = false;
 			if (0 === $iTenantId && $this->oAdminPanel->HasAccessDomain(0))
 			{
-				$iAllCount++;
+				$iAllCount += ceil($iAllCount / ($oScreen->GetLinesPerPage() - 1));
 				$bAddDefaultDomain = true;
 				$oScreen->AddListItem(0, array(
 					'Name' => CApi::I18N('ADMIN_PANEL/DOMAINS_DEFAULT')
@@ -254,12 +250,16 @@ class CCommonModule extends ap_Module
 					if ($oDomain)
 					{
 						$sTenantAddString = '';
-						if (0 < $oDomain->IdTenant && $this->oAdminPanel->RType() && 0 === $this->oAdminPanel->TenantId())
+						if (0 < $oDomain->IdTenant && $this->oTenantsApi)
 						{
-							$sTenantAddString = $this->oTenantsApi->GetTenantLoginById($oDomain->IdTenant);
-							if (!empty($sTenantAddString))
+							$oTenant = $this->oTenantsApi->GetTenantById($oDomain->IdTenant);
+							if ($oTenant)
 							{
-								$sTenantAddString = ' ('.$sTenantAddString.')';
+								$this->oAdminPanel->SetMainObject('domain_edit_tenant', $oTenant);
+								if ($this->oAdminPanel->RType() && 0 === $this->oAdminPanel->TenantId())
+								{
+									$sTenantAddString = 0 < strlen($oTenant->Login) ? ' ('.$oTenant->Login.')': '';
+								}
 							}
 						}
 
@@ -357,7 +357,7 @@ class CCommonModule extends ap_Module
 		{
 			return false;
 		}
-
+		
 		if ($oSettings->GetConf('Common/AdminLogin') === $sLogin &&
 			$this->oWebmailApi->ValidateMasterPassword($sPassword))
 		{
@@ -377,9 +377,32 @@ class CCommonModule extends ap_Module
 
 			if (0 < $iTenantId)
 			{
-				$this->setAdminAccessType(AP_SESS_AUTH_TYPE_TENANT);
-				$this->setTenantAccessId($iTenantId);
-				return true;
+				$oTenant = $this->oAdminPanel->CallModuleFunction('CProModule',
+					'GetTenantById', array($iTenantId));
+
+				if ($oTenant)
+				{
+					/* @var $oTenant CTenant */
+					if (0 < $oTenant->Expared && $oTenant->Expared < \time())
+					{
+						$sDesc = '<div style="display: block; margin: 0px auto; font: 11pt Verdana,sans-serif; width: 340px; padding: 20px; color: #777;">';
+						$sDesc .= '<h2 style="color: #D35A5A; font-weight: normal; font-size: 16pt;">'.CAPi::I18N('ADMIN_PANEL/YOUR_SUBSCRIPTION_IS_EXPIRED').'</h2>';
+						if (0 < strlen($oTenant->PayUrl))
+						{
+							$sDesc .= '<p>'.CAPi::I18N('ADMIN_PANEL/TO_RENEW_FOLLOW_LINK').
+								' <a target="_blank" href="'.ap_Utils::AttributeQuote($oTenant->PayUrl).'">'.$oTenant->PayUrl.'</a></p>';
+						}
+						
+						$sDesc .= '</div>';
+
+						CSession::Set('SESSION_LOGIN_WARNING', $sDesc);
+						return true;
+					}
+
+					$this->setAdminAccessType(AP_SESS_AUTH_TYPE_TENANT);
+					$this->setTenantAccessId($iTenantId);
+					return true;
+				}
 			}
 		}
 
@@ -415,17 +438,17 @@ class CCommonModule extends ap_Module
 	 */
 	protected function setTenantAccessId($iTenantId)
 	{
-		if (0 < $iTenantId)
-		{
-			$oTenant = $this->oTenantsApi->GetTenantById($iTenantId);
-			if ($oTenant)
-			{
-				$this->oAdminPanel->SetTenantTabsInfo($oTenant);
-			}
-		}
-
 		CSession::Set(AP_SESS_AUTH_TENANT_ID, $iTenantId);
 		$this->oAdminPanel->SetAuthTenantId($iTenantId);
+//
+//		if (0 < $iTenantId)
+//		{
+//			$oTenant = $this->oAdminPanel->GetTenantAdminObject();
+//			if ($oTenant)
+//			{
+//				$this->oAdminPanel->SetTenantTabsInfo($oTenant);
+//			}
+//		}
 	}
 
 	/**

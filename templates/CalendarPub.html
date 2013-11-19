@@ -1,0 +1,59 @@
+<html>
+	<head>
+		<title></title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link type="text/css" rel="stylesheet" href="static/css/libs.css">
+		<link type="text/css" rel="stylesheet" href="static/css/app.css">
+		<link type="text/css" rel="stylesheet" href="skins/Default/styles.css">
+	</head>
+	<body>
+<script src="./static/js/libs.js?702"></script>		
+<script src="./static/js/app-calendar.js?702"></script>		
+
+		<div class="panels" data-bind="splitter: {name: 'calendar', sizeLeft: 250, minLeft: 250, minRight: 40, resizeToWidth: true}">
+			<div class="panel calendar_manager">
+				<div class="resize_handler"></div>
+				<div class="panel_content">
+					<div class="toolbar">
+					</div>
+					<div class="middle_bar">
+						<div class="panel_center" data-bind="customScrollbar: {x: false}"></div>
+						<div class="panel_bottom" data-bind="initDom: datePickerDom">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="panel calendar">
+				<div class="panel_content">
+					<div class="toolbar">
+						<span class="content">
+							<span class="item checkmail command" data-bind="click: reloadAll, checkmail: {'activeClass': 'process', 'state': checkStarted(), 'duration': 800}">
+								<span class="icon"></span>
+							</span>
+							<span class="group">
+								<span class="item" data-i18n="CALENDAR/BUTTON_TODAY" data-bind="i18n: 'text', click: displayToday"></span>
+								<span class="item" data-i18n="CALENDAR/BUTTON_DAY_VIEW" data-bind="i18n: 'text', 
+									  click: displayDayView, css: {'selected': selectedView() === 'agendaDay'}"></span>
+								<span class="item" data-i18n="CALENDAR/BUTTON_WEEK_VIEW" data-bind="i18n: 'text', 
+									  click: displayWeekView, css: {'selected': selectedView() === 'agendaWeek'}"></span>
+								<span class="item" data-i18n="CALENDAR/BUTTON_MONTH_VIEW" data-bind="i18n: 'text', 
+									  click: displayMonthView, css: {'selected': selectedView() === 'month'}"></span>
+							</span>
+
+							<span class="group">
+								<span class="item" data-bind="click: displayPrev"><</span>
+								<span class="item" data-bind="text: dateTitle"></span>
+								<span class="item" data-bind="click: displayNext">></span>
+							</span>
+						</span>
+					</div>
+					<div class="middle_bar">
+						<div class="panel_center">
+							<div data-bind="initDom: calendarGridDom"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

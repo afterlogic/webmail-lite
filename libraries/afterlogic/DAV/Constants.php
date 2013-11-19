@@ -17,7 +17,7 @@ class Constants
 	
 	const GLOBAL_CONTACTS = 'Global Contacts';
 	const CALENDAR_DEFAULT_NAME = 'Default';
-	const CALENDAR_DEFAULT_COLOR = '#EF9554';
+	const CALENDAR_DEFAULT_COLOR = '#F09650';
 
 	const ADDRESSBOOK_DEFAULT_NAME = 'Default';
 	const ADDRESSBOOK_DEFAULT_DISPLAY_NAME = 'Address Book';
@@ -29,10 +29,17 @@ class Constants
 	
 	const DAV_USER_AGENT = 'AfterlogicDAVClient';
 	const DAV_SERVER_NAME = 'AfterlogicDAVServer';
+	const DAV_DIGEST_AUTH = true;
 	
-	const FILESTORAGE_QUOTA = 1048576;
+	const FILESTORAGE_PRIVATE_QUOTA = 104857600;
+	const FILESTORAGE_CORPORATE_QUOTA = 1048576000;
 	
+	const FILESTORAGE_PATH_ROOT = '/files';
+	const FILESTORAGE_PATH_PRIVATE = '/private';
+	const FILESTORAGE_PATH_CORPORATE = '/corporate';
 	
+	const LOG_BODY = false;
+
 	// Langs Constants
 	const CalendarDefaultName = 'My Calendar';
 }

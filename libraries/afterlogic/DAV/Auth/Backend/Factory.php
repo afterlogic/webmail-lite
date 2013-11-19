@@ -9,7 +9,7 @@ class Factory
 	public static function getBackend(\PDO $pdo, $dBPrefix = '')
 	{
 		$oBackend = null;
-		if (Server::$UseDigest)	
+		if (\afterlogic\DAV\Constants::DAV_DIGEST_AUTH)	
 		{
 			$oBackend = new Digest($pdo, $dBPrefix);
 		}

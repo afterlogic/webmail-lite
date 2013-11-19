@@ -16,8 +16,8 @@ use Sabre\DAV;
  * Note: This feature is experimental, and may change in between different
  * SabreDAV versions.
  *
- * @copyright Copyright (C) 2007-2012 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/)
+ * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
+ * @author Evert Pot (http://evertpot.com/)
  * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
 class SharingPlugin extends DAV\ServerPlugin {
@@ -151,18 +151,15 @@ class SharingPlugin extends DAV\ServerPlugin {
                     'href' => $node->getOwner(),
                 );
 
-                if ($props && isset($props[0]) && isset($props[0][200])) {
+                if (isset($props[0][200])) {
 
                     // We're mapping the internal webdav properties to the
                     // elements caldav-sharing expects.
-                    $mapping = array(
-                        '{http://sabredav.org/ns}email-address' => 'href',
-                        '{DAV:}displayname' => 'commonName',
-                    );
-                    foreach($mapping as $source=>$dest) {
-                        if (isset($props[0][200][$source])) {
-                            $ownerInfo[$dest] = $props[0][200][$source];
-                        }
+                    if (isset($props[0][200]['{http://sabredav.org/ns}email-address'])) {
+                        $ownerInfo['href'] = 'mailto:' . $props[0][200]['{http://sabredav.org/ns}email-address'];
+                    }
+                    if (isset($props[0][200]['{DAV:}displayname'])) {
+                        $ownerInfo['commonName'] = $props[0][200]['{DAV:}displayname'];
                     }
 
                 }
@@ -461,8 +458,7 @@ class SharingPlugin extends DAV\ServerPlugin {
 
         $xpath = new \DOMXPath($dom);
         $xpath->registerNamespace('cs', Plugin::NS_CALENDARSERVER);
-        $xpath->registerNamespace('d', 'DAV:');
-
+        $xpath->registerNamespace('d', 'urn:DAV');
 
         $set = array();
         $elems = $xpath->query('cs:set');
@@ -510,7 +506,7 @@ class SharingPlugin extends DAV\ServerPlugin {
 
         $xpath = new \DOMXPath($dom);
         $xpath->registerNamespace('cs', Plugin::NS_CALENDARSERVER);
-        $xpath->registerNamespace('d', 'DAV:');
+        $xpath->registerNamespace('d', 'urn:DAV');
 
         $hostHref = $xpath->evaluate('string(cs:hosturl/d:href)');
         if (!$hostHref) {

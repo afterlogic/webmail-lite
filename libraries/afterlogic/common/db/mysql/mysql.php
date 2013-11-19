@@ -14,6 +14,16 @@ CApi::Inc('common.db.sql');
  */
 class CDbMySql extends CDbSql
 {
+	/*
+	 * @var	resource
+	 */
+	protected $_rConectionHandle;
+
+	/**
+	 * @var	resource
+	 */
+	protected $_rResultId;
+
 	/**
 	 * @var bool
 	 */
@@ -37,9 +47,20 @@ class CDbMySql extends CDbSql
 		$this->sPassword = trim($sPassword);
 		$this->sDbName = trim($sDbName);
 
+		$this->_rConectionHandle = null;
+		$this->_rResultId = null;
+
 		$this->iExecuteCount = 0;
 		$this->bUseExplain = CApi::GetConf('labs.db.use-explain', false);
 		$this->bUseExplainExtended = CApi::GetConf('labs.db.use-explain-extended', false);
+	}
+
+	/**
+	 * @return bool
+	 */
+	function IsConnected()
+	{
+		return is_resource($this->_rConectionHandle);
 	}
 
 	/**
@@ -79,7 +100,7 @@ class CDbMySql extends CDbSql
 
 		if (CApi::$bUseDbLog)
 		{
-			CApi::Log('DB : start connect to '.$this->sUser.'@'.$this->sHost);
+			CApi::Log('DB(mysql) : start connect to '.$this->sUser.'@'.$this->sHost);
 		}
 		
 		$this->_rConectionHandle = @mysql_connect($this->sHost, $this->sUser, $this->sPassword, (bool) $bNewLink);

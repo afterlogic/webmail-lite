@@ -40,6 +40,8 @@
 		$('#next-btn-server-check').click(function () {
 			if (window.__awm_lite) {
 				window.open('http://www.afterlogic.com/congratulations/webmail-lite-php');
+			} else if (window.__awm_au) {
+				window.open('http://www.afterlogic.com/congratulations/aurora');
 			} else {
 				window.open('http://www.afterlogic.com/congratulations/webmail-pro-php');
 			}

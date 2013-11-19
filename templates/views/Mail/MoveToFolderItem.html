@@ -1,4 +1,4 @@
-<span class="item" data-bind="visible: visible, css: {'system': isSystem, 'user': !isSystem()}">
+<span class="item" data-bind="visible: visible() && !virtual(), css: {'system': isSystem, 'user': !isSystem()}">
 	<span class="folder" data-bind="attr: {'data-folder': fullName}, 
 		  css: {'disabled': selected, 'unselectable': !canBeSelected()}">
 		<span class="title" data-bind="text: displayName"></span>

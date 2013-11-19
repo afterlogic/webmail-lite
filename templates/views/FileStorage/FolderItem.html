@@ -1,0 +1,26 @@
+<div class="item dragHandle folder" draggable="true" 
+	 data-bind="
+		 event: { 'dragstart': eventDragStart },
+		 draggablePlace: $parent.dragAndDropHelperBinded,
+  		 draggableDragStartCallback: function() {$root.dragover(true);},
+		 draggableDragStopCallback: function() {$root.dragover(false);},
+		 css: {'selected': selected(), 
+				'checked': checked(),
+				'deleted': deleted(),
+				'incomplete': !uploaded()
+		 }"
+>
+	<div class="item_content ui-droppable" data-bind="css: {'recivedAnim': recivedAnim()}">
+		<span class="data">
+			<span class="icon animGoal"></span>
+			<span class="name" data-bind="text: name(), visible: !edited()"></span>
+			<input type="text" class="input" maxlength="30" data-bind="value: nameForEdit(), visible: edited, hasfocus: edited" />
+			<span class="progress" data-bind="visible: !uploaded()">
+				<span data-bind="style: {'width': progress() + '%'}"></span>
+				<span class="percent" data-bind="text: progress() + '%'"></span>
+			</span>
+		</span>
+		<div class="separator"></div>
+	</div>
+	<div class="mask" data-bind="droppable: function (oEvent, oUi) {$root.filesDrop($data, oEvent, oUi);}"></div>
+</div>

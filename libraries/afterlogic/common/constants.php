@@ -25,6 +25,8 @@ define('API_INC_PROTOCOL_SMTP_DEF_PORT', 25);
 define('API_DEFAULT_SKIN', 'Default');
 define('API_DUMMY', '*******');
 
+define('API_HELPDESK_PUBLIC_NAME', '_helpdesk_');
+
 // timezone fix
 $sDefaultTimeZone = function_exists('date_default_timezone_get')
 	? @date_default_timezone_get() : 'US/Pacific';

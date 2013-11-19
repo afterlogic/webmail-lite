@@ -45,18 +45,31 @@ class Inline extends \MailSo\Log\Driver
 	}
 
 	/**
-	 * @param string $sDesc
+	 * @param string $mDesc
 	 *
 	 * @return bool
 	 */
-	protected function writeImplementation($sDesc)
+	protected function writeImplementation($mDesc)
 	{
-		echo ($this->bHtmlEncodeSpecialChars)
-			? \htmlspecialchars($sDesc).$this->sNewLine : $sDesc.$this->sNewLine;
+		if (is_array($mDesc))
+		{
+			if ($this->bHtmlEncodeSpecialChars)
+			{
+				$mDesc = array_map(function ($sItem) {
+					$sItem = \htmlspecialchars($mDesc);
+				}, $mDesc);
+			}
+
+			$mDesc = \implode($this->sNewLine, $mDesc);
+		}
+		else
+		{
+			echo ($this->bHtmlEncodeSpecialChars) ? \htmlspecialchars($mDesc).$this->sNewLine : $mDesc.$this->sNewLine;
+		}
 
 		return true;
 	}
-
+	
 	/**
 	 * @return bool
 	 */
@@ -68,13 +81,5 @@ class Inline extends \MailSo\Log\Driver
 		}
 
 		return true;
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function WriteEmptyLine()
-	{
-		return $this->writeImplementation('');
 	}
 }

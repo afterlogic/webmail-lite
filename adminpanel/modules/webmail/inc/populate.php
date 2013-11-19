@@ -8,7 +8,7 @@
 
 class CWebMailPopulateData extends ap_CoreModuleHelper
 {
-	public function ServicesLogging(ap_Standard_Screen &$oScreen)
+	public function SystemLogging(ap_Standard_Screen &$oScreen)
 	{
 		$this->oSettings->GetConf('Common/LoggingLevel');
 		$this->oSettings->GetConf('Common/EnableEventLogging');
@@ -53,10 +53,6 @@ class CWebMailPopulateData extends ap_CoreModuleHelper
 			if ($bHideProtocol)
 			{
 				$oScreen->Data->SetValue('classHideIncomingMailProtocol', 'wm_hide');
-
-//				$oScreen->Data->SetValue('textIncomingMailProtocol',
-//					$oDomain->IncomingMailProtocol === EMailProtocol::IMAP4 ? '(IMAP4)' : '(POP3)');
-				
 				$oScreen->Data->SetValue('textIncomingMailProtocol', '');
 			}
 
@@ -64,8 +60,30 @@ class CWebMailPopulateData extends ap_CoreModuleHelper
 
 			$oScreen->Data->SetValue('radioAuthTypeAuthCurrentUser', true);
 			$oScreen->Data->SetValue('classHideSsl', $this->oModule->HasSslSupport() ? '' : 'wm_hide');
-
 			$oScreen->Data->SetValue('txtWebDomain', $oDomain->Url);
+
+			$mLinkWebUrl = $this->oAdminPanel->IsTenantAuthType() ?
+				CApi::GetConf('labs.custom-tenant-link-web-domain-help-url', null) :
+				CApi::GetConf('labs.custom-admin-link-web-domain-help-url', null);
+
+			if (null === $mLinkWebUrl)
+			{
+				if ($this->oAdminPanel->AType)
+				{
+					$mLinkWebUrl = 'http://www.afterlogic.com/wiki/Configuring_web_domain_names_(Aurora)';
+				}
+				else
+				{
+					$mLinkWebUrl = 'http://www.afterlogic.com/wiki/Configuring_web_domain_names_(WebMail_Pro_7)';
+				}
+			}
+			
+			if (!empty($mLinkWebUrl))
+			{
+				$oScreen->Data->SetValue('linkWebDomain', $mLinkWebUrl);
+			}
+			
+			$oScreen->Data->SetValue('classLinkWebDomain', empty($mLinkWebUrl) ? 'wm_hide' : '');
 
 			$oScreen->Data->SetValue('chAllowUsersAccessInterfaveSettings',
 				$oDomain->AllowUsersChangeInterfaceSettings);
@@ -79,7 +97,6 @@ class CWebMailPopulateData extends ap_CoreModuleHelper
 			$iMessagesPerPage = $oDomain->MailsPerPage;
 			$iContactsPerPage = $oDomain->ContactsPerPage;
 			$iAutocheckMail = $oDomain->AutoCheckMailInterval;
-
 
 			$iIncomingMailProtocol = $oDomain->IncomingMailProtocol;
 			$oScreen->Data->SetValue('optIncomingProtocolIMAP', EMailProtocol::IMAP4 === $iIncomingMailProtocol);
@@ -116,7 +133,7 @@ class CWebMailPopulateData extends ap_CoreModuleHelper
 		}
 
 		$sMessagesPerPageOptions = '';
-		$aMessagesPerPageList = array(5, 10, 20, 25, 50, 75, 100);
+		$aMessagesPerPageList = array(10, 20, 30, 50, 75, 100, 150, 200);
 		foreach ($aMessagesPerPageList as $iMessageCount)
 		{
 			$sSelected = ($iMessageCount === $iMessagesPerPage) ? ' selected="selected"' : '';
@@ -142,7 +159,7 @@ class CWebMailPopulateData extends ap_CoreModuleHelper
 		$oScreen->Data->SetValue('selAutocheckMailOptions', $sAutocheckMailOptions);
 
 		$sContactsPerPageOptions = '';
-		$aContactsPerPageList = array(5, 10, 20, 25, 50, 75, 100);
+		$aContactsPerPageList = array(10, 20, 30, 50, 75, 100, 150, 200);
 		foreach ($aContactsPerPageList as $iContactsCount)
 		{
 			$sSelected = ($iContactsPerPage === $iContactsCount) ? ' selected="selected"' : '';
@@ -150,44 +167,5 @@ class CWebMailPopulateData extends ap_CoreModuleHelper
 				.'"'.$sSelected.'>'.$iContactsCount.'</option>';
 		}
 		$oScreen->Data->SetValue('selContactsPerPageOptions', $sContactsPerPageOptions);
-
-//		$sSkinsOptions = '';
-//		$aSkins = $this->oModule->GetSkinList();
-//		if (is_array($aSkins))
-//		{
-//			foreach ($aSkins as $sSkin)
-//			{
-//				$sSelected = ($sSkin === $sDomainSkin) ? ' selected="selected"' : '';
-//				$sSkinsOptions .= '<option value="'.ap_Utils::AttributeQuote($sSkin)
-//					.'"'.$sSelected.'>'.ap_Utils::EncodeSpecialXmlChars($sSkin).'</option>';
-//			}
-//			$oScreen->Data->SetValue('selSkinsOptions', $sSkinsOptions);
-//		}
-//
-//		$sLanguageOptions = '';
-//		$aLangs = $this->oModule->GetLangsList();
-//		if (is_array($aLangs))
-//		{
-//			foreach ($aLangs as $sLang)
-//			{
-//				$sSelected = ($sLang === $sDomainLang) ? ' selected="selected"' : '';
-//				$sLanguageOptions .= '<option value="'.ap_Utils::AttributeQuote($sLang)
-//					.'"'.$sSelected.'>'.ap_Utils::EncodeSpecialXmlChars($sLang).'</option>';
-//			}
-//			$oScreen->Data->SetValue('selLanguageOptions', $sLanguageOptions);
-//		}
-//
-//		$sTimeZoneOptions = '';
-//		$aTimeZones = $this->oModule->GetTimeZoneList();
-//		if (is_array($aTimeZones))
-//		{
-//			foreach ($aTimeZones as $iIndex => $aTimeZone)
-//			{
-//				$sSelected = ((int) $sDomainZone === (int) $iIndex) ? ' selected="selected"' : '';
-//				$sTimeZoneOptions .= '<option value="'.ap_Utils::AttributeQuote($iIndex)
-//					.'"'.$sSelected.'>'.ap_Utils::EncodeSpecialXmlChars($aTimeZone).'</option>';
-//			}
-//			$oScreen->Data->SetValue('selTimeZone', $sTimeZoneOptions);
-//		}
 	}
 }

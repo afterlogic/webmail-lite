@@ -6,11 +6,6 @@ use afterlogic\DAV\Constants;
 
 class Helper
 {
-    public function __construct(\PDO $pdo, $dBPrefix = '')
-	{
-        $this->pdo = $pdo;
-		$this->dbPrefix = $dBPrefix;
-    }
 
 	public static function ValidateClient($sClient)
 	{
@@ -30,113 +25,84 @@ class Helper
 		return $bIsSync;
 	}
 
-	public function CheckPrincipals($sUserName)
+	public static function CheckPrincipals($sUserName)
 	{
+		$oPdo = \CApi::GetPDO();
+		$Settings = \CApi::GetSettings();
+		$dbPrefix = $Settings->GetConf('Common/DBPrefix');
+		
 		$sPrincipal = 'principals/' . $sUserName;
 
-		$stmt = $this->pdo->prepare(
-				'SELECT id FROM `'.$this->dbPrefix.Constants::T_PRINCIPALS.'`
-					WHERE uri = ? LIMIT 1'
+		$stmt = $oPdo->prepare(
+			'SELECT id FROM '.$dbPrefix.Constants::T_PRINCIPALS.' WHERE uri = ? LIMIT 1'
 		);
-		$stmt->execute(
-				array(
-					$sPrincipal
-				)
-		);
-		$result = $stmt->fetchAll();
-		if(count($result) === 0)
+		$stmt->execute(array($sPrincipal));
+		if(count($stmt->fetchAll()) === 0)
 		{
-			$stmt = $this->pdo->prepare(
-					'INSERT INTO `'.$this->dbPrefix.Constants::T_PRINCIPALS.'`
-						(uri,email,displayname) VALUES (?, ?, ?)'
+			$stmt = $oPdo->prepare(
+				'INSERT INTO '.$dbPrefix.Constants::T_PRINCIPALS.'
+					(uri,email,displayname) VALUES (?, ?, ?)'
 			);
-			$stmt->execute(
-					array(
-						$sPrincipal,
-						$sUserName,
-						''
-					)
+			$stmt->execute(array($sPrincipal, $sUserName, ''));
+		}
+
+		$stmt = $oPdo->prepare(
+			'SELECT principaluri FROM '.$dbPrefix.Constants::T_CALENDARS.'
+				WHERE principaluri = ? and uri = ? LIMIT 1'
+		);
+		$stmt->execute(array($sPrincipal, Constants::CALENDAR_DEFAULT_NAME));
+		if (count($stmt->fetchAll()) === 0)
+		{
+			$stmt = $oPdo->prepare(
+				'INSERT INTO '.$dbPrefix.Constants::T_CALENDARS.'
+					(principaluri, displayname, uri, description, components, ctag, calendarcolor)
+					VALUES (?, ?, ?, ?, ?, 1, ?)'
+			);
+			$stmt->execute(array(
+					$sPrincipal,
+					Constants::CalendarDefaultName,
+					Constants::CALENDAR_DEFAULT_NAME,
+					'',
+					'VEVENT,VTODO',
+					Constants::CALENDAR_DEFAULT_COLOR
+				)
 			);
 		}
 
-		$stmt = $this->pdo->prepare(
-				'SELECT principaluri FROM `'.$this->dbPrefix.Constants::T_CALENDARS.'`
-					WHERE principaluri = ? and uri = ? LIMIT 1'
+		$stmt = $oPdo->prepare(
+			'SELECT principaluri FROM '.$dbPrefix.Constants::T_ADDRESSBOOKS.'
+				WHERE principaluri = ? and uri = ? LIMIT 1'
 		);
-		$stmt->execute(
-				array(
-					$sPrincipal,
-					Constants::CALENDAR_DEFAULT_NAME
-				)
+
+		$stmt->execute(array($sPrincipal, Constants::ADDRESSBOOK_DEFAULT_NAME));
+		$bHasDefaultAddressbooks = (count($stmt->fetchAll()) != 0);
+
+		$stmt->execute(array($sPrincipal, Constants::ADDRESSBOOK_COLLECTED_NAME));
+		$bHasCollectedAddressbooks = (count($stmt->fetchAll()) != 0);
+
+		$stmt = $oPdo->prepare(
+			'INSERT INTO '.$dbPrefix.Constants::T_ADDRESSBOOKS.'
+				(principaluri, displayname, uri, description, ctag)
+				VALUES (?, ?, ?, ?, 1)'
 		);
-		$result = $stmt->fetchAll();
-		if (count($result) === 0)
+		if (!$bHasDefaultAddressbooks)
 		{
-			$stmt = $this->pdo->prepare(
-					'INSERT INTO `'.$this->dbPrefix.Constants::T_CALENDARS.'`
-						(principaluri, displayname, uri, description, components, ctag, calendarcolor)
-						VALUES (?, ?, ?, ?, ?, 1, ?)'
-			);
-			$stmt->execute(
-					array(
-						$sPrincipal,
-						Constants::CalendarDefaultName,
-						Constants::CALENDAR_DEFAULT_NAME,
-						'',
-						'VEVENT,VTODO',
-						Constants::CALENDAR_DEFAULT_COLOR
-					)
+			$stmt->execute(array(
+					$sPrincipal,
+					Constants::ADDRESSBOOK_DEFAULT_DISPLAY_NAME,
+					Constants::ADDRESSBOOK_DEFAULT_NAME,
+					Constants::ADDRESSBOOK_DEFAULT_DISPLAY_NAME
+				)
 			);
 		}
-
-		$stmt = $this->pdo->prepare(
-				'SELECT principaluri FROM `'.$this->dbPrefix.Constants::T_ADDRESSBOOKS.'`
-					WHERE principaluri = ? and uri = ? LIMIT 1'
-		);
-
-		$stmt->execute(
-				array(
-					$sPrincipal,
-					Constants::ADDRESSBOOK_DEFAULT_NAME
-				)
-		);
-		$result = $stmt->fetchAll();
-		$hasDefaultAddressbooks = (count($result) != 0);
-
-		$stmt->execute(
-				array(
-					$sPrincipal,
-					Constants::ADDRESSBOOK_COLLECTED_NAME
-				)
-		);
-		$result = $stmt->fetchAll();
-		$hasCollectedAddressbooks = (count($result) != 0);
-
-		$stmt = $this->pdo->prepare(
-				'INSERT INTO `'.$this->dbPrefix.Constants::T_ADDRESSBOOKS.'`
-					(principaluri, displayname, uri, description, ctag)
-					VALUES (?, ?, ?, ?, 1)'
-		);
-		if (!$hasDefaultAddressbooks)
+		if (!$bHasCollectedAddressbooks)
 		{
-			$stmt->execute(
-					array(
-						$sPrincipal,
-						Constants::ADDRESSBOOK_DEFAULT_DISPLAY_NAME,
-						Constants::ADDRESSBOOK_DEFAULT_NAME,
-						Constants::ADDRESSBOOK_DEFAULT_DISPLAY_NAME
-					)
-			);
-		}
-		if (!$hasCollectedAddressbooks)
-		{
-			$stmt->execute(
-					array(
-						$sPrincipal,
-						Constants::ADDRESSBOOK_COLLECTED_DISPLAY_NAME,
-						Constants::ADDRESSBOOK_COLLECTED_NAME,
-						Constants::ADDRESSBOOK_COLLECTED_DISPLAY_NAME
-					)
+			$stmt->execute(array(
+					$sPrincipal,
+					Constants::ADDRESSBOOK_COLLECTED_DISPLAY_NAME,
+					Constants::ADDRESSBOOK_COLLECTED_NAME,
+					Constants::ADDRESSBOOK_COLLECTED_DISPLAY_NAME
+				)
 			);
 		}
 	}

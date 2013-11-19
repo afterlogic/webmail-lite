@@ -10,8 +10,8 @@ use Sabre\DAV;
  * This property contains information about what kind of locks
  * this server supports.
  *
- * @copyright Copyright (C) 2007-2012 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/)
+ * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
+ * @author Evert Pot (http://evertpot.com/)
  * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
 class SupportedLock extends DAV\Property {
@@ -47,27 +47,27 @@ class SupportedLock extends DAV\Property {
 
         if (!$this->supportsLocks) return null;
 
-        $lockEntry1 = $doc->createElementNS('DAV:','d:lockentry');
-        $lockEntry2 = $doc->createElementNS('DAV:','d:lockentry');
+        $lockEntry1 = $doc->createElement('d:lockentry');
+        $lockEntry2 = $doc->createElement('d:lockentry');
 
         $prop->appendChild($lockEntry1);
         $prop->appendChild($lockEntry2);
 
-        $lockScope1 = $doc->createElementNS('DAV:','d:lockscope');
-        $lockScope2 = $doc->createElementNS('DAV:','d:lockscope');
-        $lockType1 = $doc->createElementNS('DAV:','d:locktype');
-        $lockType2 = $doc->createElementNS('DAV:','d:locktype');
+        $lockScope1 = $doc->createElement('d:lockscope');
+        $lockScope2 = $doc->createElement('d:lockscope');
+        $lockType1 = $doc->createElement('d:locktype');
+        $lockType2 = $doc->createElement('d:locktype');
 
         $lockEntry1->appendChild($lockScope1);
         $lockEntry1->appendChild($lockType1);
         $lockEntry2->appendChild($lockScope2);
         $lockEntry2->appendChild($lockType2);
 
-        $lockScope1->appendChild($doc->createElementNS('DAV:','d:exclusive'));
-        $lockScope2->appendChild($doc->createElementNS('DAV:','d:shared'));
+        $lockScope1->appendChild($doc->createElement('d:exclusive'));
+        $lockScope2->appendChild($doc->createElement('d:shared'));
 
-        $lockType1->appendChild($doc->createElementNS('DAV:','d:write'));
-        $lockType2->appendChild($doc->createElementNS('DAV:','d:write'));
+        $lockType1->appendChild($doc->createElement('d:write'));
+        $lockType2->appendChild($doc->createElement('d:write'));
 
         //$frag->appendXML('<d:lockentry><d:lockscope><d:exclusive /></d:lockscope><d:locktype><d:write /></d:locktype></d:lockentry>');
         //$frag->appendXML('<d:lockentry><d:lockscope><d:shared /></d:lockscope><d:locktype><d:write /></d:locktype></d:lockentry>');

@@ -8,7 +8,6 @@
 
 class CCommonPostAction extends ap_CoreModuleHelper
 {
-
 	public function SystemDb()
 	{
 		$this->oSettings->SetConf('Common/DBType', EDbType::MySQL);

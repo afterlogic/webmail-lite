@@ -1,0 +1,14 @@
+<div class="item" data-bind="dropdown: {'callback': $parent.calendarDropdownToggle, 'trueValue': id, passClick: false},
+	 click: $parent.calendarListClick,
+	 style: {backgroundColor: color},
+	 css: {'inactive': !active()}">
+	<span class="control"></span>
+	<label class="custom_checkbox" data-bind="css: {'checked': active}">
+		<span class="icon"></span>
+		<input type="checkbox" data-bind="checked: active" />
+	</label>
+	<span class="icon public" data-bind="visible: isPublic()"></span>
+	<span>
+		<span class="title" data-bind="text: name() + (isShared ? ' - ' + owner() : ''), fade: {color: color}"></span>
+	</span>
+</div>

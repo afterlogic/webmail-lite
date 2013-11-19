@@ -15,5 +15,6 @@
 		<span class="icon"></span>
 		<span class="text" data-bind="html: errorMessage, visible: isHtmlError"></span>
 		<span class="text" data-bind="text: errorMessage, visible: !isHtmlError()"></span>
+		<span class="close" data-bind="click: hideError, visible: errorNotHide"></span>
 	</span>
 </div>

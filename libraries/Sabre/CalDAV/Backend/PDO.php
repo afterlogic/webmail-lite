@@ -12,8 +12,8 @@ use Sabre\DAV;
  * This backend is used to store calendar-data in a PDO database, such as
  * sqlite or MySQL
  *
- * @copyright Copyright (C) 2007-2012 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/)
+ * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
+ * @author Evert Pot (http://evertpot.com/)
  * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
 class PDO extends AbstractBackend {
@@ -374,9 +374,11 @@ class PDO extends AbstractBackend {
      * 'calendardata' object is required here though, while it's not required
      * for getCalendarObjects.
      *
+     * This method must return null if the object did not exist.
+     *
      * @param string $calendarId
      * @param string $objectUri
-     * @return array
+     * @return array|null
      */
     public function getCalendarObject($calendarId,$objectUri) {
 
@@ -505,9 +507,9 @@ class PDO extends AbstractBackend {
                     $lastOccurence = $component->DTEND->getDateTime()->getTimeStamp();
                 } elseif (isset($component->DURATION)) {
                     $endDate = clone $component->DTSTART->getDateTime();
-                    $endDate->add(VObject\DateTimeParser::parse($component->DURATION->value));
+                    $endDate->add(VObject\DateTimeParser::parse($component->DURATION->getValue()));
                     $lastOccurence = $endDate->getTimeStamp();
-                } elseif ($component->DTSTART->getDateType()===VObject\Property\DateTime::DATE) {
+                } elseif (!$component->DTSTART->hasTime()) {
                     $endDate = clone $component->DTSTART->getDateTime();
                     $endDate->modify('+1 day');
                     $lastOccurence = $endDate->getTimeStamp();

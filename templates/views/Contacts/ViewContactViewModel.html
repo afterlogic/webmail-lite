@@ -1,6 +1,9 @@
 <div class="panel_top">
 	<div class="toolbar">
 		<span class="content">
+			<a class="item mail_to" href="javascript: void(0)" data-bind="visible: hasEmails, click: sendThisContact">
+				<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/BUTTON_SEND_THIS_CONTACT"></span>
+			</a>
 			<a class="item mail_to" href="javascript: void(0)" data-bind="visible: hasEmails, attr: {href: sendMailLink}">
 				<span class="icon"></span>
 				<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/BUTTON_EMAIL_TO_THIS_CONTACT"></span>
@@ -24,7 +27,7 @@
 	</div>
 	<div class="contact_content scroll-inner">
 		<div class="contact_data_groups">
-			<div class="fields" data-bind="visible: !personalIsEmpty()">
+			<div class="fields">
 				<div class="fieldset">
 					<div class="row" data-bind="visible: '' !== firstName()">
 						<span class="label">
@@ -37,6 +40,25 @@
 							<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_LAST_NAME"></span>:
 						</span>
 						<span class="value" data-bind="text: lastName"></span>
+					</div>
+					<div class="row" data-bind="visible: '' !== skype()">
+						<span class="label">
+							<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_SKYPE"></span>:
+						</span>
+						<a href="javascript: void(0)" data-bind="attr: {href: 'skype:' + skype()}">
+							<span class="value" data-bind="text: skype"></span>
+						</a>
+					</div>
+					<div class="row" data-bind="visible: '' !== facebook()">
+						<span class="label">
+							<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_FACEBOOK"></span>:
+						</span>
+
+						<a href="javascript: void(0)" target="_blank" data-bind="visible: isStrLink(facebook()), attr: {href: facebook}">
+							<span class="value" data-bind="text: facebook"></span>
+						</a>
+						<span class="value" data-bind="visible: !isStrLink(facebook()), text: facebook"></span>
+
 					</div>
 				</div>
 			</div>
@@ -107,12 +129,14 @@
 							<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_PHONE"></span>:
 						</span>
 						<span class="value" data-bind="text: personalPhone"></span>
+						<span class="link call" data-i18n="call" data-bind="i18n: 'text', click: function() {onCallClick(personalPhone())}, visible: voiceApp"></span>
 					</div>
 					<div class="row mobile" data-bind="visible: '' !== personalMobile()">
 						<span class="label">
 							<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_MOBILE"></span>:
 						</span>
 						<span class="value" data-bind="text: personalMobile"></span>
+						<span class="link call" data-i18n="call" data-bind="i18n: 'text', click: function() {onCallClick(personalMobile())}, visible: voiceApp"></span>
 					</div>
 				</div>
 			</div>
@@ -198,6 +222,7 @@
 							<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_PHONE"></span>:
 						</span>
 						<span class="value" data-bind="text: businessPhone"></span>
+						<span class="link call" data-i18n="call" data-bind="i18n: 'text', click: function() {onCallClick(businessPhone())}, visible: voiceApp"></span>
 					</div>
 				</div>
 			</div>
@@ -229,12 +254,12 @@
 				</div>
 			</div>
 
-			<div class="fields groups" data-bind="visible: 0 < $root.groupsInContactView($data).length">
+			<div class="fields groups" data-bind="visible: !global() && 0 < $root.groupsInContactView($data).length">
 				<h2 class="subtitle" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_CONTACTS_GROUPS"></h2>
 				<div class="fieldset">
 					<div class="row" data-bind="foreach: $root.groupsInContactView($data)"><span
 						data-bind="visible: $index() != 0">,</span>
-					<span class="link" data-bind="text: Name()"></span></div>
+					<span class="link" data-bind="text: Name(), click: function () { $root.viewGroup($data); }"></span></div>
 				</div>
 			</div>
 		</div>

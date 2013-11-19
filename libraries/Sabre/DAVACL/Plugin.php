@@ -13,8 +13,8 @@ use Sabre\DAV;
  * property, defined in RFC5397 and the {DAV:}expand-property report, as
  * defined in RFC3253.
  *
- * @copyright Copyright (C) 2007-2012 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/)
+ * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
+ * @author Evert Pot (http://evertpot.com/)
  * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
 class Plugin extends DAV\ServerPlugin {
@@ -1229,7 +1229,7 @@ class Plugin extends DAV\ServerPlugin {
                 $node[200][$propertyName] = new DAV\Property\ResponseList($childProps);
 
             }
-            $result[] = new DAV\Property\Response($path, $node);
+            $result[] = new DAV\Property\Response($node['href'], $node);
 
         }
 

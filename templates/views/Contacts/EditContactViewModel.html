@@ -14,29 +14,41 @@
 					</span>
 					<input class="value input" type="text" data-bind="value: displayName, hasfocus: displayNameFocused" />
 				</div>
-				<div class="row">
+				<div class="row" data-bind="visible: !itsMe()">
 					<span class="label">
 						<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_EMAIL"></span>:
 					</span>
 					<input class="value input" type="text" data-bind="value: email" />
 				</div>
-				<div class="row">
+				<div class="row" data-bind="visible: itsMe()">
 					<span class="label">
-						<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_FIRST_NAME"></span>:
+						<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_EMAIL"></span>:
 					</span>
-					<input class="value input" type="text" data-bind="value: firstName" />
+					<span class="value" data-bind="text: email"></span>
 				</div>
 				<div class="row">
 					<span class="label">
-						<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_LAST_NAME"></span>:
+						<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_PHONE"></span>:
 					</span>
-					<input class="value input" type="text" data-bind="value: lastName" />
+					<input class="value input" type="text" data-bind="value: phone" />
 				</div>
 				<div class="row">
 					<span class="label">
-						<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_NICK_NAME"></span>:
+						<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_ADDRESS"></span>:
 					</span>
-					<input class="value input" type="text" data-bind="value: nickName" />
+					<input class="value input" type="text" data-bind="value: address" />
+				</div>
+				<div class="row">
+					<span class="label">
+						<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_SKYPE"></span>:
+					</span>
+					<input class="value input" type="text" data-bind="value: skype" />
+				</div>
+				<div class="row">
+					<span class="label">
+						<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_FACEBOOK"></span>:
+					</span>
+					<input class="value input" type="text" data-bind="value: facebook" />
 				</div>
 
 				<div class="clear"></div>
@@ -65,6 +77,69 @@
 							<select data-bind="options: emails, optionsText: 'text', optionsValue: 'value', value: mainPrimaryEmail"></select>
 						</span>
 					</div>
+					<!--<div class="row">-->
+						<!--<span class="label">-->
+							<!--<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_FIRST_NAME"></span>:-->
+						<!--</span>-->
+						<!--<input class="value input" type="text" data-bind="value: firstName" />-->
+					<!--</div>-->
+					<!--<div class="row">-->
+						<!--<span class="label">-->
+							<!--<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_LAST_NAME"></span>:-->
+						<!--</span>-->
+						<!--<input class="value input" type="text" data-bind="value: lastName" />-->
+					<!--</div>-->
+					<!--<div class="row">-->
+						<!--<span class="label">-->
+							<!--<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_NICK_NAME"></span>:-->
+						<!--</span>-->
+						<!--<input class="value input" type="text" data-bind="value: nickName" />-->
+					<!--</div>-->
+					<div class="row">
+						<span class="label">
+							<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_PHONE"></span>:
+						</span>
+						<span class="value" data-bind="visible: 0 === phones().length">
+							<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_NOT_SPECIFIED_YET"></span>
+						</span>
+						<span class="value" data-bind="visible: 0 < phones().length">
+							<select data-bind="options: phones, optionsText: 'text', optionsValue: 'value', value: mainPrimaryPhone"></select>
+						</span>
+					</div>
+					<div class="row">
+						<span class="label">
+							<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_ADDRESS"></span>:
+						</span>
+						<span class="value" data-bind="visible: 0 === addresses().length">
+							<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_NOT_SPECIFIED_YET"></span>
+						</span>
+						<span class="value" data-bind="visible: 0 < addresses().length">
+							<select data-bind="options: addresses, optionsText: 'text', optionsValue: 'value', value: mainPrimaryAddress"></select>
+						</span>
+					</div>
+					<div class="row">
+					<span class="label">
+						<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_SKYPE"></span>:
+					</span>
+						<input class="value input" type="text" data-bind="value: skype" />
+					</div>
+					<div class="row">
+					<span class="label">
+						<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_FACEBOOK"></span>:
+					</span>
+						<input class="value input" type="text" data-bind="value: facebook" />
+					</div>
+				</div>
+
+				<div class="clear"></div>
+
+				<div class="fields_switcher">
+					<span class="link" data-bind="i18n: 'text', click: function () { extented(false); }"
+						data-i18n="CONTACTS/BUTTON_HIDE_ADDITIONAL_FIELDS"></span>
+				</div>
+
+				<div class="fieldset" data-bind="css: {'collapsed': personalCollapsed}">
+
 					<div class="row">
 						<span class="label">
 							<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_FIRST_NAME"></span>:
@@ -83,16 +158,6 @@
 						</span>
 						<input class="value input" type="text" data-bind="value: nickName" />
 					</div>
-				</div>
-
-				<div class="clear"></div>
-
-				<div class="fields_switcher">
-					<span class="link" data-bind="i18n: 'text', click: function () { extented(false); }"
-						data-i18n="CONTACTS/BUTTON_HIDE_ADDITIONAL_FIELDS"></span>
-				</div>
-
-				<div class="fieldset" data-bind="css: {'collapsed': personalCollapsed}">
 
 					<h2 class="subtitle" data-bind="i18n: 'text', click: function () { personalCollapsed(!personalCollapsed()) }"
 						data-i18n="CONTACTS/HEADER_HOME"></h2>
@@ -164,11 +229,17 @@
 					<h2 class="subtitle" data-bind="i18n: 'text', click: function () { businessCollapsed(!businessCollapsed()) }"
 						data-i18n="CONTACTS/HEADER_BUSINESS"></h2>
 
-					<div class="row">
+					<div class="row" data-bind="visible: !itsMe()">
 						<span class="label">
 							<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_BUSINESS_EMAIL"></span>:
 						</span>
 						<input class="value input" type="text" data-bind="value: businessEmail" />
+					</div>
+					<div class="row" data-bind="visible: itsMe()">
+						<span class="label">
+							<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_BUSINESS_EMAIL"></span>:
+						</span>
+						<span class="value" data-bind="text: businessEmail"></span>
 					</div>
 					<div class="row">
 						<span class="label">
@@ -273,7 +344,7 @@
 					</div>
 				</div>
 
-				<div class="fieldset" data-bind="visible: $root.groupFullCollection().length, css: {'collapsed': groupsCollapsed}">
+				<div class="fieldset" data-bind="visible: !global() && $root.groupFullCollection().length, css: {'collapsed': groupsCollapsed}">
 
 					<h2 class="subtitle" data-bind="click: function () { groupsCollapsed(!groupsCollapsed()) }"
 						data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_CONTACT_GROUPS"></h2>
@@ -284,9 +355,12 @@
 							data-bind="visible: $index() != 0">,</span>
 						<label class="custom_checkbox" data-bind="css: {'checked': checked}">
 							<span class="icon"></span>
-							<input type="checkbox" data-bind="checked: checked" />
+							<input type="checkbox" data-bind="checked: checked, attr: {'id': 'group'+$index()}" />
+						</label>
+						<label data-bind="attr: {'for': 'group'+$index()}">
 							<span data-bind="text: Name()"></span>
-						</label></div>
+						</label>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -296,15 +370,15 @@
 <div class="panel_bottom">
 	<div class="toolbar">
 		<span class="content">
-			<span class="item save">
+			<span class="item save" data-bind="click: function () { $root.saveCommand($data); }">
 				<span class="icon"></span>
-				<span class="text" data-bind="i18n: 'text', click: function () { $root.saveCommand($data); }">
+				<span class="text" data-bind="i18n: 'text'">
 					<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/BUTTON_SAVE_CONTACT"></span>
 				</span>
 			</span>
-			<span class="item cancel">
+			<span class="item cancel" data-bind="click: function () { $root.executeCancel(); }">
 				<span class="icon"></span>
-				<span class="text" data-bind="i18n: 'text', click: function () { $root.executeCancel(); }">
+				<span class="text" data-bind="i18n: 'text'">
 					<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/BUTTON_CANCEL_CONTACT"></span>
 				</span>
 			</span>

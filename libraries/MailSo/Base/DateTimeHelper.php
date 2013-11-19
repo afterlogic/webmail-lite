@@ -42,7 +42,6 @@ class DateTimeHelper
 	{
 		$sDateTime = \trim(\preg_replace('/ \([a-zA-Z0-9]+\)$/', '', \trim($sDateTime)));
 		$oDateTime = \DateTime::createFromFormat('D, d M Y H:i:s O', $sDateTime, \MailSo\Base\DateTimeHelper::GetUtcTimeZoneObject());
-//		$oDateTime = \DateTime::createFromFormat(\DateTime::RFC2822, $sDateTime, \MailSo\Base\DateTimeHelper::GetUtcTimeZoneObject());
 		return $oDateTime ? $oDateTime->getTimestamp() : 0;
 	}
 
@@ -56,7 +55,20 @@ class DateTimeHelper
 	 */
 	public static function ParseInternalDateString($sDateTime)
 	{
-		$oDateTime = \DateTime::createFromFormat('d-M-Y H:i:s O', $sDateTime, \MailSo\Base\DateTimeHelper::GetUtcTimeZoneObject());
+		$oDateTime = \DateTime::createFromFormat('d-M-Y H:i:s O', \trim($sDateTime), \MailSo\Base\DateTimeHelper::GetUtcTimeZoneObject());
+		return $oDateTime ? $oDateTime->getTimestamp() : 0;
+	}
+
+	/**
+	 * Parse date string formated as "2011-06-14 23:59:59 +0400"
+	 *
+	 * @param string $sDateTime
+	 *
+	 * @return int
+	 */
+	public static function ParseDateStringType1($sDateTime)
+	{
+		$oDateTime = \DateTime::createFromFormat('Y-m-d H:i:s O', \trim($sDateTime), \MailSo\Base\DateTimeHelper::GetUtcTimeZoneObject());
 		return $oDateTime ? $oDateTime->getTimestamp() : 0;
 	}
 }

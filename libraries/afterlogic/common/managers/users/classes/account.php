@@ -32,23 +32,17 @@
  * @property int $OutgoingMailAuth
  * @property bool $OutgoingMailUseSSL
  * @property int $OutgoingSendingMethod
- * @property int $DefaultOrder
- * @property bool $GetMailAtLogin
  * @property bool $HideInGAB
- * @property int $MailMode
- * @property int $MailsOnServerDays
  * @property string $Signature
  * @property int $SignatureType
  * @property int $SignatureOptions
  * @property int $GlobalAddressBook
- * @property string $Delimiter
- * @property int $MailboxSize
- * @property string $Namespace
  * @property bool $AllowCompose
  * @property bool $AllowReply
  * @property bool $AllowForward
  * @property bool $DetectSpecialFoldersWithXList
  * @property mixed $CustomFields
+ * @property bool $ForceSaveOnLogin
  *
  * @package Users
  * @subpackage Classes
@@ -58,12 +52,12 @@ class CAccount extends api_AContainer
 	const ChangePasswordExtension = 'AllowChangePasswordExtension';
 	const AutoresponderExtension = 'AllowAutoresponderExtension';
 	const SpamFolderExtension = 'AllowSpamFolderExtension';
-	const SpamLearningExtension = 'AllowSpamLearningExtension';
 	const DisableAccountDeletion = 'DisableAccountDeletion';
 	const DisableManageFolders = 'DisableManageFolders';
 	const SieveFiltersExtension = 'AllowSieveFiltersExtension';
 	const ForwardExtension = 'AllowForwardExtension';
 	const DisableManageSubscribe = 'DisableManageSubscribe';
+	const DisableFoldersManualSort = 'DisableFoldersManualSort';
 	const IgnoreSubscribeStatus = 'IgnoreSubscribeStatus';
 
 	/**
@@ -94,7 +88,7 @@ class CAccount extends api_AContainer
 		$this->aExtension = array();
 
 		$this->SetTrimer(array('Email', 'FriendlyName', 'IncomingMailServer', 'IncomingMailLogin', 'IncomingMailPassword',
-			'PreviousMailPassword', 'OutgoingMailServer', 'OutgoingMailLogin', 'Delimiter', 'Namespace'));
+			'PreviousMailPassword', 'OutgoingMailServer', 'OutgoingMailLogin'));
 
 		$this->SetLower(array(/*'Email', */'IncomingMailServer', /*'IncomingMailLogin',*/
 			'OutgoingMailServer', /*'OutgoingMailLogin'*/));
@@ -111,9 +105,9 @@ class CAccount extends api_AContainer
 			'IsDisabled'		=> false,
 			'IsMailingList'		=> false,
 
-			'StorageQuota'		=> 102400,
+			'StorageQuota'		=> $oDomain->UserQuota,
 			'StorageUsedSpace'	=> 0,
-
+			
 			'Email'				=> '',
 			'FriendlyName'		=> '',
 
@@ -134,12 +128,7 @@ class CAccount extends api_AContainer
 			'OutgoingMailUseSSL'	=> $oDomain->OutgoingMailUseSSL,
 			'OutgoingSendingMethod'	=> $oDomain->OutgoingSendingMethod,
 
-			'DefaultOrder'		=> EAccountDefaultOrder::DescDate,
-			'GetMailAtLogin'	=> true,
 			'HideInGAB'			=> false,
-
-			'MailMode'			=> EAccountMailMode::DeleteMessageWhenItsRemovedFromTrash,
-			'MailsOnServerDays'	=> 7, // TODO Magic
 
 			'Signature'			=> '',
 			'SignatureType'		=> EAccountSignatureType::Html,
@@ -147,16 +136,14 @@ class CAccount extends api_AContainer
 
 			'GlobalAddressBook'	=> $oDomain->GlobalAddressBook,
 
-			'Delimiter'			=> '/',
-			'MailboxSize'		=> 0,
-			'Namespace'			=> '',
-
 			'AllowCompose'		=> true,
 			'AllowReply'		=> true,
 			'AllowForward'		=> true,
+			
 			'DetectSpecialFoldersWithXList' => $oDomain->DetectSpecialFoldersWithXList,
 
-			'CustomFields'		=> ''
+			'CustomFields'		=> '',
+			'ForceSaveOnLogin'	=> false,
 		));
 
 		CApi::Plugin()->RunHook('api-account-construct', array(&$this));
@@ -194,6 +181,24 @@ class CAccount extends api_AContainer
 	{
 		$this->aExtension[] = $sExtensionName;
 		$this->aExtension = array_unique($this->aExtension);
+	}
+
+	/**
+	 * @param string $sExtensionName
+	 */
+	public function DisableExtension($sExtensionName)
+	{
+		$aNewExtension = array();
+		$aExtension = $this->aExtension;
+		foreach ($aExtension as $sExt)
+		{
+			if ($sExt !== $sExtensionName)
+			{
+				$aNewExtension[] = $sExt;
+			}
+		}
+		
+		$this->aExtension = array_unique($aNewExtension);
 	}
 
 	/**
@@ -269,14 +274,33 @@ class CAccount extends api_AContainer
 
 		if ($this->IsInternal)
 		{
-			$this->Namespace = '';
-			$this->Delimiter = '/';
-
 			if ((int) CApi::GetConf('labs.unlim-quota-limit-size-in-kb', 104857600) <= $this->StorageQuota)
 			{
 				$this->StorageQuota = 0;
 				$this->FlushObsolete('StorageQuota');
 			}
+
+			$oApiUsersManager = /* @var $oApiUsersManager CApiUsersManager */ CApi::Manager('users');
+			if ($oApiUsersManager)
+			{
+				$this->StorageUsedSpace = $oApiUsersManager->GetAccountUsedSpaceInKBytesByEmail($this->Email);
+				$this->FlushObsolete('StorageUsedSpace');
+			}
+		}		
+	}
+
+	public function InitBeforeChange()
+	{
+		parent::InitBeforeChange();
+
+		$bObsolete = null !== $this->GetObsoleteValue('StorageQuota');
+
+		$this->StorageQuota = 0 === $this->StorageQuota ?
+			(int) CApi::GetConf('labs.unlim-quota-limit-size-in-kb', 104857600) : $this->StorageQuota;
+
+		if (!$bObsolete)
+		{
+			$this->FlushObsolete('StorageQuota');
 		}
 	}
 
@@ -332,80 +356,12 @@ class CAccount extends api_AContainer
 		return self::GetStaticMap();
 	}
 
-	public function InitStorageUsedSpace()
-	{
-		if ($this->IsInternal)
-		{
-			$sScript = '/usr/mailsuite/scripts/du.user';
-			if (@file_exists($sScript))
-			{
-				$sCmd = $sScript.' '.
-					api_Utils::GetDomainFromEmail($this->IncomingMailLogin).' '.
-					api_Utils::GetAccountNameFromEmail($this->IncomingMailLogin);
-
-				CApi::Log('Run[du.user] cmd: '.$sCmd);
-				$sResult = @trim(shell_exec($sCmd));
-				if (!is_numeric($sResult))
-				{
-					CApi::Log('Error: "'.$sScript.'" result = '.$sResult, ELogLevel::Error);
-				}
-				else
-				{
-					CApi::Log('du.user = '.$sResult);
-
-					$this->StorageUsedSpace = (int) $sResult;
-					$this->FlushObsolete('StorageUsedSpace');
-				}
-			}
-		}
-	}
-
 	/**
 	 * @return int
 	 */
 	public function RealQuotaSize()
 	{
 		return 0 === $this->StorageQuota ? (int) CApi::GetConf('labs.unlim-quota-limit-size-in-kb', 104857600) : $this->StorageQuota;
-	}
-
-	/**
-	 * @param bool $bCreate = false
-	 *
-	 * @return void
-	 */
-	public function UpdateInternalStorageQuota($bCreate = false)
-	{
-		if ($this->IsInternal)
-		{
-			$sStorageQuota = $this->GetObsoleteValue('StorageQuota');
-			if (null !== $sStorageQuota || $bCreate)
-			{
-				$sScript = '/usr/mailsuite/scripts/';
-				$sScript .= $bCreate ? 'maildirmake.sh' : 'maildirquota.sh';
-
-				if (@file_exists($sScript))
-				{
-					$iStorageQuota = $this->StorageQuota;
-					$iStorageQuota = 0 === $iStorageQuota ? (int) CApi::GetConf('labs.unlim-quota-limit-size-in-kb', 104857600) : $iStorageQuota;
-
-					$sCmd = $sScript.' '.
-						api_Utils::GetDomainFromEmail($this->IncomingMailLogin).' '.
-						api_Utils::GetAccountNameFromEmail($this->IncomingMailLogin).' '.
-						$iStorageQuota;
-
-					CApi::Log('Run cmd: '.$sCmd);
-					$sResult = @trim(shell_exec($sCmd));
-					if ('1' !== $sResult)
-					{
-						CApi::Log('Error: "'.$sScript.'" result = '.$sResult, ELogLevel::Error);
-					}
-				}
-				else
-				{
-					CApi::Log('Error: "'.$sScript.'" file doesn\'t exist', ELogLevel::Error);
-				}
-			}
-		}
 	}
 
 	/**
@@ -424,7 +380,7 @@ class CAccount extends api_AContainer
 			'IsDefaultAccount'	=> array('bool', 'def_acct'),
 			'IsMailingList'		=> array('bool', 'mailing_list'),
 
-			'StorageQuota'		=> array('int', 'quota', false, false),
+			'StorageQuota'		=> array('int', 'quota'),
 			'StorageUsedSpace'	=> array('int'),
 
 			'Email'				=> array('string(255)', 'email', true, false),
@@ -447,12 +403,7 @@ class CAccount extends api_AContainer
 			'OutgoingMailUseSSL'	=> array('bool', 'mail_out_ssl'),
 			'OutgoingSendingMethod'	=> array('int'),
 
-			'DefaultOrder'		=> array('int', 'def_order'),
-			'GetMailAtLogin'	=> array('bool', 'getmail_at_login'),
 			'HideInGAB'			=> array('bool', 'hide_in_gab'),
-
-			'MailMode'			=> array('int', 'mail_mode'),
-			'MailsOnServerDays'	=> array('int', 'mails_on_server_days'),
 
 			'Signature'			=> array('string', 'signature'),
 			'SignatureType'		=> array('int', 'signature_type'),
@@ -460,16 +411,13 @@ class CAccount extends api_AContainer
 
 			'GlobalAddressBook'	=> array('int'),
 
-			'Delimiter'			=> array('string(2)', 'delimiter'),
-			'MailboxSize'		=> array('int', 'mailbox_size'),
-			'Namespace'			=> array('string(255)', 'namespace'),
-
 			'AllowCompose'		=> array('bool'),
 			'AllowReply'		=> array('bool'),
 			'AllowForward'		=> array('bool'),
 			'DetectSpecialFoldersWithXList' => array('bool'),
 
-			'CustomFields'		=> array('serialize', 'custom_fields')
+			'CustomFields'		=> array('serialize', 'custom_fields'),
+			'ForceSaveOnLogin'	=> array('bool'),
 		);
 	}
 }

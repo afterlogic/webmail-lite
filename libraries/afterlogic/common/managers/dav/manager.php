@@ -29,14 +29,14 @@ class CApiDavManager extends AApiManager
 
 	/**
 	 * @param CAccount $oAccount
-	 * @return DAVClient | false
+	 * @return CDAVClient | false
 	 */
 	protected function &getDAVClient($oAccount)
 	{
 		$mResult = false;
 		if (!isset($this->aDavClients[$oAccount->Email]))
 		{
-			$this->aDavClients[$oAccount->Email] = new DAVClient(
+			$this->aDavClients[$oAccount->Email] = new CDAVClient(
 				$this->GetServerUrl($oAccount), $oAccount->Email, $oAccount->IncomingMailPassword);
 		}
 
@@ -125,6 +125,11 @@ class CApiDavManager extends AApiManager
 	public function GetServerPort($oAccount)
 	{
 		$iResult = 80;
+		if ($this->IsUseSsl($oAccount))
+		{
+			$iResult = 443;
+		}
+			
 		$sServerUrl = $this->GetServerUrl($oAccount);
 		if (!empty($sServerUrl))
 		{
@@ -254,15 +259,5 @@ class CApiDavManager extends AApiManager
 	public function VObjectReaderRead($sData)
 	{
 		return \Sabre\VObject\Reader::read($sData);
-	}
-
-	/**
-	 * @param string $sName
-	 * @param string $sValue
-	 * @return \Sabre\VObject\Property
-	 */
-	public function CreateVObjectProperty($sName, $sValue)
-	{
-		return new \Sabre\VObject\Property($sName, $sValue);
 	}
 }

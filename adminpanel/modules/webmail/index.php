@@ -34,9 +34,9 @@ class CWebMailModule extends ap_Module
 	{
 		parent::__construct($oAdminPanel, $sPath);
 
-		$this->aTabs[] = AP_TAB_SERVICES;
 		$this->aTabs[] = AP_TAB_DOMAINS;
 		$this->aTabs[] = AP_TAB_USERS;
+		$this->aTabs[] = AP_TAB_SYSTEM;
 
 		$this->oCapabilityApi = CApi::Manager('capability');
 		$this->oWebmailApi = CApi::Manager('webmail');
@@ -62,8 +62,8 @@ class CWebMailModule extends ap_Module
 	{
 		switch ($sTab)
 		{
-			case AP_TAB_SERVICES:
-				$this->JsAddFile('services.js');
+			case AP_TAB_SYSTEM:
+				$this->JsAddFile('system.js');
 				$oScreen->AddMenuItem(WM_MODE_LOGGING, WM_MODE_LOGGING_NAME, $this->sPath.'/templates/logging.php',
 					array()
 				);
@@ -94,8 +94,6 @@ class CWebMailModule extends ap_Module
 							$oScreen->Main->AddTopSwitcher($this->sPath.'/templates/main-top-edit-domain-webmail-inc-server.php');
 							$oScreen->Main->AddTopSwitcher($this->sPath.'/templates/main-top-edit-domain-webmail-out-server.php');
 						}
-
-//						$oScreen->Main->AddTopSwitcher($this->sPath.'/templates/main-top-edit-domain-webmail-externals-server.php');
 
 						$oScreen->Main->AddSwitcher(
 							WM_SWITCHER_MODE_EDIT_DOMAIN_GENERAL, WM_SWITCHER_MODE_EDIT_DOMAIN_GENERAL_NAME,

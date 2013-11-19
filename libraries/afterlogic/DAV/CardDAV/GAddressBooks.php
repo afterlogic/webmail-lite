@@ -10,16 +10,6 @@ namespace afterlogic\DAV\CardDAV;
 
 class GAddressBooks extends \Sabre\DAV\Collection implements \Sabre\CardDAV\IDirectory, \Sabre\DAV\IProperties {
 
-	/**
-	 * @var $apiGcontactsManager CApiGcontactsManager
-	 */
-	private $apiGcontactsManager;
-
-	/**
-	 * @var $apiUsersManager CApiUsersManager
-	 */
-	private $apiUsersManager;
-
     /**
 	 * @var \Sabre\DAV\Auth\Plugin
      */
@@ -45,15 +35,11 @@ class GAddressBooks extends \Sabre\DAV\Collection implements \Sabre\CardDAV\IDir
      */
     public function __construct(\Sabre\DAV\Auth\Plugin $authPlugin, $name, $displayname = '')
 	{
-		$this->apiUsersManager = \CApi::Manager('users');
 		$this->authPlugin = $authPlugin;
 		$this->name = $name;
 		$this->account = null;
-		if (empty($displayname))
-		{
-			$displayname = $name;
-		}
-		$this->addressBookInfo['{DAV:}displayname'] = $displayname;
+
+		$this->addressBookInfo['{DAV:}displayname'] = (empty($displayname)) ? $name : $displayname;
     }
 
 
@@ -64,7 +50,8 @@ class GAddressBooks extends \Sabre\DAV\Collection implements \Sabre\CardDAV\IDir
 			$sUser = $this->authPlugin->getCurrentUser();
 			if (!empty($sUser))
 			{
-				$this->account = $this->apiUsersManager->GetAccountOnLogin($sUser);
+				$oApiUsersManager = \CApi::Manager('users');
+				$this->account = $oApiUsersManager->GetAccountOnLogin($sUser);
 			}
 		}
 		return $this->account;
@@ -85,20 +72,23 @@ class GAddressBooks extends \Sabre\DAV\Collection implements \Sabre\CardDAV\IDir
 	{
 		$oAccount = $this->getAccount();
         $aCards = array();
-		if (isset($oAccount) && $oAccount->User->GetCapa('GAB'))
+
+		$oApiCapabilityManager = /* @var \CApiCapabilityManager */ \CApi::Manager('capability');
+
+		if ($oAccount instanceof \CAccount &&
+			$oApiCapabilityManager->IsGlobalContactsSupported($oAccount))
 		{
 			$aContacts = array();
-			$oApiCollaborationManager = \CApi::Manager('collaboration');
-			if ($oApiCollaborationManager)
+			$oApiGcontactManager = /* @var \CApiGcontactsManager */ \CApi::Manager('gcontacts');
+			if ($oApiGcontactManager)
 			{
-				$this->apiGcontactsManager = $oApiCollaborationManager->GetGlobalContactsManager();
-				$aContacts = $this->apiGcontactsManager->GetContactItems($oAccount,
+				$aContacts = $oApiGcontactManager->GetContactItems($oAccount,
 					\EContactSortField::EMail, \ESortOrder::ASC, 0, 9999);
 			}
 
 			foreach($aContacts as $oContact)
 			{
-				$vCard = new \Sabre\VObject\Component('VCARD');
+				$vCard = new \Sabre\VObject\Component\VCard();
 				$vCard->VERSION = '3.0';
 				$vCard->UID = $oContact->Id;
 	            $vCard->EMAIL = $oContact->Email;

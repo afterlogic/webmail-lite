@@ -126,7 +126,7 @@ class CApiUsersCommandCreator extends api_CommandCreator
 	 */
 	public function UpdateAccountLastLoginAndCount($iUserId)
 	{
-		$sSql = 'UPDATE %sawm_settings SET last_login = %s, logins_count = logins_count + 1 WHERE id_user = %d';
+		$sSql = 'UPDATE %sawm_settings SET last_login = last_login_now, last_login_now = %s, logins_count = logins_count + 1 WHERE id_user = %d';
 
 		return sprintf($sSql, $this->Prefix(),
 			$this->escapeString($this->oHelper->TimeStampToDateFormat(gmdate('U'))),
@@ -421,9 +421,10 @@ AND %sacal_calendars.user_id = %d';
 	public function GetUserCount($iDomainId, $sSearchDesc = '')
 	{
 		$sWhere = '';
-		if (!empty($sSearchDesc))
+		if (0 < strlen($sSearchDesc))
 		{
-			$sWhere = ' AND (email LIKE '.$this->escapeString('%'.strtolower($sSearchDesc).'%').' OR friendly_nm LIKE '.$this->escapeString('%'.$sSearchDesc.'%').')';
+			$sSearchDesc = '\'%'.$this->escapeString($sSearchDesc, true, true).'%\'';
+			$sWhere = ' AND (email LIKE '.$sSearchDesc.' OR friendly_nm LIKE '.$sSearchDesc.')';
 		}
 
 		$sSql = 'SELECT COUNT(id_acct) as users_count FROM %sawm_accounts WHERE def_acct = 1 AND id_domain = %d%s';
@@ -541,7 +542,7 @@ AND %sacal_calendars.user_id = %d';
 
 		return sprintf($sSql, $this->Prefix(), $iUserId);
 	}
-
+	
 	/**
 	 * @param string $sEmail
 	 * @param int $niExceptAccountId = null
@@ -693,6 +694,19 @@ WHERE def_acct = 1 AND %s = %s AND %s = %s %s';
 		
 		return sprintf($sSql, $this->Prefix(), $iUserId);
 	}
+
+	/**
+	 * @param string $sEmail
+	 * @return string
+	 */
+	public function GetAccountUsedSpaceInKBytesByEmail($sEmail)
+	{
+		$sSql = 'SELECT DISTINCT quota_usage_bytes as main_usage FROM %sawm_account_quotas WHERE %s = %s';
+
+		return sprintf($sSql, $this->Prefix(),
+			$this->escapeColumn('name'), $this->escapeString(strtolower($sEmail))
+		);
+	}
 }
 
 /**
@@ -728,7 +742,8 @@ WHERE def_acct = 1 AND id_domain = %d LIMIT %d, %d';
 		$sWhere = '';
 		if (!empty($sSearchDesc))
 		{
-			$sWhere = ' AND (email LIKE '.$this->escapeString('%'.strtolower($sSearchDesc).'%').' OR friendly_nm LIKE '.$this->escapeString('%'.$sSearchDesc.'%').')';
+			$sSearchDesc = '\'%'.$this->escapeString($sSearchDesc, true, true).'%\'';
+			$sWhere = ' AND (email LIKE '.$sSearchDesc.' OR friendly_nm LIKE '.$sSearchDesc.')';
 		}
 
 		$sOrderBy = empty($sOrderBy) ? 'email' : $sOrderBy;
@@ -772,5 +787,14 @@ AND %sawm_folders.id_acct = %d';
 
 		return sprintf($sSql, $this->Prefix(), $this->Prefix(), $this->Prefix(),
 			$this->Prefix(), $this->Prefix(), $this->Prefix(), $iAccountId);
+	}
+
+	/**
+	 * @param string $sEmail
+	 * @return string
+	 */
+	public function GetAccountUsedSpaceInKBytesByEmail($sEmail)
+	{
+		return parent::GetAccountUsedSpaceInKBytesByEmail($sEmail).' LIMIT 1';
 	}
 }

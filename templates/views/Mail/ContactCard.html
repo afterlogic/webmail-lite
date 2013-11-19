@@ -1,8 +1,3 @@
-<div class="toolbar">
-	<a class="item" href="javascript: void(0)" data-i18n="CONTACTS/LINK_SEND_MAIL" data-bind="i18n: 'text', attr: {href: sendMailLink}"></a>
-	<a class="item" href="javascript: void(0)" data-i18n="CONTACTS/LINK_VIEW_MAILS" data-bind="i18n: 'text', click: $parent.viewAllMailsWithContactBinded"></a>
-</div>
-
 <div class="fields">
 	<div class="fieldset">
 		<div class="row" data-bind="visible: displayName()">
@@ -65,10 +60,12 @@
 		<div class="row" data-bind="visible: personalPhone()">
 			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_PHONE"></span>
 			<span class="value" data-bind="text: personalPhone"></span>
+			<span class="link call" data-i18n="call" data-bind="i18n: 'text', click: function() {onCallClick(personalPhone())}, visible: voiceApp"></span>
 		</div>
 		<div class="row" data-bind="visible: personalMobile()">
 			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_MOBILE"></span>
 			<span class="value" data-bind="text: personalMobile"></span>
+			<span class="link call" data-i18n="call" data-bind="i18n: 'text', click: function() {onCallClick(personalMobile())}, visible: voiceApp"></span>
 		</div>
 	</div>
 	<div class="fieldset" data-bind="visible: !businessIsEmpty()">
@@ -126,6 +123,7 @@
 		<div class="row" data-bind="visible: businessPhone()">
 			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_PHONE"></span>
 			<span class="value" data-bind="text: businessPhone"></span>
+			<span class="link call" data-i18n="call" data-bind="i18n: 'text', click: function() {onCallClick(businessPhone())}, visible: voiceApp"></span>
 		</div>
 	</div>
 	<div class="fieldset" data-bind="visible: !otherIsEmpty()">
@@ -144,4 +142,8 @@
 			<span class="value" data-bind="text: otherNotes"></span>
 		</div>
 	</div>
+</div>
+<div class="toolbar">
+	<a class="item" href="javascript: void(0)" data-i18n="CONTACTS/LINK_SEND_MAIL" data-bind="i18n: 'text', attr: {href: sendMailLink}"></a>
+	<a class="item" href="javascript: void(0)" data-i18n="CONTACTS/LINK_VIEW_MAILS" data-bind="i18n: 'text', click: $parent.viewAllMailsWithContactBinded"></a>
 </div>

@@ -14,8 +14,8 @@ use DateTime;
  * This is used to determine which icalendar objects should be returned for a
  * calendar-query REPORT request.
  *
- * @copyright Copyright (C) 2007-2012 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/)
+ * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
+ * @author Evert Pot (http://evertpot.com/)
  * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
 class CalendarQueryValidator {
@@ -217,13 +217,30 @@ class CalendarQueryValidator {
                 continue;
             }
 
-            // If there are sub-filters, we need to find at least one parameter
-            // for which the subfilters hold true.
-            foreach($parent[$filter['name']] as $subParam) {
+            if (version_compare(VObject\Version::VERSION, '3.0.0beta1', '>=')) {
 
-                if($this->validateTextMatch($subParam,$filter['text-match'])) {
-                    // We had a match, so this param-filter succeeds
-                    continue 2;
+                // If there are sub-filters, we need to find at least one parameter
+                // for which the subfilters hold true.
+                foreach($parent[$filter['name']]->getParts() as $subParam) {
+
+                    if($this->validateTextMatch($subParam,$filter['text-match'])) {
+                        // We had a match, so this param-filter succeeds
+                        continue 2;
+                    }
+
+                }
+
+            } else {
+
+                // If there are sub-filters, we need to find at least one parameter
+                // for which the subfilters hold true.
+                foreach($parent[$filter['name']] as $subParam) {
+
+                    if($this->validateTextMatch($subParam,$filter['text-match'])) {
+                        // We had a match, so this param-filter succeeds
+                        continue 2;
+                    }
+
                 }
 
             }
@@ -246,15 +263,17 @@ class CalendarQueryValidator {
      * A single text-match should be specified as well as the specific property
      * or parameter we need to validate.
      *
-     * @param VObject\Node $parent
+     * @param VObject\Node|string $check Value to check against.
      * @param array $textMatch
      * @return bool
      */
-    protected function validateTextMatch(VObject\Node $parent, array $textMatch) {
+    protected function validateTextMatch($check, array $textMatch) {
 
-        $value = (string)$parent;
+        if ($check instanceof VObject\Node) {
+            $check = (string)$check;
+        }
 
-        $isMatching = \Sabre\DAV\StringUtil::textMatch($value, $textMatch['value'], $textMatch['collation']);
+        $isMatching = \Sabre\DAV\StringUtil::textMatch($check, $textMatch['value'], $textMatch['collation']);
 
         return ($textMatch['negate-condition'] xor $isMatching);
 

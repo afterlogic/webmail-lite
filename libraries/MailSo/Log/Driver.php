@@ -34,6 +34,21 @@ abstract class Driver
 	protected $bTypedPrefix;
 
 	/**
+	 * @var bool
+	 */
+	private $bWriteOnErrorOnly;
+
+	/**
+	 * @var bool
+	 */
+	private $bFlushCache;
+
+	/**
+	 * @var array
+	 */
+	private $aCache;
+
+	/**
 	 * @access protected
 	 */
 	protected function __construct()
@@ -42,15 +57,20 @@ abstract class Driver
 		$this->sName = 'INFO';
 		$this->bTimePrefix = true;
 		$this->bTypedPrefix = true;
+
+		$this->bWriteOnErrorOnly = false;
+		$this->bFlushCache = false;
+		$this->aCache = array();
+		
 		$this->aPrefixes = array(
 			\MailSo\Log\Enumerations\Type::INFO => '[DATA]',
-			\MailSo\Log\Enumerations\Type::NOTICE => '[NOTICE]',
-			\MailSo\Log\Enumerations\Type::WARNING => '[WARNING]',
-			\MailSo\Log\Enumerations\Type::ERROR => '[ERROR]',
 			\MailSo\Log\Enumerations\Type::SECURE => '[SECURE]',
 			\MailSo\Log\Enumerations\Type::NOTE => '[NOTE]',
 			\MailSo\Log\Enumerations\Type::TIME => '[TIME]',
 			\MailSo\Log\Enumerations\Type::MEMORY => '[MEMORY]',
+			\MailSo\Log\Enumerations\Type::NOTICE => '[NOTICE]',
+			\MailSo\Log\Enumerations\Type::WARNING => '[WARNING]',
+			\MailSo\Log\Enumerations\Type::ERROR => '[ERROR]',
 		);
 	}
 
@@ -64,6 +84,17 @@ abstract class Driver
 	}
 
 	/**
+	 * @param bool $bValue
+	 * 
+	 * @return \MailSo\Log\Driver
+	 */
+	public function WriteOnErrorOnly($bValue)
+	{
+		$this->bWriteOnErrorOnly = !!$bValue;
+		return $this;
+	}
+
+	/**
 	 * @return \MailSo\Log\Driver
 	 */
 	public function DisableTypedPrefix()
@@ -73,10 +104,18 @@ abstract class Driver
 	}
 
 	/**
-	 * @param string $sDesc
+	 * @param string|array $sDesc
 	 * @return bool
 	 */
-	abstract protected function writeImplementation($sDesc);
+	abstract protected function writeImplementation($mDesc);
+
+	/**
+	 * @return bool
+	 */
+	protected function writeEmptyLineImplementation()
+	{
+		return $this->writeImplementation('');
+	}
 
 	/**
 	 * @param string $sTimePrefix
@@ -134,6 +173,23 @@ abstract class Driver
 	 */
 	final public function Write($sDesc, $iDescType = \MailSo\Log\Enumerations\Type::INFO, $sName = '')
 	{
+		if ($this->bWriteOnErrorOnly && !$this->bFlushCache)
+		{
+			$this->aCache[] = $this->loggerLineImplementation($this->getTimeWithMicroSec(), $sDesc, $iDescType, $sName);
+
+			if (\in_array($iDescType, array(
+				\MailSo\Log\Enumerations\Type::NOTICE,
+				\MailSo\Log\Enumerations\Type::WARNING,
+				\MailSo\Log\Enumerations\Type::ERROR
+			)))
+			{
+				$this->bFlushCache = true;
+				return $this->writeImplementation($this->aCache);
+			}
+
+			return true;
+		}
+
 		return $this->writeImplementation(
 			$this->loggerLineImplementation($this->getTimeWithMicroSec(), $sDesc, $iDescType, $sName));
 	}
@@ -148,9 +204,18 @@ abstract class Driver
 	}
 
 	/**
+	 * @final
 	 * @return void
 	 */
-	public function WriteEmptyLine()
+	final public function WriteEmptyLine()
 	{
+		if ($this->bWriteOnErrorOnly && !$this->bFlushCache)
+		{
+			$this->aCache[] = '';
+		}
+		else
+		{
+			$this->writeEmptyLineImplementation();
+		}
 	}
 }

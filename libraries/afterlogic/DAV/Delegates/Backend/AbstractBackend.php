@@ -11,4 +11,6 @@ namespace afterlogic\DAV\Delegates\Backend;
 abstract class AbstractBackend {
 	
 	abstract function UpdateShare($sCalendarId, $FromUser, $ToUser, $iMode);
+	
+	abstract function DeleteShares($sCalendarId, $FromUser);
 }

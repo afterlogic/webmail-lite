@@ -13,16 +13,6 @@
 class CDbGeneralSql
 {
 	/**
-	 * @var	resource
-	 */
-	protected $_rConectionHandle;
-
-	/**
-	 * @var	resource
-	 */
-	protected $_rResultId;
-
-	/**
 	 * @var	int
 	 */
 	protected $iExecuteCount;
@@ -38,19 +28,11 @@ class CDbGeneralSql
 	public $ErrorDesc;
 
 	/**
-	 * @return resource
-	 */
-	function GetResult()
-	{
-		return $this->_rResultId;
-	}
-
-	/**
 	 * @return bool
 	 */
 	function IsConnected()
 	{
-		return is_resource($this->_rConectionHandle);
+		return false;
 	}
 
 	/**

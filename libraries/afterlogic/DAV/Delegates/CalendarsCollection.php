@@ -36,4 +36,3 @@ class CalendarsCollection extends \Sabre\DAV\Collection implements \Sabre\DAV\IC
 
 }
 
-?>

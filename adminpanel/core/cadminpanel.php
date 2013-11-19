@@ -29,6 +29,11 @@ class CAdminPanel
 	public $RType;
 
 	/**
+	 * @var bool
+	 */
+	public $AType;
+
+	/**
 	 * @var array
 	 */
 	protected $aModules;
@@ -104,6 +109,11 @@ class CAdminPanel
 	protected $aTabsSort;
 
 	/**
+	 * @var string
+	 */
+	protected $sHelpUrl;
+
+	/**
 	 * @return CAdminPanel
 	 */
 	public function __construct($sIndexFileName = null)
@@ -116,7 +126,11 @@ class CAdminPanel
 		$this->bIsAuth = false;
 		$this->PType = false;
 		$this->XType = false;
+		$this->LType = false;
 		$this->RType = false;
+		$this->AType = false;
+
+		$this->sHelpUrl = '';
 
 		$this->iAuthType = null;
 		$this->aAuthDomains = null;
@@ -204,7 +218,7 @@ class CAdminPanel
 		if ($this->IsAuth())
 		{
 			$aScreenMap = array(
-				AP_TAB_SERVICES => 'ap_Standard_Screen',
+				AP_TAB_COMMON => 'ap_Standard_Screen',
 				AP_TAB_DOMAINS => 'ap_Table_Screen',
 				AP_TAB_USERS => 'ap_Table_Screen',
 				AP_TAB_TENANTS => 'ap_Table_Screen',
@@ -265,6 +279,13 @@ class CAdminPanel
 		{
 			$this->oCurrentScreen = new ap_Simple_Screen($this, 'error.php');
 			$this->oCurrentScreen->Data->SetValue('ErrorDesc', 'Admin Panel internal error.');
+		}
+		
+		if (0 < strlen(CSession::Get('SESSION_LOGIN_WARNING', '')))
+		{
+			$this->oCurrentScreen = new ap_Simple_Screen($this, 'login-warning.php');
+			$this->oCurrentScreen->Data->SetValue('TxtDesc', CSession::Get('SESSION_LOGIN_WARNING', ''));
+			CSession::Set('SESSION_LOGIN_WARNING', '');
 		}
 
 		$this->oCurrentScreen->Run();
@@ -365,9 +386,12 @@ class CAdminPanel
 			echo $this->sTabsInfo;
 		}
 
-		echo '<div class="wm_tabslist_item_small last"><a href="'.AP_INDEX_FILE.'?logout">'.CApi::I18N('ADMIN_PANEL/TABMISC_LOGOUT').'</a></div>
-<div class="wm_tabslist_item_small"><a href="'.AP_INDEX_FILE.'?help" target="_blank">'.CApi::I18N('ADMIN_PANEL/TABMISC_HELP').'</a></div></div>';
-
+		echo '<div class="wm_tabslist_item_small last"><a href="'.AP_INDEX_FILE.'?logout">'.CApi::I18N('ADMIN_PANEL/TABMISC_LOGOUT').'</a></div>';
+		if (0 < strlen($this->sHelpUrl))
+		{
+			echo '<div class="wm_tabslist_item_small"><a href="'.AP_INDEX_FILE.'?help" target="_blank">'.CApi::I18N('ADMIN_PANEL/TABMISC_HELP').'</a></div>';
+		}
+		echo '</div>';
 	}
 
 	/**
@@ -426,7 +450,7 @@ class CAdminPanel
 		if (is_array($aTabNames))
 		{
 			$aNewTabs = array();
-			$aTabs = $this->aTabs;
+			$aTabs =& $this->aTabs;
 
 			foreach ($aTabs as $aTabItem)
 			{
@@ -446,9 +470,10 @@ class CAdminPanel
 	protected function initAdminPanel()
 	{
 		$this->RType = (bool) CApi::GetConf('tenant', false);
+		$this->AType = !!CApi::Manager('collaboration');
 
 		$this->aTabsSort = array(
-			AP_TAB_SERVICES,
+			AP_TAB_COMMON,
 			AP_TAB_DOMAINS,
 			AP_TAB_USERS,
 			AP_TAB_TENANTS,
@@ -456,15 +481,8 @@ class CAdminPanel
 			AP_TAB_SYSTEM
 		);
 
-		$this->aTabs[] = array(CApi::I18N('ADMIN_PANEL/TABNAME_SYSTEM'), AP_TAB_SYSTEM);
-
 		$GLOBALS[AP_START_TIME] = ap_Utils::Microtime();
 		$GLOBALS[AP_DB_COUNT] = 0;
-
-		if (isset($_GET['help']))
-		{
-			CApi::Location(CApi::I18N('ADMIN_PANEL/URL_HELP'));
-		}
 
 		if (isset($_GET['logout']))
 		{
@@ -497,6 +515,43 @@ class CAdminPanel
 			$this->initModules();
 			$this->initType();
 			$this->initAuth();
+
+			$this->sHelpUrl = '';
+			$sUrl = $this->IsTenantAuthType() ?
+				(string) CApi::GetConf('labs.custom-tenant-help-url', '') :
+				(string) CApi::GetConf('labs.custom-admin-help-url', '');
+
+			if (0 < strlen($sUrl))
+			{
+				$this->sHelpUrl = $sUrl;
+			}
+			else
+			{
+				if ($this->AType)
+				{
+					$this->sHelpUrl = 'http://www.afterlogic.com/wiki/Aurora_documentation';
+				}
+				else if ($this->PType)
+				{
+					$this->sHelpUrl = 'http://www.afterlogic.com/wiki/WebMail_Pro_7_documentation';
+				}
+				else
+				{
+					$this->sHelpUrl = 'http://www.afterlogic.com/wiki/WebMail_Lite_7_documentation';
+				}
+			}
+			
+			if (isset($_GET['help']))
+			{
+				if (0 < strlen($this->sHelpUrl))
+				{
+					CApi::Location($this->sHelpUrl);
+				}
+				else
+				{
+					CApi::Location('?root');
+				}
+			}
 
 			$bResetToDefault = true;
 			foreach ($this->aTabs as $aTab)
@@ -589,8 +644,14 @@ class CAdminPanel
 				$sAdmloginInput = CGet::Get('AdmloginInput');
 			}
 
+			$sLoginSuffix = CPost::Get('LoginSuffix', '');
+			if (CGet::Has('LoginSuffix'))
+			{
+				$sLoginSuffix = CGet::Get('LoginSuffix', '');
+			}
+
 			if ($this->CallModuleFunction('CCommonModule', 'AuthLogin',
-				array($sAdmloginInput, CPost::Get('AdmpasswordInput'))))
+				array($sAdmloginInput.$sLoginSuffix, CPost::Get('AdmpasswordInput'))))
 			{
 				CApi::Location(AP_INDEX_FILE.'?enter');
 			}
@@ -614,7 +675,7 @@ class CAdminPanel
 
 					foreach ($aTabs as $aTabValue)
 					{
-						if (in_array($aTabValue[0], array(CApi::I18N('ADMIN_PANEL/TABNAME_DOMAINS'), CApi::I18N('ADMIN_PANEL/TABNAME_USERS'))))
+						if (in_array($aTabValue[0], array(CApi::I18N('ADMIN_PANEL/TABNAME_COMMON'), CApi::I18N('ADMIN_PANEL/TABNAME_DOMAINS'), CApi::I18N('ADMIN_PANEL/TABNAME_USERS'))))
 						{
 							$aNewTabs[] = $aTabValue;
 						}
@@ -719,7 +780,7 @@ class CAdminPanel
 			if (0 < $iTenantId)
 			{
 				$oDomainsApi = /* @var $oDomainsApi CApiDomainsManager */ CApi::Manager('domains');
-				$oDomain = /* @var $oDomain CDomain */$oDomainsApi->GetDomainById($iTenantId);
+				$oDomain = /* @var $oDomain CDomain */$oDomainsApi->GetDomainById($iDomainId);
 				if ($oDomain && $iTenantId === $oDomain->IdTenant)
 				{
 					$bResult = true;
@@ -1141,6 +1202,13 @@ class CAdminPanel
 	public function SetAuthType($iAuthType)
 	{
 		$this->iAuthType = $iAuthType;
+
+		if (!$this->IsSuperAdminAuthType())
+		{
+			$this->RemoveTabs(
+				array(AP_TAB_TENANTS, AP_TAB_CHANNELS)
+			);
+		}
 	}
 
 	/**

@@ -58,12 +58,8 @@ class PDO extends AbstractBackend
 	
 	public function UnsubscribeCalendar($iCalendarId, $sUser)
 	{
-		$stmt = $this->pdo->prepare(
-				'SELECT id FROM '.$this->principalsTbl.' WHERE uri = ?');
-		$stmt->execute(
-				array(
-					'principals/' . $sUser
-				)
+		$stmt = $this->pdo->prepare('SELECT id FROM '.$this->principalsTbl.' WHERE uri = ?');
+		$stmt->execute(array('principals/' . $sUser)
 		);
 		$result = $stmt->fetch();
 		if (!$result)
@@ -74,26 +70,15 @@ class PDO extends AbstractBackend
 		
 		$stmt = $this->pdo->prepare(
 				'DELETE FROM '.$this->delegatesTbl.' WHERE calendarid=? AND principalid=?');
-		$stmt->execute(
-				array(
-					$iCalendarId, 
-					$iPrincipalId
-				)
-		);
+		$stmt->execute(array($iCalendarId, $iPrincipalId));
 	}
-	
 	
 	public function UpdateShare($sCalendarId, $sFromUser, $sToUser, $iMode)
 	{
 		$stmt = $this->pdo->prepare(
 			'SELECT id FROM '.$this->calendarsTbl.' WHERE uri = ? AND principaluri = ?');
 		
-		$stmt->execute(
-				array(
-					basename($sCalendarId), 
-					'principals/' . $sFromUser
-				)
-		);
+		$stmt->execute(array(basename($sCalendarId), 'principals/' . $sFromUser));
 		$result = $stmt->fetch();
 		$stmt->closeCursor();
 		if (!$result)
@@ -104,11 +89,7 @@ class PDO extends AbstractBackend
 		
 		$stmt = $this->pdo->prepare(
 				'SELECT id FROM '.$this->principalsTbl.' WHERE uri = ?');
-		$stmt->execute(
-				array(
-					'principals/' . $sToUser
-				)
-		);
+		$stmt->execute(array('principals/' . $sToUser));
 		$result = $stmt->fetch();
 		$stmt->closeCursor();
 		if (!$result)
@@ -119,12 +100,7 @@ class PDO extends AbstractBackend
 		
 		$stmt = $this->pdo->prepare(
 				'DELETE FROM '.$this->delegatesTbl.' WHERE calendarid=? AND principalid=?');
-		$stmt->execute(
-				array(
-					$iCalendarId, 
-					$iPrincipalId
-				)
-		);
+		$stmt->execute(array($iCalendarId, $iPrincipalId));
 		$stmt->closeCursor();
 		
 		if ($iMode != \ECalendarPermission::RemovePermission)
@@ -133,27 +109,39 @@ class PDO extends AbstractBackend
 				'INSERT INTO '.$this->delegatesTbl.' (calendarid, principalid, mode) 
 					SELECT ?, '.$this->principalsTbl.'.id, ? 
 						FROM '.$this->principalsTbl.' WHERE uri = ?');
-			$stmt->execute(
-					array(
-						$iCalendarId, 
-						$iMode, 
-						'principals/' . $sToUser
-					)
-			);
+			$stmt->execute(array($iCalendarId, $iMode, 'principals/' . $sToUser));
 			$stmt->closeCursor();
 		}
 		return 'delegation/'.$iCalendarId.'/calendar';
 	}
 	
+	public function DeleteShares($sCalendarId, $sFromUser)
+	{
+		$stmt = $this->pdo->prepare(
+			'SELECT id FROM '.$this->calendarsTbl.' WHERE uri = ? AND principaluri = ?');
+		
+		$stmt->execute(array(basename($sCalendarId), 'principals/' . $sFromUser));
+		$result = $stmt->fetch();
+		$stmt->closeCursor();
+		if (!$result)
+		{
+			return false;
+		}       
+		$iCalendarId = $result['id'];
+		
+		$stmt = $this->pdo->prepare(
+				'DELETE FROM '.$this->delegatesTbl.' WHERE calendarid=?');
+		$stmt->execute(array($iCalendarId));
+		$stmt->closeCursor();
+		
+		return 'delegation/'.$iCalendarId.'/calendar';
+	}
+
 	public function DeleteAllUsersShares($sToUser)
 	{
 		$stmt = $this->pdo->prepare(
 				'SELECT id FROM '.$this->principalsTbl.' WHERE uri = ?');
-		$stmt->execute(
-				array(
-					'principals/' . $sToUser
-				)
-		);
+		$stmt->execute(array('principals/' . $sToUser));
 		$result = $stmt->fetchAll();
 		$stmt->closeCursor();
 		if (!$result)
@@ -187,7 +175,7 @@ class PDO extends AbstractBackend
         // Making fields a comma-delimited list 
         $fields = implode(', ', $fields);
         $stmt = $this->pdo->prepare(
-				'SELECT ' . $fields . ' FROM `'.$this->calendarsTbl.'`, `'.$this->delegatesTbl.'` 
+				'SELECT ' . $fields . ' FROM '.$this->calendarsTbl.', '.$this->delegatesTbl.' 
 		WHERE '.$this->delegatesTbl.'.calendarid = '.$this->calendarsTbl.'.id AND '.$this->delegatesTbl.'.principalid = ?'); 
         $stmt->execute(array($principalId));
 
@@ -225,13 +213,8 @@ class PDO extends AbstractBackend
 	{
 		$mCalendarId = false;
 		$stmt = $this->pdo->prepare(
-			'SELECT id FROM `'. $this->calendarsTbl .'` WHERE uri = ? AND principaluri = ?');
-		$stmt->execute(
-				array(
-					basename($calendarUri), 
-					'principals/' . $email
-				)
-		);
+			'SELECT id FROM '. $this->calendarsTbl .' WHERE uri = ? AND principaluri = ?');
+		$stmt->execute(array(basename($calendarUri), 'principals/' . $email));
 		$result = $stmt->fetch();
 		if ($result !== false)
 		{
@@ -254,12 +237,7 @@ class PDO extends AbstractBackend
 					LEFT JOIN '.$this->principalsTbl.' AS p ON p.id = d.principalid
 						LEFT JOIN '.$this->calendarsTbl.' AS c ON c.id = d.calendarid
 							WHERE c.principaluri = ? AND c.uri = ?');
-		$stmt->execute(
-				array(
-					$principalUri, 
-					$calendarUri
-				)
-		);
+		$stmt->execute(array($principalUri, $calendarUri));
 
 		return $stmt->fetchAll();	
 	}	
@@ -272,25 +250,23 @@ class PDO extends AbstractBackend
 
         // Making fields a comma-delimited list 
         $fields = implode(', ', $fields);
-        $stmt = $this->pdo->prepare('SELECT ' . $fields . ' FROM `'.$this->calendarsTbl.'`, `'.$this->delegatesTbl.'` 
+        $stmt = $this->pdo->prepare('SELECT ' . $fields . ' FROM '.$this->calendarsTbl.', '.$this->delegatesTbl.' 
 		WHERE '.$this->delegatesTbl.'.calendarid = '.$this->calendarsTbl.'.id AND '.$this->calendarsTbl.'.uri = ?'); 
         $stmt->execute(array($calendarUri));
 
         $calendars = array();
         while($row = $stmt->fetch(\PDO::FETCH_ASSOC)) 
 		{
-			$stmt1 = $this->pdo->prepare('SELECT uri FROM `'.$this->principalsTbl.'` WHERE id = ?'); 
+			$stmt1 = $this->pdo->prepare('SELECT uri FROM '.$this->principalsTbl.' WHERE id = ?'); 
 			$stmt1->execute(array($row['principalid']));
 			$row1 = $stmt1->fetch(\PDO::FETCH_ASSOC);
 			if ($row1)
 			{
-				$calendar = array(
+				$calendars[] = array(
 					'uri' => 'delegation/' . $row['id'] . '/calendar',
 					'user' => basename($row1['uri'])
 				);
-	            $calendars[] = $calendar;
 			}        
-
         }
         return $calendars;
 	}

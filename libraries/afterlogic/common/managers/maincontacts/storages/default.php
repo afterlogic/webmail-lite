@@ -31,6 +31,25 @@ class CApiMaincontactsStorage extends AApiManagerStorage
 
 	/**
 	 * @param int $iUserId
+	 * @return CContact|null
+	 */
+	public function GetMyGlobalContact($iUserId)
+	{
+		return null;
+	}
+
+	/**
+	 * @param mixed $mTypeId
+	 * @param int $iContactType
+	 * @return CContact | bool
+	 */
+	public function GetContactByTypeId($mTypeId, $mContactId)
+	{
+		return false;
+	}
+
+	/**
+	 * @param int $iUserId
 	 * @param string $sEmail
 	 * @return CContact | bool
 	 */
@@ -210,6 +229,16 @@ class CApiMaincontactsStorage extends AApiManagerStorage
 	{
 		return true;
 	}
+	
+	/**
+	 * @param int $iUserId
+	 * @param array $aContactsIds
+	 * @return bool
+	 */
+	public function DeleteSuggestContacts($iUserId, $aContactsIds)
+	{
+		return true;
+	}	
 
 	/**
 	 * @param int $iUserId
@@ -236,20 +265,20 @@ class CApiMaincontactsStorage extends AApiManagerStorage
 	 * @param array $aContactIds
 	 * @return bool
 	 */
-	public function DeleteContactsExceptIds($iUserId, $aContactIds)
-	{
-		return true;
-	}
+//	public function DeleteContactsExceptIds($iUserId, $aContactIds)
+//	{
+//		return true;
+//	}
 
 	/**
 	 * @param int $iUserId
 	 * @param array $aGroupIds
 	 * @return bool
 	 */
-	public function DeleteGroupsExceptIds($iUserId, $aGroupIds)
-	{
-		return true;
-	}
+//	public function DeleteGroupsExceptIds($iUserId, $aGroupIds)
+//	{
+//		return true;
+//	}
 
 	/**
 	 * @param CAccount $oAccount
@@ -270,17 +299,6 @@ class CApiMaincontactsStorage extends AApiManagerStorage
 	}
 
 	/**
-	 * @deprecated
-	 * @param CContact $oContact
-	 * @param mixed $mGroupId
-	 * @return bool
-	 */
-	public function AddContactToGroup($oContact, $mGroupId)
-	{
-		return true;
-	}
-
-	/**
 	 * @param CGroup $oGroup
 	 * @param array $aContactIds
 	 * @return bool
@@ -290,17 +308,6 @@ class CApiMaincontactsStorage extends AApiManagerStorage
 		return true;
 	}
 
-	/**
-	 * @deprecated
-	 * @param mixed $mContactId
-	 * @param mixed $mGroupId
-	 * @return bool
-	 */
-	public function DeleteContactFromGroup($mContactId, $mGroupId)
-	{
-		return true;
-	}
-	
 	/**
 	 * @param int $iUserId
 	 * @param mixed $mContactId

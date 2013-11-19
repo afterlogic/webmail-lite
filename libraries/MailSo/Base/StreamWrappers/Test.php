@@ -36,7 +36,7 @@ class Test
 			stream_wrapper_register(self::STREAM_NAME, '\MailSo\Base\StreamWrappers\Test');
 		}
 
-		$sHashName = md5(microtime(true).mt_rand(1000, 9999));
+		$sHashName = md5(microtime(true).rand(1000, 9999));
 
 		$rConnect = fopen('php://memory', 'r+b');
 		fwrite($rConnect, $sRawResponse);

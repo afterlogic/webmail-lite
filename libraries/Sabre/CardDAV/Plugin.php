@@ -11,8 +11,8 @@ use Sabre\VObject;
  *
  * The CardDAV plugin adds CardDAV functionality to the WebDAV server
  *
- * @copyright Copyright (C) 2007-2012 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/)
+ * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
+ * @author Evert Pot (http://evertpot.com/)
  * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
 class Plugin extends DAV\ServerPlugin {
@@ -273,7 +273,7 @@ class Plugin extends DAV\ServerPlugin {
 
         $properties = array_keys(DAV\XMLUtil::parseProperties($dom->firstChild));
 
-        $hrefElems = $dom->getElementsByTagNameNS('DAV:','href');
+        $hrefElems = $dom->getElementsByTagNameNS('urn:DAV','href');
         $propertyList = array();
 
         foreach($hrefElems as $elem) {
@@ -480,7 +480,7 @@ class Plugin extends DAV\ServerPlugin {
                 if ($filter['text-matches']) {
                     $texts = array();
                     foreach($vProperties as $vProperty)
-                        $texts[] = $vProperty->value;
+                        $texts[] = $vProperty->getValue();
 
                     $results[] = $this->validateTextMatches($texts, $filter['text-matches'], $filter['test']);
                 }
@@ -556,7 +556,7 @@ class Plugin extends DAV\ServerPlugin {
                 foreach($vProperties as $vProperty) {
                     // If we got all the way here, we'll need to validate the
                     // text-match filter.
-                    $success = DAV\StringUtil::textMatch($vProperty[$filter['name']]->value, $filter['text-match']['value'], $filter['text-match']['collation'], $filter['text-match']['match-type']);
+                    $success = DAV\StringUtil::textMatch($vProperty[$filter['name']]->getValue(), $filter['text-match']['value'], $filter['text-match']['collation'], $filter['text-match']['match-type']);
                     if ($success) break;
                 }
                 if ($filter['text-match']['negate-condition']) {

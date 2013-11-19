@@ -14,18 +14,25 @@ class CApiContactsVCardHelper
 {
 	/**
 	* @param CContact $oContact
-	* @param \Sabre\VObject\Component $vCard
+	* @param \Sabre\VObject\Component $oVCard
 	* @return void
 	*/
-	public static function UpdateVCardAddressesFromContact($oContact, &$vCard)
+	public static function UpdateVCardAddressesFromContact($oContact, &$oVCard)
 	{
 		$bFindHome = false;
 		$bFindWork = false;
 
-		$vCardCopy = clone $vCard;
+		$oVCardCopy = clone $oVCard;
 
-		$sADRHome = ';;'.$oContact->HomeStreet.';'.$oContact->HomeCity.';'.$oContact->HomeState.';'.
-			$oContact->HomeZip.';'.$oContact->HomeCountry;
+		$sADRHome = array(
+			'',
+			'',
+			$oContact->HomeStreet,
+			$oContact->HomeCity,
+			$oContact->HomeState,
+			$oContact->HomeZip,
+			$oContact->HomeCountry
+		);
 
 		if (empty($oContact->HomeStreet) && empty($oContact->HomeCity) &&
 				empty($oContact->HomeState) && empty($oContact->HomeZip) &&
@@ -34,8 +41,15 @@ class CApiContactsVCardHelper
 			$bFindHome = true;
 		}
 
-		$sADRWork = ';;'.$oContact->BusinessStreet.';'.$oContact->BusinessCity.';'.$oContact->BusinessState.';'.
-				$oContact->BusinessZip.';'.$oContact->BusinessCountry;
+		$sADRWork = array(
+			'',
+			'',
+			$oContact->BusinessStreet,
+			$oContact->BusinessCity,
+			$oContact->BusinessState,
+			$oContact->BusinessZip,
+			$oContact->BusinessCountry
+		);
 
 		if (empty($oContact->BusinessStreet) && empty($oContact->BusinessCity) &&
 				empty($oContact->BusinessState) && empty($oContact->BusinessZip) &&
@@ -44,20 +58,14 @@ class CApiContactsVCardHelper
 			$bFindWork = true;
 		}
 
-		if (isset($vCardCopy->ADR))
+		if (isset($oVCardCopy->ADR))
 		{
-			unset($vCard->ADR);
-			foreach ($vCardCopy->ADR as $oAdr)
+			unset($oVCard->ADR);
+			foreach ($oVCardCopy->ADR as $oAdr)
 			{
-				if ($oAdr->offsetExists('TYPE'))
+				if ($oTypes = $oAdr['TYPE'])
 				{
-					$aTypes = array();
-					$oTypes = $oAdr->offsetGet('TYPE');
-					foreach ($oTypes as $oType)
-					{
-						$aTypes[] = strtoupper($oType->value);
-					}
-					if (in_array('HOME', $aTypes))
+					if ($oTypes->has('HOME'))
 					{
 						if ($bFindHome)
 						{
@@ -65,11 +73,11 @@ class CApiContactsVCardHelper
 						}
 						else
 						{
-							$oAdr->value = $sADRHome;
+							$oAdr->setValue($sADRHome);
 							$bFindHome = true;
 						}
 					}
-					if (in_array('WORK', $aTypes))
+					if ($oTypes->has('WORK'))
 					{
 						if ($bFindWork)
 						{
@@ -77,44 +85,40 @@ class CApiContactsVCardHelper
 						}
 						else
 						{
-							$oAdr->value = $sADRWork;
+							$oAdr->setValue($sADRWork);
 							$bFindWork = true;
 						}
 					}
 				}
 				if (isset($oAdr))
 				{
-					$vCard->add($oAdr);
+					$oVCard->add($oAdr);
 				}
 			}
 		}
 
 		if (!$bFindHome)
 		{
-			$oADRHome = new \Sabre\VObject\Property('ADR', $sADRHome);
-			$oADRHome->add(new \Sabre\VObject\Parameter('TYPE', 'HOME'));
-			$vCard->add($oADRHome);
+			$oVCard->add('ADR', $sADRHome, array('TYPE' => 'HOME'));
 		}
 		if (!$bFindWork)
 		{
-			$oADRWork = new \Sabre\VObject\Property('ADR', $sADRWork);
-			$oADRWork->add(new \Sabre\VObject\Parameter('TYPE', 'WORK'));
-			$vCard->add($oADRWork);
+			$oVCard->add('ADR', $sADRWork, array('TYPE' => 'WORK'));
 		}
 	}
 
 	/**
 	* @param CContact $oContact
-	* @param \Sabre\VObject\Component $vCard
+	* @param \Sabre\VObject\Component\VCard $oVCard
 	* @return void
 	*/
-	public static function UpdateVCardEmailsFromContact($oContact, &$vCard)
+	public static function UpdateVCardEmailsFromContact($oContact, &$oVCard)
 	{
 		$bFindHome = false;
 		$bFindWork = false;
 		$bFindOther = false;
 
-		$vCardCopy = clone $vCard;
+		$oVCardCopy = clone $oVCard;
 
 		if (empty($oContact->HomeEmail))
 		{
@@ -129,25 +133,24 @@ class CApiContactsVCardHelper
 			$bFindOther = true;
 		}
 
-		if (isset($vCardCopy->EMAIL))
+		if (isset($oVCardCopy->EMAIL))
 		{
-			unset($vCard->EMAIL);
-			foreach ($vCardCopy->EMAIL as $oEmail)
+			unset($oVCard->EMAIL);
+			foreach ($oVCardCopy->EMAIL as $oEmail)
 			{
-				if ($oEmail->offsetExists('TYPE'))
+				if ($oTypes = $oEmail['TYPE'])
 				{
 					$aTypes = array();
-					$oTypes = $oEmail->offsetGet('TYPE');
-					foreach ($oTypes as $oType)
+					foreach ($oTypes as $sType)
 					{
-						$sType = strtoupper($oType->value);
-						if ($sType !== 'PREF')
+						if ('PREF' !== strtoupper($sType))
 						{
-							$aTypes[] = strtoupper($oType->value);
+							$aTypes[] = $sType;
 						}
 					}
+					$oTypes->setValue($aTypes);
 
-					if (in_array('HOME', $aTypes))
+					if ($oTypes->has('HOME'))
 					{
 						if ($bFindHome)
 						{
@@ -156,18 +159,14 @@ class CApiContactsVCardHelper
 						else
 						{
 							$bFindHome = true;
-							$oEmail = new \Sabre\VObject\Property('EMAIL', $oContact->HomeEmail);
 							if ($oContact->PrimaryEmail == EPrimaryEmailType::Home)
 							{
-								$aTypes[] = 'PREF';
+								$oTypes->addValue('PREF');
 							}
-							foreach ($aTypes as $sType)
-							{
-								$oEmail->add(new \Sabre\VObject\Parameter('TYPE', $sType));
-							}
+							$oEmail->setValue($oContact->HomeEmail);
 						}
 					}
-					else if (in_array('WORK', $aTypes))
+					else if ($oTypes->has('WORK'))
 					{
 						if ($bFindWork)
 						{
@@ -176,25 +175,20 @@ class CApiContactsVCardHelper
 						else
 						{
 							$bFindWork = true;
-							$oEmail = new \Sabre\VObject\Property('EMAIL', $oContact->BusinessEmail);
 							if ($oContact->PrimaryEmail == EPrimaryEmailType::Business)
 							{
-								$aTypes[] = 'PREF';
+								$oTypes->addValue('PREF');
 							}
-							foreach ($aTypes as $sType)
-							{
-								$oEmail->add(new \Sabre\VObject\Parameter('TYPE', $sType));
-							}
+							$oEmail->setValue($oContact->HomeEmail);
 						}
 					}
 					else
 					{
-						if (isset($vCard->{'X-ABLabel'}))
+						if (isset($oVCard->{'X-ABLabel'}))
 						{
-							foreach ($vCard->{'X-ABLabel'} as $oABLabel)
+							foreach ($oVCard->{'X-ABLabel'} as $oABLabel)
 							{
-								if (isset($oEmail) && $oEmail->group == $oABLabel->group &&
-										$oABLabel->value == '_$!<Other>!$_')
+								if (isset($oEmail) && $oEmail->group === $oABLabel->group && (string)$oABLabel === '_$!<Other>!$_')
 								{
 									if ($bFindOther)
 									{
@@ -203,16 +197,12 @@ class CApiContactsVCardHelper
 									else
 									{
 										$bFindOther = true;
-										$oEmail = new \Sabre\VObject\Property('EMAIL', $oContact->OtherEmail);
-										$oEmail->group = $oABLabel->group;
 										if ($oContact->PrimaryEmail == EPrimaryEmailType::Other)
 										{
-											$aTypes[] = 'PREF';
+											$oTypes->addValue('PREF');
 										}
-										foreach ($aTypes as $sType)
-										{
-											$oEmail->add(new \Sabre\VObject\Parameter('TYPE', $sType));
-										}
+										$oEmail->setValue($oContact->OtherEmail);
+										$oEmail->group = $oABLabel->group;
 										break;
 									}
 								}
@@ -220,59 +210,51 @@ class CApiContactsVCardHelper
 						}
 					}
 				}
-				if (isset($oEmail))
-				{
-					$vCard->add($oEmail);
-				}
+			}
+			if (isset($oEmail))
+			{
+				$oVCard->add($oEmail);
 			}
 		}
 
 
 		if (!$bFindHome)
 		{
-			$oEMAILHome = new \Sabre\VObject\Property('EMAIL', $oContact->HomeEmail);
-			$oEMAILHome->add(new \Sabre\VObject\Parameter('TYPE', 'INTERNET'));
-			$oEMAILHome->add(new \Sabre\VObject\Parameter('TYPE', 'HOME'));
+			$oEmail = $oVCard->add('EMAIL', $oContact->HomeEmail, array('TYPE' => 'INTERNET', 'TYPE' => 'HOME'));
 			if ($oContact->PrimaryEmail == EPrimaryEmailType::Home)
 			{
-				$oEMAILHome->add(new \Sabre\VObject\Parameter('TYPE', 'PREF'));
+				$oEmail['TYPE']->addValue('PREF');
 			}
-			$vCard->add($oEMAILHome);
 		}
 		if (!$bFindWork)
 		{
-			$oEMAILWork = new \Sabre\VObject\Property('EMAIL', $oContact->BusinessEmail);
-			$oEMAILWork->add(new \Sabre\VObject\Parameter('TYPE', 'INTERNET'));
-			$oEMAILWork->add(new \Sabre\VObject\Parameter('TYPE', 'WORK'));
+			$oEmail = $oVCard->add('EMAIL', $oContact->BusinessEmail, array('TYPE' => 'INTERNET', 'TYPE' => 'WORK'));
 			if ($oContact->PrimaryEmail == EPrimaryEmailType::Business)
 			{
-				$oEMAILWork->add(new \Sabre\VObject\Parameter('TYPE', 'PREF'));
+				$oEmail['TYPE']->addValue('PREF');
 			}
-			$vCard->add($oEMAILWork);
 		}
 		if (!$bFindOther)
 		{
-			if (!isset($vCard->{'Other.X-ABLabel'}))
+			if (!isset($oVCard->{'Other.X-ABLabel'}))
 			{
-				$vCard->add(new \Sabre\VObject\Property('Other.X-ABLabel', '_$!<Other>!$_'));
+				$oVCard->add('Other.X-ABLabel', '_$!<Other>!$_');
 			}
 
-			$oEMAILOther = new \Sabre\VObject\Property('Other.EMAIL', $oContact->OtherEmail);
-			$oEMAILOther->add(new \Sabre\VObject\Parameter('TYPE', 'INTERNET'));
+			$oEmail = $oVCard->add('Other.EMAIL', $oContact->OtherEmail, array('TYPE' => 'INTERNET'));
 			if ($oContact->PrimaryEmail == EPrimaryEmailType::Other)
 			{
-				$oEMAILOther->add(new \Sabre\VObject\Parameter('TYPE', 'PREF'));
-			}
-			$vCard->add($oEMAILOther);
+				$oEmail['TYPE']->addValue('PREF');
+			}			
 		}
 	}
 
 	/**
 	* @param CContact $oContact
-	* @param \Sabre\VObject\Component $vCard
+	* @param \Sabre\VObject\Component $oVCard
 	* @return void
 	*/
-	public static function UpdateVCardUrlsFromContact($oContact, &$vCard)
+	public static function UpdateVCardUrlsFromContact($oContact, &$oVCard)
 	{
 		$bFindHome = false;
 		$bFindWork = false;
@@ -286,19 +268,13 @@ class CApiContactsVCardHelper
 			$bFindWork = true;
 		}
 
-		if (isset($vCard->URL))
+		if (isset($oVCard->URL))
 		{
-			foreach ($vCard->URL as $oUrl)
+			foreach ($oVCard->URL as $oUrl)
 			{
-				if ($oUrl->offsetExists('TYPE'))
+				if ($oTypes = $oUrl['TYPE'])
 				{
-					$aTypes = array();
-					$oTypes = $oUrl->offsetGet('TYPE');
-					foreach ($oTypes as $oType)
-					{
-						$aTypes[] = strtoupper($oType->value);
-					}
-					if (in_array('HOME', $aTypes))
+					if ($oTypes->has('HOME'))
 					{
 						if ($bFindHome)
 						{
@@ -306,11 +282,11 @@ class CApiContactsVCardHelper
 						}
 						else
 						{
-							$oUrl->value = $oContact->HomeWeb;
+							$oUrl->setValue($oContact->HomeWeb);
 							$bFindHome = true;
 						}
 					}
-					if (in_array('WORK', $aTypes))
+					if ($oTypes->has('WORK'))
 					{
 						if ($bFindWork)
 						{
@@ -318,7 +294,7 @@ class CApiContactsVCardHelper
 						}
 						else
 						{
-							$oUrl->value = $oContact->BusinessWeb;
+							$oUrl->setValue($oContact->BusinessWeb);
 							$bFindWork = true;
 						}
 					}
@@ -328,24 +304,20 @@ class CApiContactsVCardHelper
 
 		if (!$bFindHome)
 		{
-			$oURLHome = new \Sabre\VObject\Property('URL', $oContact->HomeWeb);
-			$oURLHome->add(new \Sabre\VObject\Parameter('TYPE', 'HOME'));
-			$vCard->add($oURLHome);
+			$oVCard->add('URL', $oContact->HomeWeb, array('TYPE' => 'HOME'));
 		}
 		if (!$bFindWork)
 		{
-			$oURLWork = new \Sabre\VObject\Property('URL', $oContact->BusinessWeb);
-			$oURLWork->add(new \Sabre\VObject\Parameter('TYPE', 'WORK'));
-			$vCard->add($oURLWork);
+			$oVCard->add('URL', $oContact->BusinessWeb, array('TYPE' => 'WORK'));
 		}
 	}
 
 	/**
 	* @param CContact $oContact
-	* @param \Sabre\VObject\Component $vCard
+	* @param \Sabre\VObject\Component\VCard $oVCard
 	* @return void
 	*/
-	public static function UpdateVCardPhonesFromContact($oContact, &$vCard)
+	public static function UpdateVCardPhonesFromContact($oContact, &$oVCard)
 	{
 		$bFindHome = false;
 		$bFindWork = false;
@@ -353,7 +325,7 @@ class CApiContactsVCardHelper
 		$bFindHomeFax = false;
 		$bFindWorkFax = false;
 
-		$vCardCopy = clone $vCard;
+		$oVCardCopy = clone $oVCard;
 
 		if (empty($oContact->HomePhone))
 		{
@@ -376,22 +348,16 @@ class CApiContactsVCardHelper
 			$bFindWorkFax = true;
 		}
 
-		if (isset($vCardCopy->TEL))
+		if (isset($oVCardCopy->TEL))
 		{
-			unset($vCard->TEL);
-			foreach ($vCardCopy->TEL as $oTel)
+			unset($oVCard->TEL);
+			foreach ($oVCardCopy->TEL as $oTel)
 			{
-				if ($oTel->offsetExists('TYPE'))
+				if ($oTypes = $oTel['TYPE'])
 				{
-					$aTypes = array();
-					$oTypes = $oTel->offsetGet('TYPE');
-					foreach ($oTypes as $oType)
+					if ($oTypes->has('VOICE'))
 					{
-						$aTypes[] = strtoupper($oType->value);
-					}
-					if (in_array('VOICE', $aTypes))
-					{
-						if (in_array('HOME', $aTypes))
+						if ($oTypes->has('HOME'))
 						{
 							if ($bFindHome)
 							{
@@ -399,11 +365,11 @@ class CApiContactsVCardHelper
 							}
 							else
 							{
-								$oTel->value = $oContact->HomePhone;
+								$oTel->setValue($oContact->HomePhone);
 								$bFindHome = true;
 							}
 						}
-						if (in_array('WORK', $aTypes))
+						if ($oTypes->has('WORK'))
 						{
 							if ($bFindWork)
 							{
@@ -411,11 +377,11 @@ class CApiContactsVCardHelper
 							}
 							else
 							{
-								$oTel->value = $oContact->BusinessPhone;
+								$oTel->setValue($oContact->BusinessPhone);
 								$bFindWork = true;
 							}
 						}
-						if (in_array('CELL', $aTypes))
+						if ($oTypes->has('CELL'))
 						{
 							if ($bFindCell)
 							{
@@ -423,14 +389,14 @@ class CApiContactsVCardHelper
 							}
 							else
 							{
-								$oTel->value = $oContact->HomeMobile;
+								$oTel->setValue($oContact->HomeMobile);
 								$bFindCell = true;
 							}
 						}
 					}
-					else if (in_array('FAX', $aTypes))
+					else if ($oTypes->has('FAX'))
 					{
-						if (in_array('HOME', $aTypes))
+						if ($oTypes->has('HOME'))
 						{
 							if ($bFindHomeFax)
 							{
@@ -438,11 +404,11 @@ class CApiContactsVCardHelper
 							}
 							else
 							{
-								$oTel->value = $oContact->HomeFax;
+								$oTel->setValue($oContact->HomeFax);
 								$bFindHomeFax = true;
 							}
 						}
-						if (in_array('WORK', $aTypes))
+						if ($oTypes->has('WORK'))
 						{
 							if ($bFindWorkFax)
 							{
@@ -450,7 +416,7 @@ class CApiContactsVCardHelper
 							}
 							else
 							{
-								$oTel->value = $oContact->BusinessFax;
+								$oTel->setValue($oContact->BusinessFax);
 								$bFindWorkFax = true;
 							}
 						}
@@ -458,58 +424,43 @@ class CApiContactsVCardHelper
 				}
 				if (isset($oTel))
 				{
-					$vCard->add($oTel);
+					$oVCard->add($oTel);
 				}
 			}
 		}
 
 		if (!$bFindHome)
 		{
-			$oTELHome = new \Sabre\VObject\Property('TEL', $oContact->HomePhone);
-			$oTELHome->add(new \Sabre\VObject\Parameter('TYPE', 'VOICE'));
-			$oTELHome->add(new \Sabre\VObject\Parameter('TYPE', 'HOME'));
-			$vCard->add($oTELHome);
+			$oVCard->add('TEL', $oContact->HomePhone, array('TYPE' => 'VOICE', 'TYPE' => 'HOME'));
 		}
 		if (!$bFindWork)
 		{
-			$oTELWork = new \Sabre\VObject\Property('TEL', $oContact->BusinessPhone);
-			$oTELWork->add(new \Sabre\VObject\Parameter('TYPE', 'VOICE'));
-			$oTELWork->add(new \Sabre\VObject\Parameter('TYPE', 'WORK'));
-			$vCard->add($oTELWork);
+			$oVCard->add('TEL', $oContact->BusinessPhone, array('TYPE' => 'VOICE', 'TYPE' => 'WORK'));
 		}
 		if (!$bFindCell)
 		{
-			$oTELCell = new \Sabre\VObject\Property('TEL', $oContact->HomeMobile);
-			$oTELCell->add(new \Sabre\VObject\Parameter('TYPE', 'VOICE'));
-			$oTELCell->add(new \Sabre\VObject\Parameter('TYPE', 'CELL'));
-			$vCard->add($oTELCell);
+			$oVCard->add('TEL', $oContact->HomeMobile, array('TYPE' => 'VOICE', 'TYPE' => 'CELL'));
 		}
 		if (!$bFindHomeFax)
 		{
-			$oTELHomeFax = new \Sabre\VObject\Property('TEL', $oContact->HomeFax);
-			$oTELHomeFax->add(new \Sabre\VObject\Parameter('TYPE', 'FAX'));
-			$oTELHomeFax->add(new \Sabre\VObject\Parameter('TYPE', 'HOME'));
-			$vCard->add($oTELHomeFax);
+			$oVCard->add('TEL', $oContact->HomeFax, array('TYPE' => 'FAX', 'TYPE' => 'HOME'));
 		}
 		if (!$bFindWorkFax)
 		{
-			$oTELWorkFax = new \Sabre\VObject\Property('TEL', $oContact->BusinessFax);
-			$oTELWorkFax->add(new \Sabre\VObject\Parameter('TYPE', 'FAX'));
-			$oTELWorkFax->add(new \Sabre\VObject\Parameter('TYPE', 'WORK'));
-			$vCard->add($oTELWorkFax);
+			$oVCard->add('TEL', $oContact->BusinessFax, array('TYPE' => 'FAX', 'TYPE' => 'WORK'));
 		}
 	}
 
 	/**
 	* @param CContact $oContact
-	* @param \Sabre\VObject\Component $vCard
+	* @param \Sabre\VObject\Component $oVCard
 	* @param bool $bIsUpdate = false
 	* @return void
 	*/
-	public static function UpdateVCardFromContact($oContact, &$vCard, $bIsUpdate = false)
+	public static function UpdateVCardFromContact($oContact, &$oVCard, $bIsUpdate = false)
 	{
-		$vCard->VERSION = '3.0';
-		$vCard->PRODID = '-//Afterlogic//6.5.x//EN';
+		$oVCard->VERSION = '3.0';
+		$oVCard->PRODID = '-//Afterlogic//6.5.x//EN';
 
 		$sIdContact = $oContact->IdContactStr;
 		$aPathInfo = pathinfo($oContact->IdContactStr);
@@ -518,38 +469,38 @@ class CApiContactsVCardHelper
 			$sIdContact = $aPathInfo['filename'];
 		}
 
-		$vCard->UID = $sIdContact;
+		$oVCard->UID = $sIdContact;
 
-		$vCard->FN = $oContact->FullName;
-		$vCard->N = $oContact->LastName.';'.$oContact->FirstName.';;'.$oContact->Title.';;';
-		$vCard->{'X-AFTERLOGIC-OFFICE'} = $oContact->BusinessOffice;
-		$vCard->{'X-AFTERLOGIC-USE-FRIENDLY-NAME'} = $oContact->UseFriendlyName ? '1' : '0';
-		$vCard->TITLE = $oContact->BusinessJobTitle;
-		$vCard->NICKNAME = $oContact->NickName;
-		$vCard->NOTE = $oContact->Notes;
-		$vCard->ORG = $oContact->BusinessCompany.';'.$oContact->BusinessDepartment;
-		if(count($oContact->GroupsIds) > 0)
-		{
-			$vCard->CATEGORIES = implode(',', $oContact->GroupsIds);
-		}
-		else
-		{
-			$vCard->CATEGORIES = '';
-		}
+		$oVCard->FN = $oContact->FullName;
+		$oVCard->N = array(
+			$oContact->LastName,
+			$oContact->FirstName,
+			'',
+			$oContact->Title,
+			'',
+			''
+		);
+		$oVCard->{'X-AFTERLOGIC-OFFICE'} = $oContact->BusinessOffice;
+		$oVCard->{'X-AFTERLOGIC-USE-FRIENDLY-NAME'} = $oContact->UseFriendlyName ? '1' : '0';
+		$oVCard->TITLE = $oContact->BusinessJobTitle;
+		$oVCard->NICKNAME = $oContact->NickName;
+		$oVCard->NOTE = $oContact->Notes;
+		$oVCard->ORG = array(
+			$oContact->BusinessCompany,
+			$oContact->BusinessDepartment
+		);
+		$oVCard->CATEGORIES = $oContact->GroupsIds;
 
-		self::UpdateVCardAddressesFromContact($oContact, $vCard);
-		self::UpdateVCardEmailsFromContact($oContact, $vCard);
-		self::UpdateVCardUrlsFromContact($oContact, $vCard);
-		self::UpdateVCardPhonesFromContact($oContact, $vCard);
+		self::UpdateVCardAddressesFromContact($oContact, $oVCard);
+		self::UpdateVCardEmailsFromContact($oContact, $oVCard);
+		self::UpdateVCardUrlsFromContact($oContact, $oVCard);
+		self::UpdateVCardPhonesFromContact($oContact, $oVCard);
 
-		unset($vCard->BDAY);
-		if ($oContact->BirthdayYear !== 0 && $oContact->BirthdayMonth !== 0 &&
-				$oContact->BirthdayDay !== 0)
+		unset($oVCard->BDAY);
+		if ($oContact->BirthdayYear !== 0 && $oContact->BirthdayMonth !== 0 && $oContact->BirthdayDay !== 0)
 		{
 			$sBDayDT = $oContact->BirthdayYear.'-'.$oContact->BirthdayMonth.'-'.$oContact->BirthdayDay;
-			$oBDay = new \Sabre\VObject\Property('BDAY', $sBDayDT);
-			$oBDay->add(new \Sabre\VObject\Parameter('VALUE', 'DATE'));
-			$vCard->add($oBDay);
+			$oVCard->add('BDAY', $sBDayDT);
 		}
 	}
 }

@@ -37,6 +37,17 @@ class CApiMaincontactsCommandCreator extends api_CommandCreator
 	}
 
 	/**
+	 * @param mixed $mTypeId
+	 * @param int $iContactType
+	 * @return string
+	 */
+	public function GetContactByTypeId($mTypeId, $iContactType)
+	{
+		return $this->getContactByWhere(sprintf('%s = %s AND %s = %d',
+			$this->escapeColumn('type_id'), $this->escapeString($mTypeId), $this->escapeColumn('type'), $iContactType));
+	}
+
+	/**
 	 * @param int $iUserId
 	 * @param string $sEmail
 	 * @return string
@@ -170,7 +181,7 @@ class CApiMaincontactsCommandCreator extends api_CommandCreator
 			implode(', ', api_AContainer::DbUpdateArray($oContact, $this->oHelper)),
 			$oContact->IdUser, $oContact->IdContact);
 	}
-
+	
 	/**
 	 * @param CGroup $oGroup
 	 * @return string
@@ -211,12 +222,12 @@ class CApiMaincontactsCommandCreator extends api_CommandCreator
 	 */
 	public function DeleteContacts($iUserId, $aContactsIds)
 	{
-		$sSql = 'UPDATE %sawm_addr_book SET deleted = 1, date_modified = %s WHERE %s = %d AND %s IN (%s)';
+		$sSql = 'DELETE FROM %sawm_addr_book WHERE %s = %d AND %s IN (%s)';
 
 		$aContactsIds = array_map('intval', $aContactsIds);
 
-		return sprintf($sSql, $this->Prefix(), $this->oHelper->TimeStampToDateFormat(time(), true),
-			$this->escapeColumn('id_user'), $iUserId, $this->escapeColumn('id_addr'), implode(', ', $aContactsIds));
+		return sprintf($sSql, $this->Prefix(), $this->escapeColumn('id_user'), $iUserId,
+			$this->escapeColumn('id_addr'), implode(', ', $aContactsIds));
 	}
 
 	/**
@@ -239,39 +250,38 @@ class CApiMaincontactsCommandCreator extends api_CommandCreator
 	 * @param array $aContactsIds
 	 * @return string
 	 */
-	public function DeleteContactsExceptIds($iUserId, $aContactsIds)
-	{
-		$sSqlAdd = '';
-		if (is_array($aContactsIds) && 0 < count($aContactsIds))
-		{
-			$sSqlAdd = sprintf(' AND %s NOT IN (%s)', $this->escapeColumn('id_addr'),
-				implode(', ', $aContactsIds = array_map('intval', $aContactsIds)));
-		}
-
-		$sSql = 'UPDATE %sawm_addr_book SET deleted = 1, date_modified = %s WHERE %s = %d%s';
-
-		return sprintf($sSql, $this->Prefix(), $this->oHelper->TimeStampToDateFormat(time(), true),
-			$this->escapeColumn('id_user'), $iUserId, $sSqlAdd);
-	}
+//	public function DeleteContactsExceptIds($iUserId, $aContactsIds)
+//	{
+//		$sSqlAdd = '';
+//		if (is_array($aContactsIds) && 0 < count($aContactsIds))
+//		{
+//			$sSqlAdd = sprintf(' AND %s NOT IN (%s)', $this->escapeColumn('id_addr'),
+//				implode(', ', $aContactsIds = array_map('intval', $aContactsIds)));
+//		}
+//
+//		$sSql = 'DELETE FROM %sawm_addr_book WHERE %s = %d%s';
+//
+//		return sprintf($sSql, $this->Prefix(), $this->escapeColumn('id_user'), $iUserId, $sSqlAdd);
+//	}
 
 	/**
 	 * @param int $iUserId
 	 * @param array $aGroupsIds
 	 * @return string
 	 */
-	public function DeleteGroupsExceptIds($iUserId, $aGroupsIds)
-	{
-		$sSqlAdd = '';
-		if (is_array($aGroupsIds) && 0 < count($aGroupsIds))
-		{
-			$sSqlAdd = sprintf(' AND %s NOT IN (%s)',
-				$this->escapeColumn('id_group'), implode(', ', array_map('intval', $aGroupsIds)));
-		}
-
-		$sSql = 'DELETE FROM %sawm_addr_groups WHERE id_user = %d%s';
-
-		return sprintf($sSql, $this->Prefix(), $iUserId, $sSqlAdd);
-	}
+//	public function DeleteGroupsExceptIds($iUserId, $aGroupsIds)
+//	{
+//		$sSqlAdd = '';
+//		if (is_array($aGroupsIds) && 0 < count($aGroupsIds))
+//		{
+//			$sSqlAdd = sprintf(' AND %s NOT IN (%s)',
+//				$this->escapeColumn('id_group'), implode(', ', array_map('intval', $aGroupsIds)));
+//		}
+//
+//		$sSql = 'DELETE FROM %sawm_addr_groups WHERE id_user = %d%s';
+//
+//		return sprintf($sSql, $this->Prefix(), $iUserId, $sSqlAdd);
+//	}
 
 	/**
 	 * @param int $iUserId
@@ -484,7 +494,7 @@ class CApiMaincontactsCommandCreatorMySQL extends CApiMaincontactsCommandCreator
 	public function GetContactItemsWithoutOrder($iUserId, $iOffset, $iRequestLimit)
 	{
 		$sSql = 'SELECT id_addr, str_id, view_email, primary_email, h_email, b_email, other_email,
-use_frequency, fullname, firstname, surname, nickname, use_friendly_nm
+use_frequency, fullname, firstname, surname, nickname, use_friendly_nm, type, type_id
 FROM %sawm_addr_book WHERE id_user = %d AND deleted = 0 AND auto_create = 0 AND type = 0 LIMIT %d, %d';
 
 		return sprintf($sSql, $this->Prefix(), $iUserId, $iOffset, $iRequestLimit);
@@ -501,7 +511,8 @@ FROM %sawm_addr_book WHERE id_user = %d AND deleted = 0 AND auto_create = 0 AND 
 		$sSearchAdd = '';
 		if (!empty($sSearch))
 		{
-			$sSearch = $this->escapeString('%'.$sSearch.'%');
+			$sSearch = '\'%'.$this->escapeString($sSearch, true, true).'%\'';
+			
 			$sSearchAdd = sprintf(' AND (h_email <> \'\' OR b_email <> \'\' OR other_email <> \'\') '.
 ' AND (fullname LIKE %s OR firstname LIKE %s'.
 ' OR surname LIKE %s OR nickname LIKE %s'.
@@ -510,7 +521,7 @@ FROM %sawm_addr_book WHERE id_user = %d AND deleted = 0 AND auto_create = 0 AND 
 		}
 
 		$sSql = 'SELECT id_addr, str_id, view_email, primary_email, h_email, b_email, other_email,
-use_frequency, fullname, firstname, use_friendly_nm
+use_frequency, fullname, firstname, use_friendly_nm, type, type_id
 FROM %sawm_addr_book
 WHERE id_user = %d AND deleted = 0 AND type = 0%s
 ORDER BY use_frequency DESC
@@ -540,13 +551,14 @@ LIMIT %d, %d';
 INNER JOIN %sawm_addr_groups_contacts AS gr_cnt ON gr_cnt.id_addr = book.id_addr AND gr_cnt.id_group = %d',
 				$this->Prefix(), $iGroupId);
 
-			$sGroupWhere = '';
+			$sGroupWhere = ' AND (book.type = 0 OR book.type = 1)';
 		}
 
 		$sSearchAdd = '';
 		if (!empty($sSearch))
 		{
-			$sSearch = $this->escapeString('%'.$sSearch.'%');
+			$sSearch = '\'%'.$this->escapeString($sSearch, true, true).'%\'';
+
 			$sSearchAdd .= sprintf(' AND (book.fullname LIKE %s OR book.firstname LIKE %s OR book.surname LIKE %s OR book.nickname LIKE %s OR book.h_email LIKE %s OR book.b_email LIKE %s OR book.other_email LIKE %s)',
 				$sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch);
 		}
@@ -554,13 +566,13 @@ INNER JOIN %sawm_addr_groups_contacts AS gr_cnt ON gr_cnt.id_addr = book.id_addr
 		$sFirstCharacter = (0 < strlen(trim($sFirstCharacter))) ? trim($sFirstCharacter) : '';
 		if (!empty($sFirstCharacter))
 		{
-			$sSearch = $this->escapeString($sFirstCharacter.'%');
+			$sSearch = '\''.$this->escapeString($sFirstCharacter, true, true).'%\'';
 			$sSearchAdd .= sprintf(' AND (book.fullname LIKE %s OR book.firstname LIKE %s OR book.surname LIKE %s OR book.nickname LIKE %s OR book.h_email LIKE %s OR book.b_email LIKE %s OR book.other_email LIKE %s)',
 				$sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch);
 		}
 
-		$sSql = 'SELECT book.id_addr, book.str_id, book.view_email, book.primary_email, book.h_email, book.b_email, book.other_email,
-book.fullname, book.use_frequency, book.firstname, book.surname, book.use_friendly_nm
+		$sSql = 'SELECT book.id_addr, book.id_user, book.str_id, book.view_email, book.primary_email, book.h_email, book.b_email, book.other_email,
+book.fullname, book.use_frequency, book.firstname, book.surname, book.use_friendly_nm, book.type, book.type_id
 FROM %sawm_addr_book AS book%s
 WHERE book.id_user = %d AND book.deleted = 0'.$sGroupWhere.' AND book.auto_create = 0%s
 ORDER BY %s %s
@@ -596,14 +608,14 @@ INNER JOIN %sawm_addr_groups_contacts AS gr_cnt ON gr_cnt.id_group = book.id_gro
 		$sSearchAdd = '';
 		if (!empty($sSearch))
 		{
-			$sSearch = $this->escapeString('%'.$sSearch.'%');
+			$sSearch = '\'%'.$this->escapeString($sSearch, true, true).'%\'';
 			$sSearchAdd = sprintf(' AND book.group_nm LIKE %s', $sSearch);
 		}
 
 		$sFirstCharacter = (0 < strlen(trim($sFirstCharacter))) ? trim($sFirstCharacter) : '';
 		if (!empty($sFirstCharacter))
 		{
-			$sSearch = $this->escapeString($sFirstCharacter.'%');
+			$sSearch = '\''.$this->escapeString($sFirstCharacter, true, true).'%\'';
 			$sSearchAdd .= sprintf(' AND book.group_nm LIKE %s', $sSearch);
 		}
 
@@ -635,13 +647,13 @@ LIMIT %d, %d';
 INNER JOIN %sawm_addr_groups_contacts AS gr_cnt ON gr_cnt.id_addr = book.id_addr AND gr_cnt.id_group = %d',
 				$this->Prefix(), $iGroupId);
 
-			$sGroupWhere = '';
+			$sGroupWhere = ' AND (book.type = 0 OR book.type = 1)';
 		}
 
 		$sSearchAdd = '';
 		if (!empty($sSearch))
 		{
-			$sSearch = $this->escapeString('%'.$sSearch.'%');
+			$sSearch = '\'%'.$this->escapeString($sSearch, true, true).'%\'';
 			$sSearchAdd .= sprintf(' AND (fullname LIKE %s OR firstname LIKE %s OR surname LIKE %s OR nickname LIKE %s OR h_email LIKE %s OR b_email LIKE %s OR other_email LIKE %s)',
 				$sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch);
 		}
@@ -649,7 +661,7 @@ INNER JOIN %sawm_addr_groups_contacts AS gr_cnt ON gr_cnt.id_addr = book.id_addr
 		$sFirstCharacter = (0 < strlen(trim($sFirstCharacter))) ? trim($sFirstCharacter) : '';
 		if (!empty($sFirstCharacter))
 		{
-			$sSearch = $this->escapeString($sFirstCharacter.'%');
+			$sSearch = '\''.$this->escapeString($sFirstCharacter, true, true).'%\'';
 			$sSearchAdd .= sprintf(' AND (fullname LIKE %s OR firstname LIKE %s OR surname LIKE %s OR nickname LIKE %s OR h_email LIKE %s OR b_email LIKE %s OR other_email LIKE %s)',
 				$sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch);
 		}
@@ -671,14 +683,14 @@ WHERE book.id_user = %d AND book.deleted = 0'.$sGroupWhere.' AND book.auto_creat
 		$sSearchAdd = '';
 		if (!empty($sSearch))
 		{
-			$sSearch = $this->escapeString('%'.$sSearch.'%');
+			$sSearch = '\'%'.$this->escapeString($sSearch, true, true).'%\'';
 			$sSearchAdd .= sprintf(' AND (group_nm LIKE %s)', $sSearch);
 		}
 
 		$sFirstCharacter = (0 < strlen(trim($sFirstCharacter))) ? trim($sFirstCharacter) : '';
 		if (!empty($sFirstCharacter))
 		{
-			$sSearch = $this->escapeString($sFirstCharacter.'%');
+			$sSearch = '\''.$this->escapeString($sFirstCharacter, true, true).'%\'';
 			$sSearchAdd .= sprintf(' AND (group_nm LIKE %s)', $sSearch);
 		}
 
@@ -778,48 +790,6 @@ WHERE id_user = %d AND deleted = 0 AND auto_create = 0 AND type = %d';
 	}
 
 	/**
-	 * @deprecated
-	 * @param CContact $oContact
-	 * @param array $aGroupIds
-	 * @return string
-	 */
-	public function AddContactToGroup($oContact, $aGroupIds)
-	{
-		if (is_array($aGroupIds) && 0 < count($aGroupIds))
-		{
-			$sSql = 'INSERT INTO %sawm_addr_groups_contacts (id_addr, id_group) VALUES %s';
-			$aValues = array();
-
-			foreach ($aGroupIds as $mGroupId)
-			{
-				$aValues[] = '('.$oContact->IdContact.', '.$mGroupId.')';
-			}
-
-			return sprintf($sSql, $this->Prefix(), implode(', ', $aValues));
-		}
-
-		return '';
-	}
-
-	/**
-	 * @deprecated
-	 * @param mixed $mContactId
-	 * @param array $aGroupIds
-	 * @return bool
-	 */
-	public function DeleteContactFromGroup($mContactId, $aGroupIds)
-	{
-		if (is_array($aGroupIds) && 0 < count($aGroupIds))
-		{
-			$sSql = 'DELETE FROM %sawm_addr_groups_contacts WHERE id_addr = %s AND id_group IN (%s)';
-			return sprintf($sSql, $this->Prefix(),
-				$mContactId, implode(', ', array_map('intval', $aGroupIds)));
-		}
-
-		return '';
-	}
-	
-	/**
 	 * @param int $iUserId
 	 * @param int $mContactId
 	 * @return string
@@ -827,7 +797,8 @@ WHERE id_user = %d AND deleted = 0 AND auto_create = 0 AND type = %d';
 	public function GetGlobalContactById($iUserId, $mContactId)
 	{
 		return $this->getContactByWhere(sprintf('%s = %d AND %s = %s AND %s = %d',
-			$this->escapeColumn('id_user'), $iUserId, $this->escapeColumn('type_id'), $mContactId, 
-				$this->escapeColumn('type'),  EContactType::Global_));
+			$this->escapeColumn('id_user'), $iUserId,
+			$this->escapeColumn('type_id'), $mContactId,
+			$this->escapeColumn('type'),  EContactType::Global_));
 	}	
 }

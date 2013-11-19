@@ -73,8 +73,8 @@ class CApiWebmailManager extends AApiManagerWithStorage
 					$oAccountToCreate->Email = $sEmail;
 					
 					$oAccountToCreate->IncomingMailLogin = (isset($aExtValues['Login'])) ? $aExtValues['Login'] :
-						(($this->oSettings->GetConf('WebMail/UseLoginAsEmailAddress'))
-							? $sEmail : api_Utils::GetAccountNameFromEmail($sEmail));
+						(($this->oSettings->GetConf('WebMail/UseLoginWithoutDomain'))
+							? api_Utils::GetAccountNameFromEmail($sEmail) : $sEmail);
 					
 					$oAccountToCreate->IncomingMailPassword = $sPassword;
 
@@ -140,54 +140,6 @@ class CApiWebmailManager extends AApiManagerWithStorage
 	}
 
 	/**
-	 * @param array $aConnectErrors
-	 * @param int $iMailProtocol
-	 * @param string $sLogin
-	 * @param string $sPassword
-	 * @param string $sHost
-	 * @param int $iPort
-	 * @param bool $bUseSsl = false
-	 * @param bool &$sNamespace = null
-	 * @return bool
-	 */
-	public function TestConnectionWithMailServer(&$aConnectErrors,
-		$iMailProtocol, $sLogin, $sPassword, $sHost, $iPort, $bUseSsl = false, &$sNamespace = null)
-	{
-		$bResult = false;
-		$aConnectErrors = array(false, false);
-		$oMail = $this->oManager->GetSimpleMailProtocol($iMailProtocol, $sHost, $iPort, $bUseSsl);
-		if ($oMail)
-		{
-			$bResult = $oMail->Connect();
-			if ($bResult)
-			{
-				$bResult = $oMail->Login($sLogin, $sPassword);
-				if ($bResult)
-				{
-					if (null !== $sNamespace)
-					{
-						$sNamespace = $oMail->GetNamespace();
-					}
-
-					$oMail->Logout();
-				}
-				else
-				{
-					$aConnectErrors[1] = true;
-				}
-
-				$oMail->Disconnect();
-			}
-			else
-			{
-				$aConnectErrors[0] = true;
-			}
-
-		}
-		return $bResult;
-	}
-
-	/**
 	 * @return array
 	 */
 	public function GetSkinList()
@@ -222,104 +174,6 @@ class CApiWebmailManager extends AApiManagerWithStorage
 	}
 
 	/**
-	 * @param string $sValue
-	 * @return string
-	 */
-	public function loaderArrayMapAddRootPathToFileName($sValue)
-	{
-		if (API_P7)
-		{
-			return CApi::WebMailPath().'legacy/'.$sValue;
-		}
-
-		return CApi::WebMailPath().$sValue;
-	}
-
-	/**
-	 * @return array | bool
-	 */
-	public function GetJsFilesFullMap()
-	{
-		static $aJsFilesMap = null;
-		if (null === $aJsFilesMap)
-		{
-			include $this->path('classes.jsfiles-map');
-		}
-
-		if (!is_array($aJsFilesMap))
-		{
-			$aJsFilesMap = false;
-		}
-
-		return $aJsFilesMap;
-	}
-
-	/**
-	 * @param string $mType
-	 * @return array
-	 */
-	public function GetJsFilesList($mType)
-	{
-		$aResult = array();
-		if (is_array($mType))
-		{
-			foreach ($mType as $sType)
-			{
-				$aList = $this->GetJsFilesListByType($sType);
-				if (is_array($aList) && 0 < count($aList))
-				{
-					$aResult = array_merge($aResult, $aList);
-				}
-			}
-		}
-		else if (is_string($mType))
-		{
-			$aResult = $this->GetJsFilesListByType($mType);
-		}
-
-		return $aResult;
-	}
-
-	/**
-	 * @param string $sType
-	 * @return array
-	 */
-	public function GetJsFilesListByType($sType)
-	{
-		$aJsFilesMap = $this->GetJsFilesFullMap();
-		if (isset($aJsFilesMap[$sType]) && is_array($aJsFilesMap[$sType]))
-		{
-			if (CApi::GetConf('js.use-js-gzip', false) && api_Utils::IsGzipSupported())
-			{
-				return array('cache-loader.php?v='.CApi::VersionJs().'&t='.$sType);
-			}
-			else
-			{
-				return $aJsFilesMap[$sType];
-			}
-		}
-
-		return array();
-	}
-
-	/**
-	 * @param string $sType
-	 * @return string
-	 */
-	public function GetJsSource($sType)
-	{
-		$aJsFilesMap = $this->GetJsFilesFullMap();
-		if (isset($aJsFilesMap[$sType]) && is_array($aJsFilesMap[$sType]))
-		{
-			$aFiles = $aJsFilesMap[$sType];
-			$aFiles = array_map(array(&$this, 'loaderArrayMapAddRootPathToFileName'), $aFiles);
-			return $this->JsPacker($aFiles);
-		}
-
-		return '';
-	}
-
-	/**
 	 * @param string $sPassword
 	 * @return bool
 	 */
@@ -327,48 +181,6 @@ class CApiWebmailManager extends AApiManagerWithStorage
 	{
 		$sSettingsPassword = $this->oSettings->GetConf('Common/AdminPassword');
 		return $sSettingsPassword === $sPassword || md5($sPassword) === $sSettingsPassword;
-	}
-
-	/**
-	 * @param string $sLang
-	 * @param string $sType = 'webmail'
-	 * @return string
-	 */
-	public function GetLanguageJsSource($sType = 'webmail')
-	{
-		$aResult = array();
-
-		$aLangMap = null;
-		include $this->path('classes.'.(('webmail' === $sType)
-			? 'jslang-webmail-map' : 'jslang-calendar-map'));
-
-		if (is_array($aLangMap))
-		{
-			foreach ($aLangMap as $sKey => $sValue)
-			{
-				$aResult[] = "\t".$sKey.': \''.$this->jsLanguageQuot($sValue).'\'';
-			}
-
-			if ('webmail' === $sType)
-			{
-				$aLangNames = CApi::GetConf('langs.names', array());
-				foreach ($aLangNames as $sName => $sLocalName)
-				{
-					$aResult[] = "\t".'Language'.$this->jsLanguageQuot($sName).': \''.$this->jsLanguageQuot($sLocalName).'\'';
-				}
-			}
-		}
-
-		$sResutl = 'Lang = {'."\r\n".implode(",\r\n", $aResult)."\r\n".'};';
-		if ('webmail' === $sType)
-		{
-			$sResutl .= '
-
-Lang.Monthes = [Lang.Month, Lang.January, Lang.February, Lang.March, Lang.April, Lang.May, Lang.June, Lang.July, Lang.August, Lang.September, Lang.October, Lang.November, Lang.December];
-';
-		}
-
-		return $sResutl;
 	}
 
 	/**

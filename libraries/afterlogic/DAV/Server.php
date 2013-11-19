@@ -12,181 +12,182 @@ class_exists('CApi') || die();
 
 class Server extends \Sabre\DAV\Server
 {
-	protected $authBackend;
-	protected $principalBackend;
-	protected $caldavBackend;
-	protected $carddavBackend;
-	protected $lockBackend;
-	protected $remindersBackend;
-	protected $delegatesBackend;
+	/**
+	 * @var \CApiCapabilityManager
+	 */
+	private $oApiCapaManager;
+	
+	public $oAccount = null;
 
-	public $oSettings;
-	public $oApiCollaborationManager;
+	protected $aBackends = array();
 
-	public static $UseDigest;
+	protected function GetBackend($sName)
+	{
+		$Result = null;
+		if (isset($this->aBackends[$sName]))
+		{
+			$Result = $this->aBackends[$sName];
+		}
+		return $Result;
+	}
 
 	public function GetAuthBackend()
 	{
-		return $this->authBackend;
+		return $this->GetBackend('auth');
 	}
 
 	public function GetPrincipalBackend()
 	{
-		return $this->principalBackend;
+		return $this->GetBackend('principal');
 	}
 
 	public function GetCaldavBackend()
 	{
-		return $this->caldavBackend;
+		return $this->GetBackend('caldav');
 	}
 
 	public function GetCarddavBackend()
 	{
-		return $this->carddavBackend;
+		return $this->GetBackend('carddav');
 	}
 
 	public function GetLockBackend()
 	{
-		return $this->lockBackend;
+		return $this->GetBackend('lock');
 	}
 
 	public function GetRemindersBackend()
 	{
-		return $this->remindersBackend;
+		return $this->GetBackend('reminders');
 	}
 
 	public function GetDelegatesBackend()
 	{
-		return $this->delegatesBackend;
+		return $this->GetBackend('delegates');
 	}
 
 	public function __construct($baseUri = '/')
 	{
-		$this->oAccount = null;
-
-		self::$UseDigest = true;
 		$this->debugExceptions = false;
 
 		$this->setBaseUri($baseUri);
 		date_default_timezone_set('GMT');
 
 		/* Get WebMail Settings */
-		$this->oSettings =& \CApi::GetSettings();
+		$oSettings =& \CApi::GetSettings();
 
-		$sDbPrefix = $this->oSettings->GetConf('Common/DBPrefix');
+		$sDbPrefix = $oSettings->GetConf('Common/DBPrefix');
 
 		/* Database */
 		$oPdo = \CApi::GetPDO();
 
 		if ($oPdo)
 		{
-			$this->authBackend = Auth\Backend\Factory::getBackend($oPdo, $sDbPrefix);
-			$this->principalBackend = new Principal\Backend\PDO($oPdo, $sDbPrefix);
-			$this->caldavBackend = new CalDAV\Backend\PDO($oPdo, $sDbPrefix);
-			$this->carddavBackend = new CardDAV\Backend\PDO($oPdo, $sDbPrefix);
-			$this->lockBackend = new Locks\Backend\PDO($oPdo, $sDbPrefix);
-			$this->delegatesBackend = new Delegates\Backend\PDO($oPdo, $sDbPrefix);
-			$this->remindersBackend = new Reminders\Backend\PDO($oPdo, $sDbPrefix);
+			$this->aBackends = array(
+				'auth'      => Auth\Backend\Factory::getBackend($oPdo, $sDbPrefix),
+				'principal' => new Principal\Backend\PDO($oPdo, $sDbPrefix),
+				'caldav'    => new CalDAV\Backend\PDO($oPdo, $sDbPrefix),
+				'carddav'   => new CardDAV\Backend\PDO($oPdo, $sDbPrefix),
+				'lock'      => new Locks\Backend\PDO($oPdo, $sDbPrefix),
+				'delegates' => new Delegates\Backend\PDO($oPdo, $sDbPrefix),
+				'reminders' => new Reminders\Backend\PDO($oPdo, $sDbPrefix)
+			);
 
-			$this->oApiCollaborationManager = \CApi::Manager('collaboration');
+			$this->oApiCapaManager = \CApi::Manager('capability');
 
 			/* Authentication Plugin */
-			$authPlugin = new \Sabre\DAV\Auth\Plugin($this->authBackend, 'SabreDAV');
+			$authPlugin = new Auth\Plugin($this->GetAuthBackend(), 'SabreDAV');
 			$this->addPlugin($authPlugin);
 
 			/* Logs Plugin */
-			$logsPlugin = new Logs\Plugin();
-			$this->addPlugin($logsPlugin);
-
-			/* Contacts Plugin */
-			$contactsPlugin = new Contacts\Plugin();
-			$this->addPlugin($contactsPlugin);
-
-			$pubCollection = array();
-
-			/* Global Address Book */
-			$pubCollection[] = new CardDAV\GAddressBooks($authPlugin, 'globals',
-					Constants::GLOBAL_CONTACTS);
-
-			/* Public files folder */
-			$pubDir = \CApi::DataPath() . '/files';
-			if (!file_exists($pubDir))
-			{
-				mkdir($pubDir);
-			}
-			$pubDir .= '/corporate';
-			if (!file_exists($pubDir))
-			{
-				mkdir($pubDir);
-			}
-			$pubCollection[] = new FileStorage\PublicDirectory($pubDir, 'Files');
-
-			/* Directory tree */
-			$aTree = array();
-
-			$aTree[] = new \Sabre\CardDAV\AddressBookRoot($this->principalBackend, $this->carddavBackend);
-			$aTree[] = new \Sabre\CalDAV\CalendarRootNode($this->principalBackend, $this->caldavBackend);
-			if ($this->oApiCollaborationManager && $this->oApiCollaborationManager->IsCalendarSharingSupported())
-			{
-				$aTree[] = new Delegates\Root($oPdo, $this->principalBackend, $this->caldavBackend, true);
-			}
-			$oPrincipalCollection = new \Sabre\DAVACL\PrincipalCollection($this->principalBackend);
-			$oPrincipalCollection->disableListing = true;
-			$aTree[] = $oPrincipalCollection;
-			$aTree[] = new \Sabre\DAV\SimpleCollection('public', $pubCollection);
-
-			/* Private files folder */
-			if (\CApi::GetConf('labs.dav.use-files', false) !== false)
-			{
-				$sPath = \CApi::DataPath() . '/files/private';
-				if (!file_exists($sPath))
-				{
-					mkdir($sPath);
-				}
-				$aTree[] = new FileStorage\Root($this->principalBackend, $sPath);
-			}
-
-			/* Initializing server */
-			parent::__construct($aTree);
-			$this->httpResponse->setHeader("X-Server", "AfterlogicDAVServer");
+			$this->addPlugin(new Logs\Plugin());
 
 			/* DAV ACL Plugin */
 			$aclPlugin = new \Sabre\DAVACL\Plugin();
 			$mAdminPrincipal = \CApi::GetConf('labs.dav.admin-principal', false);
+			$aclPlugin->hideNodesFromListings = true;
 			if ($mAdminPrincipal !== false)
 			{
 				$aclPlugin->adminPrincipals = array($mAdminPrincipal);
 			}
-			$aclPlugin->hideNodesFromListings = true;
 			$this->addPlugin($aclPlugin);
 
-			/* Reminders Plugin */
-			$this->addPlugin(new Reminders\Plugin($this->remindersBackend));
+			$oPrincipalColl = new \Sabre\DAVACL\PrincipalCollection($this->GetPrincipalBackend());
+			$oPrincipalColl->disableListing = true;
 
-			$oApiDavManager = \CApi::Manager('dav');
-			if (isset($oApiDavManager) && $oApiDavManager->IsMobileSyncEnabled())
+			/* Directory tree */
+			$aTree = array(
+				new \Sabre\CardDAV\AddressBookRoot($this->GetPrincipalBackend(), $this->GetCarddavBackend()),
+				new \Sabre\CalDAV\CalendarRootNode($this->GetPrincipalBackend(), $this->GetCaldavBackend()),
+				$oPrincipalColl,
+				/* Global Address Book */
+				new CardDAV\GAddressBooks($authPlugin, 'gab', Constants::GLOBAL_CONTACTS),
+			);
+
+			if ($this->oApiCapaManager->IsCalendarSharingSupported())
+			{
+				array_push($aTree, new Delegates\Root($oPdo, $this->GetPrincipalBackend(), $this->GetCaldavBackend(), true));
+			}
+
+			/* Files folder */
+			if ($this->oApiCapaManager->IsFilesSupported())
+			{
+				/* Public files folder */
+				$publicDir = \CApi::DataPath() . Constants::FILESTORAGE_PATH_ROOT;
+				if (!file_exists($publicDir)) mkdir($publicDir);
+
+				$publicDir .= Constants::FILESTORAGE_PATH_CORPORATE;
+				if (!file_exists($publicDir))	mkdir($publicDir);
+				
+				$privateDir = \CApi::DataPath() . Constants::FILESTORAGE_PATH_ROOT . 
+						Constants::FILESTORAGE_PATH_PRIVATE;
+				if (!file_exists($privateDir)) mkdir($privateDir);
+
+				array_push($aTree, new \Sabre\DAV\SimpleCollection('files', array(
+							new FS\RootPrivate($authPlugin, $privateDir),
+							new FS\RootPublic($authPlugin, $publicDir)
+						)
+					)
+				);
+				
+				$this->addPlugin(new FS\Plugin());
+
+				// Automatically guess (some) contenttypes, based on extesion
+				$this->addPlugin(new \Sabre\DAV\Browser\GuessContentType());				
+			}
+
+			/* Initializing server */
+			parent::__construct($aTree);
+			$this->httpResponse->setHeader("X-Server", Constants::DAV_SERVER_NAME);
+			
+			/* Reminders Plugin */
+			$this->addPlugin(new Reminders\Plugin($this->GetRemindersBackend()));
+
+			/* Contacts Plugin */
+			$this->addPlugin(new Contacts\Plugin());
+
+			if ($this->oApiCapaManager->IsMobileSyncSupported())
 			{
 				/* CalDAV Plugin */
 				$this->addPlugin(new \Sabre\CalDAV\Plugin());
 
 				/* CardDAV Plugin */
 				$this->addPlugin(new \Sabre\CardDAV\Plugin());
+				
+				/* ICS Export Plugin */
+				$this->addPlugin(new \Sabre\CalDAV\ICSExportPlugin());
+
+				/* VCF Export Plugin */
+				$this->addPlugin(new \Sabre\CardDAV\VCFExportPlugin());
 			}
 
 			/* Calendar Delegation Plugin */
-			$this->addPlugin(new Delegates\Plugin($this->delegatesBackend));
-
-			/* Export Plugins */
-			if (\CApi::GetConf('labs.dav.use-export-plugin', false) !== false)
-			{
-				$this->addPlugin(new \Sabre\CalDAV\ICSExportPlugin());
-				$this->addPlugin(new \Sabre\CardDAV\VCFExportPlugin());
-			}
+			$this->addPlugin(new Delegates\Plugin($this->GetDelegatesBackend()));
 
 			/* HTML Frontend Plugin */
 			if (\CApi::GetConf('labs.dav.use-browser-plugin', false) !== false)
 			{
-				$this->addPlugin(new \Sabre\DAV\Browser\Plugin(true, true));
+				$this->addPlugin(new \Sabre\DAV\Browser\Plugin(true, false));
 			}
 
 			/* Locks Plugin */
@@ -195,32 +196,8 @@ class Server extends \Sabre\DAV\Server
 			$this->subscribeEvent('beforeGetProperties', array($this, 'beforeGetProperties'), 90);
 		}
     }
-
-	/**
-	 * @param string $path
-	 * @param \Sabre\DAV\INode $node
-	 * @param array $requestedProperties
-	 * @param array $returnedProperties
-	 * @return void
-	 */
-	function beforeGetProperties($path, \Sabre\DAV\INode $node, &$requestedProperties, &$returnedProperties)
-	{
-		$oAccount = $this->getCurrentAccount();
-		if (isset($oAccount))
-		{
-			$carddavPlugin = $this->getPlugin('Sabre\CardDAV\Plugin');
-			if (null !== $oAccount && $oAccount->User->AllowContacts &&
-					$oAccount->User->GetCapa('GAB') &&
-					isset($carddavPlugin) &&
-					$this->oApiCollaborationManager &&
-					$this->oApiCollaborationManager->IsContactsGlobalSupported())
-			{
-				$carddavPlugin->directories = array('public/globals');
-			}
-		}
-	}
 	
-	function getCurrentAccount()
+	public function getAccount()
 	{
 		if (null === $this->oAccount)
 		{
@@ -228,6 +205,7 @@ class Server extends \Sabre\DAV\Server
 			if (isset($authPlugin))
 			{
 				$sUser = $authPlugin->getCurrentUser();
+
 				if (!empty($sUser))
 				{
 					$apiUsersManager = \CApi::Manager('users');
@@ -236,5 +214,26 @@ class Server extends \Sabre\DAV\Server
 			}
 		}
 		return $this->oAccount;
+	}	
+
+	/**
+	 * @param string $path
+	 * @param \Sabre\DAV\INode $node
+	 * @param array $requestedProperties
+	 * @param array $returnedProperties
+	 * @return void
+	 */
+	public function beforeGetProperties($path, \Sabre\DAV\INode $node, &$requestedProperties, &$returnedProperties)
+	{
+		$oAccount = $this->getAccount();
+		if (isset($oAccount)/* && $node->getName() === 'root'*/)
+		{
+			$carddavPlugin = $this->getPlugin('Sabre\CardDAV\Plugin');
+			if (null !== $oAccount && isset($carddavPlugin) &&
+				$this->oApiCapaManager->IsGlobalContactsSupported($oAccount, false))
+			{
+				$carddavPlugin->directories = array('gab');
+			}
+		}
 	}
 }

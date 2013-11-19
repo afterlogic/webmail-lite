@@ -1,5 +1,5 @@
 <div class="panels" data-bind="splitter: {name: 'groups', sizeLeft: 200, minLeft: 20, minRight: 40, resizeToWidth: true}">
-	<div class="panel groups" data-splitter = "groups">
+	<div class="panel groups" data-splitter="groups">
 		<div class="resize_handler"></div>
 		<div class="panel_content">
 			<div class="toolbar"><span class="content"></span></div>
@@ -16,7 +16,7 @@
 				<div class="middle_bar" data-bind="template: {name: 'Contacts_ContactList'}"></div>
 			</div>
 		</div>
-		<div class="panel contact_viewer">
+		<div class="panel item_viewer contact_viewer">
 			<div class="panel_content">
 				<!--<div data-bind="visible: loadingViewPane">loading ...</div>-->
 				<div class="middle_bar contact" data-bind="visible: selectedContact() && !selectedContact().edited(), with: selectedContact">

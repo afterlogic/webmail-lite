@@ -26,7 +26,7 @@ class CApiIos2Manager extends AApiManager
 	 */
 	public function __construct(CApiGlobalManager &$oManager, $sForcedStorage = '')
 	{
-		parent::__construct('ios', $oManager);
+		parent::__construct('ios2', $oManager);
 
 		/*
 		 * @var $oApiUsersManager CApiUsersManager
@@ -215,7 +215,7 @@ class CApiIos2Manager extends AApiManager
 				'PayloadOrganization'		=> $oAccount->Domain->SiteName,
 				'PayloadDescription'		=> $oAccount->Domain->SiteName.' Mobile',
 				'PayloadDisplayName'		=> $oAccount->Domain->SiteName.' Mobile Profile',
-//				'ConsentText'				=> 'AfterLogic WebMail Profile @ConsentText',
+//				'ConsentText'				=> 'AfterLogic Profile @ConsentText',
 			);
 
 			$oArrayElement = $oXmlDocument->createElement('array');

@@ -8,10 +8,14 @@
 
 /**
  * @property int $IdUser
+ * @property int $IdSubscription
+ * @property int $IdHelpdeskUser
  * @property int $MailsPerPage
  * @property int $ContactsPerPage
  * @property int $AutoCheckMailInterval
+ * @property int $CreatedTime
  * @property int $LastLogin
+ * @property int $LastLoginNow
  * @property int $LoginsCount
  * @property string $DefaultSkin
  * @property string $DefaultLanguage
@@ -26,19 +30,24 @@
  * @property string $Question2
  * @property string $Answer1
  * @property string $Answer2
- * @property bool $AllowWebmail
- * @property bool $AllowContacts
- * @property bool $AllowCalendar
- * @property bool $UseCapa
  * @property string $Capa
- * @property mixed $CustomFields
  * @property string $ClientTimeZone
+ * @property bool $UseThreads
+ * @property bool $AllowHelpdeskNotifications
+ * @property mixed $CustomFields
+ * @property string $SipImpi
+ * @property string $SipPassword
  *
  * @package Users
  * @subpackage Classes
  */
 class CUser extends api_AContainer
 {
+	/**
+	 * @var CSubscription
+	 */
+	private $oSubCache;
+
 	/**
 	 * @return void
 	 */
@@ -51,16 +60,23 @@ class CUser extends api_AContainer
 		$iSaveMail = ESaveMail::Always !== $iSaveMail
 			? $oSettings->GetConf('WebMail/SaveMail') : ESaveMail::DefaultOn;
 
+		$this->oSubCache = null;
+		
 		$this->__USE_TRIM_IN_STRINGS__ = true;
+		$this->SetUpper(array('Capa'));
 
 		$this->SetDefaults(array(
 			'IdUser' => 0,
+			'IdSubscription' => 0,
+			'IdHelpdeskUser' => 0,
 
 			'MailsPerPage'			=> $oDomain->MailsPerPage,
 			'ContactsPerPage'		=> $oDomain->ContactsPerPage,
 			'AutoCheckMailInterval'	=> $oDomain->AutoCheckMailInterval,
 
+			'CreatedTime'	=> 0,
 			'LastLogin'		=> 0,
+			'LastLoginNow'	=> 0,
 			'LoginsCount'	=> 0,
 
 			'DefaultSkin'		=> $oDomain->DefaultSkin,
@@ -80,12 +96,13 @@ class CUser extends api_AContainer
 			'Answer1'	=> '',
 			'Answer2'	=> '',
 
-			'AllowWebmail'		=> $oDomain->AllowWebMail,
-			'AllowContacts'		=> $oDomain->AllowContacts,
-			'AllowCalendar'		=> $oDomain->AllowCalendar,
+			'SipImpi'		=> '',
+			'SipPassword'	=> '',
 
 			'Capa'				=> '',
 			'ClientTimeZone'	=> '',
+			'UseThreads'		=> $oDomain->UseThreads,
+			'AllowHelpdeskNotifications' => false,
 			'CustomFields'		=> ''
 		));
 
@@ -99,21 +116,17 @@ class CUser extends api_AContainer
 	 */
 	public function GetCapa($sCapaName)
 	{
-		if (!CApi::GetConf('capa', false))
+		if (!CApi::GetConf('capa', false) || '' === $this->Capa ||
+			0 === $this->IdSubscription)
 		{
 			return true;
 		}
 
-		$sCapaName = preg_replace('/[^A-Z0-9_]/', '', strtoupper($sCapaName));
+		$sCapaName = preg_replace('/[^A-Z0-9_=]/', '', strtoupper($sCapaName));
 
 		$aCapa = explode(' ', $this->Capa);
 
-		if (!in_array('ALL', $aCapa))
-		{
-			return in_array($sCapaName, $aCapa);
-		}
-
-		return true;
+		return in_array($sCapaName, $aCapa);
 	}
 
 	/**
@@ -121,7 +134,7 @@ class CUser extends api_AContainer
 	 */
 	public function AllowAllCapas()
 	{
-		$this->Capa = 'ALL';
+		$this->Capa = '';
 	}
 
 	/**
@@ -129,34 +142,124 @@ class CUser extends api_AContainer
 	 */
 	public function RemoveAllCapas()
 	{
-		$this->Capa = '';
+		$this->Capa = ECapa::NO;
 	}
 
 	/**
+	 * @param CTenant $oTenant
 	 * @param string $sCapaName
 	 * @param bool $bValue
 	 *
-	 * @return void
+	 * @return bool
 	 */
-	public function SetCapa($sCapaName, $bValue)
+	public function SetCapa($oTenant, $sCapaName, $bValue)
 	{
-		$sCapaName = preg_replace('/[^A-Z0-9_]/', '', strtoupper($sCapaName));
-
-		$aCapa = explode(' ', $this->Capa);
-
-		if ($bValue)
+		if (!CApi::GetConf('capa', false) || !$oTenant)
 		{
-			$aCapa[] = $sCapaName;
+			return true;
+		}
+
+		$oSub = null;
+		if (0 < $this->IdSubscription)
+		{
+			if ($this->oSubCache && $this->IdSubscription === $this->oSubCache->IdSubscription)
+			{
+				$oSub = $this->oSubCache;
+			}
+			else
+			{
+				$oApiSubscriptionsManager = /* @var $oApiSubscriptionsManager CApiSubscriptionsManager */ CApi::Manager('subscriptions');
+				if ($oApiSubscriptionsManager)
+				{
+					$oSub = $oApiSubscriptionsManager->GetSubscriptionById($this->IdSubscription);
+					$oSub = $oSub && $this->IdSubscription === $oSub->IdSubscription ? $oSub : null;
+					if ($oSub)
+					{
+						$this->oSubCache = $oSub;
+					}
+				}
+			}
+		}
+
+		$sSubCapa = $oSub ? $oSub->Capa : $oTenant->Capa;
+
+		$sCapaName = preg_replace('/[^A-Z0-9_]/', '', strtoupper($sCapaName));
+		if ('' === $sSubCapa || false !== strpos($sSubCapa, $sCapaName))
+		{
+			if ($bValue && '' === $this->Capa)
+			{
+				$this->Capa = '';
+			}
+			else if ($bValue && 0 < strlen($this->Capa))
+			{
+				$aCapa = explode(' ', $this->Capa);
+				$aCapa[] = $sCapaName;
+				$this->Capa = 0 < count($aCapa) ? implode(' ', $aCapa) : ECapa::NO;
+			}
+			else if (!$bValue && '' === $this->Capa)
+			{
+				$aCapa = array();
+				if ('' === $sSubCapa)
+				{
+					$oApiTenantsManager = /* @var $oApiTenantsManager CApiTenantsManager */ CApi::Manager('tenants');
+					if ($oApiTenantsManager)
+					{
+						$oTenant = $oApiTenantsManager->GetTenantById($oTenant->IdTenant);
+						if ($oTenant)
+						{
+							if ('' === $oTenant->Capa)
+							{
+								$oApiCapabilityManager = /* @var $oApiCapabilityManager CApiCapabilityManager */ CApi::Manager('capability');
+								if ($oApiCapabilityManager)
+								{
+									$aCapa = explode(' ', $oApiCapabilityManager->GetSystemCapaAsString());
+								}
+							}
+							else
+							{
+								$aCapa = explode(' ', $oTenant->Capa);
+							}
+						}
+					}
+				}
+				else
+				{
+					$aCapa = explode(' ', $sSubCapa);
+				}
+
+				$aCapa = array_diff($aCapa, array($sCapaName));
+				$this->Capa = 0 < count($aCapa) ? implode(' ', $aCapa) : ECapa::NO;
+			}
+			else if (!$bValue && 0 < strlen($this->Capa))
+			{
+				$aCapa = explode(' ', $this->Capa);
+				$aCapa = array_diff($aCapa, array($sCapaName));
+				$this->Capa = 0 < count($aCapa) ? implode(' ', $aCapa) : ECapa::NO;
+			}
 		}
 		else
 		{
-			$aCapa = array_diff($aCapa, array($sCapaName));
+			return false;
 		}
 
-		$aCapa = array_unique($aCapa);
-		$aCapa = array_values($aCapa);
+		if ('' !== $this->Capa && ECapa::NO !== $this->Capa)
+		{
+			$aResult = array();
+			$aCapa = explode(' ', $this->Capa);
+			foreach ($aCapa as $sItem)
+			{
+				if ('' === $sSubCapa || false !== strpos($sSubCapa, $sItem))
+				{
+					$aResult[] = $sItem;
+				}
+			}
 
-		$this->Capa = 0 < count($aCapa) ? implode(' ', $aCapa) : '';
+			$aResult = array_unique($aResult);
+			$aResult = array_values($aResult);
+			$this->Capa = 0 < count($aResult) ? implode(' ', $aResult) : ECapa::NO;
+		}
+
+		return true;
 	}
 
 	/**
@@ -189,13 +292,17 @@ class CUser extends api_AContainer
 	{
 		return array(
 
-			'IdUser' => array('int', 'id_user'),
+			'IdUser'			=> array('int', 'id_user'),
+			'IdSubscription'	=> array('int', 'id_subscription'),
+			'IdHelpdeskUser'	=> array('int', 'id_helpdesk_user'),
 
 			'MailsPerPage'			=> array('int', 'msgs_per_page'),
 			'ContactsPerPage'		=> array('int', 'contacts_per_page'),
 			'AutoCheckMailInterval'	=> array('int', 'auto_checkmail_interval'),
 
+			'CreatedTime'		=> array('datetime', 'created_time'),
 			'LastLogin'			=> array('datetime', 'last_login', true, false),
+			'LastLoginNow'		=> array('datetime', 'last_login_now', true, false),
 			'LoginsCount'		=> array('int', 'logins_count', true, false),
 
 			'DefaultSkin'		=> array('string(255)', 'def_skin'),
@@ -216,9 +323,11 @@ class CUser extends api_AContainer
 			'Answer1'	=> array('string(255)', 'answer_1'),
 			'Answer2'	=> array('string(255)', 'answer_2'),
 
-			'AllowWebmail'		=> array('bool'),
-			'AllowContacts'		=> array('bool'),
-			'AllowCalendar'		=> array('bool'),
+			'SipImpi'			=> array('string', 'sip_impi'),
+			'SipPassword'		=> array('password', 'sip_password'),
+
+			'UseThreads'		=> array('bool', 'use_threads'),
+			'AllowHelpdeskNotifications'	=> array('bool', 'allow_helpdesk_notifications'),
 
 			'Capa'				=> array('string(255)', 'capa'),
 			'CustomFields'		=> array('serialize', 'custom_fields')

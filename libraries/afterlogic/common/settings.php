@@ -48,14 +48,10 @@ class api_Settings
 		$this->sPath = $sSettingsPath;
 
 		$this->initDefaultValues();
-		if (!$this->initCachedValues())
+		
+		if (!$this->LoadFromXml($this->sPath.api_Settings::XML_FILE_NAME))
 		{
-			if (!$this->LoadFromXml($this->sPath.api_Settings::XML_FILE_NAME))
-			{
-				throw new CApiBaseException(Errs::Main_SettingLoadError);
-			}
-
-			$this->saveCacheValues();
+			throw new CApiBaseException(Errs::Main_SettingLoadError);
 		}
 
 		if (!api_Utils::HasSslSupport())
@@ -70,18 +66,6 @@ class api_Settings
 		}
 
 		$this->SetConf('WebMail/IncomingMailProtocol', EMailProtocol::IMAP4);
-
-		if (CApi::IsValidOutdatedPhpVersion())
-		{
-			$this->SetConf('Common/EnableMobileSync', false);
-			$this->SetConf('WebMail/ExternalHostNameOfLocalImap', '');
-			$this->SetConf('WebMail/ExternalHostNameOfLocalSmtp', '');
-			$this->SetConf('WebMail/ExternalHostNameOfDAVServer', '');
-			$this->SetConf('WebMail/ActiveSync', false);
-			$this->SetConf('WebMail/ExternalHostNameOfActiveSyncServer', '');
-			$this->SetConf('Calendar/AllowCalendar', false);
-			$this->SetConf('Calendar/AllowReminders', false);
-		}
 	}
 
 	/**
@@ -206,68 +190,7 @@ class api_Settings
 			}
 		}
 
-		$bResult = (bool) $oXmlDocument->SaveToFile($this->sPath.api_Settings::XML_FILE_NAME);
-		$this->clearCachedValues();
-		return $bResult;
-	}
-
-	/**
-	 * @return bool
-	 */
-	protected function clearCachedValues()
-	{
-		if (CApi::GetConf('labs.cache.settings-xml-in-php-file', false))
-		{
-			@unlink($this->sPath.api_Settings::XML_FILE_NAME.'.cache.php');
-		}
-	}
-	/**
-	 * @return bool
-	 */
-	protected function initCachedValues()
-	{
-		$sResult = false;
-		if (CApi::GetConf('labs.cache.settings-xml-in-php-file', false))
-		{
-			if (@file_exists($this->sPath.api_Settings::XML_FILE_NAME.'.cache.php'))
-			{
-				$this->aContainer = include $this->sPath.api_Settings::XML_FILE_NAME.'.cache.php';
-				$sResult = true;
-			}
-		}
-		return $sResult;
-	}
-
-	/**
-	 * @return bool
-	 */
-	protected function saveCacheValues()
-	{
-		if (CApi::GetConf('labs.cache.settings-xml-in-php-file', false))
-		{
-			$aCache = array();
-			foreach ($this->aContainer as $sKey => $mValue)
-			{
-				if (is_bool($mValue))
-				{
-					$mValue = $mValue ? 'true' : 'false';
-				}
-				else if (is_integer($mValue))
-				{
-					$mValue = $mValue;
-				}
-				else
-				{
-					$mValue = '"'.strtr($mValue, array('\\' => '\\\\', '"' => '\\"')).'"';
-				}
-
-				$aCache[] = '"'.$sKey.'" => '.$mValue;
-			}
-
-			return (false !== @file_put_contents($this->sPath.api_Settings::XML_FILE_NAME.'.cache.php', '<'.'?php return array('.implode(', ', $aCache).');'));
-		}
-
-		return true;
+		return (bool) $oXmlDocument->SaveToFile($this->sPath.api_Settings::XML_FILE_NAME);;
 	}
 
 	/**
@@ -312,9 +235,8 @@ class api_Settings
 			'webmail/layout'							=> 'ELayout',
 			'webmail/savemail'							=> 'ESaveMail',
 			'webmail/loginformtype'						=> 'ELoginFormType',
-			'contacts/personaladdressbook/mode'			=> 'EContactsPABMode',
-			'contacts/globaladdressbook/mode'			=> 'EContactsGABMode',
-			'contacts/globaladdressbook/sql/visibility'	=> 'EContactsGABVisibility',
+			'webmail/loginsignmetype'					=> 'ELoginSignMeType',
+			'contacts/globaladdressbookvisibility'		=> 'EContactsGABVisibility',
 			'calendar/weekstartson'						=> 'ECalendarWeekStartOn',
 			'calendar/defaulttab'						=> 'ECalendarDefaultTab',
 		);
@@ -482,7 +404,7 @@ class api_Settings
 		$this->aMap = array(
 
 			// Common
-			'Common/SiteName' => array('AfterLogic WebMail', 'string',
+			'Common/SiteName' => array('AfterLogic', 'string',
 				'Default title that will be shown in browser\'s header (Default domain settings).'),
 
 			'Common/LicenseKey' => array('', 'string',
@@ -534,29 +456,23 @@ class api_Settings
 			'WebMail/AutoCheckMailInterval' => array(0, 'int'),
 			'WebMail/DefaultSkin' => array(API_DEFAULT_SKIN, 'string'),
 			'WebMail/MailsPerPage' => array(20, 'int'),
-			'WebMail/EnableMailboxSizeLimit' => array(false, 'bool'),
-			'WebMail/MailboxSizeLimit' => array(0, 'int'),
 			'WebMail/AllowUsersChangeInterfaceSettings' => array(true, 'bool'),
 			'WebMail/AllowUsersChangeEmailSettings' => array(true, 'bool'),
 			'WebMail/EnableAttachmentSizeLimit' => array(false, 'bool'),
 			'WebMail/AttachmentSizeLimit' => array(0, 'int'),
+			'WebMail/ImageUploadSizeLimit' => array(0, 'int'),
 			'WebMail/AllowLanguageOnLogin' => array(true, 'bool'),
 			'WebMail/FlagsLangSelect' => array(false, 'bool'),
 
 			'WebMail/LoginFormType' => array(ELoginFormType::Email, 'spec'),
-			'WebMail/UseLoginAsEmailAddress' => array(true, 'bool'),
-
+			'WebMail/LoginSignMeType' => array(ELoginSignMeType::DefaultOn, 'spec'),
 			'WebMail/LoginAtDomainValue' => array('', 'string'),
-			'WebMail/DefaultDomainValue' => array('', 'string'),
+			'WebMail/UseLoginWithoutDomain' => array(false, 'bool'),
 
-			'WebMail/UseAdvancedLogin' => array(false, 'bool'),
-
-			'WebMail/UseCaptcha' => array(true, 'bool'),
 			'WebMail/UseReCaptcha' => array(false, 'bool'),
 			'WebMail/AllowNewUsersRegister' => array(false, 'bool'),
 			'WebMail/AllowUsersAddNewAccounts' => array(true, 'bool'),
 			'WebMail/AllowIdentities' => array(false, 'bool'),
-			'WebMail/StoreMailsInDb' => array(false, 'bool'),
 			'WebMail/AllowInsertImage' => array(true, 'bool'),
 			'WebMail/AllowBodySize' => array(false, 'bool'),
 			'WebMail/MaxBodySize' => array(600, 'int'),  //TODO Magic
@@ -565,15 +481,13 @@ class api_Settings
 			'WebMail/AlwaysShowImagesInMessage' => array(false, 'bool'),
 			'WebMail/SaveMail' => array(ESaveMail::Always, 'spec'),
 			'WebMail/IdleSessionTimeout' => array(0, 'int'),
-			'WebMail/UseSortImapForDateMode' => array(false, 'bool'),
+			'WebMail/UseSortImapForDateMode' => array(true, 'bool'),
+			'WebMail/UseThreadsIfSupported' => array(true, 'bool'),
 			'WebMail/DetectSpecialFoldersWithXList' => array(true, 'bool'),
 			'WebMail/EnableLastLoginNotification' => array(false, 'bool'),
 
 			'WebMail/ExternalHostNameOfLocalImap' => array('', 'string'),
 			'WebMail/ExternalHostNameOfLocalSmtp' => array('', 'string'),
-
-			'WebMail/ActiveSync' => array(false, 'bool'),
-			'WebMail/ExternalHostNameOfActiveSyncServer' => array('', 'string'),
 			'WebMail/ExternalHostNameOfDAVServer' => array('', 'string'),
 
 			// Calendar
@@ -589,10 +503,31 @@ class api_Settings
 			// Contacts
 			'Contacts/AllowContacts' => array(true, 'bool'),
 			'Contacts/ContactsPerPage' => array(20, 'int'),
-			'Contacts/PersonalAddressBook/Mode' => array(EContactsPABMode::Sql, 'spec'),
 			'Contacts/ShowGlobalContactsInAddressBook' => array(false, 'bool'),
-			'Contacts/GlobalAddressBook/Mode' => array(EContactsGABMode::Sql, 'spec'),
-			'Contacts/GlobalAddressBook/Sql/Visibility' => array(EContactsGABVisibility::DomainWide, 'spec')
+			'Contacts/GlobalAddressBookVisibility' => array(EContactsGABVisibility::DomainWide, 'spec'),
+
+			// Files
+			'Files/AllowFiles' => array(true, 'bool'),
+
+			// Sip
+			'Sip/AllowSip' => array(false, 'bool'),
+			'Sip/Realm' => array('', 'string'),
+			'Sip/WebsocketProxyUrl' => array('', 'string'),
+			'Sip/OutboundProxyUrl' => array('', 'string'),
+			'Sip/CallerID' => array('', 'string'),
+			
+			// Twilio
+			'Twilio/AllowTwilio' => array(false, 'bool'),
+			'Twilio/AccountSID' => array('', 'string'),
+			'Twilio/AuthToken' => array('', 'string'),
+			'Twilio/AppSID' => array('', 'string'),
+
+			// Helpdesk
+			'Helpdesk/AllowHelpdesk' => array(true, 'bool'),
+			'Helpdesk/AdminEmailAccount' => array('', 'string'),
+			'Helpdesk/ClientIframeUrl' => array('', 'string'),
+			'Helpdesk/AgentIframeUrl' => array('', 'string'),
+			'Helpdesk/SiteName' => array('', 'string')
 		);
 
 		foreach ($this->aMap as $sKey => $aField)

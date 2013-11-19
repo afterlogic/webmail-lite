@@ -15,7 +15,7 @@ class CApiMailMessageCollection extends \MailSo\Base\Collection
 	/**
 	 * @var int
 	 */
-	public $MessageSearchCount;
+	public $MessageResultCount;
 
 	/**
 	 * @var string
@@ -36,6 +36,11 @@ class CApiMailMessageCollection extends \MailSo\Base\Collection
 	 * @var string
 	 */
 	public $Search;
+
+	/**
+	 * @var string
+	 */
+	public $Filters;
 
 	/**
 	 * @var array
@@ -71,12 +76,13 @@ class CApiMailMessageCollection extends \MailSo\Base\Collection
 
 		$this->MessageCount = 0;
 		$this->MessageUnseenCount = 0;
-		$this->MessageSearchCount = 0;
+		$this->MessageResultCount = 0;
 
 		$this->FolderName = '';
 		$this->Offset = 0;
 		$this->Limit = 0;
 		$this->Search = '';
+		$this->Filters = '';
 
 		$this->UidNext = '';
 		$this->FolderHash = '';

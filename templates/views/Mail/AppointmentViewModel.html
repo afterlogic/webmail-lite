@@ -1,25 +1,28 @@
 <div class="fields">
-	<div class="row">
+	<div class="row fluid calendar" data-bind="visible: visibleCalendarRow">
 		<span class="label" data-i18n="MESSAGE/APPOINTMENT_CALENDAR" data-bind="i18n: 'text'"></span>:
-		<select class="value input" data-bind="visible: !calendarIsChosen() && calendars().length > 1, options: calendars,
-				optionsValue: 'id', optionsText: 'name', value: selectedCalendar"></select>
-		<span data-bind="visible: calendarIsChosen, text: chosenCalendarName"></span>
-		<span data-bind="visible: calendars().length === 1, text: firstCalendarName()"></span>
+		<span class="value">
+			<select class="value input" data-bind="visible: visibleCalendarDropdown, options: calendars,
+					optionsValue: 'id', optionsText: 'name', value: selectedCalendar"></select>
+			<span data-bind="visible: visibleCalendarName, text: chosenCalendarName"></span>
+			<span data-bind="visible: visibleFirstCalendarName, text: firstCalendarName()"></span>
+		</span>
 	</div>
-	<div class="row" data-bind="visible: location() !== ''">
+	<div class="row fluid location" data-bind="visible: location() !== ''">
 		<span class="label" data-i18n="MESSAGE/APPOINTMENT_LOCATION" data-bind="i18n: 'text'"></span>:
 		<span class="value" data-bind="text: location"></span>
 	</div>
-	<div class="row">
+	<div class="row fluid when">
 		<span class="label" data-i18n="MESSAGE/APPOINTMENT_WHEN" data-bind="i18n: 'text'"></span>:
 		<span class="value" data-bind="text: when"></span>
 	</div>
-	<div class="row description" data-bind="visible: description() !== ''">
+	<div class="row fluid description" data-bind="visible: description() !== ''">
 		<span class="label" data-i18n="MESSAGE/APPOINTMENT_DESCRIPTION" data-bind="i18n: 'text'"></span>:
 		<span class="value" data-bind="html: description"></span>
 	</div>
 	<div class="row">
-		<span class="buttons" data-bind="visible: isRequestType, css: {'touched': isAccepted() || isTentative() || isDeclined()}">
+		<span class="buttons" data-bind="visible: isRequestType, 
+			  css: {'touched': isAccepted() || isTentative() || isDeclined(), 'animation': animation}">
 			<span class="button" data-i18n="MESSAGE/APPOINTMENT_BUTTON_ACCEPT" 
 			   data-bind="i18n: 'text', css: {'state': isAccepted}, click: acceptAppointment"></span>
 			<span class="button" data-i18n="MESSAGE/APPOINTMENT_BUTTON_TENTATIVE" 

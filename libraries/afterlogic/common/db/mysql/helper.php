@@ -16,18 +16,28 @@ class CMySqlHelper implements IDbHelper
 {
 	/**
 	 * @param string $sValue
+	 * @param bool $bWithOutQuote = false
+	 * @param bool $bSearch = false
 	 * @return string
 	 */
-	public function EscapeString($sValue, $bWithOutQuote = false)
+	public function EscapeString($sValue, $bWithOutQuote = false, $bSearch = false)
 	{
+		$sResult = '';
 		if ($bWithOutQuote)
 		{
-			return addslashes($sValue);
+			$sResult = addslashes($sValue);
 		}
 		else
 		{
-			return 0 === strlen($sValue) ? '\'\'' : '\''.addslashes($sValue).'\'';
+			$sResult = 0 === strlen($sValue) ? '\'\'' : '\''.addslashes($sValue).'\'';
 		}
+
+		if ($bSearch)
+		{
+			$sResult = str_replace(array("%", "_"), array("\\%", "\\_"), $sResult);
+		}
+
+		return $sResult;
 	}
 
 	/**

@@ -177,6 +177,7 @@ class Email
 
 		$sEmail = \trim(\trim($sEmail), '<>');
 		$sName = \trim(\trim($sName), '"');
+		$sName = \trim($sName, '\'');
 		$sComment = \trim(\trim($sComment), '()');
 
 		// Remove backslash

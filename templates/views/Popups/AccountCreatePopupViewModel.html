@@ -1,4 +1,4 @@
-<div class="mask"></div>
+<div class="mask" data-bind="click: onCancelClick"></div>
 <div class="popup_panel">
 	<span class="close" data-bind="click: onCancelClick"></span>
 	<span class="title" data-i18n="SETTINGS/ACCOUNTS_ADD_NEW_ACCOUNT_TITLE" data-bind="i18n: 'text'"></span>
@@ -59,9 +59,10 @@
 		</div>
 
 		<div class="buttons">
-			<span class="button save" data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', click: onSaveClick"></span>
+			<span class="button save" data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', click: onSaveClick, visible: !loading()"></span>
+			<span class="button save" data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', click: onSaveClick, visible: loading()"></span>
 			<span class="button cancel" data-i18n="SETTINGS/BUTTON_CANCEL" data-bind="i18n: 'text', click: onCancelClick"></span>
 		</div>
 	</div>
 </div>
-<span class="helper"></span>	
+<span class="helper"></span>

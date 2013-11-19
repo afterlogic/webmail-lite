@@ -11,7 +11,7 @@
 
 	// Example of logging into WebMail account using email and password for incorporating into another web application
 
-	// utilizing WebMail Pro API
+	// utilizing API
 	include_once __DIR__.'/../libraries/afterlogic/api.php';
 
 	if (class_exists('CApi') && CApi::IsValid())
@@ -45,7 +45,7 @@
 					echo '<b>'.$oAccount->Email.':</b><br />';
 					echo '<pre>';
 					echo 'Folder:   '.$sFolder."\n";
-					echo 'Count:    '.$oCollection->MessageCount."\n"; // $oCollection->MessageSearchCount
+					echo 'Count:    '.$oCollection->MessageCount."\n"; // $oCollection->MessageResultCount
 					echo 'Unread:   '.$oCollection->MessageUnseenCount."\n";
 					echo 'List:   '."\n";
 
@@ -75,5 +75,5 @@
 	}
 	else
 	{
-		echo 'WebMail API isn\'t available';
+		echo 'AfterLogic API isn\'t available';
 	}

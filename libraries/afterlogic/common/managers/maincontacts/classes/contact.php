@@ -10,6 +10,8 @@
  * @property mixed $IdContact
  * @property string $IdContactStr
  * @property int $IdUser
+ * @property int $IdDomain
+ * @property int $IdTenant
  * @property array $GroupsIds
  * @property int $Type
  * @property string $IdTypeLink
@@ -21,6 +23,8 @@
  * @property string $FirstName
  * @property string $LastName
  * @property string $NickName
+ * @property string $Skype
+ * @property string $Facebook
  * @property string $HomeEmail
  * @property string $HomeStreet
  * @property string $HomeCity
@@ -52,6 +56,7 @@
  * @property int $BirthdayYear
  * @property bool $ReadOnly
  * @property bool $Global
+ * @property bool $ItsMe
  * @property string $ETag
  *
  * @package Maincontacts
@@ -81,6 +86,8 @@ class CContact extends api_AContainer
 			'IdContact'		=> '',
 			'IdContactStr'	=> '',
 			'IdUser'		=> 0,
+			'IdDomain'		=> 0,
+			'IdTenant'		=> 0,
 
 			'GroupsIds'		=> array(),
 
@@ -99,6 +106,8 @@ class CContact extends api_AContainer
 			'FirstName'		=> '',
 			'LastName'		=> '',
 			'NickName'		=> '',
+			'Skype'			=> '',
+			'Facebook'		=> '',
 
 			'HomeEmail'		=> '',
 			'HomeStreet'	=> '',
@@ -135,6 +144,7 @@ class CContact extends api_AContainer
 
 			'ReadOnly'			=> false,
 			'Global'			=> false,
+			'ItsMe'				=> false,
 
 			'ETag'				=> ''
 		));
@@ -175,9 +185,14 @@ class CContact extends api_AContainer
 	{
 		parent::InitByDbRow($oRow);
 
-		if (!$this->ReadOnly && EContactType::Global_ === $this->Type)
+		if (!$this->ReadOnly && (EContactType::Global_ === $this->Type || EContactType::GlobalAccounts === $this->Type))
 		{
 			$this->ReadOnly = true;
+		}
+		
+		if (EContactType::GlobalAccounts === $this->Type)
+		{
+			$this->Global = true;
 		}
 	}
 
@@ -257,6 +272,8 @@ class CContact extends api_AContainer
 			'IdContact'		=> array('string', 'id_addr', false, false),
 			'IdContactStr'	=> array('string(255)', 'str_id', false),
 			'IdUser'		=> array('int', 'id_user'),
+			'IdDomain'		=> array('int', 'id_domain', true, false),
+			'IdTenant'		=> array('int', 'id_tenant', true, false),
 
 			'GroupsIds'			=> array('array'),
 
@@ -276,6 +293,8 @@ class CContact extends api_AContainer
 			'FirstName'		=> array('string(100)', 'firstname'),
 			'LastName'		=> array('string(100)', 'surname'),
 			'NickName'		=> array('string(100)', 'nickname'),
+			'Skype'			=> array('string(100)', 'skype'),
+			'Facebook'		=> array('string(255)', 'facebook'),
 
 			'HomeEmail'		=> array('string(255)', 'h_email'),
 			'HomeStreet'	=> array('string(255)', 'h_street'),
@@ -312,6 +331,7 @@ class CContact extends api_AContainer
 
 			'ReadOnly'			=> array('bool'),
 			'Global'			=> array('bool'),
+			'ItsMe'				=> array('bool'),
 
 			'ETag'				=> array('string(50)', 'etag')
 		);
@@ -341,6 +361,8 @@ class CContact extends api_AContainer
 		$iChanged &= $this->compareProperty($oContact, 'LastName');
 		$iChanged &= $this->compareProperty($oContact, 'NickName');
 
+		$iChanged &= $this->compareProperty($oContact, 'PrimaryEmail');
+
 		$iChanged &= $this->compareProperty($oContact, 'HomeEmail');
 		$iChanged &= $this->compareProperty($oContact, 'HomeStreet');
 		$iChanged &= $this->compareProperty($oContact, 'HomeCity');
@@ -369,6 +391,9 @@ class CContact extends api_AContainer
 
 		$iChanged &= $this->compareProperty($oContact, 'OtherEmail');
 		$iChanged &= $this->compareProperty($oContact, 'Notes');
+		
+		$iChanged &= $this->compareProperty($oContact, 'Skype');
+		$iChanged &= $this->compareProperty($oContact, 'Facebook');
 
 		$iChanged &= $this->compareProperty($oContact, 'BirthdayDay');
 		$iChanged &= $this->compareProperty($oContact, 'BirthdayMonth');
@@ -381,30 +406,35 @@ class CContact extends api_AContainer
 	 * @param int $iUserId
 	 * @param string $sData
 	 */
-	public function InitFromVCardStr($iUserId, $sData)
+	public function InitFromVCardStr($iUserId, $sData, $sFileName = null)
 	{
 		$oDavManager = CApi::Manager('dav');
-		$vCard = $oDavManager ? $oDavManager->VObjectReaderRead($sData) : null;
-		if ($vCard && $vCard->UID)
+		$oVCard = $oDavManager ? $oDavManager->VObjectReaderRead($sData) : null;
+		if ($oVCard && $oVCard->UID)
 		{
+			$sUid = (string)$oVCard->UID . '.vcf';
+			if ($sFileName !== null)
+			{
+				$sUid = $sFileName;
+			}
 			$this->IdUser = $iUserId;
 			$this->UseFriendlyName = true;
-			$this->IdContact = $vCard->UID->value . '.vcf';
+			$this->IdContact = $sUid;
 			$this->IdContactStr = $this->IdContact;
 
-			if (isset($vCard->CATEGORIES) && 0 < strlen($vCard->CATEGORIES))
+			if (isset($oVCard->CATEGORIES))
 			{
-				$this->GroupsIds = explode(',', $vCard->CATEGORIES->value);
+				$this->GroupsIds = $oVCard->CATEGORIES->getParts();
 			}
 
-			if (isset($vCard->FN))
+			if (isset($oVCard->FN))
 			{
-				$this->FullName = $vCard->FN->value;
+				$this->FullName = (string)$oVCard->FN;
 			}
 
-			if (isset($vCard->N))
+			if (isset($oVCard->N))
 			{
-				$aNames = explode(';', $vCard->N->value);
+				$aNames = $oVCard->N->getParts();
 
 				if (!empty($aNames[0]))
 				{
@@ -420,19 +450,19 @@ class CContact extends api_AContainer
 				}
 			}
 
-			if (isset($vCard->NICKNAME))
+			if (isset($oVCard->NICKNAME))
 			{
-				$this->NickName = $vCard->NICKNAME->value;
+				$this->NickName = (string)$oVCard->NICKNAME;
 			}
 
-			if (isset($vCard->NOTE))
+			if (isset($oVCard->NOTE))
 			{
-				$this->Notes = $vCard->NOTE->value;
+				$this->Notes = (string)$oVCard->NOTE;
 			}
 
-			if (isset($vCard->BDAY))
+			if (isset($oVCard->BDAY))
 			{
-				$aDateTime = explode('T', $vCard->BDAY->value);
+				$aDateTime = explode('T', (string)$oVCard->BDAY);
 				if (isset($aDateTime[0]))
 				{
 					$aDate = explode('-', $aDateTime[0]);
@@ -442,9 +472,9 @@ class CContact extends api_AContainer
 				}
 			}
 
-			if (isset($vCard->ORG))
+			if (isset($oVCard->ORG))
 			{
-				$aOrgs = explode(';', $vCard->ORG->value);
+				$aOrgs = $oVCard->ORG->getParts();
 				if (!empty($aOrgs[0]))
 				{
 					$this->BusinessCompany = $aOrgs[0];
@@ -455,86 +485,71 @@ class CContact extends api_AContainer
 				}
 			}
 
-			if (isset($vCard->TITLE))
+			if (isset($oVCard->TITLE))
 			{
-				$this->BusinessJobTitle = $vCard->TITLE->value;
+				$this->BusinessJobTitle = (string)$oVCard->TITLE;
 			}
 
-			if (isset($vCard->ADR))
+			if (isset($oVCard->ADR))
 			{
-				foreach($vCard->ADR as $oAdr)
+				foreach($oVCard->ADR as $oAdr)
 				{
-					$aAdrs = explode(';', $oAdr->value);
-					if ($oAdr->offsetExists('TYPE'))
+					$aAdrs = $oAdr->getParts();
+					if ($oTypes = $oAdr['TYPE'])
 					{
-						$aTypes = array();
-						$oTypes = $oAdr->offsetGet('TYPE');
-						foreach ($oTypes as $oType)
+						if ($oTypes->has('WORK'))
 						{
-							$aTypes[] = strtoupper($oType->value);
+							$this->BusinessStreet = isset($aAdrs[2]) ? $aAdrs[2] : '';
+							$this->BusinessCity = isset($aAdrs[3]) ? $aAdrs[3] : '';
+							$this->BusinessState = isset($aAdrs[4]) ? $aAdrs[4] : '';
+							$this->BusinessZip = isset($aAdrs[5]) ? $aAdrs[5] : '';
+							$this->BusinessCountry = isset($aAdrs[6]) ? $aAdrs[6] : '';
 						}
-
-						if (in_array('WORK', $aTypes))
+						if ($oTypes->has('HOME'))
 						{
-							$this->BusinessStreet = $aAdrs[2];
-							$this->BusinessCity = $aAdrs[3];
-							$this->BusinessState = $aAdrs[4];
-							$this->BusinessZip = $aAdrs[5];
-							$this->BusinessCountry = $aAdrs[6];
-						}
-						else if (in_array('HOME', $aTypes))
-						{
-							$this->HomeStreet = $aAdrs[2];
-							$this->HomeCity = $aAdrs[3];
-							$this->HomeState = $aAdrs[4];
-							$this->HomeZip = $aAdrs[5];
-							$this->HomeCountry = $aAdrs[6];
+							$this->HomeStreet = isset($aAdrs[2]) ? $aAdrs[2] : '';
+							$this->HomeCity = isset($aAdrs[3]) ? $aAdrs[3] : '';
+							$this->HomeState = isset($aAdrs[4]) ? $aAdrs[4] : '';
+							$this->HomeZip = isset($aAdrs[5]) ? $aAdrs[5] : '';
+							$this->HomeCountry = isset($aAdrs[6]) ? $aAdrs[6] : '';
 						}
 					}
 				}
 			}
 
-			if (isset($vCard->EMAIL))
+			if (isset($oVCard->EMAIL))
 			{
-				foreach($vCard->EMAIL as $oEmail)
+				foreach($oVCard->EMAIL as $oEmail)
 				{
-					if ($oEmail->offsetExists('TYPE'))
+					if ($oType = $oEmail['TYPE'])
 					{
-						$aTypes = array();
-						$oTypes = $oEmail->offsetGet('TYPE');
-						foreach ($oTypes as $oType)
+						if ($oType->has('WORK'))
 						{
-							$aTypes[] = strtoupper($oType->value);
-						}
-
-						if (in_array('WORK', $aTypes))
-						{
-							if (in_array('PREF', $aTypes))
+							$this->BusinessEmail = (string)$oEmail;
+							if ($oType->has('PREF'))
 							{
 								$this->PrimaryEmail = EPrimaryEmailType::Business;
 							}
-							$this->BusinessEmail = $oEmail->value;
 						}
-						else if (in_array('HOME', $aTypes))
+						else if ($oType->has('HOME'))
 						{
-							if (in_array('PREF', $aTypes))
+							$this->HomeEmail = (string)$oEmail;
+							if ($oType->has('PREF'))
 							{
 								$this->PrimaryEmail = EPrimaryEmailType::Home;
 							}
-							$this->HomeEmail = $oEmail->value;
 						}
 						else
 						{
-							if (isset($vCard->{'X-ABLabel'}))
+							if (isset($oVCard->{'X-ABLabel'}))
 							{
-								$aABLabels = $vCard->{'X-ABLabel'};
+								$aABLabels = $oVCard->{'X-ABLabel'};
 								foreach ($aABLabels as $oABLabel)
 								{
-									if ($oEmail->group == $oABLabel->group &&
-											$oABLabel->value == '_$!<Other>!$_')
+									if ($oEmail->group == $oABLabel->group && (string)$oABLabel == '_$!<Other>!$_')
 									{
-										$this->OtherEmail = $oEmail->value;
-										if (in_array('PREF', $aTypes))
+										$this->OtherEmail = (string)$oEmail;
+										if ($oType->has('PREF'))
 										{
 											$this->PrimaryEmail = EPrimaryEmailType::Other;
 										}
@@ -547,82 +562,68 @@ class CContact extends api_AContainer
 				}
 			}
 
-			if (isset($vCard->URL))
+			if (isset($oVCard->URL))
 			{
-				foreach($vCard->URL as $oUrl)
+				foreach($oVCard->URL as $oUrl)
 				{
-					if ($oUrl->offsetExists('TYPE'))
+					if ($oTypes = $oUrl['TYPE'])
 					{
-						$aTypes = array();
-						$oTypes = $oUrl->offsetGet('TYPE');
-						foreach ($oTypes as $oType)
+						if ($oTypes->has('HOME'))
 						{
-							$aTypes[] = strtoupper($oType->value);
+							$this->HomeWeb = (string)$oUrl;
 						}
-
-						if (in_array('HOME', $aTypes))
+						else if ($oTypes->has('WORK'))
 						{
-							$this->HomeWeb = $oUrl->value;
-						}
-						else if (in_array('WORK', $aTypes))
-						{
-							$this->BusinessWeb = $oUrl->value;
+							$this->BusinessWeb = (string)$oUrl;
 						}
 					}
 				}
 			}
 
-			if (isset($vCard->TEL))
+			if (isset($oVCard->TEL))
 			{
-				foreach($vCard->TEL as $oTel)
+				foreach($oVCard->TEL as $oTel)
 				{
-					if ($oTel->offsetExists('TYPE'))
+					if ($oTypes = $oTel['TYPE'])
 					{
-						$aTypes = array();
-						$oTypes = $oTel->offsetGet('TYPE');
-						foreach ($oTypes as $oType)
+						if ($oTypes->has('FAX'))
 						{
-							$aTypes[] = strtoupper($oType->value);
-						}
-
-						if (in_array('FAX', $aTypes))
-						{
-							if (in_array('HOME', $aTypes))
+							if ($oTypes->has('HOME'))
 							{
-								$this->HomeFax = $oTel->value;
+								$this->HomeFax = (string)$oTel;
 							}
-							if (in_array('WORK', $aTypes))
+							if ($oTypes->has('WORK'))
 							{
-								$this->BusinessFax = $oTel->value;
+								$this->BusinessFax = (string)$oTel;
 							}
 						}
 						else
 						{
-							if (in_array('CELL', $aTypes))
+							if ($oTypes->has('CELL'))
 							{
-								$this->HomeMobile = $oTel->value;
+								$this->HomeMobile = (string)$oTel;
 							}
-							else if (in_array('HOME', $aTypes))
+							else if ($oTypes->has('HOME'))
 							{
-								$this->HomePhone = $oTel->value;
+								$this->HomePhone = (string)$oTel;
 							}
-							else if (in_array('WORK', $aTypes))
+							else if ($oTypes->has('WORK'))
 							{
-								$this->BusinessPhone = $oTel->value;
+								$this->BusinessPhone = (string)$oTel;
 							}
 						}
 					}
 				}
 			}
 
-			if (isset($vCard->{'X-AFTERLOGIC-OFFICE'}))
+			if (isset($oVCard->{'X-AFTERLOGIC-OFFICE'}))
 			{
-				$this->BusinessOffice = $vCard->{'X-AFTERLOGIC-OFFICE'}->value;
+				$this->BusinessOffice = (string)$oVCard->{'X-AFTERLOGIC-OFFICE'};
 			}
 
-			if (isset($vCard->{'X-AFTERLOGIC-USE-FRIENDLY-NAME'}))
+			if (isset($oVCard->{'X-AFTERLOGIC-USE-FRIENDLY-NAME'}))
 			{
-				$this->UseFriendlyName = '1' === (string) $vCard->{'X-AFTERLOGIC-USE-FRIENDLY-NAME'}->value;
+				$this->UseFriendlyName = '1' === (string)$oVCard->{'X-AFTERLOGIC-USE-FRIENDLY-NAME'};
 			}
 		}
 	}

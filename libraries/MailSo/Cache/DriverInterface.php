@@ -12,7 +12,7 @@ interface DriverInterface
 	 * @param string $sKey
 	 * @param string $sValue
 	 *
-	 * @return void
+	 * @return bool
 	 */
 	public function Set($sKey, $sValue);
 
@@ -29,4 +29,11 @@ interface DriverInterface
 	 * @return void
 	 */
 	public function Delete($sKey);
+
+	/**
+	 * @param int $iTimeToClearInHours = 24
+	 *
+	 * @return bool
+	 */
+	public function GC($iTimeToClearInHours = 24);
 }

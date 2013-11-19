@@ -2,7 +2,7 @@
 	<h2 class="title" data-i18n="SETTINGS/TITLE_MOBILE_SYNC" data-bind="i18n: 'text'"></h2>
 </div>
 
-<div class="panel_center" data-bind="customScrollbar: {x: false}">
+<div class="panel_center">
 	<div class="fields scroll-inner">
 		<div class="fieldset" data-bind="visible: enableDav">
 			<h2 class="subtitle" data-i18n="SETTINGS/MOBILE_DAVSYNC_HEADING" data-bind="i18n: 'text'"></h2>
@@ -13,15 +13,7 @@
 				<span class="value" data-bind="text: davServer"></span>
 			</div>
 			
-			<div class="hint" data-i18n="SETTINGS/MOBILE_DAVSYNC_HEADING_LOGIN" data-bind="i18n: 'text'"></div>
-			<div class="row">
-				<span class="label" data-i18n="SETTINGS/MOBILE_DAVSYNC_LOGIN" data-bind="i18n: 'text'"></span>
-				<span class="value" data-bind="text: davLogin"></span>
-			</div>
-			<div class="row">
-				<span class="label" data-i18n="SETTINGS/MOBILE_DAVSYNC_PASSWORD_TITLE" data-bind="i18n: 'text'"></span>
-				<span class="value" data-bind="text: password"></span>
-			</div>
+			<div class="hint" data-i18n="SETTINGS/MOBILE_CREDENTIALS_TITLE" data-bind="i18n: 'text'"></div>
 		</div>
 		
 		<div class="fieldset ios_profile" data-bind="visible: bVisibleIosLink">
@@ -69,28 +61,23 @@
 					<span class="value" data-bind="text: davGlobalAddressBookUrl"></span>
 				</div>
 			</div>
+
+			<div class="hint" data-i18n="SETTINGS/MOBILE_CREDENTIALS_TITLE" data-bind="i18n: 'text'"></div>
 		</div>
 		
-		<div class="fieldset" data-bind="visible: enableActiveSync">
-			<h2 class="subtitle" data-i18n="SETTINGS/MOBILE_ACTIVESYNC_HEADING" data-bind="i18n: 'text'"></h2>
-			
-			<div class="hint" data-i18n="SETTINGS/MOBILE_ACTIVESYNC_HINT" data-bind="i18n: 'text'"></div>
-			
-			<div class="row">
-				<span class="label" data-i18n="SETTINGS/MOBILE_ACTIVESYNC_SERVER" data-bind="i18n: 'text'"></span>
-				<span class="value" data-bind="text: activeServer"></span>
+		<div class="fieldset" data-bind="visible: visibleDavViaUrls && bVisibleFiles">
+			<h2 class="subtitle" data-i18n="SETTINGS/MOBILE_DAVSYNC_HEADING_FILES" data-bind="i18n: 'text'"></h2>
+			<div class="hint" data-i18n="SETTINGS/MOBILE_DAVSYNC_HINT_SPECIFY" data-bind="i18n: 'text'"></div>
+		
+			<div class="fieldgroup">
+				<div class="row">
+					<span class="label" data-i18n="SETTINGS/MOBILE_DAVSYNC_FILES" data-bind="i18n: 'text'"></span>
+					<span class="value" data-bind="text: davServer() + '/files'"></span>
+				</div>
 			</div>
-			
-			<div class="row">
-				<span class="label" data-i18n="SETTINGS/MOBILE_ACTIVESYNC_LOGIN" data-bind="i18n: 'text'"></span>
-				<span class="value" data-bind="text: activeLogin"></span>
-			</div>
-			
-			<div class="row">
-				<span class="label" data-i18n="SETTINGS/MOBILE_ACTIVESYNC_PASSWORD_TITLE" data-bind="i18n: 'text'"></span>
-				<span class="value" data-i18n="SETTINGS/MOBILE_ACTIVESYNC_PASSWORD_VALUE" data-bind="i18n: 'text'"></span>
-			</div>
+
+			<div class="hint" data-i18n="SETTINGS/MOBILE_CREDENTIALS_TITLE" data-bind="i18n: 'text'"></div>
 		</div>
-			
+		
 	</div>
 </div>

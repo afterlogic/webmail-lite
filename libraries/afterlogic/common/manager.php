@@ -22,7 +22,7 @@ class CApiGlobalManager
 	protected $oConnection;
 
 	/**
-	 * @var CMySqlHelper
+	 * @var IDbHelper
 	 */
 	protected $oSqlHelper;
 
@@ -44,6 +44,10 @@ class CApiGlobalManager
 		$this->aManagers = array();
 		$this->aStorageMap = array(
 			'mailsuite' => 'db',
+			'min' => 'db',
+			'fetchers' => 'db',
+			'helpdesk' => 'db',
+			'subscriptions' => 'db',
 			'db' => 'db',
 			'domains' => 'db',
 			'tenants' => 'db',
@@ -51,11 +55,22 @@ class CApiGlobalManager
 			'users' => 'db',
 			'webmail' => 'db',
 			'mail' => 'db',
-			'filecache' => 'file',
 			'gcontacts' => 'db',
 			'maincontacts' => 'db',
-			'calendar' => 'sabredav'
+			'filecache' => 'file',
+			'calendar' => 'sabredav',
+			'filestorage' => 'sabredav'
 		);
+
+		if (CApi::GetConf('gcontacts.ldap', false))
+		{
+			$this->aStorageMap['gcontacts'] = 'ldap';
+		}
+
+		if (CApi::GetConf('contacts.ldap', false))
+		{
+			$this->aStorageMap['maincontacts'] = 'ldap';
+		}
 	}
 
 	/**
@@ -142,21 +157,10 @@ class CApiGlobalManager
 	 * @param bool $iMailProtocol
 	 * @return CApiImap4MailProtocol
 	 */
-	public function GetSimpleMailProtocol($iMailProtocol, $sHost, $iPort, $bUseSsl = false)
+	public function GetSimpleMailProtocol($sHost, $iPort, $bUseSsl = false)
 	{
-		$oMail = null;
-		switch ($iMailProtocol)
-		{
-			case EMailProtocol::IMAP4:
-				CApi::Inc('common.net.protocols.imap4');
-				$oMail = new CApiImap4MailProtocol($sHost, $iPort, $bUseSsl);
-				break;
-			case EMailProtocol::POP3:
-				CApi::Inc('common.net.protocols.pop3');
-				$oMail = new CApiPop3MailProtocol($sHost, $iPort, $bUseSsl);
-				break;
-		}
-		return $oMail;
+		CApi::Inc('common.net.protocols.imap4');
+		return new CApiImap4MailProtocol($sHost, $iPort, $bUseSsl);
 	}
 
 	public function &GetCommandCreator(AApiManagerStorage &$oStorage, $aCommandCreatorsNames)
@@ -191,11 +195,7 @@ class CApiGlobalManager
 	public function GetByType($sManagerType, $sForcedStorage = '')
 	{
 		$oResult = null;
-		if ('dav' === $sManagerType && (version_compare(phpversion(), '5.3.0') <= -1))
-		{
-			
-		}
-		else if (CApi::IsValid())
+		if (CApi::IsValid())
 		{
 			$sManagerKey = empty($sForcedStorage) ? $sManagerType : $sManagerType.'/'.$sForcedStorage;
 			if (isset($this->aManagers[$sManagerKey]))
@@ -327,9 +327,9 @@ abstract class AApiManager
 	 * @param string $sInclude
 	 * @return void
 	 */
-	protected function inc($sInclude)
+	protected function inc($sInclude, $bDoExitOnError = true)
 	{
-		CApi::ManagerInc($this->GetManagerName(), $sInclude);
+		CApi::ManagerInc($this->GetManagerName(), $sInclude, $bDoExitOnError);
 	}
 
 	/**

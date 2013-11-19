@@ -1,0 +1,25 @@
+<span class="file attachment" data-bind="css: {'fail': uploadError(), 'success': !uploadError()}">
+	<span class="file_content">
+		<span class="file">
+			<span class="cancel" data-bind="click: function () { $parent.onCancelUpload( uploadUID() ); }, i18n: 'text'" data-i18n="COMMON/UPLOAD_CANCEL"></span> 
+			<span class="icon download" data-bind="attr: {'title': downloadTitle()}, click: downloadAttachment, css: extention().toLowerCase()">
+				<span data-bind="visible: !uploaded()" class="spinner"></span>
+			</span>
+
+			<span class="title">
+				<span class="name" data-bind="text: displayName()"></span><span class="ext" data-bind="text: '.' + extention()"></span>
+				<span class="size" data-bind="text: friendlySize()"></span>
+			</span>
+			<span class="separator"></span>
+			<a class="button view" data-bind="click: viewAttachment, visible: visibleViewLink(), i18n: 'text'" 
+			   data-i18n="MESSAGE/ATTACHMENT_VIEW" href="javascript: void(0)"></a>
+			<a class="button view" data-bind="attr: {'title': downloadTitle()}, click: downloadAttachment, visible: $parent.allowDownloadAttachmentsLink, i18n: 'text'" 
+			   data-i18n="MESSAGE/ATTACHMENT_DOWNLOAD" href="javascript: void(0)"></a>
+		</span>
+
+		<span data-bind="visible: statusText().length > 0, text: statusText(), css: {'error': uploadError()}" class="status_text"></span>
+		<span data-bind="visible: visibleProgress()" class="progress">
+			<span data-bind="style: {'width': progressPercent() + '%'}"></span>
+		</span>
+	</span>
+</span>

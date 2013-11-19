@@ -1,22 +1,31 @@
 	<span class="content">
-		<span class="item upload">
-			<span class="icon" data-bind="i18n: 'title'" data-i18n="FILESTORAGE/UPLOAD_FILE"></span>
-			<span class="text" data-bind="i18n: 'text'" data-i18n="FILESTORAGE/UPLOAD_FILE"></span>
+		<span class="search_block custom_select">
+			<span class="button" data-i18n="CONTACTS/BUTTON_SEARCH" data-bind="i18n: 'text'"></span>
+			<input type="text" data-bind="hasfocus: isSearchFocused, value: searchPattern, onEnter: onSearch" />
 		</span>
-		<span class="item download">
-			<span class="icon" data-bind="i18n: 'title'" data-i18n="FILESTORAGE/DOWNLOAD_FILE"></span>
-			<span class="text" data-bind="i18n: 'text'" data-i18n="FILESTORAGE/DOWNLOAD_FILE"></span>
+		
+		<span class="item new_folder" data-bind="click: onCreateFolderClick">
+			<span class="icon" data-bind="i18n: 'title'" data-i18n="FILESTORAGE/NEW_FOLDER"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="FILESTORAGE/NEW_FOLDER"></span>
 		</span>
-		<span class="item edit">
-			<span class="icon" data-bind="i18n: 'title'" data-i18n="FILESTORAGE/EDIT_FILE"></span>
-			<span class="text" data-bind="i18n: 'text'" data-i18n="FILESTORAGE/EDIT_FILE"></span>
+		<span class="item download" data-bind="command: downloadCommand">
+			<span class="icon" data-bind="i18n: 'title'" data-i18n="FILESTORAGE/BUTTON_DOWNLOAD_FILE"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="FILESTORAGE/BUTTON_DOWNLOAD_FILE"></span>
 		</span>
-		<span class="item share">
-			<span class="icon" data-bind="i18n: 'title'" data-i18n="FILESTORAGE/SHARE_FILE"></span>
-			<span class="text" data-bind="i18n: 'text'" data-i18n="FILESTORAGE/SHARE_FILE"></span>
+		<span class="item send_files command" data-bind="command: sendCommand">
+			<span class="icon" data-bind="i18n: 'title'" data-i18n="FILESTORAGE/BUTTON_SEND_FILE"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="FILESTORAGE/BUTTON_SEND_FILE"></span>
 		</span>
-		<span class="item delete">
-			<span class="icon" data-bind="i18n: 'title'" data-i18n="FILESTORAGE/DELETE_FILE"></span>
-			<span class="text" data-bind="i18n: 'text'" data-i18n="FILESTORAGE/DELETE_FILE"></span>
+		<span class="item edit" data-bind="command: renameCommand">
+			<span class="icon" data-bind="i18n: 'title'" data-i18n="FILESTORAGE/BUTTON_RENAME"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="FILESTORAGE/BUTTON_RENAME"></span>
+		</span>
+		<span class="item share" data-bind="command: shareCommand">
+			<span class="icon" data-bind="i18n: 'title'" data-i18n="FILESTORAGE/BUTTON_PUBLIC_LINK"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="FILESTORAGE/BUTTON_PUBLIC_LINK"></span>
+		</span>
+		<span class="item delete" data-bind="command: deleteCommand">
+			<span class="icon" data-bind="i18n: 'title'" data-i18n="FILESTORAGE/BUTTON_DELETE"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="FILESTORAGE/BUTTON_DELETE"></span>
 		</span>
 	</span>

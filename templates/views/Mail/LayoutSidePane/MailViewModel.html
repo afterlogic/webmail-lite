@@ -12,7 +12,7 @@
 			<div class="middle_bar" data-bind="template: {name: 'Mail_FolderListViewModel', data: oFolderList}, css: {'quota_visible': -1 < oFolderList.quotaProc()}"></div>
 		</div>
 	</div>
-	<div class="panel_helper" data-bind="splitter: {name: 'messages', sizeLeft: 400, minLeft: 20, minRight: 10}">
+	<div class="panel_helper" data-bind="splitter: {name: 'messages', sizeLeft: 400, minLeft: 45, minRight: 10}">
 		<div class="panel messages">
 			<div class="resize_handler"></div>
 			<div class="panel_content">
@@ -21,7 +21,7 @@
 				<div class="middle_bar" data-bind="template: {name: 'Mail_MessageListViewModel', data: oMessageList}"></div>
 			</div>
 		</div>
-		<div class="panel message_viewer">
+		<div class="panel item_viewer message_viewer">
 			<div class="panel_content">
 				<div class="middle_bar" data-bind="template: {name: 'Mail_LayoutSidePane_MessagePaneViewModel', data: oMessagePane}"></div>
 			</div>

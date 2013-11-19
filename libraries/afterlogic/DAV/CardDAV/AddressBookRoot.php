@@ -2,8 +2,8 @@
 
 namespace afterlogic\DAV\CardDAV;
 
-class AddressBookRoot extends \Sabre\CardDAV\AddressBookRoot {
-
+class AddressBookRoot extends \Sabre\CardDAV\AddressBookRoot
+{
 	protected function getAccount($principalUri)
 	{
 		$oAccount = null;
@@ -16,10 +16,13 @@ class AddressBookRoot extends \Sabre\CardDAV\AddressBookRoot {
 		return $oAccount;
 	}
 
-	public function getChildForPrincipal(array $principal) {
-
+	public function getChildForPrincipal(array $principal)
+	{
+		$oApiCapabilityManager = /* @var \CApiCapabilityManager */ \CApi::Manager('capability');
+		
 		$oAccount = $this->getAccount($principal['uri']);
-		if (null !== $oAccount && $oAccount->User->GetCapa('PAB'))
+		if ($oAccount instanceof \CAccount &&
+			$oApiCapabilityManager->IsPersonalContactsSupported($oAccount))
 		{
 			return new UserAddressBooks($this->carddavBackend, $principal['uri']);
 		}

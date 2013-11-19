@@ -41,8 +41,8 @@ namespace Sabre\CalDAV\Backend;
  * How it works
  * ============
  *
- * When a user shares a calendar, the addShare() method will be called with a
- * list of sharees that are now added, and a list of sharees that have been
+ * When a user shares a calendar, the updateShares() method will be called with
+ * a list of sharees that are now added, and a list of sharees that have been
  * removed.
  * Removal is instant, but when a sharee is added the sharee first gets a
  * chance to accept or reject the invitation for a share.
@@ -157,7 +157,7 @@ namespace Sabre\CalDAV\Backend;
  * ==============================================
  *
  * If Sabre\CalDAV\Property\AllowedSharingModes is returned from
- * getCalendarsByUser, this allows the server to specify wether either sharing,
+ * getCalendarsByUser, this allows the server to specify whether either sharing,
  * or publishing is supported.
  *
  * This allows a client to determine in advance which features are available,
@@ -165,8 +165,8 @@ namespace Sabre\CalDAV\Backend;
  * the backend, the SharingPlugin automatically injects it and assumes both
  * features are available.
  *
- * @copyright Copyright (C) 2007-2012 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/)
+ * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
+ * @author Evert Pot (http://evertpot.com/)
  * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
 interface SharingSupport extends NotificationSupport {

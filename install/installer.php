@@ -160,8 +160,7 @@ class CInstaller
 
 	function Post()
 	{
-		$sState = $_POST['state'];
-
+		$sState = empty($_POST['state']) ? '' : $_POST['state'];
 		if (isset($_POST['back_btn']))
 		{
 			header('Location: '.'index.php?step='.$this->getBackStep($sState));

@@ -1,46 +1,21 @@
 <div class="panels settings">
 	<div class="panel navigation">
 		<div class="panel_content">
-			<div class="middle_bar">
-				<div class="item common" data-bind="css: {'selected': (tab() == Enums.SettingsTab.Common)},
-					 visible: bAllowUsersChangeInterfaceSettings">
+			<div class="middle_bar" data-bind="foreach: aTabs">
+				<div data-bind="attr: {'class': 'item ' + $data.TabName},
+					 css: {'selected': ($parent.tab() === $data.TabName)}">
 					<span class="icon"></span>
-					<span class="link" data-i18n="SETTINGS/TAB_COMMON" data-bind="i18n: 'text', click: function () {showTab(Enums.SettingsTab.Common);}"></span>
-				</div>
-				<div class="item accounts" data-bind="css: {'selected': (tab() == Enums.SettingsTab.EmailAccounts)}">
-					<span class="icon"></span>
-					<span class="link" data-i18n="SETTINGS/TAB_EMAIL_ACCOUNTS" data-bind="i18n: 'text', click: function () {showTab(Enums.SettingsTab.EmailAccounts);}"></span>
-				</div>
-				<div class="item calendar" data-bind="css: {'selected': (tab() == Enums.SettingsTab.Calendar)},
-					 visible: bAllowCalendar">
-					<span class="icon"></span>
-					<span class="link" data-i18n="SETTINGS/TAB_CALENDAR" data-bind="i18n: 'text', click: function () {showTab(Enums.SettingsTab.Calendar);}"></span>
-				</div>
-				<div class="item mobile_sync" data-bind="css: {'selected': (tab() == Enums.SettingsTab.MobileSync)},
-					 visible: bAllowMobileSync">
-					<span class="icon"></span>
-					<span class="link" data-i18n="SETTINGS/TAB_MOBILE_SYNC" data-bind="i18n: 'text', click: function () {showTab(Enums.SettingsTab.MobileSync);}"></span>
-				</div>
-				<div class="item outlook_sync" data-bind="css: {'selected': (tab() == Enums.SettingsTab.OutLookSync)},
-					 visible: bAllowOutlookSync">
-					<span class="icon"></span>
-					<span class="link" data-i18n="SETTINGS/TAB_OUTLOOK_SYNC" data-bind="i18n: 'text', click: function () {showTab(Enums.SettingsTab.OutLookSync);}"></span>
+					<span class="link" data-bind="text: $data.TabTitle, 
+						  click: function () {$parent.showTab($data.TabName);}"></span>
 				</div>
 			</div>
 		</div>
 	</div>
 	<div class="panel">
-		<div class="panel_content">
-			<div class="middle_bar coomon" data-bind="template: {name: 'Settings_CommonSettingsViewModel', data: oCommon}, 
-				 visible: tab() === Enums.SettingsTab.Common"></div>
-			<div class="middle_bar accounts" data-bind="template: {name: 'Settings_EmailAccountsSettingsViewModel', data: oEmailAccounts}, 
-				 visible: tab() === Enums.SettingsTab.EmailAccounts"></div>
-			<div class="middle_bar calendar" data-bind="template: {name: 'Settings_CalendarSettingsViewModel', data: oCalendar}, 
-				 visible: tab() === Enums.SettingsTab.Calendar"></div>
-			<div class="middle_bar mobile_sync" data-bind="template: {name: 'Settings_MobileSyncSettingsViewModel', data: oMobileSync}, 
-				 visible: tab() === Enums.SettingsTab.MobileSync"></div>
-			<div class="middle_bar outlook_sync" data-bind="template: {name: 'Settings_OutLookSyncSettingsViewModel', data: oOutLookSync}, 
-				 visible: tab() === Enums.SettingsTab.OutLookSync"></div>
+		<div class="panel_content" data-bind="foreach: aTabs">
+			<div data-bind="attr: {'class': 'middle_bar ' + $data.TabName},
+				template: {name: $data.TemplateName, data: $data}, 
+				visible: $parent.tab() === $data.TabName"></div>
 		</div>
 	</div>
 </div>

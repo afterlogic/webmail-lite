@@ -74,6 +74,15 @@ class CApiUsersStorage extends AApiManagerStorage
 	}
 
 	/**
+	 * @param string $sEmail
+	 * @return int
+	 */
+	public function GetAccountUsedSpaceInKBytesByEmail($sEmail)
+	{
+		return 0;
+	}
+
+	/**
 	 * @param CAccount $oAccount
 	 * @return array | bool
 	 */

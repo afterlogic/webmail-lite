@@ -19,7 +19,7 @@ class Client
 	public function __construct()
 	{
 		// TODO hc
-		$this->oDriver = new \ProjectSeven\Storage\Drivers\Files(PSEVEN_APP_DATA_PATH);
+		$this->oDriver = new \ProjectSeven\Storage\Drivers\Files(\CApi::DataPath());
 	}
 
 	/**

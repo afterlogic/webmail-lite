@@ -20,18 +20,19 @@ class CApiFilecacheManager extends AApiManagerWithStorage
 	}
 
 	/**
-	 * @param CAccount $oAccount
+	 * @param CAccount|CHelpdeskUser $oAccount
 	 * @param string $sKey
 	 * @param string $sValue
+	 * @param string $sFileSuffix = ''
 	 *
 	 * @return bool
 	 */
-	public function Put(CAccount $oAccount, $sKey, $sValue)
+	public function Put($oAccount, $sKey, $sValue, $sFileSuffix = '')
 	{
 		$bResult = false;
 		try
 		{
-			$bResult = $this->oStorage->Put($oAccount, $sKey, $sValue);
+			$bResult = $this->oStorage->Put($oAccount, $sKey, $sValue, $sFileSuffix);
 		}
 		catch (CApiBaseException $oException)
 		{
@@ -41,18 +42,19 @@ class CApiFilecacheManager extends AApiManagerWithStorage
 	}
 
 	/**
-	 * @param CAccount $oAccount
+	 * @param CAccount|CHelpdeskUser $oAccount
 	 * @param string $sKey
 	 * @param resource $rSource
+	 * @param string $sFileSuffix = ''
 	 *
 	 * @return bool
 	 */
-	public function PutFile(CAccount $oAccount, $sKey, $rSource)
+	public function PutFile($oAccount, $sKey, $rSource, $sFileSuffix = '')
 	{
 		$bResult = false;
 		try
 		{
-			$bResult = $this->oStorage->PutFile($oAccount, $sKey, $rSource);
+			$bResult = $this->oStorage->PutFile($oAccount, $sKey, $rSource, $sFileSuffix);
 		}
 		catch (CApiBaseException $oException)
 		{
@@ -62,18 +64,19 @@ class CApiFilecacheManager extends AApiManagerWithStorage
 	}
 
 	/**
-	 * @param CAccount $oAccount
+	 * @param CAccount|CHelpdeskUser $oAccount
 	 * @param string $sKey
 	 * @param string $sSource
+	 * @param string $sFileSuffix = ''
 	 *
 	 * @return bool
 	 */
-	public function MoveUploadedFile(CAccount $oAccount, $sKey, $sSource)
+	public function MoveUploadedFile($oAccount, $sKey, $sSource, $sFileSuffix = '')
 	{
 		$bResult = false;
 		try
 		{
-			$bResult = $this->oStorage->MoveUploadedFile($oAccount, $sKey, $sSource);
+			$bResult = $this->oStorage->MoveUploadedFile($oAccount, $sKey, $sSource, $sFileSuffix);
 		}
 		catch (CApiBaseException $oException)
 		{
@@ -83,17 +86,18 @@ class CApiFilecacheManager extends AApiManagerWithStorage
 	}
 
 	/**
-	 * @param CAccount $oAccount
+	 * @param CAccount|CHelpdeskUser $oAccount
 	 * @param string $sKey
+	 * @param string $sFileSuffix = ''
 	 *
 	 * @return string | bool
 	 */
-	public function Get(CAccount $oAccount, $sKey)
+	public function Get($oAccount, $sKey, $sFileSuffix = '')
 	{
 		$mResult = false;
 		try
 		{
-			$mResult = $this->oStorage->Get($oAccount, $sKey);
+			$mResult = $this->oStorage->Get($oAccount, $sKey, $sFileSuffix);
 		}
 		catch (CApiBaseException $oException)
 		{
@@ -103,17 +107,18 @@ class CApiFilecacheManager extends AApiManagerWithStorage
 	}
 
 	/**
-	 * @param CAccount $oAccount
+	 * @param CAccount|CHelpdeskUser $oAccount
 	 * @param string $sKey
+	 * @param string $sFileSuffix = ''
 	 *
 	 * @return resource | bool
 	 */
-	public function GetFile(CAccount $oAccount, $sKey)
+	public function GetFile($oAccount, $sKey, $sFileSuffix = '')
 	{
 		$mResult = false;
 		try
 		{
-			$mResult = $this->oStorage->GetFile($oAccount, $sKey);
+			$mResult = $this->oStorage->GetFile($oAccount, $sKey, $sFileSuffix);
 		}
 		catch (CApiBaseException $oException)
 		{
@@ -123,17 +128,18 @@ class CApiFilecacheManager extends AApiManagerWithStorage
 	}
 
 	/**
-	 * @param CAccount $oAccount
+	 * @param CAccount|CHelpdeskUser $oAccount
 	 * @param string $sKey
+	 * @param string $sFileSuffix = ''
 	 *
 	 * @return bool
 	 */
-	public function Clear(CAccount $oAccount, $sKey)
+	public function Clear($oAccount, $sKey, $sFileSuffix = '')
 	{
 		$bResult = false;
 		try
 		{
-			$bResult = $this->oStorage->Clear($oAccount, $sKey);
+			$bResult = $this->oStorage->Clear($oAccount, $sKey, $sFileSuffix);
 		}
 		catch (CApiBaseException $oException)
 		{
@@ -143,17 +149,18 @@ class CApiFilecacheManager extends AApiManagerWithStorage
 	}
 
 	/**
-	 * @param CAccount $oAccount
+	 * @param CAccount|CHelpdeskUser $oAccount
 	 * @param string $sKey
+	 * @param string $sFileSuffix = ''
 	 *
 	 * @return int | bool
 	 */
-	public function FileSize(CAccount $oAccount, $sKey)
+	public function FileSize($oAccount, $sKey, $sFileSuffix = '')
 	{
 		$mResult = false;
 		try
 		{
-			$mResult = $this->oStorage->FileSize($oAccount, $sKey);
+			$mResult = $this->oStorage->FileSize($oAccount, $sKey, $sFileSuffix);
 		}
 		catch (CApiBaseException $oException)
 		{
@@ -163,17 +170,17 @@ class CApiFilecacheManager extends AApiManagerWithStorage
 	}
 
 	/**
-	 * @param CAccount $oAccount
+	 * @param CAccount|CHelpdeskUser $oAccount
 	 * @param string $sKey
 	 *
 	 * @return bool
 	 */
-	public function FileExists(CAccount $oAccount, $sKey)
+	public function FileExists($oAccount, $sKey, $sFileSuffix = '')
 	{
 		$bResult = false;
 		try
 		{
-			$bResult = $this->oStorage->FileExists($oAccount, $sKey);
+			$bResult = $this->oStorage->FileExists($oAccount, $sKey, $sFileSuffix);
 		}
 		catch (CApiBaseException $oException)
 		{
@@ -183,17 +190,35 @@ class CApiFilecacheManager extends AApiManagerWithStorage
 	}
 
 	/**
-	 * @param CAccount $oAccount
+	 * @param CAccount|CHelpdeskUser $oAccount
 	 * @param string $sKey
+	 * @param string $sFileSuffix = ''
 	 *
 	 * @return bool
 	 */
-	public function GenerateFullFilePath(CAccount $oAccount, $sKey)
+	public function GenerateFullFilePath($oAccount, $sKey, $sFileSuffix = '')
 	{
 		$bResult = false;
 		try
 		{
-			$bResult = $this->oStorage->GenerateFullFilePath($oAccount, $sKey);
+			$bResult = $this->oStorage->GenerateFullFilePath($oAccount, $sKey, $sFileSuffix);
+		}
+		catch (CApiBaseException $oException)
+		{
+			$this->setLastException($oException);
+		}
+		return $bResult;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function GC()
+	{
+		$bResult = false;
+		try
+		{
+			$bResult = $this->oStorage->GC();
 		}
 		catch (CApiBaseException $oException)
 		{

@@ -1,13 +1,15 @@
 <div class="toolbar">
+	<span class="resizer_top" data-bind="event: { 'dblclick': resizeDblClick}"></span>
+	<span class="resizer_bottom" data-bind="event: { 'dblclick': resizeDblClick}"></span>
 	<span class="content">
 		<span class="item checkmail" data-bind="command: checkMailCommand, checkmail: {'activeClass': 'process', 'state': checkMailStarted(), 'duration': 800}">
 			<span class="icon" data-bind="i18n: 'title'" data-i18n="MAILBOX/TOOL_CHECK_MAIL"></span>
 			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_CHECK_MAIL"></span>
 		</span>
 		<span class="group mark" data-bind="dropdown: {}, css: {disabled: oMessageList.isEmptyList()}">
-			<span class="item">
-				<span class="icon" data-bind="command: markAsReadCommand, i18n: 'title'" data-i18n="MAILBOX/TOOL_MARK_AS_READ"></span>
-				<span class="text" data-bind="command: markAsReadCommand, i18n: 'text'" data-i18n="MAILBOX/TOOL_MARK_AS_READ"></span>
+			<span class="item" data-bind="command: markAsReadCommand">
+				<span class="icon" data-bind="i18n: 'title'" data-i18n="MAILBOX/TOOL_MARK_AS_READ"></span>
+				<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_MARK_AS_READ"></span>
 			</span><span class="item control">
 				<span class="arrow"></span>
 			</span>
@@ -17,14 +19,6 @@
 					<span class="dropdown_content">
 						<span class="item allread" data-bind="command: markAllReadCommand, i18n: 'text'" data-i18n="MAILBOX/TOOL_MARK_ALL_READ"></span>
 						<span class="item unread" data-bind="command: markAsUnreadCommand, i18n: 'text'" data-i18n="MAILBOX/TOOL_MARK_AS_UNREAD"></span>
-						<!--<span class="flag" data-bind="command: flagCommand, i18n: 'text',
-							 css: {'disabled': !oMessageList.isEnableGroupOperations()}"
-							data-i18n="MAILBOX/TOOL_FLAG"></span>
-						<span class="unflag" data-bind="command: unflagCommand, i18n: 'text',
-							 css: {'disabled': !oMessageList.isEnableGroupOperations()}"
-							data-i18n="MAILBOX/TOOL_UNFLAG"></span>-->
-						<!--<span class="allunread" data-bind="command: markAllUnreadCommand, i18n: 'text'"
-							data-i18n="MAILBOX/TOOL_MARK_ALL_UNREAD"></span>-->
 					</span>
 				</span>
 			</span>
@@ -48,7 +42,7 @@
 			<span class="icon" data-bind="i18n: 'title'" data-i18n="MAILBOX/TOOL_DELETE"></span>
 			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_DELETE"></span>
 		</span>
-		
+
 		<span class="item empty_trash" data-bind="command: emptyTrashCommand, visible: isTrashFolder()">
 			<span class="icon" data-bind="i18n: 'title'" data-i18n="MAILBOX/TOOL_EMPTY_TRASH"></span>
 			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_EMPTY_TRASH"></span>
@@ -57,11 +51,11 @@
 			<span class="icon" data-bind="i18n: 'title'" data-i18n="MAILBOX/TOOL_EMPTY_SPAM"></span>
 			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_EMPTY_SPAM"></span>
 		</span>
-		<span class="item spam" data-bind="command: spamCommand, visible: !isSpamFolder()">
+		<span class="item spam" data-bind="command: spamCommand, visible: allowedSpamAction">
 			<span class="icon" data-bind="i18n: 'title'" data-i18n="MAILBOX/TOOL_SPAM"></span>
 			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_SPAM"></span>
 		</span>
-		<span class="item notspam" data-bind="command: notSpamCommand, visible: isSpamFolder()">
+		<span class="item notspam" data-bind="command: notSpamCommand, visible: allowedNotSpamAction">
 			<span class="icon" data-bind="i18n: 'title'" data-i18n="MAILBOX/TOOL_NOT_SPAM"></span>
 			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_NOT_SPAM"></span>
 		</span>

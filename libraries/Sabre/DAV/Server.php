@@ -6,8 +6,8 @@ use Sabre\HTTP;
 /**
  * Main DAV server class
  *
- * @copyright Copyright (C) 2007-2012 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/)
+ * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
+ * @author Evert Pot (http://evertpot.com/)
  * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
 class Server {
@@ -619,7 +619,16 @@ class Server {
             // New read/write stream
             $newStream = fopen('php://temp','r+');
 
-            stream_copy_to_stream($body, $newStream, $end-$start+1, $start);
+            // stream_copy_to_stream() has a bug/feature: the `whence` argument
+            // is interpreted as SEEK_SET (count from absolute offset 0), while
+            // for a stream it should be SEEK_CUR (count from current offset).
+            // If a stream is nonseekable, the function fails. So we *emulate*
+            // the correct behaviour with fseek():
+            if ($start > 0) {
+                if (($curOffs = ftell($body)) === false) $curOffs = 0;
+                fseek($body, $start - $curOffs, SEEK_CUR);
+            }
+            stream_copy_to_stream($body, $newStream, $end-$start+1);
             rewind($newStream);
 
             $this->httpResponse->setHeader('Content-Length', $end-$start+1);
@@ -1449,6 +1458,13 @@ class Server {
 
         $path = rtrim($path,'/');
 
+        // This event allows people to intercept these requests early on in the
+        // process.
+        //
+        // We're not doing anything with the result, but this can be helpful to
+        // pre-fetch certain expensive live properties.
+        $this->broadCastEvent('beforeGetPropertiesForPath', array($path, $propertyNames, $depth));
+
         $returnPropertyList = array();
 
         $parentNode = $this->tree->getNodeForPath($path);
@@ -2148,7 +2164,7 @@ class Server {
         if (!$body) return array();
 
         $dom = XMLUtil::loadDOMDocument($body);
-        $elem = $dom->getElementsByTagNameNS('DAV:','propfind')->item(0);
+        $elem = $dom->getElementsByTagNameNS('urn:DAV','propfind')->item(0);
         return array_keys(XMLUtil::parseProperties($elem));
 
     }

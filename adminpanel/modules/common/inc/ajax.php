@@ -66,7 +66,7 @@ class CCommonAjaxAction extends ap_CoreModuleHelper
 
 	protected function initUpdateDomainByPost(CDomain &$oDomain)
 	{
-		$oDomain->OverrideSettings = CPost::GetCheckBox('chOverrideSettings');
+		$oDomain->OverrideSettings = 0 < $oDomain->IdTenant ? true : CPost::GetCheckBox('chOverrideSettings');
 
 		if ($oDomain->OverrideSettings)
 		{

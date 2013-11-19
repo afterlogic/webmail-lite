@@ -22,7 +22,7 @@ class CApiDbDbStorage extends CApiDbStorage
 	protected $oCommandCreator;
 
 	/**
-	 * @var CMySqlHelper
+	 * @var IDbHelper
 	 */
 	protected $oHelper;
 
@@ -76,8 +76,10 @@ class CApiDbDbStorage extends CApiDbStorage
 
 	/**
 	 * @param mixed $fVerboseCallback
+	 * @param bool $bDropFields = false
+	 * @param bool $bDropIndex = false
 	 */
-	public function SyncTables($fVerboseCallback)
+	public function SyncTables($fVerboseCallback, $bDropFields = false, $bDropIndex = false)
 	{
 		$iResult = 0;
 		$aDbTables = $this->oConnection->GetTableNames();
@@ -89,7 +91,7 @@ class CApiDbDbStorage extends CApiDbStorage
 			{
 				if (in_array($oTable->Name(), $aDbTables))
 				{
-					$iResult &= $this->syncTable($oTable, $fVerboseCallback, true, true);
+					$iResult &= $this->syncTable($oTable, $fVerboseCallback, $bDropFields, $bDropIndex);
 				}
 				else
 				{
@@ -113,12 +115,18 @@ class CApiDbDbStorage extends CApiDbStorage
 	/**
 	 * @param CDbTable $oTable
 	 * @param mixed $fVerboseCallback
-	 * @param bool $bUseDropFields = false
+	 * @param bool $bDropFields = false
+	 * @param bool $bDropIndex = false
 	 */
-	protected function syncTable(CDbTable $oTable, $fVerboseCallback, $bUseDropFields = false, $bUseDropIndex = false)
+	protected function syncTable(CDbTable $oTable, $fVerboseCallback, $bDropFields = false, $bDropIndex = false)
 	{
 		$iResult = 1;
 		$aDbFields = $this->oConnection->GetTableFields($oTable->Name());
+		if (!is_array($aDbFields))
+		{
+			return false;
+		}
+
 		$aSchemaFields = $oTable->GetFieldNames();
 
 		$aFieldsToAdd = array_diff($aSchemaFields, $aDbFields);
@@ -135,7 +143,7 @@ class CApiDbDbStorage extends CApiDbStorage
 			call_user_func($fVerboseCallback, ESyncVerboseType::CreateField, $sResult, $oTable->Name(), $aFieldsToAdd, $sError);
 		}
 
-		if ($bUseDropFields)
+		if ($bDropFields)
 		{
 			$aFieldsToDelete = array_diff($aDbFields, $aSchemaFields);
 			if (0 < count($aFieldsToDelete))
@@ -185,7 +193,7 @@ class CApiDbDbStorage extends CApiDbStorage
 			}
 		}
 
-		if ($bUseDropIndex)
+		if ($bDropIndex)
 		{
 			foreach ($aDbIndexesSimple as $sKey => $sIndex)
 			{

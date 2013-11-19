@@ -24,7 +24,8 @@ In case of a shared hosting, you need to ask your hosting provider to perform th
 
 	define('PSEVEN_APP_ROOT_PATH', rtrim(realpath(__DIR__), '\\/').'/');
 	define('PSEVEN_APP_LIBRARY_PATH', PSEVEN_APP_ROOT_PATH.'libraries/ProjectSeven/');
-	define('PSEVEN_APP_DATA_PATH', PSEVEN_APP_ROOT_PATH.'data/');
+	define('PSEVEN_APP_SYMFONY_LIBRARY_PATH', PSEVEN_APP_ROOT_PATH.'libraries/Symfony/');
+	define('PSEVEN_APP_THUMB_LIBRARY_PATH', PSEVEN_APP_ROOT_PATH.'libraries/PHPThumb/');
 	define('PSEVEN_APP_START', microtime(true));
 
 	/**
@@ -37,6 +38,22 @@ In case of a shared hosting, you need to ask your hosting provider to perform th
 		if (0 === strpos($sClassName, 'ProjectSeven') && false !== strpos($sClassName, '\\'))
 		{
 			$sFileName = PSEVEN_APP_LIBRARY_PATH.str_replace('\\', '/', substr($sClassName, 13)).'.php';
+			if (file_exists($sFileName))
+			{
+				return include $sFileName;
+			}
+		}
+		else if (0 === strpos($sClassName, 'Symfony') && false !== strpos($sClassName, '\\'))
+		{
+			$sFileName = PSEVEN_APP_SYMFONY_LIBRARY_PATH.str_replace('\\', '/', substr($sClassName, 8)).'.php';
+			if (file_exists($sFileName))
+			{
+				return include $sFileName;
+			}
+		}
+		else if (0 === strpos($sClassName, 'PHPThumb') && false !== strpos($sClassName, '\\'))
+		{
+			$sFileName = PSEVEN_APP_THUMB_LIBRARY_PATH.str_replace('\\', '/', substr($sClassName, 9)).'.php';
 			if (file_exists($sFileName))
 			{
 				return include $sFileName;

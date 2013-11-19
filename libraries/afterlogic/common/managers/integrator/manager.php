@@ -19,6 +19,11 @@ class CApiIntegratorManager extends AApiManager
 	/**
 	 * @type string
 	 */
+	const AUTH_HD_KEY = 'p7hdauth';
+
+	/**
+	 * @type string
+	 */
 	const TOKEN_KEY = 'p7token';
 
 	/**
@@ -30,6 +35,16 @@ class CApiIntegratorManager extends AApiManager
 	 * @type string
 	 */
 	const TOKEN_LANGUAGE = 'p7lang';
+
+	/**
+	 * @type string
+	 */
+	const TOKEN_HD_THREAD_ID = 'p7hdthread';
+
+	/**
+	 * @type string
+	 */
+	const TOKEN_HD_ACTIVATED = 'p7hdactivated';
 
 	/**
 	 * @var bool
@@ -74,10 +89,12 @@ class CApiIntegratorManager extends AApiManager
 	 */
 	private function compileTemplates($sTheme)
 	{
+		$sHash = CApi::Plugin()->Hash();
+		
 		$sCacheFileName = '';
 		if (CApi::GetConf('labs.cache.templates', $this->bCache))
 		{
-			$sCacheFileName = 'templates-'.md5(CApi::Version()).'.cache';
+			$sCacheFileName = 'templates-'.md5(CApi::Version().$sHash).'.cache';
 			$sCacheFullFileName = CApi::DataPath().'/cache/'.$sCacheFileName;
 			if (file_exists($sCacheFullFileName))
 			{
@@ -112,18 +129,37 @@ class CApiIntegratorManager extends AApiManager
 					$sThemeFileName = substr($sFileName, $iPos + 16);
 				}
 			}
-// TODO
-//			if (0 < strlen($sThemeFileName))
-//			{
-//				$sThemeFileName = CApi::WebMailPath().'skins/'.$sTheme.'/templates/'.$sThemeFileName;
-//				if (file_exists($sThemeFileName))
-//				{
-//					$sFileName = $sThemeFileName;
-//				}
-//			}
 
-			$sResult .= '<script id="'.preg_replace('/[^a-zA-Z0-9_]/', '', str_replace(array('/', '\\'), '_', substr($sName, 0, -5))).'" type="text/html">'.
-				preg_replace('/[\r\n\t]+/', ' ', file_get_contents($sFileName)).'</script>';
+			if (0 < strlen($sThemeFileName))
+			{
+				$sThemeFileName = CApi::WebMailPath().'skins/'.$sTheme.'/templates/'.$sThemeFileName;
+				if (file_exists($sThemeFileName))
+				{
+					$sFileName = $sThemeFileName;
+				}
+			}
+
+			$sTemplateID = preg_replace('/[^a-zA-Z0-9_]/', '', str_replace(array('/', '\\'), '_', substr($sName, 0, -5)));
+			$sTemplateHtml = file_get_contents($sFileName);
+
+			$sTemplateHtml = CApi::Plugin()->ParseTemplate($sTemplateID, $sTemplateHtml);
+			$sTemplateHtml = preg_replace('/\{%INCLUDE-START\/[a-zA-Z\-_]+\/INCLUDE-END%\}/', '', $sTemplateHtml);
+
+			$sResult .= '<script id="'.$sTemplateID.'" type="text/html">'.
+				preg_replace('/[\r\n\t]+/', ' ', $sTemplateHtml).'</script>';
+		}
+
+		$aPluginsTemplates = CApi::Plugin()->GetPluginsTemplates();
+		foreach ($aPluginsTemplates as $aData)
+		{
+			$sTemplateID = preg_replace('/[^a-zA-Z0-9_]/', '', str_replace(array('/', '\\'), '_', $aData[0]));
+			$sTemplateHtml = file_get_contents($aData[1]);
+			
+			$sTemplateHtml = CApi::Plugin()->ParseTemplate($sTemplateID, $sTemplateHtml);
+			$sTemplateHtml = preg_replace('/\{%INCLUDE-START\/[a-zA-Z\-_]+\/INCLUDE-END%\}/', '', $sTemplateHtml);
+
+			$sResult .= '<script id="'.$sTemplateID.'" type="text/html">'.
+				preg_replace('/[\r\n\t]+/', ' ', $sTemplateHtml).'</script>';
 		}
 
 		$sResult = trim($sResult);
@@ -131,7 +167,7 @@ class CApiIntegratorManager extends AApiManager
 		{
 			if (!is_dir(dirname($sCacheFullFileName)))
 			{
-				mkdir(dirname($sCacheFullFileName), 0777);
+				mkdir(dirname($sCacheFullFileName), 0777, true);
 			}
 			
 			$sResult = '<!-- '.$sCacheFileName.' -->'.$sResult;
@@ -139,49 +175,6 @@ class CApiIntegratorManager extends AApiManager
 		}
 
 		return $sResult;
-	}
-
-	/**
-	 * @param string $sLanguage
-	 * @return string
-	 */
-	private function convertLanguageNameToMomentName($sLanguage)
-	{
-		$aList = array(
-			'english' => 'en',
-			'polish' => 'pl',
-			'estonian' => 'et',
-			'bulgarian' => 'bg',
-			'ukrainian' => 'uk',
-			'thai' => 'th',
-			'swedish' => 'sv',
-			'spanish' => 'es',
-			'russian' => 'ru',
-			'romanian' => 'ro',
-			'portuguese-brazil' => 'pt-br',
-//			'persian' => '', // TODO name? Farsi
-			'latvian' => 'lv',
-			'korean' => 'ko',
-			'japanese' => 'ja',
-			'italian' => 'it',
-			'hungarian' => 'hu',
-			'hebrew' => 'he',
-			'german' => 'de',
-			'french' => 'fr',
-			'finnish' => 'fi',
-			'dutch' => 'nl',
-			'danish' => 'da',
-			'chinese-Traditional' => 'zh-tw',
-			'chinese-Simplified' => 'zh-cn',
-			'arabic' => 'ar',
-			'turkish' => 'tr',
-			'norwegian' => 'nb',
-//			'lithuanian' => 'lt',  // TODO
-			'greek' => 'el',
-			'czech' => 'cs'
-		);
-
-		return isset($aList[strtolower($sLanguage)]) ? $aList[strtolower($sLanguage)] : $sLanguage;
 	}
 
 	/**
@@ -230,7 +223,7 @@ class CApiIntegratorManager extends AApiManager
 		}
 
 		$aResultLang = array();
-		$sMomentLanguage = $this->convertLanguageNameToMomentName($sLanguage);
+		$sMomentLanguage = api_Utils::ConvertLanguageNameToShort($sLanguage);
 		$sFileName = CApi::WebMailPath().'i18n/'.$sLanguage.'.ini';
 		$sMomentFileName = CApi::WebMailPath().'i18n/moment/'.$sMomentLanguage.'.js';
 		
@@ -345,6 +338,26 @@ class CApiIntegratorManager extends AApiManager
 	}
 
 	/**
+	 * @return int
+	 */
+	public function GetLogginedHelpdeskUserId()
+	{
+		$iHdUserId = 0;
+		$sKey = empty($_COOKIE[self::AUTH_HD_KEY]) ? '' : $_COOKIE[self::AUTH_HD_KEY];
+		if (!empty($sKey) && is_string($sKey))
+		{
+			$aUserHashTable = CApi::DecodeKeyValues($sKey);
+			if (is_array($aUserHashTable) && isset($aUserHashTable['token']) &&
+				'hd_auth' === $aUserHashTable['token'] && 0 < strlen($aUserHashTable['id']) && is_int($aUserHashTable['id']))
+			{
+				$iHdUserId = (int) $aUserHashTable['id'];
+			}
+		}
+
+		return $iHdUserId;
+	}
+
+	/**
 	 * @return CAccount | null
 	 */
 	public function GetLogginedDefaultAccount()
@@ -377,7 +390,7 @@ class CApiIntegratorManager extends AApiManager
 		if (null === $sToken)
 		{
 			$sToken = md5(rand(1000, 9999).CApi::$sSalt.microtime(true));
-			@setcookie(self::TOKEN_KEY, $sToken, 0, $this->getCookiePath(), null, null, true);
+			@setcookie(self::TOKEN_KEY, $sToken, time() + 60 * 60 * 24 * 30, $this->getCookiePath(), null, null, true);
 		}
 
 		return $sToken;
@@ -434,6 +447,116 @@ class CApiIntegratorManager extends AApiManager
 	}
 
 	/**
+	 * @param int $iThreadID
+	 *
+	 * @return void
+	 */
+	public function SetThreadIdFromRequest($iThreadID)
+	{
+		$aHashTable = array(
+			'token' => 'thread_id',
+			'id' => (int) $iThreadID
+		);
+
+		CApi::LogObject($aHashTable);
+
+		$_COOKIE[self::TOKEN_HD_THREAD_ID] = CApi::EncodeKeyValues($aHashTable);
+		@setcookie(self::TOKEN_HD_THREAD_ID, CApi::EncodeKeyValues($aHashTable), 0, $this->getCookiePath(), null, null, true);
+	}
+
+	/**
+	 * @return int|null
+	 */
+	public function GetThreadIdFromRequestAndClear()
+	{
+		$mHdThreadId = null;
+		$sKey = empty($_COOKIE[self::TOKEN_HD_THREAD_ID]) ? '' : $_COOKIE[self::TOKEN_HD_THREAD_ID];
+		if (!empty($sKey) && is_string($sKey))
+		{
+			$aUserHashTable = CApi::DecodeKeyValues($sKey);
+			if (is_array($aUserHashTable) && isset($aUserHashTable['token'], $aUserHashTable['id']) &&
+				'thread_id' === $aUserHashTable['token'] && 0 < strlen($aUserHashTable['id']) && is_int($aUserHashTable['id']))
+			{
+				$mHdThreadId = (int) $aUserHashTable['id'];
+			}
+		}
+
+		if (0 < strlen($sKey))
+		{
+			if (isset($_COOKIE[self::TOKEN_HD_THREAD_ID]))
+			{
+				unset($_COOKIE[self::TOKEN_HD_THREAD_ID]);
+			}
+
+			@setcookie(self::TOKEN_HD_THREAD_ID, '', time() - 60 * 60 * 24 * 30, $this->getCookiePath());
+		}
+
+		return $mHdThreadId;
+	}
+
+	/**
+	 * @return void
+	 */
+	public function RemoveUserAsActivated()
+	{
+		if (isset($_COOKIE[self::TOKEN_HD_ACTIVATED]))
+		{
+			$_COOKIE[self::TOKEN_HD_ACTIVATED] = '';
+			unset($_COOKIE[self::TOKEN_HD_ACTIVATED]);
+			@setcookie(self::TOKEN_HD_ACTIVATED, '', time() - 60 * 60 * 24 * 30, $this->getCookiePath());
+		}
+	}
+
+	/**
+	 * @param CHelpdeskUser $oHelpdeskUser
+	 *
+	 * @return void
+	 */
+	public function SetUserAsActivated($oHelpdeskUser, $bForgot = false)
+	{
+		$aHashTable = array(
+			'token' => 'hd_activated_email',
+			'forgot' => $bForgot,
+			'email' => $oHelpdeskUser->Email
+		);
+
+		$_COOKIE[self::TOKEN_HD_ACTIVATED] = CApi::EncodeKeyValues($aHashTable);
+		@setcookie(self::TOKEN_HD_ACTIVATED, CApi::EncodeKeyValues($aHashTable), 0, $this->getCookiePath(), null, null, true);
+	}
+
+	/**
+	 * @param bool $bForgot = false
+	 *
+	 * @return int
+	 */
+	public function GetActivatedUserEmailAndClear()
+	{
+		$sEmail = '';
+		$sKey = empty($_COOKIE[self::TOKEN_HD_ACTIVATED]) ? '' : $_COOKIE[self::TOKEN_HD_ACTIVATED];
+		if (!empty($sKey) && is_string($sKey))
+		{
+			$aUserHashTable = CApi::DecodeKeyValues($sKey);
+			if (is_array($aUserHashTable) && isset($aUserHashTable['token']) &&
+				'hd_activated_email' === $aUserHashTable['token'] && 0 < strlen($aUserHashTable['email']))
+			{
+				$sEmail = $aUserHashTable['email'];
+			}
+		}
+
+		if (0 < strlen($sKey))
+		{
+			if (isset($_COOKIE[self::TOKEN_HD_ACTIVATED]))
+			{
+				unset($_COOKIE[self::TOKEN_HD_ACTIVATED]);
+			}
+
+			@setcookie(self::TOKEN_HD_THREAD_ID, '', time() - 60 * 60 * 24 * 30, $this->getCookiePath());
+		}
+
+		return $sEmail;
+	}
+
+	/**
 	 * @param CAccount $oAccount
 	 * @param bool $bSignMe = false
 	 *
@@ -451,16 +574,61 @@ class CApiIntegratorManager extends AApiManager
 		@setcookie(self::AUTH_KEY, CApi::EncodeKeyValues($aAccountHashTable), $iTime, $this->getCookiePath(), null, null, true);
 	}
 
+	/**
+	 * @param CHelpdeskUser $oUser
+	 * @param bool $bSignMe = false
+	 *
+	 * @return void
+	 */
+	public function SetHelpdeskUserAsLoggedIn(CHelpdeskUser $oUser, $bSignMe = false)
+	{
+		$aUserHashTable = array(
+			'token' => 'hd_auth',
+			'sign-me' => $bSignMe,
+			'id' => $oUser->IdHelpdeskUser
+		);
+
+		$iTime = $bSignMe ? time() + 60 * 60 * 24 * 30 : 0;
+		@setcookie(self::AUTH_HD_KEY, CApi::EncodeKeyValues($aUserHashTable), $iTime, $this->getCookiePath(), null, null, true);
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function LogoutHelpdeskUser()
+	{
+		@setcookie(self::AUTH_HD_KEY, '', time() - 60 * 60 * 24 * 30, $this->getCookiePath());
+		return true;
+	}
+
 	public function ResetCookies()
 	{
 		$sAccountHash = !empty($_COOKIE[self::AUTH_KEY]) ? $_COOKIE[self::AUTH_KEY] : '';
 		if (0 < strlen($sAccountHash))
 		{
 			$aAccountHashTable = CApi::DecodeKeyValues($sAccountHash);
-			$bSignMe = isset($aAccountHashTable['sign-me']) ? !!$aAccountHashTable['sign-me'] : false;
+			if (isset($aAccountHashTable['sign-me']) && $aAccountHashTable['sign-me'])
+			{
+				@setcookie(self::AUTH_KEY, CApi::EncodeKeyValues($aAccountHashTable),
+					time() + 60 * 60 * 24 * 30, $this->getCookiePath(), null, null, true);
+			}
 
-			$iTime = $bSignMe ? time() + 60 * 60 * 24 * 30 : 0;
-			@setcookie(self::AUTH_KEY, CApi::EncodeKeyValues($aAccountHashTable), $iTime, $this->getCookiePath(), null, null, true);
+			$sToken = !empty($_COOKIE[self::TOKEN_KEY]) ? $_COOKIE[self::TOKEN_KEY] : null;
+			if (null !== $sToken)
+			{
+				@setcookie(self::TOKEN_KEY, $sToken, time() + 60 * 60 * 24 * 30, $this->getCookiePath(), null, null, true);
+			}
+		}
+
+		$sHelpdeskHash = !empty($_COOKIE[self::AUTH_HD_KEY]) ? $_COOKIE[self::AUTH_HD_KEY] : '';
+		if (0 < strlen($sHelpdeskHash))
+		{
+			$aHelpdeskHashTable = CApi::DecodeKeyValues($sHelpdeskHash);
+			if (isset($aHelpdeskHashTable['sign-me']) && $aHelpdeskHashTable['sign-me'])
+			{
+				@setcookie(self::AUTH_HD_KEY, CApi::EncodeKeyValues($aHelpdeskHashTable), 
+					time() + 60 * 60 * 24 * 30, $this->getCookiePath(), null, null, true);
+			}
 		}
 	}
 
@@ -486,16 +654,29 @@ class CApiIntegratorManager extends AApiManager
 			{
 				$oAccount->IncomingMailPassword = $sIncPassword;
 			}
-
+			
 			if ($oAccount->IsDisabled || ($oAccount->Domain && $oAccount->Domain->IsDisabled))
 			{
 				throw new CApiManagerException(Errs::WebMailManager_AccountDisabled);
 			}
-			else if (!$oAccount->User->AllowWebmail || !$oAccount->User->GetCapa('WEBMAIL'))
+			else if (!$oAccount->Domain->AllowWebMail)
 			{
 				throw new CApiManagerException(Errs::WebMailManager_AccountWebmailDisabled);
 			}
 
+			if (0 < $oAccount->IdTenant)
+			{
+				$oApiTenantsManager = /* @var $oApiTenantsManager CApiTenantsManager */ CApi::Manager('tenants');
+				if ($oApiTenantsManager)
+				{
+					$oTenant = $oApiTenantsManager->GetTenantById($oAccount->IdTenant);
+					if ($oTenant && ($oTenant->IsDisabled || (0 < $oTenant->Expared && $oTenant->Expared < \time())))
+					{
+						throw new CApiManagerException(Errs::WebMailManager_AccountDisabled);
+					}
+				}
+			}
+			
 			if (0 < strlen($sLanguage) && $sLanguage !== $oAccount->User->DefaultLanguage)
 			{
 				$oAccount->User->DefaultLanguage = $sLanguage;
@@ -507,7 +688,8 @@ class CApiIntegratorManager extends AApiManager
 			$sObsoleteIncPassword = $oAccount->GetObsoleteValue('IncomingMailPassword');
 			$sObsoleteLanguage = $oAccount->User->GetObsoleteValue('DefaultLanguage');
 			if (null !== $sObsoleteIncPassword && $sObsoleteIncPassword !== $oAccount->IncomingMailPassword ||
-				null !== $sObsoleteLanguage && $sObsoleteLanguage !== $oAccount->User->DefaultLanguage)
+				null !== $sObsoleteLanguage && $sObsoleteLanguage !== $oAccount->User->DefaultLanguage ||
+				$oAccount->ForceSaveOnLogin)
 			{
 				$oApiUsersManager->UpdateAccount($oAccount);
 			}
@@ -562,6 +744,140 @@ class CApiIntegratorManager extends AApiManager
 
 		return $oResult;
 	}
+	
+	/**
+	 * @return CHelpdeskUser|null|bool
+	 */
+	public function LoginToHelpdeskAccount($iIdTenant, $sEmail, $sPassword)
+	{
+		$oResult = null;
+
+		CApi::Plugin()->RunHook('api-integrator-login-to-helpdesk-user', array(&$sEmail, &$sPassword));
+
+		$oApiHelpdeskManager = /* @var $oApiHelpdeskManager CApiHelpdeskManager */ CApi::Manager('helpdesk');
+		$oApiUsersManager = /* @var $oApiUsersManager CApiUsersManager */ CApi::Manager('users');
+		$oApiCapabilityManager = /* @var $oApiCapabilityManager CApiCapabilityManager */ CApi::Manager('capability');
+		if (!$oApiHelpdeskManager || !$oApiUsersManager || !$oApiCapabilityManager ||
+			!$oApiCapabilityManager->IsHelpdeskSupported())
+		{
+			return false;
+		}
+
+		$oAccount = $oApiUsersManager->GetAccountOnLogin($sEmail);
+		if ($oAccount && $oAccount->IdTenant === $iIdTenant && $oApiCapabilityManager->IsHelpdeskSupported($oAccount) &&
+			$oAccount->IncomingMailPassword === $sPassword)
+		{
+			$this->SetAccountAsLoggedIn($oAccount);
+			$this->SetThreadIdFromRequest(0);
+			throw new CApiManagerException(Errs::HelpdeskManager_AccountSystemAuthentication);
+			return null;
+		}
+
+		$oUser = /* @var $oUser CHelpdeskUser */ $oApiHelpdeskManager->GetUserByEmail($iIdTenant, $sEmail);
+		if ($oUser instanceof CHelpdeskUser && $oUser->ValidatePassword($sPassword) && $iIdTenant === $oUser->IdTenant)
+		{
+			if (!$oUser->Activated)
+			{
+				throw new CApiManagerException(Errs::HelpdeskManager_UnactivatedUser);
+			}
+
+			$oResult = $oUser;
+			CApi::Plugin()->RunHook('statistics.helpdesk-login', array(&$oResult, null));
+		}
+		else
+		{
+			throw new CApiManagerException(Errs::HelpdeskManager_AccountAuthentication);
+		}
+
+		if ($oResult instanceof CHelpdeskUser)
+		{
+			CApi::Plugin()->RunHook('statistics.helpdesk-login', array(&$oResult, null));
+		}
+
+		CApi::Plugin()->RunHook('api-integrator-login-to-helpdesk-user-result', array(&$oResult));
+
+		return $oResult;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function RegisterHelpdeskAccount($iIdTenant, $sEmail, $sName, $sPassword)
+	{
+		$bResult = false;
+
+		$oApiHelpdeskManager = /* @var $oApiHelpdeskManager CApiHelpdeskManager */ CApi::Manager('helpdesk');
+		$oApiUsersManager = /* @var $oApiUsersManager CApiUsersManager */ CApi::Manager('users');
+		$oApiCapabilityManager = /* @var $oApiCapabilityManager CApiCapabilityManager */ CApi::Manager('capability');
+		if (!$oApiHelpdeskManager || !$oApiUsersManager || !$oApiCapabilityManager ||
+			!$oApiCapabilityManager->IsHelpdeskSupported())
+		{
+			return $bResult;
+		}
+
+		$oUser = /* @var $oUser CHelpdeskUser */ $oApiHelpdeskManager->GetUserByEmail($iIdTenant, $sEmail);
+		if (!$oUser)
+		{
+			$oAccount = $oApiUsersManager->GetAccountOnLogin($sEmail);
+			if ($oAccount && $oAccount->IdTenant === $iIdTenant && $oApiCapabilityManager->IsHelpdeskSupported($oAccount))
+			{
+				throw new CApiManagerException(Errs::HelpdeskManager_UserAlreadyExists);
+			}
+
+			$oUser = new CHelpdeskUser();
+			$oUser->Activated = false;
+			$oUser->Email = $sEmail;
+			$oUser->Name = $sName;
+			$oUser->IdTenant = $iIdTenant;
+			$oUser->IsAgent = false;
+
+			$oUser->SetPassword($sPassword);
+			
+			$oApiHelpdeskManager->CreateUser($oUser);
+			if (!$oUser || 0 === $oUser->IdHelpdeskUser)
+			{
+				throw new CApiManagerException(Errs::HelpdeskManager_UserCreateFailed);
+			}
+			else
+			{
+				$bResult = true;
+			}
+		}
+		else
+		{
+			throw new CApiManagerException(Errs::HelpdeskManager_UserAlreadyExists);
+		}
+
+		return $bResult;
+	}
+
+	/**
+	 * @return int|bool
+	 */
+	public function GetTenantIdByHash($sTenantHash)
+	{
+		$iResult = 0;
+
+		$oApiCapabilityManager = /* @var $oApiCapabilityManager CApiCapabilityManager */ CApi::Manager('capability');
+		if (0 === strlen($sTenantHash) && $oApiCapabilityManager->IsHelpdeskSupported() && !$oApiCapabilityManager->IsTenantsSupported())
+		{
+			return 0;
+		}
+		else if (0 < strlen($sTenantHash))
+		{
+			$oApiTenantsManager = /* @var $oApiTenantsManager CApiTenantsManager */ CApi::Manager('tenants');
+			if ($oApiTenantsManager)
+			{
+				$oTenant = $oApiTenantsManager->GetTenantByHash($sTenantHash);
+				if ($oTenant && $oTenant->IsHelpdeskSupported())
+				{
+					$iResult = $oTenant->IdTenant;
+				}
+			}
+		}
+		
+		return 0 < $iResult ? $iResult : false;
+	}
 
 	/**
 	 * @param CAccount $oAccount
@@ -593,6 +909,10 @@ class CApiIntegratorManager extends AApiManager
 		return $oDomain;
 	}
 
+	/**
+	 * @param CDomain $oDomain
+	 * @return array
+	 */
 	private function appDataDomainSettings($oDomain)
 	{
 		$aResult = array();
@@ -600,14 +920,15 @@ class CApiIntegratorManager extends AApiManager
 		{
 			$oSettings =& CApi::GetSettings();
 
-			/* @var $oApiDavManager CApiDavManager */
-			$oApiDavManager = CApi::Manager('dav');
-
 			$aResult['AllowUsersChangeInterfaceSettings'] = (bool) $oDomain->AllowUsersChangeInterfaceSettings;
 			$aResult['AllowUsersChangeEmailSettings'] = (bool) $oDomain->AllowUsersChangeEmailSettings;
 			$aResult['AllowUsersAddNewAccounts'] = (bool) $oDomain->AllowUsersAddNewAccounts;
+			$aResult['AllowFetcher'] = (bool) $oDomain->IsInternal;
+
+			$aResult['SiteName'] = $oDomain->SiteName;
 
 			$aResult['DefaultLanguage'] = $oDomain->DefaultLanguage;
+			$aResult['DefaultLanguageShort'] = api_Utils::ConvertLanguageNameToShort($oDomain->DefaultLanguage);
 			$aResult['DefaultTheme'] = $oDomain->DefaultSkin;
 
 			$aResult['Languages'] = array();
@@ -628,41 +949,76 @@ class CApiIntegratorManager extends AApiManager
 			}
 
 			$aResult['DateFormats'] = array();
-			foreach (array(EDateFormat::MMDDYYYY, EDateFormat::DDMMYYYY) as $sDateFmtName)
+			foreach (array(EDateFormat::MMDDYYYY, EDateFormat::DDMMYYYY, EDateFormat::DD_MONTH_YYYY) as $sDateFmtName)
 			{
 				$aResult['DateFormats'][] = $sDateFmtName;
 			}
 
 			$iAttachmentSizeLimit = ((bool) $oSettings->GetConf('WebMail/EnableAttachmentSizeLimit'))
 				? (int) $oSettings->GetConf('WebMail/AttachmentSizeLimit') : 0;
+			
+			$iImageUploadSizeLimit = ((bool) $oSettings->GetConf('WebMail/EnableAttachmentSizeLimit'))
+				? (int) $oSettings->GetConf('WebMail/ImageUploadSizeLimit') : 0;
 
 			$aResult['AttachmentSizeLimit'] = $iAttachmentSizeLimit;
+			$aResult['ImageUploadSizeLimit'] = $iImageUploadSizeLimit;
 			$aResult['AutoSave'] = (bool) CApi::GetConf('webmail.autosave', true);
-
-			$sUrl = $oApiDavManager ? $oApiDavManager->GetServerUrl() : '';
 
 			$aResult['IdleSessionTimeout'] = (int) $oSettings->GetConf('WebMail/IdleSessionTimeout');
 			$aResult['AllowInsertImage'] = (bool) $oSettings->GetConf('WebMail/AllowInsertImage');
 			$aResult['AllowBodySize'] = (bool) $oSettings->GetConf('WebMail/AllowBodySize');
 			$aResult['MaxBodySize'] = (int) $oSettings->GetConf('WebMail/MaxBodySize');
 			$aResult['MaxSubjectSize'] = (int) $oSettings->GetConf('WebMail/MaxSubjectSize');
-			$aResult['EnableMobileSync'] = (!empty($sUrl) && (bool) $oSettings->GetConf('Common/EnableMobileSync'));
 			
 			$aResult['AllowPrefetch'] = (bool) CApi::GetConf('webmail.use-prefetch', true);
 			$aResult['AllowLanguageOnLogin'] = (bool) $oSettings->GetConf('WebMail/AllowLanguageOnLogin');
 			$aResult['FlagsLangSelect'] = (bool) $oSettings->GetConf('WebMail/FlagsLangSelect');
 			
+			$aResult['LoginFormType'] = (int) $oSettings->GetConf('WebMail/LoginFormType');
+			$aResult['LoginSignMeType'] = (int) $oSettings->GetConf('WebMail/LoginSignMeType');
+			$aResult['LoginAtDomainValue'] = (string) $oSettings->GetConf('WebMail/LoginAtDomainValue');
+			
 			$aResult['DemoWebMail'] = (bool) CApi::GetConf('demo.webmail.enable', false);
 			$aResult['DemoWebMailLogin'] = CApi::GetConf('demo.webmail.login', '');
 			$aResult['DemoWebMailPassword'] = CApi::GetConf('demo.webmail.password', '');
 			$aResult['GoogleAnalyticsAccount'] = CApi::GetConf('labs.google-analytic.account', '');
-			$aResult['CustomLogoutUrl'] = CApi::GetConf('labs.webmail.custom-logout-url', '');
+			$aResult['CustomLoginUrl'] = (string) CApi::GetConf('labs.webmail.custom-login-url', '');
+			$aResult['CustomLogoutUrl'] = (string) CApi::GetConf('labs.webmail.custom-logout-url', '');
 			$aResult['ShowQuotaBar'] = (bool) $oSettings->GetConf('WebMail/ShowQuotaBar');
+			$aResult['ServerUseUrlRewrite'] = (bool) CApi::GetConf('labs.server-use-url-rewrite', false);
+			$aResult['ServerUrlRewriteBase'] = (string) CApi::GetConf('labs.server-url-rewrite-base', '');
+			$aResult['IosDetectOnLogin'] = (bool) CApi::GetConf('labs.webmail.ios-detect-on-login', true);
+			$aResult['ReCaptchaPublicKey'] = CApi::GetConf('captcha.recaptcha-public-key', '');
+			$aResult['UseReCaptcha'] = false;
+
+			if ($aResult['IosDetectOnLogin'])
+			{
+				$aResult['IosDetectOnLogin'] = isset($_COOKIE['skip_ios']) &&
+					'1' === (string) $_COOKIE['skip_ios'] ? false : true;
+			}
+
+			if ($oSettings->GetConf('WebMail/UseReCaptcha'))
+			{
+				$iLimitCaptcha = (int) CApi::GetConf('captcha.limit-count', 0);
+				if (0 === $iLimitCaptcha)
+				{
+					$aResult['UseReCaptcha'] = true;
+				}
+				else
+				{
+					$iLimitCaptcha -= \CApi::CatchaLocalLimit();
+					if (0 >= $iLimitCaptcha)
+					{
+						$aResult['UseReCaptcha'] = true;
+					}
+				}
+			}
 
 			$sCustomLanguage = $this->GetLoginLanguage();
 			if (!empty($sCustomLanguage))
 			{
 				$aResult['DefaultLanguage'] = $sCustomLanguage;
+				$aResult['DefaultLanguageShort'] = api_Utils::ConvertLanguageNameToShort($sCustomLanguage);
 			}
 
 			$aResult['LoginDescription'] = '';
@@ -673,6 +1029,30 @@ class CApiIntegratorManager extends AApiManager
 		return $aResult;
 	}
 
+	/**
+	 * @param CHelpdeskUser $oUser
+	 * @return array
+	 */
+	private function appDataHelpdeskUserSettings($oUser)
+	{
+		$aResult = array();
+		if ($oUser)
+		{
+			$aResult['Name'] = $oUser->Name;
+			$aResult['Email'] = $oUser->Email;
+			$aResult['Language'] = $oUser->Language;
+			$aResult['DateFormat'] = $oUser->DateFormat;
+			$aResult['TimeFormat'] = $oUser->TimeFormat;
+			$aResult['IsHelpdeskAgent'] = $oUser->IsAgent;
+		}
+
+		return $aResult;
+	}
+
+	/**
+	 * @param CAccount $oAccount
+	 * @return array
+	 */
 	private function appDataUserSettings($oAccount)
 	{
 		$aResult = array();
@@ -680,18 +1060,15 @@ class CApiIntegratorManager extends AApiManager
 		{
 			$oSettings =& CApi::GetSettings();
 
-			/* @var $oApiCapabilityManager CApiCapabilityManager */
 			$oApiCapabilityManager = CApi::Manager('capability');
-
-			/* @var $oApiCollaborationManager CApiCollaborationManager */
-			$oApiCollaborationManager = CApi::Manager('collaboration');
+			/* @var $oApiCapabilityManager CApiCapabilityManager */
 
 			$aResult['IdUser'] = $oAccount->User->IdUser;
 			$aResult['MailsPerPage'] = (int) $oAccount->User->MailsPerPage;
 			$aResult['ContactsPerPage'] = (int) $oAccount->User->ContactsPerPage;
 			$aResult['AutoCheckMailInterval'] = (int) $oAccount->User->AutoCheckMailInterval;
 			$aResult['DefaultEditor'] = (int) $oAccount->User->DefaultEditor;
-			$aResult['Layout'] = (int) $oAccount->User->Layout;
+//			$aResult['Layout'] = (int) $oAccount->User->Layout;
 			$aResult['Layout'] = 0;
 
 			$aResult['DefaultTheme'] = $oAccount->User->DefaultSkin;
@@ -707,26 +1084,136 @@ class CApiIntegratorManager extends AApiManager
 			$iSaveMail = ESaveMail::Always !== $iSaveMail ? $oAccount->User->SaveMail : ESaveMail::Always;
 			$aResult['SaveMail'] = (int) $iSaveMail;
 
-			$aResult['OutlookSyncEnable'] = (bool) ($oAccount->User->GetCapa('OUTLOOK_SYNC') && $oApiCollaborationManager);
-
-			$iPab = (int) ($oAccount->User->AllowContacts && $oAccount->User->GetCapa('PAB'));
-			$iGab = (int) ($oAccount->User->AllowContacts &&
-				$oSettings->GetConf('Contacts/ShowGlobalContactsInAddressBook') &&
-				$oAccount->User->GetCapa('GAB') &&
-				$oApiCollaborationManager &&
-				$oApiCollaborationManager->IsContactsGlobalSupported());
-
-			$aResult['ShowPersonalContacts'] = (bool) $iPab;
-			$aResult['ShowGlobalContacts'] = (bool) $iGab;
+			$aResult['ThreadsEnabled'] = !!$oSettings->GetConf('WebMail/UseThreadsIfSupported');
+			$aResult['UseThreads'] = false;
+			
+			if ($aResult['ThreadsEnabled'])
+			{
+				$aResult['UseThreads'] = (bool) $oAccount->User->UseThreads;
+			}
+			
+			$aResult['OutlookSyncEnable'] = $oApiCapabilityManager->IsOutlookSyncSupported($oAccount);
+			$aResult['MobileSyncEnable'] = $oApiCapabilityManager->IsMobileSyncSupported($oAccount);
+			
+			$aResult['ShowPersonalContacts'] = $oApiCapabilityManager->IsPersonalContactsSupported($oAccount);
+			$aResult['ShowGlobalContacts'] = $oApiCapabilityManager->IsGlobalContactsSupported($oAccount, true);
+			
+			$aResult['IsFilesSupported'] = $oApiCapabilityManager->IsFilesSupported($oAccount);
+			$aResult['IsHelpdeskSupported'] = $oApiCapabilityManager->IsHelpdeskSupported($oAccount);
+			$aResult['IsHelpdeskAgent'] = $aResult['IsHelpdeskSupported']; // TODO
+			$aResult['AllowHelpdeskNotifications'] = (bool) $oAccount->User->AllowHelpdeskNotifications;
 
 			$aResult['LastLogin'] = 0;
 			if ($oSettings->GetConf('WebMail/EnableLastLoginNotification'))
 			{
-				$sLastLogin = (string) CSession::Get(EAccountSessKey::LastLogin, '');
-				if (!empty($sLastLogin))
+				$aResult['LastLogin'] = $oAccount->User->LastLogin;
+			}
+
+			$aResult['AllowVoice'] = false;
+			$aResult['VoiceProvider'] = '';
+			$aResult['VoiceRealm'] = '';
+			$aResult['VoiceWebsocketProxyUrl'] = '';
+			$aResult['VoiceOutboundProxyUrl'] = '';
+			$aResult['VoiceCallerID'] = '';
+			
+//			$aResult['VoiceAccountSID'] = '';
+//			$aResult['VoiceAuthToken'] = '';
+//			$aResult['VoiceAppSID'] = '';
+
+			$aResult['VoiceImpi'] = $oAccount->User->SipImpi;
+			$aResult['VoicePassword'] = $oAccount->User->SipPassword;
+			
+//			0 < strlen($aResult['VoiceImpi']) && 
+			if ($oApiCapabilityManager->IsVoiceSupported($oAccount))
+			{
+				if (0 < $oAccount->IdTenant)
 				{
-					$aResult['LastLogin'] = (int) $sLastLogin;
+					$oApiTenants = CApi::Manager('tenants');
+					$oTenant = $oApiTenants ? $oApiTenants->GetTenantById($oAccount->IdTenant) : null;
+					/* @var $oTenant CTenant */
+					
+					if ($oTenant && $oTenant->IsVoiceSupported()) {
+						
+						if ($oTenant->SipAllowConfiguration || $oTenant->TwilioAllowConfiguration)
+						{
+							if ($oTenant->SipAllow) {
+								$aResult['AllowVoice'] = $oTenant->SipAllow;
+								$aResult['VoiceProvider'] = 'sip';
+								$aResult['VoiceRealm'] = (string) $oTenant->SipRealm;
+								$aResult['VoiceWebsocketProxyUrl'] = (string) $oTenant->SipWebsocketProxyUrl;
+								$aResult['VoiceOutboundProxyUrl'] = (string) $oTenant->SipOutboundProxyUrl;
+								$aResult['VoiceCallerID'] = (string) $oTenant->SipCallerID;
+							} 
+							else if ($oTenant->TwilioAllow) 
+							{
+								$aResult['AllowVoice'] = $oTenant->TwilioAllow;
+								$aResult['VoiceProvider'] = 'twilio';
+	//							$aResult['VoiceAccountSID'] = (string) $oTenant->TwilioAccountSID;
+	//							$aResult['VoiceAuthToken'] = (string) $oTenant->TwilioAuthToken;
+	//							$aResult['VoiceAppSID'] = (string) $oTenant->TwilioAppSID;
+							}
+						}
+					}
+				} else {
+					if ($oSettings->GetConf('Sip/AllowSip'))
+					{
+						$aResult['AllowVoice'] = true;
+						$aResult['VoiceProvider'] = 'sip';
+						$aResult['VoiceRealm'] = (string) $this->oSettings->GetConf('Sip/Realm');
+						$aResult['VoiceWebsocketProxyUrl'] = (string) $this->oSettings->GetConf('Sip/WebsocketProxyUrl');
+						$aResult['VoiceOutboundProxyUrl'] = (string) $this->oSettings->GetConf('Sip/OutboundProxyUrl');
+						$aResult['VoiceCallerID'] = (string) $this->oSettings->GetConf('Sip/CallerID');
+					}
+					else if ($oSettings->GetConf('Twilio/AllowTwilio'))
+					{
+						$aResult['AllowVoice'] = true;
+						$aResult['VoiceProvider'] = 'twilio';
+	//					$aResult['VoiceAccountSID'] = (string) $this->oSettings->GetConf('Twilio/AccountSID');
+	//					$aResult['VoiceAuthToken'] = (string) $this->oSettings->GetConf('Twilio/AuthToken');
+	//					$aResult['VoiceAppSID'] = (string) $this->oSettings->GetConf('Twilio/AppSID');
+					}
 				}
+				
+				if ($aResult['VoiceProvider'] === 'sip' && (0 === strlen($aResult['VoiceRealm']) || 0 === strlen($aResult['VoiceWebsocketProxyUrl'])))
+				{
+					$aResult['AllowVoice'] = false;
+					$aResult['VoiceRealm'] = '';
+					$aResult['VoiceWebsocketProxyUrl'] = '';
+					$aResult['VoiceOutboundProxyUrl'] = '';
+					$aResult['VoiceCallerID'] = '';
+					$aResult['VoiceImpi'] = '';
+					$aResult['VoicePassword'] = '';
+					
+//					$aResult['VoiceAccountSID'] = '';
+//					$aResult['VoiceAuthToken'] = '';
+//					$aResult['VoiceAppSID'] = '';
+				}
+				\CApi::Log($aResult['AllowVoice']);
+//				else if ($aResult['VoiceProvider'] === 'twilio' &&
+//						(
+//							0 === strlen($aResult['VoiceAccountSID']) ||
+//							0 === strlen($aResult['VoiceTwilioAuthToken']) ||
+//							0 === strlen($aResult['VoiceTwilioAppSID'])
+//						)
+//					)
+//				{
+//					$aResult['AllowVoice'] = false;
+////					$aResult['VoiceAccountSID'] = '';
+////					$aResult['VoiceAuthToken'] = '';
+////					$aResult['VoiceAppSID'] = '';
+//					
+//					$aResult['VoiceRealm'] = '';
+//					$aResult['VoiceWebsocketProxyUrl'] = '';
+//					$aResult['VoiceOutboundProxyUrl'] = '';
+//					$aResult['VoiceCallerID'] = '';
+//					$aResult['VoiceImpi'] = '';
+//					$aResult['VoicePassword'] = '';
+//				}
+			}
+			else
+			{
+				$aResult['VoiceImpi'] = '';
+				$aResult['VoicePassword'] = '';
 			}
 
 			/* @var $oApiUsersManager CApiUsersManager */
@@ -735,11 +1222,10 @@ class CApiIntegratorManager extends AApiManager
 			/* @var $oApiDavManager CApiDavManager */
 			$oApiDavManager = CApi::Manager('dav');
 
-			$aResult['AllowCalendar'] = (bool)
-				($oApiCapabilityManager->IsCalendarSupported() && $oAccount->User->AllowCalendar && $oAccount->User->GetCapa('CALENDAR'));
+			$aResult['AllowCalendar'] = $oApiCapabilityManager->IsCalendarSupported($oAccount);
 
 			$aResult['Calendar'] = null;
-			if ($oApiDavManager && $oAccount->IsDefaultAccount)
+			if ($aResult['AllowCalendar'] && $oApiDavManager && $oAccount->IsDefaultAccount)
 			{
 				/* @var $oCalUser CCalUser */
 				$oCalUser = $oApiUsersManager->GetOrCreateCalUserByUserId($oAccount->IdUser);
@@ -760,13 +1246,21 @@ class CApiIntegratorManager extends AApiManager
 				}
 			}
 
+			$aResult['CalendarSharing'] = false;
+			$aResult['CalendarAppointments'] = false;
+			
 			$aResult['AllowCalendar'] = null === $aResult['Calendar'] ? false : $aResult['AllowCalendar'];
+			if ($aResult['AllowCalendar'])
+			{
+				$aResult['CalendarSharing'] = $oApiCapabilityManager->IsCalendarSharingSupported($oAccount);
+				$aResult['CalendarAppointments'] = $oApiCapabilityManager->IsCalendarAppointmentsSupported($oAccount);
+			}
 
 			$bIsDemo = false;
 			CApi::Plugin()->RunHook('plugin-is-demo-account', array(&$oAccount, &$bIsDemo));
 			$aResult['IsDemo'] = $bIsDemo;
 			
-			CApi::Plugin()->RunHook('api-app-user-data', $oAccount, $aResult);
+			CApi::Plugin()->RunHook('api-app-user-data', array(&$oAccount, &$aResult));
 
 		}
 
@@ -839,41 +1333,119 @@ class CApiIntegratorManager extends AApiManager
 	 */
 	public function GetThemeList()
 	{
-		$sList = array();
-		$sDir = CApi::WebMailPath().'skins';
-		if (@is_dir($sDir))
+		static $sList = null;
+		if (null === $sList)
 		{
-			$rDirH = @opendir($sDir);
-			if ($rDirH)
+			$sList = array();
+
+			$aThemes = CApi::GetConf('themes', array());
+			$sDir = CApi::WebMailPath().'skins';
+
+			if (is_array($aThemes))
 			{
-				while (($sFile = @readdir($rDirH)) !== false)
+				foreach ($aThemes as $sTheme)
 				{
-					if ('.' !== $sFile{0} && is_dir($sDir.'/'.$sFile) && file_exists($sDir.'/'.$sFile.'/styles.css'))
+					if (file_exists($sDir.'/'.$sTheme.'/styles.css'))
 					{
-						$sList[] = $sFile;
+						$sList[] = $sTheme;
 					}
 				}
-				@closedir($rDirH);
 			}
 		}
+		
 		return $sList;
 	}
 
 	/**
+	 * @param bool $bHelpdesk = false
+	 * @param int $iHelpdeskIdTenant = null
+	 * @param string $sHelpdeskTenantHash = ''
 	 * @return array
 	 */
-	public function AppData()
+	public function AppData($bHelpdesk = false, $iHelpdeskIdTenant = null, $sHelpdeskTenantHash = '', $sCalendarPubHash = '')
 	{
 		$aAppData = array(
 			'Auth' => false,
 			'User' => null,
+			'TenantHash' => '',
+			'HelpdeskSiteName' => '',
+			'HelpdeskIframeUrl' => '',
+			'HelpdeskRedirect' => false,
+			'HelpdeskThreadId' => 0,
+			'HelpdeskActivatedEmail' => '',
+			'HelpdeskForgotHash' => '',
 			'LastErrorCode' => $this->GetLastErrorCode(),
 			'Token' => $this->GetCsrfToken()
 		);
-
+		
 		if (0 < $aAppData['LastErrorCode'])
 		{
 			$this->ClearLastErrorCode();
+		}
+
+		if (!empty($sCalendarPubHash))
+		{
+			$aAppData['CalendarPubHash'] = $sCalendarPubHash;
+			$aAppData['CalendarPubParams'] = CApi::DecodeKeyValues($sCalendarPubHash);
+			return $aAppData;
+		}
+
+		$oApiHelpdeskManager = CApi::Manager('helpdesk');
+		/* @var $oApiHelpdeskManager CApiHelpdeskManager */
+
+		$mThreadId = $this->GetThreadIdFromRequestAndClear();
+		if ($bHelpdesk)
+		{
+			$aHelpdesMainData = null;
+			$aAppData['TenantHash'] = $sHelpdeskTenantHash;
+			
+			$iUserId = $this->GetLogginedHelpdeskUserId();
+			if (0 < $iUserId && $oApiHelpdeskManager)
+			{
+				$oHelpdeskUser = $oApiHelpdeskManager->GetUserById($iHelpdeskIdTenant, $iUserId);
+				if ($oHelpdeskUser)
+				{
+					$aHelpdesMainData = $oApiHelpdeskManager->GetHelpdesMainSettings($oHelpdeskUser->IdTenant);
+
+					$aAppData['Auth'] = true;
+					$aAppData['HelpdeskIframeUrl'] = $oHelpdeskUser->IsAgent ? $aHelpdesMainData['AgentIframeUrl'] : $aHelpdesMainData['ClientIframeUrl'];
+					$aAppData['HelpdeskSiteName'] = isset($aHelpdesMainData['SiteName']) ? $aHelpdesMainData['SiteName'] : '';
+					$aAppData['User'] = $this->appDataHelpdeskUserSettings($oHelpdeskUser);
+				}
+			}
+
+			if (!$aHelpdesMainData && $oApiHelpdeskManager)
+			{
+				$iIdTenant = $this->GetTenantIdByHash($sHelpdeskTenantHash);
+				if (0 < $iIdTenant)
+				{
+					$aHelpdesMainData = $oApiHelpdeskManager->GetHelpdesMainSettings($iIdTenant);
+					$aAppData['HelpdeskSiteName'] = isset($aHelpdesMainData['SiteName']) ? $aHelpdesMainData['SiteName'] : '';
+				}
+			}
+
+			$oHttp = \MailSo\Base\Http::SingletonInstance();
+
+			$aAppData['HelpdeskForgotHash'] = $oHttp->GetRequest('forgot', '');
+			if (0 === strlen($aAppData['HelpdeskForgotHash']))
+			{
+				$aAppData['HelpdeskThreadId'] = null === $mThreadId ? 0 : $mThreadId;
+				$aAppData['HelpdeskActivatedEmail'] = $this->GetActivatedUserEmailAndClear();
+			}
+
+			$aAppData['App'] = array();
+			$aAppData['App']['DateFormats'] = array();
+			foreach (array(EDateFormat::MMDDYYYY, EDateFormat::DDMMYYYY, EDateFormat::DD_MONTH_YYYY) as $sDateFmtName)
+			{
+				$aAppData['App']['DateFormats'][] = $sDateFmtName;
+			}
+			
+			return $aAppData;
+		}
+		else
+		{
+			$aAppData['HelpdeskRedirect'] = is_int($mThreadId);
+			$aAppData['HelpdeskThreadId'] = null === $mThreadId ? 0 : $mThreadId;
 		}
 
 		$oDefaultAccount = null;
@@ -921,6 +1493,12 @@ class CApiIntegratorManager extends AApiManager
 				if ($oDefaultAccount)
 				{
 					$aAppData['User'] = $this->appDataUserSettings($oDefaultAccount);
+					if ($oApiHelpdeskManager)
+					{
+						$aData = $oApiHelpdeskManager->GetHelpdesMainSettings($oDefaultAccount->IdTenant);
+						$aAppData['HelpdeskIframeUrl'] = isset($aAppData['User']['IsHelpdeskAgent']) && $aAppData['User']['IsHelpdeskAgent'] ?
+							$aData['AgentIframeUrl'] : $aData['ClientIframeUrl'];
+					}
 				}
 			}
 		}
@@ -928,17 +1506,24 @@ class CApiIntegratorManager extends AApiManager
 		$oDomain = $this->getDefaultAccountDomain($oDefaultAccount);
 		$aAppData['App'] = $this->appDataDomainSettings($oDomain);
 
+		$aAppData['HelpdeskThreadId'] = null === $aAppData['HelpdeskThreadId'] ? 0 : $aAppData['HelpdeskThreadId'];
+
 		CApi::Plugin()->RunHook('api-app-data', $oDefaultAccount, $aAppData);
 
 		return $aAppData;
 	}
 
 	/**
+	 * @param bool $bHelpdesk = false
+	 * @param int $iHelpdeskIdTenant = null
+	 * @param string $sHelpdeskHash = ''
+	 * @param string $sCalendarPubHash = ''
+	 *
 	 * @return string
 	 */
-	private function compileAppData()
+	private function compileAppData($bHelpdesk = false, $iHelpdeskIdTenant = null, $sHelpdeskHash = '', $sCalendarPubHash = '')
 	{
-		return '<script>window.pSevenAppData='.json_encode($this->AppData()).';</script>';
+		return '<script>window.pSevenAppData='.json_encode($this->AppData($bHelpdesk, $iHelpdeskIdTenant, $sHelpdeskHash, $sCalendarPubHash)).';</script>';
 	}
 
 	/**
@@ -987,9 +1572,10 @@ class CApiIntegratorManager extends AApiManager
 	}
 
 	/**
+	 * @param string $sCalendarPubHash = ''
 	 * @return string
 	 */
-	public function GetAppDirValue()
+	public function GetAppDirValue($bHelpdesk = false)
 	{
 		list($sLanguage, $sTheme) = $this->getThemeAndLanguage();
 		return \in_array($sLanguage, array('Arabic', 'Hebrew')) ? 'rtl' : 'ltr';
@@ -997,25 +1583,50 @@ class CApiIntegratorManager extends AApiManager
 
 	/**
 	 * @param string $sWebPath = '.'
+	 * @param bool $bHelpdesk = false
+	 * @param string $sCalendarPubHash = ''
 	 * @return string
 	 */
-	public function BuildHeadersLink($sWebPath = '.')
+	public function BuildHeadersLink($sWebPath = '.', $bHelpdesk = false, $sCalendarPubHash = '')
 	{
-		list($sLanguage, $sTheme) = $this->getThemeAndLanguage();
+		list($sLanguage, $sTheme) = $this->getThemeAndLanguage($bHelpdesk);
 		
 		$sVersionJs = '?'.CApi::VersionJs();
 		$sWebPath = empty($sWebPath) ? '.' : $sWebPath;
-		return
+
+		if ($bHelpdesk)
+		{
+			return
 '<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/static/css/libs.css'.$sVersionJs.'" />'.
 '<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/static/css/app.css'.$sVersionJs.'" />'.
 '<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/skins/'.$sTheme.'/styles.css'.$sVersionJs.'" />';
+		}
+		else if (!empty($sCalendarPubHash))
+		{
+			return
+'<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/static/css/libs.css'.$sVersionJs.'" />'.
+'<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/static/css/app.css'.$sVersionJs.'" />'.
+'<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/skins/'.$sTheme.'/styles.css'.$sVersionJs.'" />';
+		}
+		else
+		{
+			return
+'<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/static/css/libs.css'.$sVersionJs.'" />'.
+'<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/static/css/app.css'.$sVersionJs.'" />'.
+'<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/skins/'.$sTheme.'/styles.css'.$sVersionJs.'" />';
+		}
 	}
 
 	/**
 	 * @param string $sWebPath = '.'
+	 * @param bool $bHelpdesk = false
+	 * @param int $iHelpdeskIdTenant = null
+	 * @param string $sHelpdeskHash = ''
+	 * @param string $sCalendarPubHash = ''
+	 *
 	 * @return string
 	 */
-	public function BuildBody($sWebPath = '.')
+	public function BuildBody($sWebPath = '.', $bHelpdesk = false, $iHelpdeskIdTenant = null, $sHelpdeskHash = '', $sCalendarPubHash = '')
 	{
 		list($sLanguage, $sTheme) = $this->getThemeAndLanguage();
 
@@ -1025,9 +1636,11 @@ class CApiIntegratorManager extends AApiManager
 '<div>'.
 $this->compileTemplates($sTheme).
 $this->compileLanguage($sLanguage).
-$this->compileAppData().
+$this->compileAppData($bHelpdesk, $iHelpdeskIdTenant, $sHelpdeskHash, $sCalendarPubHash).
 '<script src="'.$sWebPath.'/static/js/libs.js?'.CApi::VersionJs().'"></script>'.
-'<script src="'.$sWebPath.'/static/js/app'.(CApi::GetConf('labs.use-app-min-js', false) ? '.min' : '').'.js?'.CApi::VersionJs().'"></script>'.
+'<script src="'.$sWebPath.'/static/js/app'.($bHelpdesk ? '-helpdesk' :
+	(empty($sCalendarPubHash) ? '' : '-calendar-pub')).(CApi::GetConf('labs.use-app-min-js', false) ? '.min' : '').'.js?'.CApi::VersionJs().'"></script>'.
+	(CApi::Plugin()->HasJsFiled() ? '<script src="?/Plugins/js/'.CApi::Plugin()->Hash().'/"></script>' : '').
 '</div></div>'."\r\n".'<!-- '.CApi::Version().' -->'
 		;
 	}

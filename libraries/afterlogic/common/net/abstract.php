@@ -92,8 +92,16 @@ abstract class CApiNetAbstract
 			CApi::Log('connected');
 		}
 
-		@stream_set_timeout($this->rConnect, $this->iSocketTimeOut);
-		@stream_set_blocking($this->rConnect, true);
+		if (\MailSo\Base\Utils::FunctionExistsAndEnabled('stream_set_timeout'))
+		{
+			@stream_set_timeout($this->rConnect, $this->iSocketTimeOut);
+		}
+
+		if (\MailSo\Base\Utils::FunctionExistsAndEnabled('@stream_set_blocking'))
+		{
+			@stream_set_blocking($this->rConnect, true);
+		}
+
 		return true;
 	}
 

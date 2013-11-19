@@ -26,14 +26,6 @@ return array(
 	'log.max-view-size' => 100,
 
 	/**
-	 * Defines whether javascript files compression and merging is used
-	 * to speed up loading WebMail Pro interface, JavaScript files are compressed on server.
-	 * You might need to turn this off, in some cases, particularly if you feel that
-	 * GZip compression doesn't work on your server as expected.
-	 */
-	'js.use-js-gzip' => true,
-
-	/**
 	 * Number of subsequent login errors which invokes CAPTCHA
 	 */
 	'captcha.limit-count' => 3,
@@ -71,13 +63,6 @@ return array(
 	'webmail.use-prefetch' => true,
 
 	/**
-	 * The file used to launch WebMail in IFrame (e.g. iframe-webmail.php)
-	 * This is especially useful if you embed WebMail Pro into your own web application.
-	 * If set to null, WebMail is launched in regular way (not in IFrame)
-	 */
-	'webmail.use-iframe' => null, // 'iframe-webmail.php'
-
-	/**
 	 * Languages considered to be RTL ones by WebMail
 	 */
 	'webmail.rtl-langs' => array('Hebrew', 'Arabic', 'Persian'),
@@ -85,7 +70,7 @@ return array(
 	/**
 	 * X-Mailer value used in outgoing mails
 	 */
-	'webmail.xmailer-value' => 'AfterLogic WebMail PHP',
+	'webmail.xmailer-value' => 'AfterLogic webmail client',
 
 	/**
 	 * IMAP4 only
@@ -150,15 +135,15 @@ return array(
 	 */
 	'webmail.bodystructure-message-size-limit' => 20000,
 
-	/**
-	 *
-	 */
-	'cdn.prefix' => '',
-
-	/**
-	 *
-	 */
 	'mailsuite' => false,
+
+	'files' => true,
+
+	'helpdesk' => true,
+
+	'capa' => false,
+
+	'themes' => array('Default'),
 
 	/**
 	 * Which email should be treated as primary one in contact object
@@ -188,9 +173,6 @@ return array(
 	 */
 	'temp.cron-time-file' => '.clear.dat',
 
-	/**
-	 *
-	 */
 	'langs.names' => array(
 		'Arabic' => 'العربية',
 		'Bulgarian' => 'Български',
@@ -204,6 +186,7 @@ return array(
 		'Hungarian' => 'Magyar',
 		'Italian' => 'Italiano',
 		'Norwegian' => 'Norsk',
+		'Portuguese-Portuguese' => 'Português',
 		'Portuguese-Brazil' => 'Português Brasil',
 		'Polish' => 'Polski',
 		'Russian' => 'Русский',
@@ -218,10 +201,6 @@ return array(
 		'Korean' => '한국어',
 		'Czech' => 'Čeština'
 	),
-
-	'tenant' => false,
-
-	'capa' => false,
 
 	/**
 	 * Enable plugins in WebMail
@@ -239,19 +218,31 @@ return array(
 	'labs.db.use-explain-extended' => false,
 	'labs.db.log-query-params' => false,
 	'labs.log.post-view' => false,
-	'labs.log.specified-by-user' => false,
 	'labs.webmail.gmail-fix-folders' => true,
+	'labs.webmail.custom-login-url' => '',
 	'labs.webmail.custom-logout-url' => '',
+	'labs.webmail.disable-folders-manual-sort' => false,
+	'labs.webmail.ios-detect-on-login' => true,
 	'labs.dav.use-browser-plugin' => false,
 	'labs.dav.use-export-plugin' => true,
 	'labs.dav.use-files' => false,
 	'labs.dav.admin-principal' => 'principals/admin',
 	'labs.cache.i18n' => true,
 	'labs.cache.templates' => true,
-	'labs.cache.settings-xml-in-php-file' => false,
+	'labs.twillio' => false,
+	'labs.voice' => false,
+	'labs.voice.realm' => '',
+	'labs.voice.websocket-proxy-url' => '',
+	'labs.voice.outbound-proxy-url' => '',
+	'labs.voice.main-impi' => '',
+	'labs.voice.main-password' => '',
 	'labs.webmail.csrftoken-protection' => true,
 	'labs.unlim-quota-limit-size-in-kb' => 104857600,
+	'labs.use-date-from-headers' => false,
 	'labs.google-analytic.account' => '',
 	'labs.app-cookie-path' => '/',
+	'labs.force-depricated-mysql' => false,
+	'labs.server-use-url-rewrite' => false,
+	'labs.server-url-rewrite-base' => '',
 	'labs.i18n' => 'en'
 );

@@ -52,7 +52,7 @@ class PDO extends \Sabre\CalDAV\Backend\PDO {
 
 		parent::deleteCalendar($calendarId);
 		
-		$stmt = $this->pdo->prepare('DELETE FROM `'.$this->delegatesTableName.'` WHERE calendarid = ?');
+		$stmt = $this->pdo->prepare('DELETE FROM '.$this->delegatesTableName.' WHERE calendarid = ?');
 		$stmt->execute(array($calendarId));
     }
 	

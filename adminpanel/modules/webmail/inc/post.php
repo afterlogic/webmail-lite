@@ -8,7 +8,7 @@
 
 class CWebMailPostAction extends ap_CoreModuleHelper
 {
-	public function ServicesLogging()
+	public function SystemLogging()
 	{
 		if (isset($_POST['btnClearLog']) || isset($_POST['btnUserActivityClearLog']))
 		{

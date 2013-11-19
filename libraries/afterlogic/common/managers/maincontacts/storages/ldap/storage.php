@@ -7,19 +7,44 @@
  */
 
 /**
- * @package Maincontacts
+ * @package Contacts
  */
 class CApiMaincontactsLdapStorage extends CApiMaincontactsStorage
 {
 	/**
-	 * @var resource
+	 * @var string
 	 */
-	protected $rLink;
+	private $sContactUidFieldName;
 
 	/**
-	 * @var resource
+	 * @var string
 	 */
-	protected $rSearch;
+	private $sGroupUidFieldName;
+
+	/**
+	 * @var string
+	 */
+	private $sContactObjectClass;
+
+	/**
+	 * @var string
+	 */
+	private $sGroupObjectClass;
+
+	/**
+	 * @var string
+	 */
+	private $sEmailFieldName;
+
+	/**
+	 * @var string
+	 */
+	private $sContactNameFieldName;
+
+	/**
+	 * @var string
+	 */
+	private $sGroupNameFieldName;
 
 	/**
 	 * @param CApiGlobalManager $oManager
@@ -28,212 +53,430 @@ class CApiMaincontactsLdapStorage extends CApiMaincontactsStorage
 	{
 		parent::__construct('ldap', $oManager);
 
-		$this->rLink = null;
-		$this->rSearch = null;
-
-		$this->inc('config');
-		if (!class_exists('CApiMaincontactsLdapHelper')) // TODO
-		{
-			$this->inc('helper');
-		}
-
-		CSession::$sSessionName = API_SESSION_WEBMAIL_NAME; // TODO
+		$this->sContactObjectClass = strtolower(CApi::GetConf('contacts.ldap.contact-object-class', 'pabPerson'));
+		$this->sGroupObjectClass = strtolower(CApi::GetConf('contacts.ldap.group-object-class', 'pabGroup'));
+		$this->sEmailFieldName = strtolower(CApi::GetConf('contacts.ldap.email-field-name', 'mail'));
+		$this->sContactUidFieldName = strtolower(CApi::GetConf('contacts.ldap.contact-uid-field-name', 'un'));
+		$this->sGroupUidFieldName = strtolower(CApi::GetConf('contacts.ldap.group-uid-field-name', 'un'));
+		$this->sContactNameFieldName = strtolower(CApi::GetConf('contacts.ldap.contact-name-field-name', 'cn'));
+		$this->sGroupNameFieldName = strtolower(CApi::GetConf('contacts.ldap.group-name-field-name', 'cn'));
 	}
 
 	/**
-	 * @param int $iUserId
-	 * @return CApiMaincontactsLdapConfig
+	 * @staticvar CLdapConnector|null $oLdap
+	 * @param CAccount $oAccount
+	 * @return CLdapConnector|bool
 	 */
-	public function initConfigFromUserId($iUserId)
+	private function Ldap($oAccount)
 	{
-		$oConfig = null;
+//		if ($oAccount)
+//		{
+//			// TODO
+//			$aCustomFields = $oAccount->CustomFields;
+//			$aCustomFields['LdapPabUrl'] = 'ldap://192.168.0.197:389/ou=TestUser2,ou=PAB,dc=example,dc=com';
+//			$aCustomFields['LdapPabUrl'] = 'ldap://jes7dir.netvision.net.il:389/ou=24606995,ou=People,o=netvision.net.il,o=NVxSP,o=pab';
+//			$oAccount->CustomFields = $aCustomFields;
+//		}
 
-		$sPabUrl = CApiMaincontactsLdapHelper::GetPabUrlFromId($iUserId);
-
-		if (!empty($sPabUrl))
+		static $aLdap = array();
+		if (!$oAccount || !isset($oAccount->CustomFields) || empty($oAccount->CustomFields['LdapPabUrl']))
 		{
-			$aPabUrl = api_Utils::LdapUriParse($sPabUrl);
-			if (isset($aPabUrl['host'], $aPabUrl['port'], $aPabUrl['search_dn']))
-			{
-				$oConfig = new CApiMaincontactsLdapConfig(
-					$aPabUrl['host'], $aPabUrl['port'], $aPabUrl['search_dn'],
-					CApi::GetConf('contacts.ldap-bind-dn', ''), CApi::GetConf('contacts.ldap-bind-password', ''));
-			}
-		}
-		else
-		{
-			CApi::Log('LDAP: Empty Pub Uri', ELogLevel::Error);
+			return false;
 		}
 
-		if (!$oConfig)
+		$sPabUrl = $oAccount->CustomFields['LdapPabUrl'];
+		$aPabUrl = api_Utils::LdapUriParse($sPabUrl);
+
+		if (isset($aLdap[$sPabUrl]) && $aLdap[$sPabUrl])
 		{
-			CApi::Log('LDAP: Error config', ELogLevel::Error);
+			return $aLdap[$sPabUrl];
 		}
 
-		return $oConfig;
-	}
-
-	protected function connect($oConfig)
-	{
 		if (!extension_loaded('ldap'))
 		{
 			CApi::Log('LDAP: Can\'t load LDAP extension.', ELogLevel::Error);
 			return false;
 		}
 
-		if ($oConfig && !is_resource($this->rLink))
+		if (!class_exists('CLdapConnector'))
 		{
-			CApi::Log('LDAP: connect to '.$oConfig->Host().':'.$oConfig->Port());
-			$this->rLink = @ldap_connect($oConfig->Host(), $oConfig->Port());
-			if ($this->rLink)
+			CApi::Inc('common.ldap');
+		}
+
+		$oLdap = new CLdapConnector($aPabUrl['search_dn']);
+		$oLdap = $oLdap->Connect(
+			(string) $aPabUrl['host'],
+			(int) $aPabUrl['port'],
+			(string) CApi::GetConf('contacts.ldap.bind-dn', ''),
+			(string) CApi::GetConf('contacts.ldap.bind-password', '')
+		) ? $oLdap : false;
+
+		if ($oLdap)
+		{
+			if (!$oLdap->Search('(objectClass=*)'))
 			{
-				@register_shutdown_function(array(&$this, 'RegDisconnect'));
+				CApi::Log('LDAP: Init PabUrl Entry');
 
-				@ldap_set_option($this->rLink, LDAP_OPT_PROTOCOL_VERSION, 3);
-				@ldap_set_option($this->rLink, LDAP_OPT_REFERRALS, 0);
+				$sNewDn = $oLdap->GetSearchDN();
+				$aDnExplode = ldap_explode_dn($sNewDn, 1);
+				$sOu =  isset($aDnExplode[0]) ? trim($aDnExplode[0]) : '';
 
-				CApi::Log('LDAP: bind = "'.$oConfig->BindDn().'" / "'.$oConfig->BindPassword().'"');
-				if (!@ldap_bind($this->rLink, $oConfig->BindDn(), $oConfig->BindPassword()))
+				$aPabUrlEntry = CApi::GetConf('contacts.ldap.pab-url-entry', array(
+					'objectClass' => array('top', 'organizationalUnit')
+				));
+
+				if (isset($aPabUrlEntry['objectClass']))
 				{
-					$this->validateLdapErrorOnFalse(false);
-					$this->disconnect();
-					return false;
-				}
-			}
-			else
-			{
-				$this->validateLdapErrorOnFalse(false);
-				return false;
-			}
-
-			if ($this->rLink)
-			{
-				if ('0' === CSession::Get('PabValidate', '0'))
-				{
-					CSession::Set('PabValidate', '1');
-
-					$rSearchLink = @ldap_list($this->rLink, $oConfig->SearchDn(), '(objectClass=*)');
-					if (!$rSearchLink)
+					$aPabUrlEntry['ou'] = $sOu;
+					if (0 < strlen($sOu))
 					{
-						CApi::Log('LDAP: Init PabUrl Entry');
-
-						$sNewDn = $oConfig->SearchDn();
-						$aDnExplode = ldap_explode_dn($sNewDn, 1);
-						$sOu =  isset($aDnExplode[0]) ? trim($aDnExplode[0]) : '';
-						if (!empty($sOu))
+						if (!$oLdap->Add('', $aPabUrlEntry))
 						{
-							$aEntry = array(
-								'ou' => $sOu,
-								'objectClass' => array('top', 'organizationalUnit')
-							);
-
-							CApi::Log('LDAP: ldap_add(rLink, "'.$sNewDn.'", $aEntry');
-							CApi::Log('LDAP: $aEntry = '.print_r($aEntry, true));
-							$this->validateLdapErrorOnFalse(@ldap_add($this->rLink, $sNewDn, $aEntry));
-						}
-						else
-						{
-							CApi::Log('LDAP: empty Ou in SearchDn = '.$oConfig->SearchDn());
+							$oLdap = false;
 						}
 					}
+					else
+					{
+						CApi::Log('LDAP: empty Ou in SearchDn = '.$sNewDn);
+						$oLdap = false;
+					}
+				}
+				else
+				{
+					CApi::Log('LDAP: pab-url-entry format error');
+					CApi::Log(print_r($aPabUrlEntry, true));
+
+					$oLdap = false;
 				}
 			}
 		}
 
-		return true;
-	}
+		$aLdap[$sPabUrl] = $oLdap;
 
-	public function RegDisconnect()
-	{
-		static $isReg = false;
-		if (!$isReg)
-		{
-			$this->disconnect();
-			$isReg = true;
-		}
-	}
-
-	protected function disconnect()
-	{
-		if (is_resource($this->rLink))
-		{
-			CApi::Log('LDAP: disconnect');
-			@ldap_close($this->rLink);
-			$this->rLink = null;
-		}
-	}
-
-	protected function validateLdapErrorOnFalse($bReturn)
-	{
-		if (false === $bReturn)
-		{
-			CApi::Log('LDAP: error #'.@ldap_errno($this->rLink).': '.@ldap_error($this->rLink), ELogLevel::Error);
-		}
-
-		return $bReturn;
+		return $oLdap;
 	}
 
 	/**
 	 * @param int $iUserId
-	 * @param string $sObjectFilter
-	 * @return bool
+	 * @return CAccount|bool
 	 */
-	protected function search($iUserId, $sObjectFilter)
+	private function getAccountFromUserId($iUserId)
 	{
-		$oConfig = $this->initConfigFromUserId($iUserId);
-		if ($oConfig && $this->connect($oConfig))
+		/* @var $oApiUsersManager CApiUsersManager */
+		$oApiUsersManager = CApi::Manager('users');
+
+		if (0 < $iUserId && $oApiUsersManager)
 		{
-			CApi::Log('LDAP: search = "'.$oConfig->SearchDn().'" / '.$sObjectFilter);
-			$this->rSearch = @ldap_search($this->rLink, $oConfig->SearchDn(), $sObjectFilter);
-			$this->validateLdapErrorOnFalse($this->rSearch);
-			return is_resource($this->rSearch);
+			$iIdAccount = $oApiUsersManager->GetDefaultAccountId($iUserId);
+			if (0 < $iIdAccount)
+			{
+				$oDefAccount = $oApiUsersManager->GetAccountById($iIdAccount);
+			}
+
+			if ($oDefAccount)
+			{
+				return $oDefAccount;
+			}
 		}
 
 		return false;
 	}
 
 	/**
-	 * @param string $sField
-	 * @param string $sOrder "asc" or "desc"
-	 * @param int $iOffset = null
-	 * @param int $iRequestLimit = null
+	 * @param CAccount $oAccount
+	 * @return CContactListItem|bool
+	 */
+	private function populateContactItem($oAccount, $aLdapData)
+	{
+		$oContactItem = false;
+		if ($aLdapData && isset($aLdapData[$this->sContactUidFieldName][0]))
+		{
+			$oContactItem = new CContactListItem();
+			$oContactItem->Id = (string) $aLdapData[$this->sContactUidFieldName][0];
+			$oContactItem->IdStr = $oContactItem->Id;
+			$oContactItem->IsGroup = false;
+			$oContactItem->Name = isset($aLdapData['cn'][0]) ? (string) $aLdapData['cn'][0] : '';
+			$oContactItem->Email = isset($aLdapData['mail'][0]) ? (string) $aLdapData['mail'][0] :
+				(isset($aLdapData['homeemail'][0]) ? (string) $aLdapData['homeemail'][0] : '');
+			$oContactItem->UseFriendlyName = true;
+
+			if ('-' === $oContactItem->Name)
+			{
+				$oContactItem->Name = '';
+			}
+		}
+		
+		return $oContactItem;
+	}
+
+	/**
+	 * @param CAccount $oAccount
+	 * @return CContactListItem|bool
+	 */
+	private function populateGroupItem($oAccount, $aLdapData)
+	{
+		$oContactItem = false;
+		if ($aLdapData && isset($aLdapData[$this->sGroupUidFieldName][0], $aLdapData['cn'][0]))
+		{
+			$oContactItem = new CContactListItem();
+			$oContactItem->Id = (string) $aLdapData[$this->sGroupUidFieldName][0];
+			$oContactItem->IdStr = $oContactItem->Id;
+			$oContactItem->IsGroup = true;
+			$oContactItem->Name = (string) $aLdapData['cn'][0];
+			$oContactItem->UseFriendlyName = true;
+		}
+
+		return $oContactItem;
+	}
+
+	/**
 	 * @return array
 	 */
-	protected function sortPaginate($sField, $sOrder = 'asc', $iOffset = null, $iRequestLimit = null)
+	private static function contactObjectMap()
 	{
-		$iTotalEntries = ldap_count_entries($this->rLink, $this->rSearch);
+		$aMap = array(
+			'givenName' => 'FirstName',
+			'sn' => 'LastName',
+			'cn' => 'FullName',
 
-		$iEnd = 0;
-		$iStart = 0;
-		if ($iOffset === null || $iRequestLimit === null)
+			'mail' => 'HomeEmail',
+			'homeemail' => 'HomeEmail',
+
+			'street' => 'HomeStreet',
+			'l' => 'HomeCity',
+			'st' => 'HomeState',
+			'postalcode' => 'HomeZip',
+			'co' => 'HomeCountry',
+			'facsimileTelephoneNumber' => 'HomeFax',
+			'mobile' => 'HomeMobile',
+			'homePhone' => 'HomePhone',
+			'labeledUri' => 'HomeWeb',
+
+			'description' => 'Notes',
+		);
+
+		return $aMap;
+	}
+
+	/**
+	 * @param CAccount $oAccount
+	 * @return CContact|bool
+	 */
+	private function populateContact($oAccount, $aLdapData)
+	{
+		$oContact = false;
+		if ($aLdapData && isset($aLdapData[$this->sContactUidFieldName][0]))
 		{
-			$iStart = 0;
-			$iEnd = $iTotalEntries - 1;
-		}
-		else
-		{
-			$iStart = $iOffset;
-			$iStart = ($iStart < 0) ? 0 : $iStart;
+			CApi::LogObject($aLdapData);
 
-			$iEnd = $iStart + $iRequestLimit;
-			$iEnd = ($iEnd > $iTotalEntries) ? $iTotalEntries : $iEnd;
-		}
+			$oContact = new CContact();
+			$oContact->IdUser = $oAccount->IdUser;
+			$oContact->IdTenant = $oAccount->IdTenant;
+			$oContact->IdDomain = $oAccount->IdDomain;
+			$oContact->IdContact = (string) $aLdapData[$this->sContactUidFieldName][0];
+			$oContact->IdContactStr = $oContact->IdContact;
+			$oContact->UseFriendlyName = true;
 
-		ldap_sort($this->rLink, $this->rSearch, $sField);
-		$aList = array();
-
-		for ($iCurrent = 0, $rEntry = ldap_first_entry($this->rLink, $this->rSearch);
-			$iCurrent < $iEnd && is_resource($rEntry);
-			$iCurrent++, $rEntry = ldap_next_entry($this->rLink, $rEntry)
-		)
-		{
-			if ($iCurrent >= $iStart)
+			// TODO
+			if (!empty($aLdapData['sn'][0]) && '-' === $aLdapData['sn'][0])
 			{
-				array_push($aList, ldap_get_attributes($this->rLink, $rEntry));
+				$aLdapData['sn'][0] = '';
+			}
+
+			$aMap = $this->contactObjectMap();
+			$aMap = array_change_key_case($aMap, CASE_LOWER);
+			$aLdapDataLower = array_change_key_case($aLdapData, CASE_LOWER);
+
+			foreach ($aLdapDataLower as $sKey => $mRow)
+			{
+				if (isset($aMap[$sKey]) && isset($oContact->{$aMap[$sKey]}) && 0 === strlen($oContact->{$aMap[$sKey]}))
+				{
+					$oContact->{$aMap[$sKey]} = isset($mRow[0]) ? $mRow[0] : '';
+				}
+			}
+
+			$sDateOfBirth = isset($aLdapDataLower['dateofbirth'][0]) ? (string) $aLdapDataLower['dateofbirth'][0] : '';
+			if (strlen($sDateOfBirth) > 0)
+			{
+				$aDateOfBirth = explode('/', $sDateOfBirth, 3);
+				if (3 === count($aDateOfBirth) && isset($aDateOfBirth[0], $aDateOfBirth[1], $aDateOfBirth[2]))
+				{
+					$oContact->BirthdayDay = is_numeric($aDateOfBirth[0]) ? (int) $aDateOfBirth[0] : 0;
+					$oContact->BirthdayMonth = is_numeric($aDateOfBirth[1]) ? (int) $aDateOfBirth[1] : 0;
+					$oContact->BirthdayYear = is_numeric($aDateOfBirth[2]) ? (int) $aDateOfBirth[2] : 0;
+				}
+			}
+
+			if (isset($aLdapDataLower['memberofpabgroup']))
+			{
+				unset($aLdapDataLower['memberofpabgroup']['count']);
+
+				if (is_array($aLdapDataLower['memberofpabgroup']))
+				{
+					$aGroupsIds = array();
+					$aMemberOfPabGroup = array_values($aLdapDataLower['memberofpabgroup']);
+					foreach ($aMemberOfPabGroup as $sGroupId)
+					{
+						if (!empty($sGroupId))
+						{
+							$aGroupsIds[] = $sGroupId;
+						}
+					}
+
+					$oContact->GroupsIds = $aGroupsIds;
+				}
 			}
 		}
 
-		return ($sOrder === 'desc') ? array_reverse($aList) : $aList;
+		return $oContact;
+	}
+
+	/**
+	 * @param CAccount $oAccount
+	 * @return CGroup|bool
+	 */
+	private function populateGroup($oAccount, $aLdapData)
+	{
+		$oGroup = false;
+		if ($aLdapData && isset($aLdapData[$this->sGroupUidFieldName][0], $aLdapData['cn'][0]))
+		{
+			$oGroup = new CGroup();
+			$oGroup->IdUser = $oAccount->IdUser;
+			$oGroup->IdGroup = (string) $aLdapData[$this->sGroupUidFieldName][0];
+			$oGroup->IdGroupStr = $oGroup->IdGroup;
+			$oGroup->Name = isset($aLdapData['cn'][0]) ? $aLdapData['cn'][0]: '';
+			$oGroup->IsOrganization = false;
+		}
+
+		return $oGroup;
+	}
+
+	/**
+	 * @param CAccount $oAccount
+	 * @param CContact $oContact
+	 * @param bool $bIsUpdate
+	 * @return array
+	 */
+	private function getEntryFromContact($oAccount, &$oContact, $bIsUpdate)
+	{
+		$sId = $oContact->IdContact;
+		if (!$bIsUpdate)
+		{
+			$sId = 'contact'.md5($oContact->FullName.$oContact->ViewEmail.time().rand(1000, 9999));
+		}
+
+		$oContact->IdContact = (string) $sId;
+		$oContact->IdUser = $oAccount->IdUser;
+		$oContact->IdContactStr = $oContact->IdContact;
+		$oContact->IdDomain = $oAccount->IdDomain;
+		$oContact->IdTenant = $oAccount->IdTenant;
+
+		$aE = array(
+			'sn' => '',
+			'cn' => '',
+			'objectClass' => array(
+				'top',
+				'person',
+				'pabperson', //TODO
+				'organizationalPerson',
+				'inetOrgPerson'
+			)
+		);
+
+		$aE[$this->sContactUidFieldName] = $oContact->IdContact;
+
+		$aMap = $this->contactObjectMap();
+		$aMapCache = array();
+		foreach ($aMap as $sEntryKey => $sObjectKey)
+		{
+			if (isset($oContact->{$sObjectKey}) && strlen($oContact->{$sObjectKey}) > 0)
+			{
+				if (!isset($aMapCache[$sObjectKey]))
+				{
+					$aE[$sEntryKey] = $oContact->{$sObjectKey};
+					$aMapCache[$sObjectKey] = true;
+				}
+			}
+		}
+
+		$aE['memberofpabgroup'] = array();
+		$aGroupsIds = $oContact->GroupsIds;
+		if (is_array($aGroupsIds) && 0 < count($aGroupsIds))
+		{
+			foreach($aGroupsIds as $mGroupId)
+			{
+				$aE['memberofpabgroup'][] = $mGroupId;
+			}
+		}
+
+		if ($bIsUpdate)
+		{
+			unset($aE['objectClass']);
+		}
+		else
+		{
+			if (0 === count($aE['memberofpabgroup']))
+			{
+				unset($aE['memberofpabgroup']);
+			}
+		}
+
+		CApi::Plugin()->RunHook('api-ldap-get-entry-from-contact', array($oAccount, &$oContact, &$aE, $bIsUpdate));
+
+		if (empty($aE['sn']))
+		{
+			$aE['sn'] = '-';
+		}
+		
+		return $aE;
+	}
+
+	/**
+	 * @param CAccount $oAccount
+	 * @param CGroup $oGroup
+	 * @param bool $bIsUpdate
+	 * @return array
+	 */
+	private function getEntryFromGroup($oAccount, &$oGroup, $bIsUpdate)
+	{
+		$sId = $oGroup->IdGroup;
+		if (!$bIsUpdate)
+		{
+			$sId = 'group'.md5($oGroup->Name.time().rand(1000, 9999));
+		}
+
+		$oGroup->IdGroup = (string) $sId;
+		$oGroup->IdGroupStr = $oGroup->IdGroup;
+		$oGroup->IdUser = $oAccount->IdUser;
+
+		$aE = array(
+			'cn' => $oGroup->Name,
+			'objectClass' => array(
+				'top',
+				'pabGroup' // TODO
+			)
+		);
+
+		$aE[$this->sGroupUidFieldName] = $oGroup->IdGroup;
+
+		if ($bIsUpdate)
+		{
+			unset($aE['objectClass']);
+		}
+
+		CApi::Plugin()->RunHook('api-ldap-get-entry-from-group', array($oAccount, &$oGroup, &$aE, $bIsUpdate));
+
+		return $aE;
+	}
+
+	/**
+	 * @param mixed $mTypeId
+	 * @param int $mContactId
+	 * @return CContact | bool
+	 */
+	public function GetContactByTypeId($mTypeId, $mContactId)
+	{
+		return false;
 	}
 
 	/**
@@ -244,11 +487,12 @@ class CApiMaincontactsLdapStorage extends CApiMaincontactsStorage
 	public function GetContactById($iUserId, $mContactId)
 	{
 		$oContact = false;
-		if ($this->search($iUserId, '(&(objectClass='.CApiMaincontactsLdapHelper::CONTACT_OBJECT_CLASS.')(un='.$mContactId.'))'))
+		$oAccount = $this->getAccountFromUserId($iUserId);
+		$oLdap = $this->Ldap($oAccount);
+
+		if ($oLdap && $oLdap->Search('(&(objectClass='.$this->sContactObjectClass.')('.$this->sContactUidFieldName.'='.$mContactId.'))'))
 		{
-			$aResurn = ldap_get_entries($this->rLink, $this->rSearch);
-			$this->validateLdapErrorOnFalse($aResurn);
-			$oContact = CApiMaincontactsLdapHelper::LdapContactPopulate($aResurn, $iUserId);
+			$oContact = $this->populateContact($oAccount, $oLdap->ResultItem());
 		}
 
 		return $oContact;
@@ -262,11 +506,12 @@ class CApiMaincontactsLdapStorage extends CApiMaincontactsStorage
 	public function GetContactByEmail($iUserId, $sEmail)
 	{
 		$oContact = false;
-		if ($this->search($iUserId, '(&(objectClass='.CApiMaincontactsLdapHelper::CONTACT_OBJECT_CLASS.')(mail='.$sEmail.'))'))
+		$oAccount = $this->getAccountFromUserId($iUserId);
+		$oLdap = $this->Ldap($oAccount);
+
+		if ($oLdap && $oLdap->Search('(&(objectClass='.$this->sContactObjectClass.')('.$this->sEmailFieldName.'='.$sEmail.'))'))
 		{
-			$aResurn = ldap_get_entries($this->rLink, $this->rSearch);
-			$this->validateLdapErrorOnFalse($aResurn);
-			$oContact = CApiMaincontactsLdapHelper::LdapContactPopulate($aResurn, $iUserId);
+			$oContact = $this->populateContact($oAccount, $oLdap->ResultItem());
 		}
 
 		return $oContact;
@@ -292,6 +537,16 @@ class CApiMaincontactsLdapStorage extends CApiMaincontactsStorage
 	}
 
 	/**
+	 * @todo
+	 * @param int $iUserId
+	 * @return CContact|null
+	 */
+	public function GetMyGlobalContact($iUserId)
+	{
+		return null;
+	}
+
+	/**
 	 * @param int $iUserId
 	 * @param mixed $mGroupId
 	 * @return CGroup
@@ -299,11 +554,12 @@ class CApiMaincontactsLdapStorage extends CApiMaincontactsStorage
 	public function GetGroupById($iUserId, $mGroupId)
 	{
 		$oGroup = false;
-		if ($this->search($iUserId, '(&(objectClass='.CApiMaincontactsLdapHelper::GROUP_OBJECT_CLASS.')(un='.$mGroupId.'))'))
+		$oAccount = $this->getAccountFromUserId($iUserId);
+		$oLdap = $this->Ldap($oAccount);
+
+		if ($oLdap && $oLdap->Search('(&(objectClass='.$this->sGroupObjectClass.')('.$this->sGroupUidFieldName.'='.$mGroupId.'))'))
 		{
-			$aResurn = ldap_get_entries($this->rLink, $this->rSearch);
-			$this->validateLdapErrorOnFalse($aResurn);
-			$oGroup = CApiMaincontactsLdapHelper::LdapGroupPopulate($aResurn, $iUserId);
+			$oGroup = $this->populateGroup($oAccount, $oLdap->ResultItem());
 		}
 
 		return $oGroup;
@@ -311,106 +567,101 @@ class CApiMaincontactsLdapStorage extends CApiMaincontactsStorage
 
 	/**
 	 * @param int $iUserId
+	 * @param string $sGroupStrId
+	 * @return CGroup
+	 */
+	public function GetGroupByStrId($iUserId, $sGroupStrId)
+	{
+		return $this->GetGroupById($iUserId, $sGroupStrId);
+	}
+
+	/**
+	 * @todo
+	 * @param int $iUserId
+	 * @param string $sName
+	 * @return CGroup
+	 */
+	public function GetGroupByName($iUserId, $sName)
+	{
+		return false;
+	}
+
+	/**
+	 * @param int $iUserId
 	 * @param int $iOffset
 	 * @param int $iRequestLimit
-	 * @return array | bool
+	 * @return bool | array
 	 */
 	public function GetContactItemsWithoutOrder($iUserId, $iOffset, $iRequestLimit)
 	{
 		$aContacts = false;
-		if ($this->search($iUserId, '(objectClass='.CApiMaincontactsLdapHelper::CONTACT_OBJECT_CLASS.')'))
+		$oAccount = $this->getAccountFromUserId($iUserId);
+		$oLdap = $this->Ldap($oAccount);
+		
+		if ($oLdap && $oLdap->Search('(objectClass='.$this->sContactObjectClass.')'))
 		{
-			$iTotalEntries = ldap_count_entries($this->rLink, $this->rSearch);
-			if ($iOffset === null || $iRequestLimit === null)
-			{
-				# fetch all in one page
-				$iStart = 0;
-				$iEnd = $iTotalEntries - 1;
-			}
-			else
-			{
-				$iStart = $iOffset;
-				$iStart = ($iStart < 0) ? 0 : $iStart;
-
-				$iEnd = $iStart + $iRequestLimit;
-				$iEnd = ($iEnd > $iTotalEntries - 1) ? $iTotalEntries - 1 : $iEnd;
-			}
-
-			$aList = array();
-			for ($iCurrent = 0, $rEntry = ldap_first_entry($this->rLink, $this->rSearch);
-				$iCurrent <= $iEnd && is_resource($rEntry);
-				$iCurrent++, $rEntry = ldap_next_entry($this->rLink, $rEntry))
-			{
-				if ($iCurrent >= $iStart)
-				{
-					array_push($aList, ldap_get_attributes($this->rLink, $rEntry));
-				}
-			}
-
 			$aContacts = array();
-			if (0 < count($aList))
+			$mLdapContactsItems = $oLdap->SortPaginate('', true, $iOffset, $iRequestLimit);
+			foreach ($mLdapContactsItems as $aItem)
 			{
-				$aContacts = array();
-				if (0 < count($aReturn))
+				$oContact = $this->populateContactItem($oAccount, $aItem);
+				if ($oContact)
 				{
-					foreach ($aReturn as $aItem)
-					{
-						$oContactItem = new CContactListItem();
-						$oContactItem->InitByLdapRowWithType('contact', $aItem);
-						$aContacts[] = $oContactItem;
-						unset($oContactItem);
-					}
+					$aContacts[] = $oContact;
 				}
 			}
 		}
-
+	
 		return $aContacts;
 	}
 
+	private function buildContactFilter($sSearch, $sFirstCharacter, $mGroupId)
+	{
+		$sFirstCharacterFilter = empty($sFirstCharacter) ? '' : '(|('.$this->sContactNameFieldName.'='.$sFirstCharacter.'*)('.$this->sEmailFieldName.'='.$sFirstCharacter.'*))';
+
+		$sFilter = '(objectClass='.$this->sContactObjectClass.')';
+		$sFilter = empty($sFirstCharacterFilter) ? $sFilter : '(&'.$sFirstCharacterFilter.$sFilter.')';
+		$sFilter = empty($mGroupId) ? $sFilter : '(&'.$sFilter.'(memberofpabgroup='.$mGroupId.'))';
+
+		if (0 < strlen($sSearch))
+		{
+			$sFilter = '(&(|('.$this->sContactNameFieldName.'=*'.$sSearch.'*)('.$this->sEmailFieldName.'=*'.$sSearch.'*))'.$sFilter.')';
+		}
+
+		return $sFilter;
+	}
+
 	/**
-	 * @param string $mUserId
+	 * @param int $iUserId
 	 * @param int $iSortField
 	 * @param int $iSortOrder
 	 * @param int $iOffset
 	 * @param int $iRequestLimit
 	 * @param string $sSearch
 	 * @param string $sFirstCharacter
-	 * @param string $mGroupId
+	 * @param mixed $iGroupId
 	 * @return bool | array
 	 */
-	public function GetContactItems($mUserId, $iSortField, $iSortOrder, $iOffset, $iRequestLimit, $sSearch, $sFirstCharacter, $mGroupId)
+	public function GetContactItems($iUserId, $iSortField, $iSortOrder, $iOffset, $iRequestLimit, $sSearch, $sFirstCharacter, $mGroupId)
 	{
 		$aContacts = false;
-		$sFirstCharacterFilter = empty($sFirstCharacter) ? '' : '(|(cn='.$sFirstCharacter.'*)(mail='.$sFirstCharacter.'*))';
+		$oAccount = $this->getAccountFromUserId($iUserId);
+		$oLdap = $this->Ldap($oAccount);
 
-		$sFilter = '(objectClass='.CApiMaincontactsLdapHelper::CONTACT_OBJECT_CLASS.')';
-		$sFilter = empty($sFirstCharacterFilter) ? $sFilter : '(&'.$sFirstCharacterFilter.$sFilter.')';
-		$sFilter = empty($mGroupId) ? $sFilter : '(&'.$sFilter.'(memberofpabgroup='.$mGroupId.'))';
-
-		if (0 < strlen($sSearch))
+		$aContacts = false;
+		if ($oLdap->Search($this->buildContactFilter($sSearch, $sFirstCharacter, $mGroupId)))
 		{
-			$sFilter = '(&(|(cn=*'.$sSearch.'*)(mail=*'.$sSearch.'*))'.$sFilter.')';
-		}
-
-		if ($this->search($mUserId, $sFilter))
-		{
-			$aReturn = $this->sortPaginate(
-				(EContactSortField::EMail === $iSortField) ? 'mail' : 'cn',
-				(ESortOrder::ASC === $iSortOrder) ? 'asc' : 'desc', $iOffset, $iRequestLimit);
-
-			$this->validateLdapErrorOnFalse($aReturn);
-			if ($aReturn && is_array($aReturn))
+			$mLdapContactsItems = $oLdap->SortPaginate(
+				EContactSortField::EMail === $iSortField ? $this->sEmailFieldName : $this->sContactNameFieldName,
+				ESortOrder::ASC === $iSortOrder, $iOffset, $iRequestLimit);
+			
+			$aContacts = array();
+			foreach ($mLdapContactsItems as $aItem)
 			{
-				$aContacts = array();
-				if (0 < count($aReturn))
+				$oContact = $this->populateContactItem($oAccount, $aItem);
+				if ($oContact)
 				{
-					foreach ($aReturn as $aItem)
-					{
-						$oContactItem = new CContactListItem();
-						$oContactItem->InitByLdapRowWithType('contact', $aItem);
-						$aContacts[] = $oContactItem;
-						unset($oContactItem);
-					}
+					$aContacts[] = $oContact;
 				}
 			}
 		}
@@ -422,31 +673,20 @@ class CApiMaincontactsLdapStorage extends CApiMaincontactsStorage
 	 * @param int $iUserId
 	 * @param string $sSearch
 	 * @param string $sFirstCharacter
-	 * @param int $mGroupId
+	 * @param mixed $mGroupId
 	 * @return int
 	 */
 	public function GetContactItemsCount($iUserId, $sSearch, $sFirstCharacter, $mGroupId)
 	{
 		$iResult = 0;
-		$sFirstCharacterFilter = empty($sFirstCharacter) ? '' : '(|(cn='.$sFirstCharacter.'*)(mail='.$sFirstCharacter.'*))';
+		
+		$aContacts = false;
+		$oLdap = $this->Ldap($this->getAccountFromUserId($iUserId));
 
-		$sFilter = '(objectClass='.CApiMaincontactsLdapHelper::CONTACT_OBJECT_CLASS.')';
-		$sFilter = empty($sFirstCharacterFilter) ? $sFilter : '(&'.$sFirstCharacterFilter.$sFilter.')';
-		$sFilter = empty($mGroupId) ? $sFilter : '(&'.$sFilter.'(memberofpabgroup='.$mGroupId.'))';
-
-		if (0 < strlen($sSearch))
+		$aContacts = false;
+		if ($oLdap && $oLdap->Search($this->buildContactFilter($sSearch, $sFirstCharacter, $mGroupId)))
 		{
-			$sFilter = '(&(|(cn=*'.$sSearch.'*)(mail=*'.$sSearch.'*))'.$sFilter.')';
-		}
-
-		if ($this->search($iUserId, $sFilter))
-		{
-			$iCount = ldap_count_entries($this->rLink, $this->rSearch);
-			$this->validateLdapErrorOnFalse($iCount);
-			if (false !== $iCount)
-			{
-				$iResult = $iCount;
-			}
+			$iResult = $oLdap->ResultCount();
 		}
 
 		return $iResult;
@@ -465,10 +705,12 @@ class CApiMaincontactsLdapStorage extends CApiMaincontactsStorage
 	 */
 	public function GetGroupItems($iUserId, $iSortField, $iSortOrder, $iOffset, $iRequestLimit, $sSearch, $sFirstCharacter, $mContactId)
 	{
-		$aGroups = false;
-		$sFirstCharacterFilter = empty($sFirstCharacter) ? '' : '(cn='.$sFirstCharacter.'*)';
+		$oAccount = $this->getAccountFromUserId($iUserId);
+		$oLdap = $this->Ldap($oAccount);
 
-		$sFilter = '(objectClass='.CApiMaincontactsLdapHelper::GROUP_OBJECT_CLASS.')';
+		$sFirstCharacterFilter = empty($sFirstCharacter) ? '' : '('.$this->sGroupNameFieldName.'='.$sFirstCharacter.'*)';
+
+		$sFilter = '(objectClass='.$this->sGroupObjectClass.')';
 		$sFilter = empty($sFirstCharacterFilter) ? $sFilter : '(&'.$sFirstCharacterFilter.$sFilter.')';
 
 		if (!empty($mContactId))
@@ -481,14 +723,14 @@ class CApiMaincontactsLdapStorage extends CApiMaincontactsStorage
 				{
 					if (1 === count($aGroupIds))
 					{
-						$sAdd = '(un='.$aGroupIds[0].')';
+						$sAdd = '('.$this->sGroupUidFieldName.'='.$aGroupIds[0].')';
 					}
 					else
 					{
 						$aAdd = array();
 						foreach ($aGroupIds as $sGroupId)
 						{
-							$aAdd[] = '(un='.$sGroupId.')';
+							$aAdd[] = '('.$this->sGroupUidFieldName.'='.$sGroupId.')';
 						}
 
 						$sAdd = '(|'.implode('', $aAdd).')';
@@ -505,27 +747,22 @@ class CApiMaincontactsLdapStorage extends CApiMaincontactsStorage
 
 		if (0 < strlen($sSearch))
 		{
-			$sFilter = '(&(cn=*'.$sSearch.'*)'.$sFilter.')';
+			$sFilter = '(&('.$this->sGroupNameFieldName.'=*'.$sSearch.'*)'.$sFilter.')';
 		}
 
-		if ($this->search($iUserId, $sFilter))
+		$aGroups = false;
+		if ($oLdap && $oLdap->Search($sFilter))
 		{
-			$aReturn = $this->sortPaginate('cn',
-				(ESortOrder::ASC === $iSortOrder) ? 'asc' : 'desc', $iOffset, $iRequestLimit);
+			$mLdapGroupsItems = $oLdap->SortPaginate(
+				$this->sGroupNameFieldName, ESortOrder::ASC === $iSortOrder, $iOffset, $iRequestLimit);
 
-			$this->validateLdapErrorOnFalse($aReturn);
-			if ($aReturn && is_array($aReturn))
+			$aGroups = array();
+			foreach ($mLdapGroupsItems as $aItem)
 			{
-				$aGroups = array();
-				if (0 < count($aReturn))
+				$oGroup = $this->populateGroupItem($oAccount, $aItem);
+				if ($oGroup)
 				{
-					foreach ($aReturn as $aItem)
-					{
-						$oGroupItem = new CContactListItem();
-						$oGroupItem->InitByLdapRowWithType('group', $aItem);
-						$aGroups[] = $oGroupItem;
-						unset($oGroupItem);
-					}
+					$aGroups[] = $oGroup;
 				}
 			}
 		}
@@ -542,27 +779,35 @@ class CApiMaincontactsLdapStorage extends CApiMaincontactsStorage
 	public function GetGroupItemsCount($iUserId, $sSearch, $sFirstCharacter)
 	{
 		$iResult = 0;
-		$sFirstCharacterFilter = empty($sFirstCharacter) ? '' : '(cn='.$sFirstCharacter.'*)';
+		$oLdap = $this->Ldap($this->getAccountFromUserId($iUserId));
 
-		$sFilter = '(objectClass='.CApiMaincontactsLdapHelper::GROUP_OBJECT_CLASS.')';
+		$sFirstCharacterFilter = empty($sFirstCharacter) ? '' : '('.$this->sGroupNameFieldName.'='.$sFirstCharacter.'*)';
+
+		$sFilter = '(objectClass='.$this->sGroupObjectClass.')';
 		$sFilter = empty($sFirstCharacterFilter) ? $sFilter : '(&'.$sFirstCharacterFilter.$sFilter.')';
 
 		if (0 < strlen($sSearch))
 		{
-			$sFilter = '(&(cn=*'.$sSearch.'*)'.$sFilter.')';
+			$sFilter = '(&('.$this->sGroupNameFieldName.'=*'.$sSearch.'*)'.$sFilter.')';
 		}
 
-		if ($this->search($iUserId, $sFilter))
+		if ($oLdap && $oLdap->Search($sFilter))
 		{
-			$iCount = ldap_count_entries($this->rLink, $this->rSearch);
-			$this->validateLdapErrorOnFalse($iCount);
-			if (false !== $iCount)
-			{
-				$iResult = $iCount;
-			}
+			$iResult = $oLdap->ResultCount();
 		}
 
 		return $iResult;
+	}
+
+	/**
+	 * @param int $iUserId
+	 * @param string $sSearch
+	 * @param int $iRequestLimit
+	 * @return bool | array
+	 */
+	public function GetSuggestContactItems($iUserId, $sSearch, $iRequestLimit)
+	{
+		return $this->GetContactItems($iUserId, EContactSortField::EMail, ESortOrder::ASC, 0, $iRequestLimit, $sSearch, '', '');
 	}
 
 	/**
@@ -571,20 +816,16 @@ class CApiMaincontactsLdapStorage extends CApiMaincontactsStorage
 	 */
 	public function UpdateContact($oContact)
 	{
+		$oAccount = $this->getAccountFromUserId($oContact->IdUser);
+		$oLdap = $this->Ldap($oAccount);
+
 		$bReturn = false;
-		$oConfig = $this->initConfigFromUserId($oContact->IdUser);
-		if ($oConfig && $this->connect($oConfig))
+		if ($oLdap)
 		{
-			$oCurrentContact = $this->GetContactById($oContact->IdUser, $oContact->IdContact);
-			if ($oCurrentContact)
+			$aEntry = $this->getEntryFromContact($oAccount, $oContact, true);
+			if ($aEntry)
 			{
-				$aEntry = CApiMaincontactsLdapHelper::GetEntryFromContact($oContact, true);
-
-				CApi::Log('LDAP: Update Contact: ldap_modify ("un='.$oContact->IdContact.','.$oConfig->SearchDn().'", $aEntry);');
-				CApi::Log('LDAP: $aEntry = '.print_r($aEntry, true));
-
-				$bReturn = @ldap_modify($this->rLink, 'un='.$oContact->IdContact.','.$oConfig->SearchDn(), $aEntry);
-				$this->validateLdapErrorOnFalse($bReturn);
+				$bReturn = $oLdap->Modify($this->sContactUidFieldName.'='.$oContact->IdContact, $aEntry);
 			}
 		}
 
@@ -597,20 +838,16 @@ class CApiMaincontactsLdapStorage extends CApiMaincontactsStorage
 	 */
 	public function UpdateGroup($oGroup)
 	{
+		$oAccount = $this->getAccountFromUserId($oGroup->IdUser);
+		$oLdap = $this->Ldap($oAccount);
+
 		$bReturn = false;
-		$oConfig = $this->initConfigFromUserId($oGroup->IdUser);
-		if ($oConfig && $this->connect($oConfig))
+		if ($oLdap)
 		{
-			$oCurrentGroup = $this->GetGroupById($oGroup->IdUser, $oGroup->IdGroup);
-			if ($oCurrentGroup)
+			$aEntry = $this->getEntryFromGroup($oAccount, $oGroup, true);
+			if ($aEntry)
 			{
-				$aEntry = CApiMaincontactsLdapHelper::GetEntryFromGroup($oGroup, true);
-
-				CApi::Log('LDAP: Update Group: ldap_modify ("un='.$oGroup->IdGroup.','.$oConfig->SearchDn().'", $aEntry);');
-				CApi::Log('LDAP: $aEntry = '.print_r($aEntry, true));
-
-				$bReturn = @ldap_modify($this->rLink, 'un='.$oGroup->IdGroup.','.$oConfig->SearchDn(), $aEntry);
-				$this->validateLdapErrorOnFalse($bReturn);
+				$bReturn = $oLdap->Modify($this->sGroupUidFieldName.'='.$oGroup->IdGroup, $aEntry);
 			}
 		}
 
@@ -623,21 +860,17 @@ class CApiMaincontactsLdapStorage extends CApiMaincontactsStorage
 	 */
 	public function CreateContact($oContact)
 	{
+		$oAccount = $this->getAccountFromUserId($oContact->IdUser);
+		$oLdap = $this->Ldap($oAccount);
+		
 		$bReturn = false;
-		$oConfig = $this->initConfigFromUserId($oContact->IdUser);
-		if ($oConfig && $this->connect($oConfig))
+		if ($oLdap)
 		{
-			$sUid = CApiMaincontactsLdapHelper::CreateNewContactUn($oContact);
-			$oContact->IdContact = $sUid;
-			$oContact->IdContactStr = $oContact->IdContact;
-
-			$aEntry = CApiMaincontactsLdapHelper::GetEntryFromContact($oContact);
-
-			CApi::Log('LDAP: Add Group: ldap_add ("un='.$sUid.','.$oConfig->SearchDn().'", $aEntry);');
-			CApi::Log('LDAP: $aEntry = '.print_r($aEntry, true));
-
-			$bReturn = @ldap_add($this->rLink, 'un='.$sUid.','.$oConfig->SearchDn(), $aEntry);
-			$this->validateLdapErrorOnFalse($bReturn);
+			$aEntry = $this->getEntryFromContact($oAccount, $oContact, false);
+			if ($aEntry)
+			{
+				$bReturn = $oLdap->Add($this->sContactUidFieldName.'='.$oContact->IdContact, $aEntry);
+			}
 		}
 
 		return $bReturn;
@@ -649,21 +882,17 @@ class CApiMaincontactsLdapStorage extends CApiMaincontactsStorage
 	 */
 	public function CreateGroup($oGroup)
 	{
+		$oAccount = $this->getAccountFromUserId($oGroup->IdUser);
+		$oLdap = $this->Ldap($oAccount);
+
 		$bReturn = false;
-		$oConfig = $this->initConfigFromUserId($oGroup->IdUser);
-		if ($oConfig && $this->connect($oConfig))
+		if ($oLdap)
 		{
-			$sUid = CApiMaincontactsLdapHelper::CreateNewGroupUn($oGroup);
-			$oGroup->IdGroup = $sUid;
-			$oGroup->IdGroupStr = $oGroup->IdGroup;
-
-			$aEntry = CApiMaincontactsLdapHelper::GetEntryFromGroup($oGroup);
-
-			CApi::Log('LDAP: Add Group: ldap_add ("un='.$sUid.','.$oConfig->SearchDn().'", $aEntry);');
-			CApi::Log('LDAP: $aEntry = '.print_r($aEntry, true));
-
-			$bReturn = @ldap_add($this->rLink, 'un='.$sUid.','.$oConfig->SearchDn(), $aEntry);
-			$this->validateLdapErrorOnFalse($bReturn);
+			$aEntry = $this->getEntryFromGroup($oAccount, $oGroup, false);
+			if ($aEntry)
+			{
+				$bReturn = $oLdap->Add($this->sGroupUidFieldName.'='.$oGroup->IdGroup, $aEntry);
+			}
 		}
 
 		return $bReturn;
@@ -676,21 +905,54 @@ class CApiMaincontactsLdapStorage extends CApiMaincontactsStorage
 	 */
 	public function DeleteContacts($iUserId, $aContactsIds)
 	{
+		$oAccount = $this->getAccountFromUserId($iUserId);
+		$oLdap = $this->Ldap($oAccount);
+		
 		$bReturn = false;
-		if (is_array($aContactsIds) && 0 < count($aContactsIds))
+		if ($oLdap && is_array($aContactsIds) && 0 < count($aContactsIds))
 		{
-			$oConfig = $this->initConfigFromUserId($iUserId);
-			if ($oConfig && $this->connect($oConfig))
+			foreach ($aContactsIds as $sContactId)
 			{
-				foreach ($aContactsIds as $sContactId)
+				$bReturn = $oLdap->Delete($this->sContactUidFieldName.'='.$sContactId);
+				if (!$bReturn)
 				{
-					CApi::Log('LDAP: Delete Contact: @ldap_delete ("un='.$sContactId.','.$oConfig->SearchDn().'");');
-					$bReturn = @ldap_delete($this->rLink, 'un='.$sContactId.','.$oConfig->SearchDn());
-					$this->validateLdapErrorOnFalse($bReturn);
-					if (!$bReturn)
-					{
-						break;
-					}
+					break;
+				}
+			}
+		}
+
+		return $bReturn;
+	}
+	
+	/**
+	 * @param int $iUserId
+	 * @param array $aContactsIds
+	 * @return bool
+	 */
+	public function DeleteSuggestContacts($iUserId, $aContactsIds)
+	{
+		return true;
+	}	
+
+	/**
+	 * @param int $iUserId
+	 * @param array $aGroupsIds
+	 * @return bool
+	 */
+	public function DeleteGroups($iUserId, $aGroupsIds)
+	{
+		$oAccount = $this->getAccountFromUserId($iUserId);
+		$oLdap = $this->Ldap($oAccount);
+		
+		$bReturn = false;
+		if ($oLdap && is_array($aGroupsIds) && 0 < count($aGroupsIds))
+		{
+			foreach ($aGroupsIds as $sGroupId)
+			{
+				$bReturn = $oLdap->Delete($this->sGroupUidFieldName.'='.$sGroupId);
+				if (!$bReturn)
+				{
+					break;
 				}
 			}
 		}
@@ -700,30 +962,186 @@ class CApiMaincontactsLdapStorage extends CApiMaincontactsStorage
 
 	/**
 	 * @param int $iUserId
-	 * @param array $aGroupsIds
+	 * @param mixed $mGroupsId
 	 * @return bool
 	 */
-	public function DeleteGroups($iUserId, $aGroupsIds)
+	public function DeleteGroup($iUserId, $mGroupsId)
 	{
-		$bReturn = false;
-		if (is_array($aGroupsIds) && 0 < count($aGroupsIds))
+		return $this->DeleteGroups($iUserId, array($mGroupsId));
+	}
+
+	/**
+	 * @todo
+	 * @param int $iUserId
+	 * @param string $sEmail
+	 * @return bool
+	 */
+	public function UpdateSuggestTable($iUserId, $aEmails)
+	{
+		return true;
+	}
+
+	/**
+	 * @param int $iUserId
+	 * @param array $aContactIds
+	 * @return bool
+	 */
+//	public function DeleteContactsExceptIds($iUserId, $aContactIds)
+//	{
+//		$bResult = false;
+//		if ($this->oConnection->Execute($this->oCommandCreator->DeleteContactsExceptIds($iUserId, $aContactIds)))
+//		{
+//			$bResult = true;
+//			$this->oConnection->Execute($this->oCommandCreator->ClearGroupsIdsByExceptContactsIds($iUserId, $aContactIds));
+//		}
+//
+//		return $bResult;
+//	}
+
+	/**
+	 * @param int $iUserId
+	 * @param array $aGroupIds
+	 * @return bool
+	 */
+//	public function DeleteGroupsExceptIds($iUserId, $aGroupIds)
+//	{
+//		$bResult = false;
+//		if ($this->oConnection->Execute($this->oCommandCreator->DeleteGroupsExceptIds($iUserId, $aGroupIds)))
+//		{
+//			$bResult = true;
+//			$this->oConnection->Execute($this->oCommandCreator->ClearContactsIdsByExceptGroupsIds($iUserId, $aGroupIds));
+//		}
+//
+//		return $bResult;
+//	}
+
+	/**
+	 * @todo
+	 * @param CAccount $oAccount
+	 * @return bool
+	 */
+	public function ClearAllContactsAndGroups($oAccount)
+	{
+		return true;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function FlushContacts()
+	{
+		return true;
+	}
+
+	/**
+	 * @param CGroup $oGroup
+	 * @param array $aContactIds
+	 * @return bool
+	 */
+	public function AddContactsToGroup($oGroup, $aContactIds)
+	{
+		$iResult = 1;
+
+		$oContact = null;
+		foreach ($aContactIds as $mContactId)
 		{
-			$oConfig = $this->initConfigFromUserId($iUserId);
-			if ($oConfig && $this->connect($oConfig))
+			$oContact = $this->GetContactById($oGroup->IdUser, $mContactId);
+			if ($oContact)
 			{
-				foreach ($aGroupsIds as $sGroupId)
+				$aIds = $oContact->GroupsIds;
+				$aIds = is_array($aIds) ? $aIds : array();
+				$aIds[] = $oGroup->IdGroup;
+				$aIds = array_unique($aIds);
+
+				if (implode(',', $aIds) !== implode(',', $oContact->GroupsIds))
 				{
-					CApi::Log('LDAP: Delete Group: @ldap_delete ("un='.$sGroupId.','.$oConfig->SearchDn().'");');
-					$bReturn = @ldap_delete($this->rLink, 'un='.$sGroupId.','.$oConfig->SearchDn());
-					$this->validateLdapErrorOnFalse($bReturn);
-					if (!$bReturn)
-					{
-						break;
-					}
+					$oContact->GroupsIds = $aIds;
+					$iResult &= $this->UpdateContact($oContact);
 				}
 			}
 		}
 
-		return $bReturn;
+		return (bool) $iResult;
+	}
+
+	/**
+	 * @param CGroup $oGroup
+	 * @param array $aContactIds
+	 * @return bool
+	 */
+	public function RemoveContactsFromGroup($oGroup, $aContactIds)
+	{
+		$iResult = 1;
+
+		$oContact = null;
+		foreach ($aContactIds as $mContactId)
+		{
+			$oContact = $this->GetContactById($oGroup->IdUser, $mContactId);
+			if ($oContact)
+			{
+				$aIds = $oContact->GroupsIds;
+				$bNew = array();
+				foreach ($aIds as $mId)
+				{
+					if ((string) $mId !== (string) $oGroup->IdGroup)
+					{
+						$bNew[] = $mId;
+					}
+				}
+				$bNew = array_unique($bNew);
+
+				if (implode(',', $bNew) !== implode(',', $oContact->GroupsIds))
+				{
+					$oContact->GroupsIds = $bNew;
+					$iResult &= $this->UpdateContact($oContact);
+				}
+			}
+		}
+
+		return (bool) $iResult;
+	}
+
+	/**
+	 * @todo
+	 * @param CAccount $oAccount
+	 * @param mixed $mContactId
+	 * @param int $iContactType = EContactType::Global_
+	 * @return int|null
+	 */
+	public function ConvertedContactLocalId($oAccount, $mContactId, $iContactType)
+	{
+		return null;
+	}
+
+	/**
+	 * @todo
+	 * @param CAccount $oAccount
+	 * @param int $iContactType = EContactType::Global_
+	 * @return array
+	 */
+	public function ConvertedContactLocalIdCollection($oAccount, $iContactType = EContactType::Global_)
+	{
+		return array();
+	}
+
+	/**
+	 * @todo
+	 * @param array $aIds
+	 * @return array
+	 */
+	public function ContactIdsLinkedToGroups($aIds)
+	{
+		return array();
+	}
+
+	/**
+	 * @todo
+	 * @param int $iUserId
+	 * @param mixed $mContactId
+	 * @return CContact|false
+	 */
+	public function GetGlobalContactById($iUserId, $mContactId)
+	{
+		return false;
 	}
 }

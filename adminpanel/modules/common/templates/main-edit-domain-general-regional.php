@@ -58,6 +58,8 @@
 					$this->Data->PrintSelectedValue('optDateFormatMMDDYYYY'); ?>><?php echo CApi::I18N('ADMIN_PANEL/DOMAINS_GENERAL_DATEFORMAT_MMDD');?></option>
 				<option value="<?php echo EDateFormat::DDMMYYYY; ?>" <?php
 					$this->Data->PrintSelectedValue('optDateFormatDDMMYYYY'); ?>><?php echo CApi::I18N('ADMIN_PANEL/DOMAINS_GENERAL_DATEFORMAT_DDMM');?></option>
+				<option value="<?php echo EDateFormat::DD_MONTH_YYYY; ?>" <?php
+					$this->Data->PrintSelectedValue('optDateFormatDDMonthYYYY'); ?>><?php echo CApi::I18N('ADMIN_PANEL/DOMAINS_GENERAL_DATEFORMAT_DD_MONTH_YYYY');?></option>
 			</select>
 		</td>
 	</tr>

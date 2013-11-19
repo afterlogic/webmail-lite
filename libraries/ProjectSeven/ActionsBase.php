@@ -92,10 +92,11 @@ abstract class ActionsBase
 	 * @param string $sActionName
 	 * @param int $iErrorCode
 	 * @param string $sErrorMessage
+	 * @param array $aAdditionalParams = null
 	 *
 	 * @return array
 	 */
-	public function FalseResponse($oAccount, $sActionName, $iErrorCode = null, $sErrorMessage = null)
+	public function FalseResponse($oAccount, $sActionName, $iErrorCode = null, $sErrorMessage = null, $aAdditionalParams = null)
 	{
 		$aResponseItem = $this->DefaultResponse($oAccount, $sActionName, false);
 
@@ -108,16 +109,26 @@ abstract class ActionsBase
 			}
 		}
 
+		if (is_array($aAdditionalParams))
+		{
+			foreach ($aAdditionalParams as $sKey => $mValue)
+			{
+				$aResponseItem[$sKey] = $mValue;
+			}
+		}
+
 		return $aResponseItem;
 	}
 
 	/**
+	 * @param \CAccount $oAccount
 	 * @param string $sActionName
 	 * @param \Exception $oException
+	 * @param array $aAdditionalParams = null
 	 *
 	 * @return array
 	 */
-	public function ExceptionResponse($oAccount, $sActionName, $oException)
+	public function ExceptionResponse($oAccount, $sActionName, $oException, $aAdditionalParams = null)
 	{
 		$iErrorCode = null;
 		$sErrorMessage = null;
@@ -133,7 +144,7 @@ abstract class ActionsBase
 			$sErrorMessage = $oException->getCode().' - '.$oException->getMessage();
 		}
 
-		return $this->FalseResponse($oAccount, $sActionName, $iErrorCode, $sErrorMessage);
+		return $this->FalseResponse($oAccount, $sActionName, $iErrorCode, $sErrorMessage, $aAdditionalParams);
 	}
 
 	/**
@@ -154,6 +165,25 @@ abstract class ActionsBase
 	public function SetActionParams($aCurrentActionParams)
 	{
 		$this->aCurrentActionParams = $aCurrentActionParams;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function GetActionParams()
+	{
+		return $this->aCurrentActionParams;
+	}
+
+	/**
+	 * @param string $sKey
+	 * @param mixed $mValue
+	 *
+	 * @return void
+	 */
+	public function setParamValue($sKey, $mValue)
+	{
+		$this->aCurrentActionParams[$sKey] = $mValue;
 	}
 
 	/**
@@ -220,6 +250,31 @@ abstract class ActionsBase
 	}
 
 	/**
+	 * @param string $sMimeType
+	 * @return bool
+	 */
+	private function isImageMimeTypeSuppoted($sMimeType)
+	{
+		$bResult = function_exists('gd_info');
+		if ($bResult)
+		{
+			$bResult = false;
+			switch (strtolower($sMimeType))
+			{
+				case 'image/jpg':
+				case 'image/jpeg':
+					$bResult = function_exists('imagecreatefromjpeg');
+					break;
+				case 'image/png':
+					$bResult = function_exists('imagecreatefrompng');
+					break;
+			}
+		}
+
+		return $bResult;
+	}
+
+	/**
 	 * @param \CAccount $oAccount
 	 * @param mixed $mResponse
 	 * @param string $sParent
@@ -233,9 +288,13 @@ abstract class ActionsBase
 
 		if (is_object($mResponse))
 		{
-			if ($mResponse instanceof \CApiMailMessage)
+			$sClassName = get_class($mResponse);
+			if ('CApiMailMessage' === $sClassName)
 			{
 				$oAttachments = $mResponse->Attachments();
+
+				$iInternalTimeStampInUTC = $mResponse->InternalTimeStampInUTC();
+				$iReceivedOrDateTimeStampInUTC = $mResponse->ReceivedOrDateTimeStampInUTC();
 
 				$aFlags = $mResponse->FlagsLowerCase();
 				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), array(
@@ -243,21 +302,25 @@ abstract class ActionsBase
 					'Uid' => $mResponse->Uid(),
 					'Subject' => $mResponse->Subject(),
 					'MessageId' => $mResponse->MessageId(),
-					'TextPartID' => $mResponse->TextPartID(),
 					'Size' => $mResponse->Size(),
 					'TextSize' => $mResponse->TextSize(),
-					'InternalTimeStampInUTC' => $mResponse->InternalTimeStampInUTC(),
+					'InternalTimeStampInUTC' => $iInternalTimeStampInUTC,
+					'ReceivedOrDateTimeStampInUTC' => $iReceivedOrDateTimeStampInUTC,
+					'TimeStampInUTC' =>	\CApi::GetConf('labs.use-date-from-headers', false) && 0 < $iReceivedOrDateTimeStampInUTC ?
+						$iReceivedOrDateTimeStampInUTC : $iInternalTimeStampInUTC,
 					'From' => $this->responseObject($oAccount, $mResponse->From(), $sParent, $aParameters),
 					'To' => $this->responseObject($oAccount, $mResponse->To(), $sParent, $aParameters),
 					'Cc' => $this->responseObject($oAccount, $mResponse->Cc(), $sParent, $aParameters),
 					'Bcc' => $this->responseObject($oAccount, $mResponse->Bcc(), $sParent, $aParameters),
 					'Sender' => $this->responseObject($oAccount, $mResponse->Sender(), $sParent, $aParameters),
+					'ReplyTo' => $this->responseObject($oAccount, $mResponse->ReplyTo(), $sParent, $aParameters),
 					'IsSeen' => in_array('\\seen', $aFlags),
 					'IsFlagged' => in_array('\\flagged', $aFlags),
 					'IsAnswered' => in_array('\\answered', $aFlags),
 					'IsForwarded' => false,
 					'HasAttachments' => $oAttachments && 0 < $oAttachments->Count(),
-					'IsAnswered' => in_array('\\answered', $aFlags),
+					'HasVcardAttachment' => $oAttachments && $oAttachments->HasVcardAttachment(),
+					'HasIcalAttachment' => $oAttachments && $oAttachments->HasIcalAttachment(),
 					'Priority' => $mResponse->Priority(),
 					'DraftInfo' => $mResponse->DraftInfo(),
 					'Sensitivity' => $mResponse->Sensitivity()
@@ -287,8 +350,23 @@ abstract class ActionsBase
 					$bHasExternals = false;
 					$aFoundedCIDs = array();
 
-					$mResult['Html'] = \MailSo\Base\HtmlUtils::ClearHtml($mResponse->Html(), $bHasExternals, $aFoundedCIDs);
-					$mResult['Plain'] = \MailSo\Base\HtmlUtils::ConvertPlainToHtml($mResponse->Plain());
+					$bRtl = false;
+					$sPlain = '';
+					$sHtml = $mResponse->Html();
+					
+					if (0 === strlen($sHtml))
+					{
+						$sPlain = $mResponse->Plain();
+						$bRtl = \MailSo\Base\Utils::IsRTL($sPlain);
+					}
+					else
+					{
+						$bRtl = \MailSo\Base\Utils::IsRTL($sHtml);
+					}
+
+					$mResult['Html'] = 0 === strlen($sHtml) ? '' : \MailSo\Base\HtmlUtils::ClearHtml($sHtml, $bHasExternals, $aFoundedCIDs);
+					$mResult['Plain'] = 0 === strlen($sPlain) ? '' : \MailSo\Base\HtmlUtils::ConvertPlainToHtml($sPlain);
+					$mResult['Rtl'] = $bRtl;
 
 					$mResult['ICAL'] = $this->responseObject($oAccount, $mResponse->GetExtend('ICAL'), $sParent, $aParameters);
 					$mResult['VCARD'] = $this->responseObject($oAccount, $mResponse->GetExtend('VCARD'), $sParent, $aParameters);
@@ -299,13 +377,19 @@ abstract class ActionsBase
 					$mResult['Attachments'] = $this->responseObject($oAccount, $oAttachments, $sParent, array_merge($aParameters, array(
 						'FoundedCIDs' => $aFoundedCIDs
 					)));
+
+//					$mResult['Html'] = \MailSo\Base\Utils::Utf8Clear($mResult['Html']);
+//					$mResult['Plain'] = \MailSo\Base\Utils::Utf8Clear($mResult['Plain']);
 				}
 				else
 				{
 					$mResult['@Object'] = 'Object/MessageListItem';
+					$mResult['Threads'] = $mResponse->Threads();
 				}
+
+				$mResult['Subject'] = \MailSo\Base\Utils::Utf8Clear($mResult['Subject']);
 			}
-			else if ($mResponse instanceof \CApiMailIcs)
+			else if ('CApiMailIcs' === $sClassName)
 			{
 				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), array(
 					'Uid' => $mResponse->Uid,
@@ -320,7 +404,7 @@ abstract class ActionsBase
 					'CalendarId' => $mResponse->CalendarId
 				));
 			}
-			else if ($mResponse instanceof \CApiMailVcard)
+			else if ('CApiMailVcard' === $sClassName)
 			{
 				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), array(
 					'Uid' => $mResponse->Uid,
@@ -330,7 +414,7 @@ abstract class ActionsBase
 					'Exists' => $mResponse->Exists
 				));
 			}
-			else if ($mResponse instanceof \CFilter)
+			else if ('CFilter' === $sClassName)
 			{
 				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), array(
 					'Enable' => $mResponse->Enable,
@@ -341,7 +425,77 @@ abstract class ActionsBase
 					'FolderFullName' => $mResponse->FolderFullName,
 				));
 			}
-			else if ($mResponse instanceof \CApiMailFolder)
+			else if ('CHelpdeskThread' === $sClassName)
+			{
+				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), array(
+					'IdHelpdeskThread' => $mResponse->IdHelpdeskThread,
+					'ThreadHash' => $mResponse->StrHelpdeskThreadHash,
+					'IdOwner' => $mResponse->IdOwner,
+					'Owner' => $mResponse->Owner,
+					'Type' => $mResponse->Type,
+					'Subject' => $mResponse->Subject,
+					'IsRead' => $mResponse->IsRead,
+					'IsArchived' => $mResponse->IsArchived,
+					'ItsMe' => $mResponse->ItsMe,
+					'HasAttachments' => $mResponse->HasAttachments,
+					'PostCount' => $mResponse->PostCount,
+					'Created' => $mResponse->Created,
+					'Updated' => $mResponse->Updated
+				));
+			}
+			else if ('CHelpdeskPost' === $sClassName)
+			{
+				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), array(
+					'IdHelpdeskPost' => $mResponse->IdHelpdeskPost,
+					'IdHelpdeskThread' => $mResponse->IdHelpdeskThread,
+					'IdOwner' => $mResponse->IdOwner,
+					'Owner' => $mResponse->Owner,
+					'Attachments' => $this->responseObject($oAccount, $mResponse->Attachments, $sParent),
+					'IsThreadOwner' => $mResponse->IsThreadOwner,
+					'ItsMe' => $mResponse->ItsMe,
+					'Type' => $mResponse->Type,
+					'SystemType' => $mResponse->SystemType,
+					'Text' => \MailSo\Base\HtmlUtils::ConvertPlainToHtml($mResponse->Text),
+					'Created' => $mResponse->Created
+				));
+			}
+			else if ('CHelpdeskAttachment' === $sClassName)
+			{
+				/* @var $mResponse CHelpdeskAttachment */
+				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), array(
+					'IdHelpdeskAttachment' => $mResponse->IdHelpdeskAttachment,
+					'IdHelpdeskPost' => $mResponse->IdHelpdeskPost,
+					'IdHelpdeskThread' => $mResponse->IdHelpdeskThread,
+					'SizeInBytes' => $mResponse->SizeInBytes,
+					'FileName' => $mResponse->FileName,
+					'MimeType' => \MailSo\Base\Utils::MimeContentType($mResponse->FileName),
+					'Hash' => $mResponse->Hash,
+					'Created' => $mResponse->Created
+				));
+			}
+			else if ('CFetcher' === $sClassName)
+			{
+				/* @var $mResponse \CFetcher */
+				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), array(
+					'IdFetcher' => $mResponse->IdFetcher,
+					'IdAccount' => $mResponse->IdAccount,
+					'IsEnabled' => $mResponse->IsEnabled,
+					'IsLocked' => $mResponse->IsLocked,
+					'Folder' => $mResponse->Folder,
+					'Name' => $mResponse->Name,
+					'Email' => $mResponse->Email,
+					'Signature' => $mResponse->Signature,
+					'LeaveMessagesOnServer' => $mResponse->LeaveMessagesOnServer,
+					'IncomingMailServer' => $mResponse->IncomingMailServer,
+					'IncomingMailPort' => $mResponse->IncomingMailPort,
+					'IncomingMailLogin' => $mResponse->IncomingMailLogin,
+					'IsOutgoingEnabled' => $mResponse->IsOutgoingEnabled,
+					'OutgoingMailServer' => $mResponse->OutgoingMailServer,
+					'OutgoingMailPort' => $mResponse->OutgoingMailPort,
+					'OutgoingMailAuth' => $mResponse->OutgoingMailAuth
+				));
+			}
+			else if ('CApiMailFolder' === $sClassName)
 			{
 				$aExtended = null;
 				$mStatus = $mResponse->Status();
@@ -352,7 +506,8 @@ abstract class ActionsBase
 						'MessageUnseenCount' => (int) $mStatus['UNSEEN'],
 						'UidNext' => (string) $mStatus['UIDNEXT'],
 						'Hash' => \api_Utils::GenerateFolderHash(
-							$mResponse->FullNameRaw(), $mStatus['MESSAGES'], $mStatus['UNSEEN'], $mStatus['UIDNEXT'])
+							$mResponse->FullNameRaw(), $mStatus['MESSAGES'], $mStatus['UNSEEN'], $mStatus['UIDNEXT']
+						)
 					);
 				}
 
@@ -361,6 +516,7 @@ abstract class ActionsBase
 					'Name' => $mResponse->Name(),
 					'FullName' => $mResponse->FullName(),
 					'FullNameRaw' => $mResponse->FullNameRaw(),
+					'FullNameHash' => md5($mResponse->FullNameRaw()),
 					'Delimiter' => $mResponse->Delimiter(),
 					'IsSubscribed' => $oAccount->IsEnabledExtension(\CAccount::IgnoreSubscribeStatus) ? true : $mResponse->IsSubscribed(),
 					'IsSelectable' => $mResponse->IsSelectable(),
@@ -370,7 +526,7 @@ abstract class ActionsBase
 					'SubFolders' => $this->responseObject($oAccount, $mResponse->SubFolders(), $sParent, $aParameters)
 				));
 			}
-			else if ($mResponse instanceof \CApiMailAttachment)
+			else if ('CApiMailAttachment' === $sClassName)
 			{
 				$aFoundedCIDs = isset($aParameters['FoundedCIDs']) && is_array($aParameters['FoundedCIDs'])
 					? $aParameters['FoundedCIDs'] : array();
@@ -386,6 +542,7 @@ abstract class ActionsBase
 						? '' :  $sMimeIndex,
 					'EstimatedSize' => $mResponse->EstimatedSize(),
 					'CID' => $mResponse->Cid(),
+					'Thumb' => $this->isImageMimeTypeSuppoted($sMimeType),
 					'IsInline' => $mResponse->IsInline(),
 					'IsLinked' => in_array(trim(trim($mResponse->Cid()), '<>'), $aFoundedCIDs)
 				));
@@ -400,14 +557,15 @@ abstract class ActionsBase
 				));
 
 			}
-			else if ($mResponse instanceof \MailSo\Mime\Email)
+			else if ('MailSo\Mime\Email' === $sClassName)
 			{
 				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), array(
+					'$sClassName' => $sClassName,
 					'DisplayName' => $mResponse->GetDisplayName(),
 					'Email' => $mResponse->GetEmail()
 				));
 			}
-			else if ($mResponse instanceof \CApiMailMessageCollection)
+			else if ('CApiMailMessageCollection' === $sClassName)
 			{
 				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), array(
 					'Uids' => $mResponse->Uids,
@@ -415,20 +573,21 @@ abstract class ActionsBase
 					'FolderHash' => $mResponse->FolderHash,
 					'MessageCount' => $mResponse->MessageCount,
 					'MessageUnseenCount' => $mResponse->MessageUnseenCount,
-					'MessageSearchCount' => $mResponse->MessageSearchCount,
+					'MessageResultCount' => $mResponse->MessageResultCount,
 					'FolderName' => $mResponse->FolderName,
 					'Offset' => $mResponse->Offset,
 					'Limit' => $mResponse->Limit,
-					'Search' => $mResponse->Search
+					'Search' => $mResponse->Search,
+					'Filters' => $mResponse->Filters
 				));
 			}
-			else if ($mResponse instanceof \CApiMailFolderCollection)
+			else if ('CApiMailFolderCollection' === $sClassName)
 			{
 				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), array(
 					'Namespace' => $mResponse->GetNamespace()
 				));
 			}
-			else if ($mResponse instanceof \CContactListItem)
+			else if ('CContactListItem' === $sClassName)
 			{
 				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), array(
 					'IdUser' => $oAccount->IdUser,
@@ -438,16 +597,20 @@ abstract class ActionsBase
 					'UseFriendlyName' => $mResponse->UseFriendlyName,
 					'IsGroup' => $mResponse->IsGroup,
 					'ReadOnly' => $mResponse->ReadOnly,
+					'ItsMe' => $mResponse->ItsMe,
 					'Frequency' => $mResponse->Frequency
 				));
 			}
-			else if ($mResponse instanceof \CContact)
+			else if ('CContact' === $sClassName)
 			{
 				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), array(
 					'IdUser' => $mResponse->IdUser,
 					'IdContact' => $mResponse->IdContact,
 					'IdContactStr' => $mResponse->IdContactStr,
 
+					'Global' => $mResponse->Global,
+					'ItsMe' => $mResponse->ItsMe,
+					
 					'PrimaryEmail' => $mResponse->PrimaryEmail,
 					'UseFriendlyName' => $mResponse->UseFriendlyName,
 
@@ -458,6 +621,9 @@ abstract class ActionsBase
 					'FirstName' => $mResponse->FirstName,
 					'LastName' => $mResponse->LastName,
 					'NickName' => $mResponse->NickName,
+					'Skype' => $mResponse->Skype,
+					'Facebook' => $mResponse->Facebook,
+
 					'HomeEmail' => $mResponse->HomeEmail,
 					'HomeStreet' => $mResponse->HomeStreet,
 					'HomeCity' => $mResponse->HomeCity,
@@ -494,7 +660,7 @@ abstract class ActionsBase
 					'ETag' => $mResponse->ETag
 				));
 			}
-			else if ($mResponse instanceof \CGroup)
+			else if ('CGroup' === $sClassName)
 			{
 				$aContacts = $this->ApiContacts()->GetContactItems(
 					$mResponse->IdUser, \EContactSortField::Name, \ESortOrder::ASC, 0, 99, '', '', $mResponse->IdGroup);
@@ -515,7 +681,7 @@ abstract class ActionsBase
 			}
 			else
 			{
-				$mResult = '['.get_class($mResponse).']';
+				$mResult = '['.$sClassName.']';
 			}
 		}
 		else if (is_array($mResponse))

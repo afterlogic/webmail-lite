@@ -94,16 +94,16 @@
 			<div class="panel_top" data-bind="initDom: messageFields">
 				<div class="notice" data-bind="visible: isDemo, i18n: 'text'" data-i18n="DEMO/WARNING_SEND_EMAIL_TO_DEMO_ONLY"></div>
 				<table class="fields">
-					<!--<tr class="first_row from" data-bind="visible: visibleFrom">
+					<tr class="first_row from" data-bind="visible: visibleFrom">
 						<td class="wm_label">
 							<span data-bind="i18n: 'text'" data-i18n="COMPOSE/HEADER_FROM"></span>:
 						</td>
 						<td>
-							<select class="input" tabindex="1" data-bind="foreach: accounts, value: selectedAccountId">
+							<select class="input" tabindex="1" data-bind="foreach: senderList, value: selectedSender">
 								<option data-bind="text: fullEmail, value: id"></option>
 							</select>
 						</td>
-					</tr>-->
+					</tr>
 					<tr class="to">
 						<td class="wm_label">
 							<span data-bind="i18n: 'text'" data-i18n="COMPOSE/HEADER_TO"></span>:
@@ -146,7 +146,7 @@
 							<span data-bind="i18n: 'text'" data-i18n="COMPOSE/HEADER_SUBJECT"></span>:
 						</td>
 						<td>
-							<input type="text" class="input" maxlength="255" tabindex="5" data-bind="value: subject, hasfocus: subjectFocused"/>
+							<input type="text" class="input" maxlength="255" tabindex="5" data-bind="value: subject, hasfocus: subjectFocused, valueUpdate: 'afterkeydown'"/>
 						</td>
 					</tr>
 					<tr class="counter" data-bind="visible: visibleCounter">
@@ -161,23 +161,24 @@
 					<tr>
 						<td></td>
 						<td>
-							<div class="wm_attachment_uploading">
-								<div class="wm_upload_drop_cont"
+							<div class="attachment_uploading">
+								<div class="uploader_mask"
 										data-bind="initDom: composeUploaderDropPlace, 
-										css: { 'wm_upload_drop_area_active': uploaderDragOver, 
-										'wm_upload_body_drop_area_active': uploaderBodyDragOver }">
-									<span class="wm_upload_button" data-bind="initDom: composeUploaderButton">
-										<span data-bind="i18n: 'text'" data-i18n="COMPOSE/ATTACH_CLICK"></span>
-									</span>
-									<span class="wm_upload_drop_area_text" data-bind="i18n: 'text', visible: allowDragNDrop" 
-										  data-i18n="COMPOSE/ATTACH_HINT"></span>
+										css: { 'over': uploaderDragOver, 'active': uploaderBodyDragOver }">
+									<div class="inner">
+										<span class="uploader_button" data-bind="initDom: composeUploaderButton">
+											<span data-bind="i18n: 'text'" data-i18n="COMPOSE/ATTACH_CLICK"></span>
+										</span>
+										<span class="text" data-bind="i18n: 'text', visible: allowDragNDrop" 
+											  data-i18n="COMPOSE/ATTACH_HINT"></span>
+									</div>
 								</div>
 								<div class="clear"></div>
-								<div class="wm_upload_list" data-bind="customScrollbar: {x: false}, visible: notInlineAttachments().length > 0">
+								<div class="upload_list" data-bind="customScrollbar: {x: false}, visible: notInlineAttachments().length > 0">
 									<div class="scroll-inner" data-bind="foreach: notInlineAttachments">
-										<span class="attachment" data-bind="css: {'fail': uploadError(), 'success': !uploadError()}">
+										<span class="file attachment" data-bind="css: {'fail': uploadError(), 'success': !uploadError()}">
 											<span class="cancel" data-bind="click: function () {$parent.onAttachmentRemove(uploadUid());}, i18n: 'text'" data-i18n="COMPOSE/UPLOAD_CANCEL"></span>
-											<span class="icon" data-bind="css: extension()"></span>
+											<span class="icon" data-bind="css: extension().toLowerCase()"></span>
 											<span class="title">
 												<span class="file" data-bind="text: fileName()"></span>
 												<span class="size" data-bind="text: friendlySize()"></span>
@@ -206,10 +207,12 @@
 				<!-- ko template: { name: 'Common_HtmlEditorViewModel', data: oHtmlEditor} --><!-- /ko -->
 			</div>
 			<div class="panel_bottom">
-				<span class="button send" data-bind="command: sendCommand, css: {'disabled': !isEnableSending()}">
-					<span data-bind="i18n: 'text'" data-i18n="COMPOSE/TOOL_SEND"></span>
-				</span>
+				<!--<span class="button send" data-bind="command: sendCommand, css: {'disabled': !isEnableSending()}">-->
+					<!--<span data-bind="i18n: 'text'" data-i18n="COMPOSE/TOOL_SEND"></span>-->
+				<!--</span>-->
+				<span class="text hint" data-i18n="COMPOSE/QUICK_REPLY_HOTKEY" data-bind="i18n: 'text'"></span>
 			</div>
+
 		</div>
 	</div>
 </div>

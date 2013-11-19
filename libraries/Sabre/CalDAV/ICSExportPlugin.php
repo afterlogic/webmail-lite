@@ -12,8 +12,8 @@ use Sabre\VObject;
  * This is useful for clients that don't support CalDAV yet. They often do
  * support ics files.
  *
- * @copyright Copyright (C) 2007-2012 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/)
+ * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
+ * @author Evert Pot (http://evertpot.com/)
  * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
 class ICSExportPlugin extends DAV\ServerPlugin {
@@ -85,7 +85,7 @@ class ICSExportPlugin extends DAV\ServerPlugin {
      */
     public function generateICS(array $nodes) {
 
-        $calendar = new VObject\Component('vcalendar');
+        $calendar = new VObject\Component\VCalendar();
         $calendar->version = '2.0';
         if (DAV\Server::$exposeVersion) {
             $calendar->prodid = '-//SabreDAV//SabreDAV ' . DAV\Version::VERSION . '//EN';

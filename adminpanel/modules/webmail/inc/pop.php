@@ -8,7 +8,7 @@
 
 class CWebMailPopAction extends ap_CoreModuleHelper
 {
-	public function Services()
+	public function System()
 	{
 		$sType = isset($_GET['type']) ? $_GET['type'] : '';
 		$sAction = isset($_GET['action']) ? $_GET['action'] : '';

@@ -1189,6 +1189,24 @@ class api_Utils
 	}
 
 	/**
+	 * @param int $sLen = 6
+	 * @return string
+	 */
+	public static function GenerateShortHashString($sLen = 10)
+	{
+		$sResult = '';
+		$sChars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
+		$iCharLen = strlen($sChars);
+
+		for (; 0 < $sLen; $sLen--)
+		{
+			$sResult .= substr($sChars, rand(0, $iCharLen), 1);
+		}
+		
+		return $sResult;
+	}
+
+	/**
 	 * @param string $sFileName
 	 * @return string
 	 */
@@ -1362,6 +1380,50 @@ class api_Utils
 		}
 
 		return $sResult;
+	}
+
+	/**
+	 * @param string $sLanguage
+	 * @return string
+	 */
+	public static function ConvertLanguageNameToShort($sLanguage)
+	{
+		$aList = array(
+			'english' => 'en',
+			'polish' => 'pl',
+			'estonian' => 'et',
+			'bulgarian' => 'bg',
+			'ukrainian' => 'uk',
+			'thai' => 'th',
+			'swedish' => 'sv',
+			'spanish' => 'es',
+			'russian' => 'ru',
+			'romanian' => 'ro',
+			'portuguese-brazil' => 'pt-br',
+//			'persian' => '', // TODO name? Farsi
+			'latvian' => 'lv',
+			'korean' => 'ko',
+			'japanese' => 'ja',
+			'italian' => 'it',
+			'hungarian' => 'hu',
+			'hebrew' => 'he',
+			'german' => 'de',
+			'french' => 'fr',
+			'finnish' => 'fi',
+			'dutch' => 'nl',
+			'danish' => 'da',
+			'chinese-Traditional' => 'zh-tw',
+			'chinese-Simplified' => 'zh-cn',
+			'arabic' => 'ar',
+			'turkish' => 'tr',
+			'norwegian' => 'nb',
+//			'lithuanian' => 'lt',  // TODO
+			'greek' => 'el',
+			'czech' => 'cs'
+		);
+
+		$sLanguage = strtolower($sLanguage);
+		return isset($aList[$sLanguage]) ? $aList[$sLanguage] : $sLanguage;
 	}
 
 	/**
@@ -1638,12 +1700,14 @@ class api_Utils
 		return md5($sFolder.$sD.$iMessageCount.$sD.$iMessageUnseenCount.$sD.$sUidNext);
 	}
 
-	public static function getDirectorySize($path)
+	public static function GetDirectorySize($path)
 	{
 		$size = 0;
 		$files = 0;
 		$directories = 0;
-		if ($handle = opendir($path))
+
+		$handle = is_dir($path) ? opendir($path) : null;
+		if ($handle)
 		{
 			while (false !== ($file = readdir($handle)))
 			{
@@ -1653,7 +1717,7 @@ class api_Utils
 					if (is_dir ($nextpath))
 					{
 						$directories++;
-						$result = self::getDirectorySize($nextpath);
+						$result = self::GetDirectorySize($nextpath);
 						$size += $result['size'];
 						$files += $result['files'];
 						$directories += $result['directories'];
@@ -1665,8 +1729,12 @@ class api_Utils
 					}
 				}
 			}
+			
+			if (is_resource($handle))
+			{
+				closedir($handle);
+			}
 		}
-		closedir ($handle);
 
 		return array(
 		  'size' => $size,
@@ -1674,6 +1742,33 @@ class api_Utils
 		  'directories' => $directories
 		);
 	}
+	
+	public static function SearchFiles($sPath, $sPattern)
+	{
+		$files = array();
+
+		// Create recursive dir iterator which skips dot folders
+		$oDirIterator = new RecursiveDirectoryIterator($sPath, 
+				FilesystemIterator::SKIP_DOTS |
+				FilesystemIterator::UNIX_PATHS
+		);		
+		$oIterators = new RecursiveIteratorIterator($oDirIterator, 
+				RecursiveIteratorIterator::SELF_FIRST
+		);		
+		foreach($oIterators as $oIterator)
+		{
+			$sName = $oIterator->getFilename();
+			$aMatches = array();
+			$iResult = preg_match("/" . preg_quote($sPattern) . "/ui", $sName, $aMatches);
+			if ($sName !== '.sabredav' && $sName !== API_HELPDESK_PUBLIC_NAME && $iResult === 1)
+			{
+				$files[] = $oIterator->getPathname();		
+			}
+		}
+		
+		return $files;
+	}	
+
 }
 
 /**

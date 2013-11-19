@@ -78,6 +78,7 @@ class CApiErrorCodes
 	const TenantsManager_AccountCreateUserLimitReached = 1705;
 	const TenantsManager_DomainCreateUserLimitReached = 1706;
 	const TenantsManager_QuotaLimitExided = 1707;
+	const TenantsManager_AccountUpdateUserLimitReached = 1705;
 
 	// channels
 	const ChannelsManager_ChannelAlreadyExists = 1801;
@@ -102,10 +103,27 @@ class CApiErrorCodes
 	const Mail_InvalidRecipients = 4005;
 	const Mail_CannotRenameNonExistenFolder = 4006;
 	const Mail_CannotSendMessage = 4007;
+	const Mail_CannotSaveMessageInSentItems = 4008;
+
+	// fetcher
+	const Fetcher_ConnectToMailServerFailed = 4101;
+	const Fetcher_AuthError = 4102;
 
 	// Sabre
 	const Sabre_Exception = 5001;
 	const Sabre_PreconditionFailed = 5002;
+
+	// Helpdesk
+	const HelpdeskManager_UserAlreadyExists = 6001;
+	const HelpdeskManager_UserCreateFailed = 6002;
+	const HelpdeskManager_UserUpdateFailed = 6003;
+	const HelpdeskManager_AccountAuthentication = 6004;
+	const HelpdeskManager_ThreadCreateFailed = 6005;
+	const HelpdeskManager_ThreadUpdateFailed = 6006;
+	const HelpdeskManager_PostCreateFailed = 6007;
+	const HelpdeskManager_AccountSystemAuthentication = 6008;
+	const HelpdeskManager_AccountCannotBeDeleted = 6009;
+	const HelpdeskManager_UnactivatedUser = 6010;
 
 	/**
 	 * @param int $iCode
@@ -149,6 +167,7 @@ class CApiErrorCodes
 				self::TenantsManager_TenantUpdateFailed => CApi::I18N('API/TENANTSMANAGER_TENANT_UPDATE_FAILED'),
 				self::TenantsManager_TenantDoesNotExist => CApi::I18N('API/TENANTSMANAGER_TENANT_DOES_NOT_EXIST'),
 				self::TenantsManager_AccountCreateUserLimitReached => CApi::I18N('API/TENANTSMANAGER_ACCOUNT_CREATE_USER_LIMIT_REACHED'),
+				self::TenantsManager_AccountUpdateUserLimitReached => CApi::I18N('API/TENANTSMANAGER_ACCOUNT_UPDATE_USER_LIMIT_REACHED'),
 				self::TenantsManager_DomainCreateUserLimitReached => CApi::I18N('API/TENANTSMANAGER_DOMAIN_CREATE_USER_LIMIT_REACHED'),
 				self::TenantsManager_QuotaLimitExided => CApi::I18N('API/TENANTS_MANAGER_QUOTA_LIMIT_EXCEEDED'),
 
@@ -193,6 +212,9 @@ class CApiErrorCodes
 				self::Mail_AccountConnectToMailServerFailed => CApi::I18N('API/MAIL_ACCOUNT_CONNECT_TO_MAIL_SERVER_FAILED'),
 				self::Mail_CannotRenameNonExistenFolder => CApi::I18N('API/MAIL_CANNOT_RENAME_NON_EXITEN_FOLDER'),
 				self::Mail_CannotSendMessage => CApi::I18N('API/MAIL_CANNOT_SEND_MESSAGE'),
+
+				self::Fetcher_ConnectToMailServerFailed => CApi::I18N('API/FETCHER_CONNECT_TO_MAIL_SERVER_FAILED'),
+				self::Fetcher_AuthError => CApi::I18N('API/FETCHER_AUTH_ERROR'),
 
 				self::Sabre_Exception => CApi::I18N('API/SABRE_EXCEPTION'),
 				self::Sabre_PreconditionFailed => CApi::I18N('API/SABRE_PRECONDITION_FAILED')

@@ -245,7 +245,7 @@ class CReminder
 		catch (Exception $oException)
 		{
 			CApi::Log('MessageSend Exception', ELogLevel::Error, 'cron-');
-			CApi::LogObject($oException, ELogLevel::Error, 'cron-');
+			CApi::LogException($oException, ELogLevel::Error, 'cron-');
 		}
 
 		return false;
@@ -255,11 +255,11 @@ class CReminder
 	{
 		CApi::Log('---------- Start cron script', ELogLevel::Full, 'cron-');
 
-		$oNowDT = new DateTime('now', new DateTimeZone('UTC'));
+		$oNowDT = new \DateTime('now', new \DateTimeZone('UTC'));
 		$iNowTS = $oNowDT->getTimestamp();
 
 		$oStartDT = clone $oNowDT;
-		$oStartDT->sub(new DateInterval('PT5M'));
+		$oStartDT->sub(new DateInterval('PT30M'));
 
 		if (file_exists($this->sCurRunFilePath))
 		{
@@ -267,9 +267,9 @@ class CReminder
 			$sCurRunFileTS = fread($handle, 10);
 			if (!empty($sCurRunFileTS) && is_numeric($sCurRunFileTS))
 			{
-				$oStartDT = new DateTime();
+				$oStartDT = new \DateTime();
 				$oStartDT->setTimestamp($sCurRunFileTS);
-				$oStartDT->setTimezone(new DateTimeZone('UTC'));
+				$oStartDT->setTimezone(new \DateTimeZone('UTC'));
 			}
 		}
 
@@ -298,16 +298,20 @@ class CReminder
 					{
 						$aCacheEvents[$sEventId]['data'] = $this->oApiCalendarManager->GetEvent($oAccount, $sCalendarUri, $sEventId);
 
-						$dt = new DateTime();
+						$dt = new \DateTime();
 						$dt->setTimestamp($iStartTime);
-						$dt->setTimezone(new DateTimeZone($oAccount->GetDefaultStrTimeZone()));
+						$dt->setTimezone(new \DateTimeZone($oAccount->GetDefaultStrTimeZone()));
 
 						$sDateFormat = 'm/d/Y';
 						$sTimeFormat = 'h:i A';
 
-						if ($oAccount->User->DefaultDateFormat == EDateFormat::DDMMYYYY)
+						if ($oAccount->User->DefaultDateFormat === EDateFormat::DDMMYYYY)
 						{
 							$sDateFormat = 'd/m/Y';
+						}
+						else if ($oAccount->User->DefaultDateFormat === EDateFormat::DD_MONTH_YYYY)
+						{
+							$sDateFormat = 'd l Y';
 						}
 
 						if ($oAccount->User->DefaultTimeFormat == ETimeFormat::F24)
@@ -331,64 +335,64 @@ class CReminder
 				{
 					foreach ($aUserEvents as $aUserEvent)
 					{
-						$aData = $aUserEvent['data']['data'];
-						$aEvents = $aUserEvent['data']['events'];
-						$aReminders = $aUserEvent['data']['reminders'];
+						$aSubEvents = $aUserEvent['data'];
 
-						if (isset($aEvents))
+						if (isset($aSubEvents, $aSubEvents['vcal']))
 						{
-							foreach ($aEvents as $aEvent)
+							$vCal = $aSubEvents['vcal'];
+							foreach ($aSubEvents as $mKey => $aEvent)
 							{
-								$oAccount = $this->getAccount($sEmail);
-								$oCalendar = $this->getCalendar($oAccount, $sCalendarUri);
-								
-								if ($oCalendar)
+								if ($mKey !== 'vcal')
 								{
-									$aCalendarUsers = $this->oApiCalendarManager->GetCalendarUsers($oAccount, $oCalendar);
-									
-									$sEventId = $aEvent['event_id'];
-									$sDate = $aUserEvent['time'];
+									$oAccount = $this->getAccount($sEmail);
+									$oCalendar = $this->getCalendar($oAccount, $sCalendarUri);
 
-									$vCal = $aData[$sEventId];
-
-									$sEventName = $aEvent['event_name'];
-									$sEventText = $aEvent['event_text'];
-									
-									$sCalendarName = $oCalendar->DisplayName;
-									$sCalendarColor = $oCalendar->Color;
-									
-									$sSubject = $this->i18n('REMINDERS/SUBJECT', $oAccount, array(
-										'EVENT_NAME' => $sEventName,
-										'DATE' => $sDate
-									));
-
-									$bIsMessageSent = $this->sendMessage($oAccount, $sSubject, $sEventName, $sDate, $sCalendarName, $sEventText, $sCalendarColor);
-
-									if ($bIsMessageSent)
+									if ($oCalendar)
 									{
-										$this->oApiCalendarManager->UpdateReminder($oAccount->Email, $sCalendarUri, $sEventId, $vCal->serialize());
-										CApi::Log('Send reminder for event: \''.$sEventName.'\' started on \''.$sDate.'\' to \''.$oAccount->Email.'\'', \ELogLevel::Full, 'cron-');
-									}
-									else
-									{
-										CApi::Log('Send reminder for event: FAILED!', ELogLevel::Full, 'cron-');
-									}
+										$aCalendarUsers = $this->oApiCalendarManager->GetCalendarUsers($oAccount, $oCalendar);
 
-									if (0 < count($aCalendarUsers))
-									{
-										foreach ($aCalendarUsers as $aCalendarUser)
+										$sEventId = $aEvent['uid'];
+										$sDate = $aUserEvent['time'];
+
+										$sEventName = $aEvent['subject'];
+										$sEventText = $aEvent['description'];
+
+										$sCalendarName = $oCalendar->DisplayName;
+										$sCalendarColor = $oCalendar->Color;
+
+										$sSubject = $this->i18n('REMINDERS/SUBJECT', $oAccount, array(
+											'EVENT_NAME' => $sEventName,
+											'DATE' => $sDate
+										));
+
+										$bIsMessageSent = $this->sendMessage($oAccount, $sSubject, $sEventName, $sDate, $sCalendarName, $sEventText, $sCalendarColor);
+
+										if ($bIsMessageSent)
 										{
-											$oCalendarAccount = $this->getAccount($aCalendarUser['email']);
-											if ($oCalendarAccount)
+											$this->oApiCalendarManager->UpdateReminder($oAccount->Email, $sCalendarUri, $sEventId, $vCal->serialize());
+											CApi::Log('Send reminder for event: \''.$sEventName.'\' started on \''.$sDate.'\' to \''.$oAccount->Email.'\'', \ELogLevel::Full, 'cron-');
+										}
+										else
+										{
+											CApi::Log('Send reminder for event: FAILED!', ELogLevel::Full, 'cron-');
+										}
+
+										if (0 < count($aCalendarUsers))
+										{
+											foreach ($aCalendarUsers as $aCalendarUser)
 											{
-												$this->sendMessage($oCalendarAccount, $sSubject, $sEventName, $sDate, $sCalendarName, $sEventText, $sCalendarColor);
+												$oCalendarAccount = $this->getAccount($aCalendarUser['email']);
+												if ($oCalendarAccount)
+												{
+													$this->sendMessage($oCalendarAccount, $sSubject, $sEventName, $sDate, $sCalendarName, $sEventText, $sCalendarColor);
+												}
 											}
 										}
 									}
-								}
-								else
-								{
-									CApi::Log('Calendar '.$sCalendarUri.' not found!', ELogLevel::Full, 'cron-');
+									else
+									{
+										CApi::Log('Calendar '.$sCalendarUri.' not found!', ELogLevel::Full, 'cron-');
+									}
 								}
 							}
 						}

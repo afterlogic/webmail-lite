@@ -380,6 +380,29 @@ class ManageSieveClient extends \MailSo\Net\NetClient
 	}
 
 	/**
+	 * @return string
+	 *
+	 * @throws \MailSo\Net\Exceptions\Exception
+	 * @throws \MailSo\Sieve\Exceptions\NegativeResponseException
+	 */
+	public function GetActiveScriptName()
+	{
+		$aList = $this->ListScripts();
+		if (is_array($aList) && 0 < count($aList))
+		{
+			foreach ($aList as $sName => $bIsActive)
+			{
+				if ($bIsActive)
+				{
+					return $sName;
+				}
+			}
+		}
+
+		return '';
+	}
+
+	/**
 	 * @param string $sScriptName
 	 * 
 	 * @return bool
@@ -389,23 +412,7 @@ class ManageSieveClient extends \MailSo\Net\NetClient
 	 */
 	public function IsActiveScript($sScriptName)
 	{
-		$aList = $this->ListScripts();
-		if (is_array($aList) && 0 < count($aList))
-		{
-			foreach ($aList as $sName => $bIsActive)
-			{
-				if ($bIsActive && $sScriptName === $sName)
-				{
-					return true;
-				}
-				else if ($bIsActive)
-				{
-					break;
-				}
-			}
-		}
-
-		return false;
+		return $sScriptName === $this->GetActiveScriptName();
 	}
 	
 	/**

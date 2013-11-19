@@ -87,12 +87,13 @@ class Loader
 		{
 			$aResult = array(
 				'php' => array(
-					'phpversion' => \phpversion(),
+					'phpversion' => PHP_VERSION,
 					'ssl' => (int) \function_exists('openssl_open'),
 					'iconv' => (int) \function_exists('iconv')
 			));
 
-			if (\function_exists('memory_get_usage') && \function_exists('memory_get_peak_usage'))
+			if (\MailSo\Base\Utils::FunctionExistsAndEnabled('memory_get_usage') &&
+				\MailSo\Base\Utils::FunctionExistsAndEnabled('memory_get_peak_usage'))
 			{
 				$aResult['php']['memory_get_usage'] =
 					Utils::FormatFileSize(\memory_get_usage(true), 2);

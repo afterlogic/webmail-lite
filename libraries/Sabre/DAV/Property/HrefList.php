@@ -9,8 +9,8 @@ use Sabre\DAV;
  *
  * This property contains multiple {DAV:}href elements, each containing a url.
  *
- * @copyright Copyright (C) 2007-2012 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/)
+ * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
+ * @author Evert Pot (http://evertpot.com/)
  * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
 class HrefList extends DAV\Property {
@@ -67,8 +67,11 @@ class HrefList extends DAV\Property {
         $prefix = $server->xmlNamespaces['DAV:'];
 
         foreach($this->hrefs as $href) {
+
             $elem = $dom->ownerDocument->createElement($prefix . ':href');
-            $elem->nodeValue = ($this->autoPrefix?$server->getBaseUri():'') . $href;
+            $value = ($this->autoPrefix?$server->getBaseUri():'') . $href;
+            $elem->appendChild($dom->ownerDocument->createTextNode($value));
+
             $dom->appendChild($elem);
         }
 

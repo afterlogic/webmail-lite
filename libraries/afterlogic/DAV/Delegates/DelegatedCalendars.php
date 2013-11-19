@@ -45,16 +45,16 @@ class DelegatedCalendars implements \Sabre\DAV\IExtendedCollection, \Sabre\DAVAC
      * @param \Sabre\DAVACL\PrincipalBackend\BackendInterface $principalBackend
      * @param \Sabre\CalDAV\Backend\AbstractBackend $caldavBackend
      * @param \afterlogic\DAV\Delegates\Backend\AbstractBackend $delegatesBackend
-     * @param mixed $userUri
+     * @param array principalInfo
      */
     public function __construct(\Sabre\DAVACL\PrincipalBackend\BackendInterface $principalBackend, 
 			\Sabre\CalDAV\Backend\AbstractBackend $caldavBackend, 
-			\afterlogic\DAV\Delegates\Backend\AbstractBackend $delegatesBackend, $userUri) {
+			\afterlogic\DAV\Delegates\Backend\AbstractBackend $delegatesBackend, $principalInfo) {
 
         $this->principalBackend = $principalBackend;
         $this->caldavBackend = $caldavBackend;
         $this->delegatesBackend = $delegatesBackend;
-        $this->principalInfo = $principalBackend->getPrincipalByPath($userUri);
+        $this->principalInfo = $principalInfo;
 
     }
 

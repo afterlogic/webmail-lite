@@ -100,11 +100,6 @@ class CApiMailMessage
 	/**
 	 * @var string
 	 */
-	protected $sTextPartID;
-
-	/**
-	 * @var string
-	 */
 	protected $sPlain;
 
 	/**
@@ -148,6 +143,11 @@ class CApiMailMessage
 	private $aExtend;
 
 	/**
+	 * @var array
+	 */
+	private $aThreads;
+
+	/**
 	 * @return void
 	 */
 	protected function __construct()
@@ -183,7 +183,6 @@ class CApiMailMessage
 		$this->sReferences = '';
 
 		$this->sHeaders = '';
-		$this->sTextPartID = '';
 		$this->sPlain = '';
 		$this->sHtml = '';
 
@@ -195,6 +194,8 @@ class CApiMailMessage
 		$this->oAttachments = null;
 		$this->aDraftInfo = null;
 		$this->aExtend = null;
+
+		$this->aThreads = array();
 
 		return $this;
 	}
@@ -366,6 +367,14 @@ class CApiMailMessage
 	/**
 	 * @return \MailSo\Mime\EmailCollection
 	 */
+	public function ReplyTo()
+	{
+		return $this->oReplyTo;
+	}
+
+	/**
+	 * @return \MailSo\Mime\EmailCollection
+	 */
 	public function To()
 	{
 		return $this->oTo;
@@ -401,14 +410,6 @@ class CApiMailMessage
 	public function References()
 	{
 		return $this->sReferences;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function TextPartID()
-	{
-		return $this->sTextPartID;
 	}
 
 	/**
@@ -469,6 +470,22 @@ class CApiMailMessage
 	}
 
 	/**
+	 * @return array
+	 */
+	public function Threads()
+	{
+		return $this->aThreads;
+	}
+
+	/**
+	 * @param array $aThreads
+	 */
+	public function SetThreads($aThreads)
+	{
+		$this->aThreads = \is_array($aThreads) ? $aThreads : array();
+	}
+
+	/**
 	 * @param string $sRawFolderFullName
 	 * @param \MailSo\Imap\FetchResponse $oFetchResponse
 	 * @param \MailSo\Imap\BodyStructure $oBodyStructure = null
@@ -494,7 +511,7 @@ class CApiMailMessage
 			$oBodyStructure = $oFetchResponse->GetFetchBodyStructure();
 		}
 
-		$oTextPart = $oBodyStructure ? $oBodyStructure->SearchHtmlOrPlainPart() : null;
+		$aTextParts = $oBodyStructure ? $oBodyStructure->SearchHtmlOrPlainParts() : array();
 
 		$aICalPart = $oBodyStructure ? $oBodyStructure->SearchByContentType('text/calendar') : null;
 		$oICalPart = is_array($aICalPart) && 0 < count($aICalPart) ? $aICalPart[0] : null;
@@ -566,7 +583,7 @@ class CApiMailMessage
 			}
 		}
 
-		$sCharset = $oTextPart ? $oTextPart->Charset() : '';
+		$sCharset = $oBodyStructure ? $oBodyStructure->SearchCharset() : '';
 
 		$this->sHeaders = trim($oFetchResponse->GetHeaderFieldsValue($sRfc822SubMimeIndex));
 		if (!empty($this->sHeaders))
@@ -588,7 +605,9 @@ class CApiMailMessage
 				$oHeaders->SetParentCharset($sCharset);
 			}
 
-			$this->sSubject = $oHeaders->ValueByName(\MailSo\Mime\Enumerations\Header::SUBJECT);
+			$bCharsetAutoDetect = 0 === \strlen($sCharset);
+
+			$this->sSubject = $oHeaders->ValueByName(\MailSo\Mime\Enumerations\Header::SUBJECT, $bCharsetAutoDetect);
 			$this->sMessageId = $oHeaders->ValueByName(\MailSo\Mime\Enumerations\Header::MESSAGE_ID);
 			$this->sContentType = $oHeaders->ValueByName(\MailSo\Mime\Enumerations\Header::CONTENT_TYPE);
 
@@ -625,12 +644,12 @@ class CApiMailMessage
 					\MailSo\Base\DateTimeHelper::ParseRFC2822DateString($sDate);
 			}
 
-			$this->oFrom = $oHeaders->GetAsEmailCollection(\MailSo\Mime\Enumerations\Header::FROM_);
-			$this->oTo = $oHeaders->GetAsEmailCollection(\MailSo\Mime\Enumerations\Header::TO_);
-			$this->oCc = $oHeaders->GetAsEmailCollection(\MailSo\Mime\Enumerations\Header::CC);
-			$this->oBcc = $oHeaders->GetAsEmailCollection(\MailSo\Mime\Enumerations\Header::BCC);
-			$this->oSender = $oHeaders->GetAsEmailCollection(\MailSo\Mime\Enumerations\Header::SENDER);
-			$this->oReplyTo = $oHeaders->GetAsEmailCollection(\MailSo\Mime\Enumerations\Header::REPLY_TO);
+			$this->oFrom = $oHeaders->GetAsEmailCollection(\MailSo\Mime\Enumerations\Header::FROM_, $bCharsetAutoDetect);
+			$this->oTo = $oHeaders->GetAsEmailCollection(\MailSo\Mime\Enumerations\Header::TO_, $bCharsetAutoDetect);
+			$this->oCc = $oHeaders->GetAsEmailCollection(\MailSo\Mime\Enumerations\Header::CC, $bCharsetAutoDetect);
+			$this->oBcc = $oHeaders->GetAsEmailCollection(\MailSo\Mime\Enumerations\Header::BCC, $bCharsetAutoDetect);
+			$this->oSender = $oHeaders->GetAsEmailCollection(\MailSo\Mime\Enumerations\Header::SENDER, $bCharsetAutoDetect);
+			$this->oReplyTo = $oHeaders->GetAsEmailCollection(\MailSo\Mime\Enumerations\Header::REPLY_TO, $bCharsetAutoDetect);
 
 			$this->sInReplyTo = $oHeaders->ValueByName(\MailSo\Mime\Enumerations\Header::IN_REPLY_TO);
 			$this->sReferences = $oHeaders->ValueByName(\MailSo\Mime\Enumerations\Header::REFERENCES);
@@ -725,32 +744,70 @@ class CApiMailMessage
 			}
 		}
 
-		if ($oTextPart)
+		if (is_array($aTextParts) && 0 < count($aTextParts))
 		{
-			$this->sTextPartID = $oTextPart->PartID();
-			$this->iTextSize = $oTextPart->EstimatedSize();
+			$sHtmlParts = array();
+			$sPlainParts = array();
 
-			$sText = $oFetchResponse->GetFetchValue(\MailSo\Imap\Enumerations\FetchType::BODY.'['.$oTextPart->PartID().']');
-			if (!empty($sText))
+			$iHtmlSize = 0;
+			$iPlainSize = 0;
+			foreach ($aTextParts as /* @var $oPart \MailSo\Imap\BodyStructure */ $oPart)
 			{
-				$sTextCharset = $oTextPart->Charset();
-				if (empty($sTextCharset))
+				if ($oPart)
 				{
-					$sTextCharset = $sCharset;
+					if ('text/html ' === $oPart->ContentType())
+					{
+						$iHtmlSize += $oPart->EstimatedSize();
+					}
+					else
+					{
+						$iPlainSize += $oPart->EstimatedSize();
+					}
 				}
 
-				$sText = \MailSo\Base\Utils::DecodeEncodingValue($sText, $oTextPart->MailEncodingName());
-				$sText = \MailSo\Base\Utils::ConvertEncoding($sText, $sTextCharset, \MailSo\Base\Enumerations\Charset::UTF_8);
+				$sText = $oFetchResponse->GetFetchValue(\MailSo\Imap\Enumerations\FetchType::BODY.'['.$oPart->PartID().
+					('' !== $sRfc822SubMimeIndex && is_numeric($sRfc822SubMimeIndex) ? '.1' : '').']');
 
-				if ('text/html' === $oTextPart->ContentType())
+				if (is_string($sText) && 0 < strlen($sText))
 				{
-					$this->sHtml = $sText;
-				}
-				else
-				{
-					$this->sPlain = $sText;
+					$sTextCharset = $oPart->Charset();
+					if (empty($sTextCharset))
+					{
+						$sTextCharset = $sCharset;
+					}
+
+					$sText = \MailSo\Base\Utils::DecodeEncodingValue($sText, $oPart->MailEncodingName());
+					$sText = \MailSo\Base\Utils::ConvertEncoding($sText, $sTextCharset, \MailSo\Base\Enumerations\Charset::UTF_8);
+					$sText = \MailSo\Base\Utils::Utf8Clear($sText);
+
+					if ('text/html' === $oPart->ContentType())
+					{
+						$sHtmlParts[] = $sText;
+					}
+					else
+					{
+						$sPlainParts[] = $sText;
+					}
 				}
 			}
+
+			if (0 < count($sHtmlParts))
+			{
+				$this->sHtml = implode('<br />', $sHtmlParts);
+				$this->iTextSize = strlen($this->sHtml);
+			}
+			else
+			{
+				$this->sPlain = implode("\n", $sPlainParts);
+				$this->iTextSize = strlen($this->sPlain);
+			}
+
+			if (0 === $this->iTextSize)
+			{
+				$this->iTextSize = 0 < $iHtmlSize ? $iHtmlSize : $iPlainSize;
+			}
+
+			unset($sHtmlParts, $sPlainParts);
 		}
 
 		if ($oBodyStructure)

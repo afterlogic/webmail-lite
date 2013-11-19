@@ -19,6 +19,31 @@ class CApiPluginManager
 	/**
 	 * @var array
 	 */
+	private $_aServiceHooks;
+	
+	/**
+	 * @var array
+	 */
+	private $_aJsFiles;
+
+	/**
+	 * @var array
+	 */
+	private $_aTemplates;
+
+	/**
+	 * @var array
+	 */
+	private $_aTemplatesStrings;
+
+	/**
+	 * @var array
+	 */
+	private $_aAddTemplates;
+
+	/**
+	 * @var array
+	 */
 	private $_aJsonHooks;
 
 	/**
@@ -44,8 +69,12 @@ class CApiPluginManager
 	public function __construct(CApiGlobalManager $oApiGlobalManager)
 	{
 		$this->_aHooks = array();
+		$this->_aServiceHooks = array();
+		$this->_aJsFiles = array();
 		$this->_aJsonHooks = array();
 		$this->_aPlugins = array();
+		$this->_aTemplates = array();
+		$this->_aAddTemplates = array();
 		$this->_mState = null;
 
 		$this->_oApiGlobalManager = $oApiGlobalManager;
@@ -61,7 +90,7 @@ class CApiPluginManager
 				{
 					while (false !== ($sFile = @readdir($rDirHandle)))
 					{
-						if ('.' !== $sFile{0} && preg_match('/^[a-z0-9\-]+$/', $sFile) &&
+						if (0 < strlen($sFile) && '.' !== $sFile{0} && preg_match('/^[a-z0-9\-]+$/', $sFile) &&
 							(CApi::GetConf('plugins.config.include-all', false) ||
 								CApi::GetConf('plugins.'.$sFile, false)) &&
 							@file_exists($sPluginsPath.$sFile.'/index.php'))
@@ -70,12 +99,14 @@ class CApiPluginManager
 							if ($oPlugin instanceof AApiPlugin)
 							{
 								$oPlugin->SetName($sFile);
+								$oPlugin->SetPath($sPluginsPath.$sFile);
 								$oPlugin->Init();
 //								$oPlugin->Log('INIT > '.get_class($oPlugin));
 								$this->_aPlugins[] = $oPlugin;
 							}
 						}
 					}
+					
 					@closedir($rDirHandle);
 				}
 			}
@@ -88,6 +119,20 @@ class CApiPluginManager
 	public function GlobalManager()
 	{
 		return $this->_oApiGlobalManager;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function Hash()
+	{
+		$sResult = md5(CApi::Version());
+		foreach ($this->_aPlugins as $oPlugin)
+		{
+			$sResult = md5($sResult.$oPlugin->GetPath().$oPlugin->GetName().$oPlugin->GetHash());
+		}
+
+		return $sResult;
 	}
 
 	/**
@@ -104,6 +149,180 @@ class CApiPluginManager
 			}
 
 			$this->_aHooks[$sHookName][] = $mHookCallbak;
+		}
+	}
+
+	/**
+	 * @param string $sServiceName
+	 * @param mixed $mHookCallbak
+	 */
+	public function AddServiceHook($sServiceName, $mHookCallbak)
+	{
+		if ($this->bIsEnabled)
+		{
+			if (!isset($this->_aServiceHooks[$sServiceName]))
+			{
+				$this->_aServiceHooks[$sServiceName] = array();
+			}
+
+			$this->_aServiceHooks[$sServiceName][] = $mHookCallbak;
+		}
+	}
+
+	/**
+	 * @param string $sJsFileName
+	 */
+	public function AddJsFile($sJsFileName)
+	{
+		if ($this->bIsEnabled)
+		{
+			$this->_aJsFiles[] = $sJsFileName;
+		}
+	}
+
+	/**
+	 * @param string $sParsedTemplateID
+	 * @param string $sParsedPlace
+	 * @param string $sTemplateFileName
+	 */
+	public function IncludeTemplate($sParsedTemplateID, $sParsedPlace, $sTemplateFileName)
+	{
+		if ($this->bIsEnabled)
+		{
+			if (!isset($this->_aTemplates[$sParsedTemplateID]))
+			{
+				$this->_aTemplates[$sParsedTemplateID] = array();
+			}
+			
+			$this->_aTemplates[$sParsedTemplateID][] = array(
+				$sParsedPlace, $sTemplateFileName
+			);
+		}
+	}
+
+	/**
+	 * @param string $sParsedTemplateID
+	 * @param string $sParsedPlace
+	 * @param string $sTemplateString
+	 */
+	public function IncludeTemplateAsString($sParsedTemplateID, $sParsedPlace, $sTemplateString)
+	{
+		if ($this->bIsEnabled)
+		{
+			if (!isset($this->_aTemplatesStrings[$sParsedTemplateID]))
+			{
+				$this->_aTemplatesStrings[$sParsedTemplateID] = array();
+			}
+
+			$this->_aTemplatesStrings[$sParsedTemplateID][] = array(
+				$sParsedPlace, $sTemplateString
+			);
+		}
+	}
+
+	/**
+	 * @param string $sTemplateName
+	 * @param string $sTemplateFileName
+	 */
+	public function AddTemplate($sTemplateName, $sTemplateFileName)
+	{
+		if ($this->bIsEnabled)
+		{
+			$this->_aAddTemplates[] = array(
+				$sTemplateName, $sTemplateFileName
+			);
+		}
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function HasJsFiled()
+	{
+		return 0 < count($this->_aJsFiles);
+	}
+
+	/**
+	 * @return string
+	 */
+	public function CompileJs()
+	{
+		$aResult = array();
+		if ($this->bIsEnabled)
+		{
+			foreach ($this->_aJsFiles as $sFile)
+			{
+				if (file_exists($sFile))
+				{
+					$aResult[] = file_get_contents($sFile);
+				}
+			}
+		}
+
+		return implode("\n", $aResult);
+	}
+
+	/**
+	 * @return string
+	 */
+	public function ParseTemplate($sTemplateID, $sTemplateSource)
+	{
+		if ($this->bIsEnabled)
+		{
+			if (isset($this->_aTemplates[$sTemplateID]) && is_array($this->_aTemplates[$sTemplateID]))
+			{
+				foreach ($this->_aTemplates[$sTemplateID] as $aItem)
+				{
+					if (!empty($aItem[0]) && !empty($aItem[1]) && file_exists($aItem[1]))
+					{
+						$sTemplateSource = str_replace('{%INCLUDE-START/'.$aItem[0].'/INCLUDE-END%}',
+							file_get_contents($aItem[1]).'{%INCLUDE-START/'.$aItem[0].'/INCLUDE-END%}', $sTemplateSource);
+					}
+				}
+			}
+			
+			if (isset($this->_aTemplatesStrings[$sTemplateID]) && is_array($this->_aTemplatesStrings[$sTemplateID]))
+			{
+				foreach ($this->_aTemplatesStrings[$sTemplateID] as $aItem)
+				{
+					if (!empty($aItem[0]) && isset($aItem[1]))
+					{
+						$sTemplateSource = str_replace('{%INCLUDE-START/'.$aItem[0].'/INCLUDE-END%}',
+							$aItem[1].'{%INCLUDE-START/'.$aItem[0].'/INCLUDE-END%}', $sTemplateSource);
+					}
+				}
+			}
+		}
+
+		return $sTemplateSource;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function GetPluginsTemplates()
+	{
+		$aTemplates = array();
+		if ($this->bIsEnabled)
+		{
+			$aTemplates = $this->_aAddTemplates;
+		}
+
+		return $aTemplates;
+	}
+
+	/**
+	 * @param string $sServiceNameLover
+	 * @param array $aParts
+	 */
+	public function RunServiceHandle($sServiceNameLover, $aParts)
+	{
+		if (isset($this->_aServiceHooks[$sServiceNameLover]) && is_array($this->_aServiceHooks[$sServiceNameLover]))
+		{
+			foreach ($this->_aServiceHooks[$sServiceNameLover] as $mCallbak)
+			{
+				call_user_func_array($mCallbak, $aParts);
+			}
 		}
 	}
 
@@ -224,6 +443,11 @@ abstract class AApiPlugin
 	/**
 	 * @var string
 	 */
+	protected $sPath;
+
+	/**
+	 * @var string
+	 */
 	protected $sVersion;
 
 	/**
@@ -239,6 +463,9 @@ abstract class AApiPlugin
 	{
 		$this->sVersion = (string) $sVersion;
 		$this->oPluginManager = $oPluginManager;
+
+		$this->sName = '';
+		$this->sPath = '';
 	}
 
 	public function Init()
@@ -268,11 +495,35 @@ abstract class AApiPlugin
 	}
 
 	/**
+	 * @param string $sPath
+	 */
+	final public function SetPath($sPath)
+	{
+		$this->sPath = $sPath;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function GetHash()
+	{
+		return '';
+	}
+
+	/**
 	 * @return string
 	 */
 	public function GetName()
 	{
 		return $this->sName;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function GetPath()
+	{
+		return $this->sPath;
 	}
 
 	/**
@@ -311,12 +562,77 @@ abstract class AApiPlugin
 	}
 
 	/**
-	 * @param string $sXmlHookName
+	 * @param string $sHookName
 	 * @param string $sFunctionName
 	 */
-	public function AddJsonHook($sXmlHookName, $sFunctionName)
+	public function AddJsonHook($sHookName, $sFunctionName)
 	{
-		$this->oPluginManager->AddJsonHook($sXmlHookName, array(&$this, $sFunctionName));
+		$this->oPluginManager->AddJsonHook($sHookName, array(&$this, $sFunctionName));
+	}
+
+	/**
+	 * @param string $sServiceName
+	 * @param string $sFunctionName
+	 */
+	public function AddServiceHook($sServiceName, $sFunctionName)
+	{
+		$this->oPluginManager->AddServiceHook($sServiceName, array(&$this, $sFunctionName));
+	}
+
+	/**
+	 * @param string $sJsFileName
+	 */
+	public function AddJsFile($sJsFileName)
+	{
+		if (file_exists($this->sPath.'/'.$sJsFileName))
+		{
+			$this->oPluginManager->AddJsFile($this->sPath.'/'.$sJsFileName);
+		}
+	}
+
+	/**
+	 * @param string $sParsedTemplateID
+	 * @param string $sParsedPlace
+	 * @param string $sTemplateFileName
+	 */
+	public function IncludeTemplate($sParsedTemplateID, $sParsedPlace, $sTemplateFileName)
+	{
+		if (0 < strlen($sParsedTemplateID) && 0 < strlen($sParsedPlace) && file_exists($this->sPath.'/'.$sTemplateFileName))
+		{
+			$this->oPluginManager->IncludeTemplate($sParsedTemplateID, $sParsedPlace, $this->sPath.'/'.$sTemplateFileName);
+		}
+	}
+
+	/**
+	 * @param string $sParsedTemplateID
+	 * @param string $sParsedPlace
+	 * @param string $sTemplateHtml
+	 */
+	public function IncludeTemplateAsString($sParsedTemplateID, $sParsedPlace, $sTemplateHtml)
+	{
+		if (0 < strlen($sParsedTemplateID) && 0 < strlen($sParsedPlace))
+		{
+			$this->oPluginManager->IncludeTemplateAsString($sParsedTemplateID, $sParsedPlace, $sTemplateHtml);
+		}
+	}
+
+	/**
+	 * @param string $sTemplateName
+	 * @param string $sTemplateFileName
+	 * @param string $sLayoutName = 'Layout'
+	 * @param string $sLayoutPosition = 'Screens-Middle'
+	 */
+	public function AddTemplate($sTemplateName, $sTemplateFileName, $sLayoutName = 'Layout', $sLayoutPosition = 'Screens-Middle')
+	{
+		if (0 < strlen($sTemplateName) && file_exists($this->sPath.'/'.$sTemplateFileName))
+		{
+			$sTemplateName = 'Plugin_'.preg_replace('/[^a-zA-Z0-9_]/', '', str_replace(array('/', '\\'), '_', $sTemplateName));
+
+			$this->IncludeTemplateAsString($sLayoutName, 'Layout-'.$sLayoutPosition,
+				'<div data-view-model="'.$sTemplateName.'" class="screen" style="display: none;"></div>');
+			
+			$this->oPluginManager->AddTemplate($sTemplateName, $this->sPath.'/'.$sTemplateFileName);
+		}
 	}
 
 	/**

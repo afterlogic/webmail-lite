@@ -62,8 +62,7 @@ class PDO extends AbstractBackend
         $fields[] = 'starttime';
 
         $fields = implode(', ', $fields);
-        $stmt = $this->pdo->prepare('SELECT ' . $fields . ' FROM `'.$this->table.
-				'` WHERE eventid = ?'); 
+        $stmt = $this->pdo->prepare('SELECT ' . $fields . ' FROM '.$this->table.' WHERE eventid = ?'); 
 		
         $stmt->execute(array($eventId));
 		
@@ -91,8 +90,7 @@ class PDO extends AbstractBackend
 		}
 		
         $fields = implode(', ', $fields);
-        $stmt = $this->pdo->prepare('SELECT ' . $fields . ' FROM `'.$this->table.
-				'` WHERE 1 = 1' . $timeFilter); 
+        $stmt = $this->pdo->prepare('SELECT ' . $fields . ' FROM '.$this->table.' WHERE 1 = 1' . $timeFilter); 
 		
         $stmt->execute($values);
 		
@@ -135,7 +133,7 @@ class PDO extends AbstractBackend
 			$values[':starttime'] = (int) $starttime;
 		}
 
-		$stmt = $this->pdo->prepare("INSERT INTO `".$this->table."` (".implode(', ', $fieldNames).") VALUES (".implode(', ',array_keys($values)).")");
+		$stmt = $this->pdo->prepare("INSERT INTO ".$this->table." (".implode(', ', $fieldNames).") VALUES (".implode(', ',array_keys($values)).")");
         $stmt->execute($values);
 
         return $this->pdo->lastInsertId();		
@@ -143,13 +141,13 @@ class PDO extends AbstractBackend
 
 	public function deleteReminder($eventId)
 	{
-        $stmt = $this->pdo->prepare('DELETE FROM `'.$this->table.'` WHERE eventid = ?');
+        $stmt = $this->pdo->prepare('DELETE FROM '.$this->table.' WHERE eventid = ?');
         $stmt->execute(array($eventId));
 	}
 	
 	public function deleteReminderByCalendar($calendarUri)
 	{
-        $stmt = $this->pdo->prepare('DELETE FROM `'.$this->table.'` WHERE calendaruri = ?');
+        $stmt = $this->pdo->prepare('DELETE FROM '.$this->table.' WHERE calendaruri = ?');
         $stmt->execute(array($calendarUri));
 	}
 }

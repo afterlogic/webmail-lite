@@ -20,13 +20,21 @@ class HeaderCollection extends \MailSo\Base\Collection
 
 	/**
 	 * @access protected
+	 *
+	 * @param string $sRawHeaders = ''
+	 * @param bool $bStoreRawHeaders = true
 	 */
-	protected function __construct()
+	protected function __construct($sRawHeaders = '', $bStoreRawHeaders = true)
 	{
 		parent::__construct();
 
 		$this->sRawHeaders = '';
 		$this->sParentCharset = \MailSo\Base\Enumerations\Charset::ISO_8859_1;
+
+		if (0 < \strlen($sRawHeaders))
+		{
+			$this->Parse($sRawHeaders, $bStoreRawHeaders);
+		}
 	}
 
 	/**
@@ -80,31 +88,33 @@ class HeaderCollection extends \MailSo\Base\Collection
 
 	/**
 	 * @param string $sHeaderName
+	 * @param bool $bCharsetAutoDetect = false
 	 * @return string
 	 */
-	public function ValueByName($sHeaderName)
+	public function ValueByName($sHeaderName, $bCharsetAutoDetect = false)
 	{
 		$oHeader = null;
 		$oHeader =& $this->GetByName($sHeaderName);
-		return (null !== $oHeader) ? $oHeader->Value() : '';
+		return (null !== $oHeader) ? ($bCharsetAutoDetect ? $oHeader->ValueWithCharsetAutoDetect() : $oHeader->Value()) : '';
 	}
 
 	/**
 	 * @param string $sHeaderName
+	 * @param bool $bCharsetAutoDetect = false
 	 * @return array
 	 */
-	public function ValuesByName($sHeaderName)
+	public function ValuesByName($sHeaderName, $bCharsetAutoDetect = false)
 	{
 		$aResult = array();
 		$oHeader = null;
 
-		$sHeaderNameLower = strtolower($sHeaderName);
+		$sHeaderNameLower = \strtolower($sHeaderName);
 		$aHeaders =& $this->GetAsArray();
 		foreach ($aHeaders as /* @var $oHeader \MailSo\Mime\Header */ &$oHeader)
 		{
-			if ($sHeaderNameLower === strtolower($oHeader->Name()))
+			if ($sHeaderNameLower === \strtolower($oHeader->Name()))
 			{
-				$aResult[] = $oHeader->Value();
+				$aResult[] = $bCharsetAutoDetect ? $oHeader->ValueWithCharsetAutoDetect() : $oHeader->Value();
 			}
 		}
 
@@ -119,7 +129,7 @@ class HeaderCollection extends \MailSo\Base\Collection
 	public function RemoveByName($sHeaderName)
 	{
 		$aResult = $this->FilterList(function ($oHeader) use ($sHeaderName) {
-			return $oHeader && strtolower($oHeader->Name()) !== strtolower($sHeaderName);
+			return $oHeader && \strtolower($oHeader->Name()) !== \strtolower($sHeaderName);
 		});
 
 		return $this->SetAsArray($aResult);
@@ -127,14 +137,14 @@ class HeaderCollection extends \MailSo\Base\Collection
 
 	/**
 	 * @param string $sHeaderName
+	 * @param bool $bCharsetAutoDetect = false
 	 * @return string
 	 */
-	public function GetAsEmailCollection($sHeaderName)
+	public function GetAsEmailCollection($sHeaderName, $bCharsetAutoDetect = false)
 	{
 		$oResult = null;
-
-		$sValue = $this->ValueByName($sHeaderName);
-		if (0 < strlen($sValue))
+		$sValue = $this->ValueByName($sHeaderName, $bCharsetAutoDetect);
+		if (0 < \strlen($sValue))
 		{
 			$oResult = \MailSo\Mime\EmailCollection::NewInstance($sValue);
 		}
@@ -177,11 +187,11 @@ class HeaderCollection extends \MailSo\Base\Collection
 	{
 		$oResult = $oHeader = null;
 
-		$sHeaderNameLower = strtolower($sHeaderName);
+		$sHeaderNameLower = \strtolower($sHeaderName);
 		$aHeaders =& $this->GetAsArray();
 		foreach ($aHeaders as /* @var $oHeader \MailSo\Mime\Header */ &$oHeader)
 		{
-			if ($sHeaderNameLower === strtolower($oHeader->Name()))
+			if ($sHeaderNameLower === \strtolower($oHeader->Name()))
 			{
 				$oResult =& $oHeader;
 				break;
@@ -210,7 +220,7 @@ class HeaderCollection extends \MailSo\Base\Collection
 	 */
 	public function SetParentCharset($sParentCharset)
 	{
-		if (0 < strlen($sParentCharset))
+		if (0 < \strlen($sParentCharset))
 		{
 			if ($this->sParentCharset !== $sParentCharset)
 			{
@@ -255,12 +265,12 @@ class HeaderCollection extends \MailSo\Base\Collection
 			$this->sRawHeaders = $sRawHeaders;
 		}
 
-		if (0 < strlen($this->sParentCharset))
+		if (0 === \strlen($this->sParentCharset))
 		{
 			$this->sParentCharset = $sParentCharset;
 		}
 
-		$aHeaders = explode("\n", str_replace("\r", '', $sRawHeaders));
+		$aHeaders = \explode("\n", \str_replace("\r", '', $sRawHeaders));
 
 		$sName = null;
 		$sValue = null;
@@ -271,15 +281,26 @@ class HeaderCollection extends \MailSo\Base\Collection
 				continue;
 			}
 
-			$sFirstChar = substr($sHeadersValue, 0, 1);
-			if ($sFirstChar !== ' ' && $sFirstChar !== "\t" && false === strpos($sHeadersValue, ':'))
+			$sFirstChar = \substr($sHeadersValue, 0, 1);
+			if ($sFirstChar !== ' ' && $sFirstChar !== "\t" && false === \strpos($sHeadersValue, ':'))
 			{
 				continue;
 			}
 			else if (null !== $sName && ($sFirstChar === ' ' || $sFirstChar === "\t"))
 			{
-				$sValue = is_null($sValue) ? '' : $sValue;
-				if ('?=' === substr($sValue, -2) && '=?' === substr($sHeadersValue, 1, 2))
+				$sValue = \is_null($sValue) ? '' : $sValue;
+
+				if ('?=' === \substr(\rtrim($sHeadersValue), -2))
+				{
+					$sHeadersValue = \rtrim($sHeadersValue);
+				}
+
+				if ('=?' === \substr(\ltrim($sHeadersValue), 0, 2))
+				{
+					$sHeadersValue = \ltrim($sHeadersValue);
+				}
+
+				if ('=?' === \substr($sHeadersValue, 0, 2))
 				{
 					$sValue .= $sHeadersValue;
 				}
@@ -301,15 +322,20 @@ class HeaderCollection extends \MailSo\Base\Collection
 					$sValue = null;
 				}
 
-				$aHeaderParts = explode(':', $sHeadersValue, 2);
+				$aHeaderParts = \explode(':', $sHeadersValue, 2);
 				$sName = $aHeaderParts[0];
 				$sValue = isset($aHeaderParts[1]) ? $aHeaderParts[1] : '';
+
+				if ('?=' === \substr(\rtrim($sValue), -2))
+				{
+					$sValue = \rtrim($sValue);
+				}
 			}
 		}
 
 		if (null !== $sName)
 		{
-			$oHeader = Header::NewInstanceFromEncodedString($sName.': '.$sValue);
+			$oHeader = Header::NewInstanceFromEncodedString($sName.': '.$sValue, $this->sParentCharset);
 			if ($oHeader)
 			{
 				$this->Add($oHeader);
@@ -331,6 +357,6 @@ class HeaderCollection extends \MailSo\Base\Collection
 			$aResult[] = $oHeader->EncodedValue();
 		}
 
-		return implode(\MailSo\Mime\Enumerations\Constants::CRLF, $aResult);
+		return \implode(\MailSo\Mime\Enumerations\Constants::CRLF, $aResult);
 	}
 }

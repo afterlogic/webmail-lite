@@ -3,7 +3,7 @@
 if(!defined('DAV_ROOT')) define('DAV_ROOT', 'dav.php/');
 if(!defined('DAV_EMAIL_DEV')) define('DAV_EMAIL_DEV', '@');
 
-class DAVClient 
+class CDAVClient 
 {
 	const PROP_RESOURCETYPE = '{DAV:}resourcetype';
 	const PROP_DISPLAYNAME = '{DAV:}displayname';
@@ -169,17 +169,6 @@ class DAVClient
 			$sPort = ':' . $this->port;
 		}
 		return $this->protocol . '://' . $_SERVER['SERVER_NAME'] . $sPort;
-	}
-	
-	/**
-	* @return string
-	*/
-	public function GetMainPrincipalUrl($principal) 
-	{
-		$principal = str_replace('/calendar-proxy-read', '', rtrim($principal, '/'));
-		$principal = str_replace('/calendar-proxy-write', '', $principal);
-		$principal = rtrim($principal, '/user');
-		return $principal;
 	}
 
 	/**

@@ -60,6 +60,7 @@ class CApi
 
 		if (!is_object(CApi::$oManager))
 		{
+			CApi::Inc('common.functions');
 			CApi::Inc('common.constants');
 			CApi::Inc('common.enum');
 			CApi::Inc('common.exception');
@@ -91,9 +92,8 @@ class CApi
 			}
 
 			CApi::$sSalt = $sSalt;
-			CApi::$oManager = new CApiGlobalManager();
 			CApi::$aConfig = include CApi::RootPath().'common/config.php';
-
+			
 			$sSettingsFile = CApi::DataPath().'/settings/config.php';
 			if (@file_exists($sSettingsFile))
 			{
@@ -104,6 +104,7 @@ class CApi
 				}
 			}
 
+			CApi::$oManager = new CApiGlobalManager();
 			CApi::$oPlugin = new CApiPluginManager(CApi::$oManager);
 			CApi::$bIsValid = CApi::validateApi();
 
@@ -116,20 +117,20 @@ class CApi
 	/**
 	 * @return string
 	 */
-	static public function EncodeKeyValues(array $aValues)
+	static public function EncodeKeyValues(array $aValues, $iSaltLen = 32)
 	{
 		return api_Utils::UrlSafeBase64Encode(
-			api_Crypt::XxteaEncrypt(serialize($aValues), md5(self::$sSalt)));
+			api_Crypt::XxteaEncrypt(serialize($aValues), substr(md5(self::$sSalt), 0, $iSaltLen)));
 	}
 
 	/**
 	 * @return array
 	 */
-	public static function DecodeKeyValues($sEncodedValues)
+	public static function DecodeKeyValues($sEncodedValues, $iSaltLen = 32)
 	{
 		$aResult = unserialize(
 			api_Crypt::XxteaDecrypt(
-				api_Utils::UrlSafeBase64Decode($sEncodedValues), md5(self::$sSalt)));
+				api_Utils::UrlSafeBase64Decode($sEncodedValues), substr(md5(self::$sSalt), 0, $iSaltLen)));
 
 		return is_array($aResult) ? $aResult : array();
 	}
@@ -138,48 +139,6 @@ class CApi
 	{
 		CApi::Manager('users');
 		CApi::Manager('domains');
-	}
-
-	/**
-	 * @return bool
-	 */
-	public static function IsValidPhpVersion()
-	{
-		if (!defined('APP_VALID_VERSION'))
-		{
-			define('APP_VALID_VERSION', version_compare(phpversion(), '5.2.3') > -1);
-		}
-
-		return APP_VALID_VERSION;
-	}
-
-	/**
-	 * @return bool
-	 */
-	public static function IsValidFullSupportPhpVersion()
-	{
-		if (!defined('APP_VALID_FULL_VERSION'))
-		{
-			define('APP_VALID_FULL_VERSION', version_compare(phpversion(), '5.3.0') > -1);
-		}
-
-		return APP_VALID_FULL_VERSION;
-	}
-
-	/**
-	 * @return bool
-	 */
-	public static function IsValidOutdatedPhpVersion()
-	{
-		if (!defined('APP_OUTDATED_VERSION'))
-		{
-			define('APP_OUTDATED_VERSION',
-				self::IsValidPhpVersion() &&
-				!self::IsValidFullSupportPhpVersion()
-			);
-		}
-
-		return APP_OUTDATED_VERSION;
 	}
 
 	/**
@@ -208,21 +167,60 @@ class CApi
 	}
 
 	/**
+	 * @return \MailSo\Cache\CacheClient
+	 */
+	public static function Cacher()
+	{
+		static $oCacher = null;
+		if (null === $oCacher)
+		{
+			$oCacher = \MailSo\Cache\CacheClient::NewInstance();
+			$oCacher->SetDriver(\MailSo\Cache\Drivers\File::NewInstance(CApi::DataPath().'/cache'));
+			$oCacher->SetCacheIndex(PSEVEN_APP_VERSION);
+		}
+
+		return $oCacher;
+	}
+
+	public static function CatchaLocalLimit($bAddToLimit = false, $bClear = false)
+	{
+		$iResult = 0;
+		$oApiIntegrator = CApi::Manager('integrator');
+		if ($oApiIntegrator)
+		{
+			$sKey = 'Login/Captcha/Limit/'.$oApiIntegrator->GetCsrfToken();
+			$oCacher = \CApi::Cacher();
+			if ($oCacher->IsInited())
+			{
+				if ($bClear)
+				{
+					$oCacher->Delete($sKey);
+				}
+				else
+				{
+					$sData = $oCacher->Get($sKey);
+					if (0 < strlen($sData) && is_numeric($sData))
+					{
+						$iResult = (int) $sData;
+					}
+
+					if ($bAddToLimit)
+					{
+						$oCacher->Set($sKey, ++$iResult);
+					}
+				}
+			}
+		}
+
+		return $iResult;
+	}
+
+	/**
 	 * @return api_Settings
 	 */
 	public static function &GetSettings()
 	{
 		return CApi::$oManager->GetSettings();
-	}
-
-	/**
-	 * @param api_Http $oInput
-	 * @return string
-	 */
-	public static function CsrfBrowserToken(api_Http $oInput)
-	{
-		$sUserAgent = $oInput->GetServer('HTTP_USER_AGENT', '');
-		return md5('awm'.__FILE__.md5($sUserAgent).'awm');
 	}
 
 	/**
@@ -238,17 +236,28 @@ class CApi
 
 		$oSettings =& CApi::GetSettings();
 
+		$sDbPort = '';
+		$sUnixSocket = '';
+		
 		$sDbHost = $oSettings->GetConf('Common/DBHost');
 		$sDbName = $oSettings->GetConf('Common/DBName');
 		$sDbLogin = $oSettings->GetConf('Common/DBLogin');
 		$sDbPassword = $oSettings->GetConf('Common/DBPassword');
 
-		$sUnixSocket = '';
-		$iPos = strpos($sDbHost, '/');
-		if (false !== $iPos)
+		$iPos = strpos($sDbHost, ':');
+		if (false !== $iPos && 0 < $iPos)
 		{
-			$sUnixSocket = substr($sDbHost, $iPos);
-			$sDbHost = rtrim(substr($sDbHost, 0, $iPos), ':');
+			$sAfter = substr($sDbHost, $iPos + 1);
+			$sDbHost = substr($sDbHost, 0, $iPos);
+
+			if (is_numeric($sAfter))
+			{
+				$sDbPort = $sAfter;
+			}
+			else
+			{
+				$sUnixSocket = $sAfter;
+			}
 		}
 
 		$oPdo = false;
@@ -256,10 +265,15 @@ class CApi
 		{
 			try
 			{
-				$oPdo = new PDO('mysql:dbname='.$sDbName.';host='.$sDbHost.
+				$oPdo = @new PDO('mysql:dbname='.$sDbName.
+					(empty($sDbHost) ? '' : ';host='.$sDbHost).
+					(empty($sDbPort) ? '' : ';port='.$sDbPort).
 					(empty($sUnixSocket) ? '' : ';unix_socket='.$sUnixSocket), $sDbLogin, $sDbPassword);
 
-				$oPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+				if ($oPdo)
+				{
+					$oPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+				}
 			}
 			catch (Exception $oException)
 			{
@@ -304,10 +318,10 @@ class CApi
 	/**
 	 * @return bool
 	 */
-	public static function ManagerInc($sManagerName, $sFileName)
+	public static function ManagerInc($sManagerName, $sFileName, $bDoExitOnError = true)
 	{
 		$sManagerName = preg_replace('/[^a-z]/', '', strtolower($sManagerName));
-		return CApi::Inc('common.managers.'.$sManagerName.'.'.$sFileName);
+		return CApi::Inc('common.managers.'.$sManagerName.'.'.$sFileName, $bDoExitOnError);
 	}
 
 	/**
@@ -370,8 +384,9 @@ class CApi
 
 		if ($bDoExitOnError)
 		{
-			exit('FILE NOT EXITS = '.$sFileFullPath);
+			exit('FILE NOT EXISTS = '.$sFileFullPath);
 		}
+		
 		return false;
 	}
 
@@ -411,19 +426,38 @@ class CApi
 	}
 
 	/**
+	 * @param Exception $mObject
+	 * @param int $iLogLevel = ELogLevel::Error
+	 * @param string $sFilePrefix = ''
+	 */
+	public static function LogException($mObject, $iLogLevel = ELogLevel::Error, $sFilePrefix = '')
+	{
+		CApi::Log((string) $mObject, $iLogLevel, $sFilePrefix);
+	}
+
+	/**
 	 * @param string $sFilePrefix = ''
 	 *
 	 * @return string
 	 */
 	public static function GetLogFileName($sFilePrefix = '')
 	{
-		$sLogFile = $sFilePrefix.CApi::GetConf('log.log-file', 'log.txt');
-		if (CApi::GetConf('labs.log.specified-by-user', false) && !empty($_COOKIE['user-log']))
-		{
-			$sLogFile = substr(preg_replace('/[^a-z0-9]/', '', $_COOKIE['user-log']), 0, 20).'-'.$sLogFile;
-		}
+		return $sFilePrefix.CApi::GetConf('log.log-file', 'log.txt');
+	}
 
-		return $sLogFile;
+	/**
+	 * @param bool $bOn = true
+	 */
+	public static function SpecifiedUserLogging($bOn = true)
+	{
+		if ($bOn)
+		{
+			@setcookie('SpecifiedUserLogging', '1', 0, CApi::GetConf('labs.app-cookie-path', '/'), null, null, true);
+		}
+		else
+		{
+			@setcookie('SpecifiedUserLogging', '0', 0, CApi::GetConf('labs.app-cookie-path', '/'), null, null, true);
+		}
 	}
 
 	/**
@@ -437,15 +471,14 @@ class CApi
 		static $bIsFirst = true;
 
 		$oSettings =& CApi::GetSettings();
-		$sLogFile = self::GetLogFileName($sFilePrefix);
-		$bSpecifidedByUser = CApi::GetConf('labs.log.specified-by-user', false) && !empty($_COOKIE['user-log']);
 
-		if ($oSettings && $oSettings->GetConf('Common/EnableLogging')
-			&& ($iLogLevel <= $oSettings->GetConf('Common/LoggingLevel') ||
-				$bSpecifidedByUser ||
-				(ELogLevel::Spec === $oSettings->GetConf('Common/LoggingLevel') &&
-					isset($_COOKIE['spec-log']) && '1' === (string) $_COOKIE['spec-log'])))
+		if ($oSettings && $oSettings->GetConf('Common/EnableLogging') &&
+			($iLogLevel <= $oSettings->GetConf('Common/LoggingLevel') ||
+			(ELogLevel::Spec === $oSettings->GetConf('Common/LoggingLevel') &&
+				isset($_COOKIE['SpecifiedUserLogging']) && '1' === (string) $_COOKIE['SpecifiedUserLogging'])))
 		{
+			$sLogFile = self::GetLogFileName($sFilePrefix);
+
 			$aMicro = explode('.', microtime(true));
 			$sDate = gmdate('H:i:s.').str_pad((isset($aMicro[1]) ? substr($aMicro[1], 0, 2) : '0'), 2, '0');
 			if ($bIsFirst)
@@ -597,7 +630,7 @@ class CApi
 	private static function convertIniToLang($sLangFile)
 	{
 		$aResultLang = false;
-		
+
 		$aLang = @parse_ini_string(file_get_contents($sLangFile), true);
 		if (is_array($aLang))
 		{

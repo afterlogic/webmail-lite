@@ -10,8 +10,8 @@ use Sabre\DAV;
  * The href property represents a url within a {DAV:}href element.
  * This is used by many WebDAV extensions, but not really within the WebDAV core spec
  *
- * @copyright Copyright (C) 2007-2012 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/)
+ * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
+ * @author Evert Pot (http://evertpot.com/)
  * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
 class Href extends DAV\Property implements IHref {
@@ -68,7 +68,9 @@ class Href extends DAV\Property implements IHref {
         $prefix = $server->xmlNamespaces['DAV:'];
 
         $elem = $dom->ownerDocument->createElement($prefix . ':href');
-        $elem->nodeValue = ($this->autoPrefix?$server->getBaseUri():'') . $this->href;
+        $value = ($this->autoPrefix?$server->getBaseUri():'') . $this->href;
+        $elem->appendChild($dom->ownerDocument->createTextNode($value));
+
         $dom->appendChild($elem);
 
     }

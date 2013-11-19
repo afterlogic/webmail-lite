@@ -32,12 +32,17 @@ class Basic extends \Sabre\DAV\Auth\Backend\AbstractBasic
      * @param string $tableName The PDO table name to use
      * @return void
      */
-    public function __construct(\PDO $pdo, $dBPrefix = '') {
-
+    public function __construct(\PDO $pdo, $dBPrefix = '')
+	{
         $this->pdo = $pdo;
         $this->dbPrefix = $dBPrefix;
     }
-
+	
+    public function setCurrentUser($user)
+	{
+		$this->currentUser = $user;
+	}
+	
     /**
      * Validates a username and password
      *
@@ -46,38 +51,47 @@ class Basic extends \Sabre\DAV\Auth\Backend\AbstractBasic
      *
      * @return bool
      */
-    protected function validateUserPass($username, $password)
+    protected function validateUserPass($sUserName, $sPassword)
 	{
 		if (class_exists('CApi') && \CApi::IsValid())
 		{
+			/* @var $oApiUsersManager \CApiUsersManager */
 			$oApiUsersManager = \CApi::Manager('users');
-			$oAccount = $oApiUsersManager->GetAccountOnLogin($username);
-
+			
 			/* @var $oApiCalendarManager \CApiCalendarManager */
 			$oApiCalendarManager = \CApi::Manager('calendar');
 
-			$bIsActiveSyncClient = Helper::ValidateClient('activesync');
-			$bIsOutlookSyncClient = Helper::ValidateClient('outlooksync');
-			
-			$bIsActiveSync = false;
-			$bIsOutlookSync = false;
-			$bIsDemo = false;
+			/* @var $oApiCapabilityManager \CApiCapabilityManager */
+			$oApiCapabilityManager = \CApi::Manager('capability');
 
-			if ($oAccount)
+			if ($oApiUsersManager && $oApiCalendarManager && $oApiCapabilityManager)
 			{
-				$bIsActiveSync = $bIsActiveSyncClient && $oAccount->User->GetCapa('ACTIVE_SYNC');
-				$bIsOutlookSync = $bIsOutlookSyncClient && $oAccount->User->GetCapa('OUTLOOK_SYNC');
-				\CApi::Plugin()->RunHook('plugin-is-demo-account', array(&$oAccount, &$bIsDemo));
-			}
-			
-			if ($username ===  $oApiCalendarManager->GetPublicUser() || ($bIsDemo) ||
-				($oAccount && $oAccount->IncomingMailPassword === $password && 
-				 ($bIsActiveSync || $bIsOutlookSync || 
-				  ($oAccount->User->GetCapa('DAV_SYNC') && !$bIsActiveSyncClient && !$bIsOutlookSyncClient))))
-			{
-				$oHelper = new Helper($this->pdo, $this->dbPrefix);
-				$oHelper->CheckPrincipals($username);
-				return true;
+				$oAccount = $oApiUsersManager->GetAccountOnLogin($sUserName);
+
+				$bIsOutlookSyncClient = Helper::ValidateClient('outlooksync');
+
+				$bIsMobileSync = false;
+				$bIsOutlookSync = false;
+				$bIsDemo = false;
+
+				if ($oAccount)
+				{
+					$bIsMobileSync = $oApiCapabilityManager->IsMobileSyncSupported($oAccount);
+					$bIsOutlookSync = $oApiCapabilityManager->IsOutlookSyncSupported($oAccount);
+					\CApi::Plugin()->RunHook('plugin-is-demo-account', array(&$oAccount, &$bIsDemo));
+				}
+
+				if (
+					($oAccount && $oAccount->IncomingMailPassword === $sPassword &&
+						(($bIsMobileSync && !$bIsOutlookSyncClient) || ($bIsOutlookSync && $bIsOutlookSyncClient))) ||
+					$bIsDemo ||
+					$sUserName === $oApiCalendarManager->GetPublicUser()
+				)
+				{
+					\afterlogic\DAV\Auth\Backend\Helper::CheckPrincipals($sUserName);
+					
+					return true;
+				}
 			}
 		}
 

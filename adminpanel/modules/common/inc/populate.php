@@ -41,8 +41,9 @@ class CCommonPopulateData extends ap_CoreModuleHelper
 
 			$oScreen->Data->SetValue('classHideDefault', $oDomain->IsDefaultDomain ? 'wm_hide' : '');
 			$oScreen->Data->SetValue('classHideNotDefault', $oDomain->IsDefaultDomain ? '' : 'wm_hide');
-			$oScreen->Data->SetValue('chOverrideSettings', $oDomain->OverrideSettings);
+			$oScreen->Data->SetValue('classHideOverrideSettings', 0 < $oDomain->IdTenant ? 'wm_hide' : '');
 			$oScreen->Data->SetValue('classHideSsl', $this->oModule->HasSslSupport() ? '' : 'wm_hide');
+			$oScreen->Data->SetValue('chOverrideSettings', $oDomain->OverrideSettings);
 
 			$sDomainSkin = $oDomain->DefaultSkin;
 			$sDomainLang = $oDomain->DefaultLanguage;
@@ -53,6 +54,7 @@ class CCommonPopulateData extends ap_CoreModuleHelper
 			$oScreen->Data->SetValue('radioTimeFormat12', ETimeFormat::F12 === $oDomain->DefaultTimeFormat);
 			$oScreen->Data->SetValue('radioTimeFormat24', ETimeFormat::F24 === $oDomain->DefaultTimeFormat);
 
+			$oScreen->Data->SetValue('optDateFormatDDMonthYYYY', EDateFormat::DD_MONTH_YYYY === $oDomain->DefaultDateFormat);
 			$oScreen->Data->SetValue('optDateFormatMMDDYY', EDateFormat::MMDDYY === $oDomain->DefaultDateFormat);
 			$oScreen->Data->SetValue('optDateFormatDDMMYY', EDateFormat::DDMMYY === $oDomain->DefaultDateFormat);
 			$oScreen->Data->SetValue('optDateFormatMMDDYYYY', EDateFormat::MMDDYYYY === $oDomain->DefaultDateFormat);

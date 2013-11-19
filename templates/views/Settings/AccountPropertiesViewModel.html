@@ -5,7 +5,7 @@
 			<input class="value input" type="text" maxlength="65" data-bind="value: friendlyName, onEnter: onSaveClick"/>
 		</div>
 		
-		<div class="row" data-bind="visible: !isLinked()">
+		<div class="row" data-bind="visible: !isDefault() || (!isLinked() && allowUsersChangeEmailSettings)">
 			<span class="label required" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_INCOMING_MAIL" data-bind="i18n: 'text'"></span>
 			<input class="value input" type="text" maxlength="255" data-bind="value: incomingMailServer, onEnter: onSaveClick"/>
 
@@ -13,15 +13,15 @@
 			<input class="value input port" type="text" maxlength="5" data-bind="value: incomingMailPort, onEnter: onSaveClick"/>
 		</div>
 		
-		<div class="row" data-bind="visible: !(isDefault()&&isLinked())">
+		<div class="row" data-bind="visible: !isDefault() || (!isLinked() && allowUsersChangeEmailSettings)"">
 			<span class="label required" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_LOGIN" data-bind="i18n: 'text'"></span>
 			<input class="value input" type="text" maxlength="255" data-bind="value: incomingMailLogin, hasfocus: incLoginFocused, onEnter: onSaveClick"/>
 		</div>
-		<div class="row" data-bind="visible: !(isDefault()&&isLinked())">
+		<div class="row" data-bind="visible: !isDefault() || (!isLinked() && allowUsersChangeEmailSettings)"">
 			<span class="label required" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_PASSWORD" data-bind="i18n: 'text'"></span>
 			<input class="value input" type="password" maxlength="255" data-bind="value: incomingMailPassword, onEnter: onSaveClick"/>
 		</div>
-		<div class="row" data-bind="visible: !isLinked()">
+		<div class="row" data-bind="visible: !isDefault() || (!isLinked() && allowUsersChangeEmailSettings)"">
 			<span class="label required" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_OUTGOING_MAIL" data-bind="i18n: 'text'"></span>
 			<input class="value input" type="text" maxlength="255"  data-bind="value: outgoingMailServer, hasfocus: outServerFocused, onEnter: onSaveClick"/>
 
@@ -29,7 +29,7 @@
 			<input  class="value input port" type="text" maxlength="5"  data-bind="value: outgoingMailPort, onEnter: onSaveClick"/>
 		</div>
 		
-		<div class="row" data-bind="visible: !isLinked()">
+		<div class="row" data-bind="visible: !isDefault() || (!isLinked() && allowUsersChangeEmailSettings)"">
 			<div>
 				<label class="custom_checkbox" data-bind="css: {'checked': useSmtpAuthentication}">
 					<span class="icon"></span>
@@ -39,21 +39,19 @@
 			</div>
 		</div>
 		
-		<div class="buttons" data-bind="visible: allowChangePassword" style="float: left; width: 40%; text-align: left;">
+		<div class="buttons" data-bind="visible: allowChangePassword" style="text-align: left;">
 			<span class="button" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_CHANGE_PASSWORD" data-bind="i18n: 'text', click: onChangePasswordClick"></span>
 		</div>
 		
-		<div style="overflow: hidden;" data-bind="visible: !isInternal()">
-			<div class="row" data-bind="visible: !isInternal()">
-				<span class="link" data-i18n="SETTINGS/ACCOUNTS_LINK_DELETE" 
-					   data-bind="i18n: 'text', click: function () { $parent.onEditedAccountDelete() }">
-				</span>
-			</div>
-			<div class="hint" data-bind="visible: !isInternal()">
-				<span data-i18n="SETTINGS/ACCOUNTS_DELETE_DEFAULT_HINT" data-bind="visible: !isInternal() && isDefault() && $parent.accounts().length > 1, i18n: 'text'"></span>
-				<span data-i18n="SETTINGS/ACCOUNTS_DELETE_SINGLE_DEFAULT_HINT" data-bind="visible: !isInternal() && isDefault() && $parent.accounts().length === 1, i18n: 'text'"></span>
-				<span data-i18n="SETTINGS/ACCOUNTS_DELETE_HINT" data-bind="visible: !isInternal() && !isDefault(), i18n: 'text'"></span>
-			</div>
+		<div class="row remove_account" data-bind="visible: !isInternal() && allowUsersChangeEmailSettings">
+			<span class="link" data-i18n="SETTINGS/ACCOUNTS_LINK_DELETE" 
+				   data-bind="i18n: 'text', click: function () { $parent.onEditedAccountDelete() }">
+			</span>
+		</div>
+		<div class="hint" data-bind="visible: !isInternal() && allowUsersChangeEmailSettings">
+			<span data-i18n="SETTINGS/ACCOUNTS_DELETE_DEFAULT_HINT" data-bind="visible: !isInternal() && isDefault() && $parent.accounts().length > 1, i18n: 'text'"></span>
+			<span data-i18n="SETTINGS/ACCOUNTS_DELETE_SINGLE_DEFAULT_HINT" data-bind="visible: !isInternal() && isDefault() && $parent.accounts().length === 1, i18n: 'text'"></span>
+			<span data-i18n="SETTINGS/ACCOUNTS_DELETE_HINT" data-bind="visible: !isInternal() && !isDefault(), i18n: 'text'"></span>
 		</div>
 		
 		<!--<div class="row" data-bind="visible: useSmtpAuthentication()">
@@ -68,6 +66,8 @@
 	</div>
 	
 	<div class="buttons">
-		<span class="button" data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', click: onSaveClick"></span>
+		<span class="button" data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', click: onSaveClick, visible: !loading()"></span>
+		<span class="button" data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', click: onSaveClick, visible: loading()"></span>
+		<!--<span class="button" data-bind="buttonText: {textTrigger: buttonTextTrigger, action: 'save'}, click: onSaveClick"></span>-->
 	</div>
 </div>

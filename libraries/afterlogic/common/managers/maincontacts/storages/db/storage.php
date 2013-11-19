@@ -41,7 +41,17 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 	 */
 	public function GetContactById($iUserId, $mContactId)
 	{
-		return $this->getContactBySql($this->oCommandCreator->GetContactById($iUserId, (int) $mContactId));
+		return $this->getContactBySql($this->oCommandCreator->GetContactById($iUserId, (int) $mContactId), $iUserId);
+	}
+
+	/**
+	 * @param mixed $mTypeId
+	 * @param int $iContactType
+	 * @return CContact | bool
+	 */
+	public function GetContactByTypeId($mTypeId, $mContactId)
+	{
+		return $this->getContactBySql($this->oCommandCreator->GetContactByTypeId($mTypeId, $mContactId));
 	}
 
 	/**
@@ -51,7 +61,7 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 	 */
 	public function GetContactByEmail($iUserId, $sEmail)
 	{
-		return $this->getContactBySql($this->oCommandCreator->GetContactByEmail($iUserId, $sEmail));
+		return $this->getContactBySql($this->oCommandCreator->GetContactByEmail($iUserId, $sEmail), $iUserId);
 	}
 
 	/**
@@ -61,7 +71,7 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 	 */
 	public function GetContactByStrId($iUserId, $sContactStrId)
 	{
-		return $this->getContactBySql($this->oCommandCreator->GetContactByStrId($iUserId, $sContactStrId));
+		return $this->getContactBySql($this->oCommandCreator->GetContactByStrId($iUserId, $sContactStrId), $iUserId);
 	}
 
 	/**
@@ -87,10 +97,42 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 	}
 
 	/**
+	 * @param int $iUserId
+	 * @return CContact|null
+	 */
+	public function GetMyGlobalContact($iUserId)
+	{
+		/* @var $oApiUsersManager CApiUsersManager */
+		$oApiUsersManager = CApi::Manager('users');
+		
+		/* @var $oApiGContactsManager CApiGcontactsManager */
+		$oApiGContactsManager = CApi::Manager('gcontacts');
+		
+		if ($oApiUsersManager && $oApiGContactsManager)
+		{
+			$oDefAccount = null;
+			
+			$iIdAccount = $oApiUsersManager->GetDefaultAccountId($iUserId);
+			if (0 < $iIdAccount)
+			{
+				$oDefAccount = $oApiUsersManager->GetAccountById($iIdAccount);
+			}
+
+			if ($oDefAccount)
+			{
+				return $oApiGContactsManager->GetContactByTypeId($oDefAccount, $oDefAccount->IdUser);
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * @param string $sSql
+	 * @param int $iUserId = null
 	 * @return CContact
 	 */
-	protected function getContactBySql($sSql)
+	protected function getContactBySql($sSql, $iUserId = null)
 	{
 		$oContact = false;
 		if ($this->oConnection->Execute($sSql))
@@ -102,6 +144,17 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 			{
 				$oContact = new CContact();
 				$oContact->InitByDbRow($oRow);
+
+				if ($oContact->ReadOnly && null !== $iUserId &&
+					(EContactType::Global_ === $oContact->Type || EContactType::GlobalAccounts === $oContact->Type))
+				{
+					$oGContact = $this->GetMyGlobalContact($iUserId);
+					if ($oGContact && (string) $oContact->IdTypeLink === (string) $oGContact->IdContact)
+					{
+						$oContact->ReadOnly = false;
+						$oContact->ItsMe = true;
+					}
+				}
 
 				$this->updateContactGroupIds($oContact);
 			}
@@ -220,6 +273,13 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 	public function GetContactItems($iUserId, $iSortField, $iSortOrder, $iOffset, $iRequestLimit, $sSearch, $sFirstCharacter, $iGroupId)
 	{
 		$mContactItems = false;
+		$oGContact = null;
+
+		if (0 < $iGroupId)
+		{
+			$oGContact = $this->GetMyGlobalContact($iUserId);
+		}
+
 		if ($this->oConnection->Execute($this->oCommandCreator->GetContactItems($iUserId, $iSortField, $iSortOrder,
 			$iOffset, $iRequestLimit, $sSearch, $sFirstCharacter, $iGroupId)))
 		{
@@ -228,7 +288,7 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 			while (false !== ($oRow = $this->oConnection->GetNextRecord()))
 			{
 				$oContactItem = new CContactListItem();
-				$oContactItem->InitByDbRowWithType('contact', $oRow);
+				$oContactItem->InitByDbRowWithType('contact', $oRow, $oGContact ? $oGContact->IdContact : null);
 				$mContactItems[] = $oContactItem;
 				unset($oContactItem);
 			}
@@ -345,6 +405,7 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 			{
 				$this->oConnection->Execute($this->oCommandCreator->UpdateGroupIdsInContact($oContact));
 			}
+			
 			return true;
 		}
 		return false;
@@ -409,6 +470,16 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 
 		return $bResult;
 	}
+	
+	/**
+	 * @param int $iUserId
+	 * @param array $aContactsIds
+	 * @return bool
+	 */
+	public function DeleteSuggestContacts($iUserId, $aContactsIds)
+	{
+		return $this->DeleteContacts($iUserId, $aContactsIds);
+	}	
 
 	/**
 	 * @param int $iUserId
@@ -490,34 +561,34 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 	 * @param array $aContactIds
 	 * @return bool
 	 */
-	public function DeleteContactsExceptIds($iUserId, $aContactIds)
-	{
-		$bResult = false;
-		if ($this->oConnection->Execute($this->oCommandCreator->DeleteContactsExceptIds($iUserId, $aContactIds)))
-		{
-			$bResult = true;
-			$this->oConnection->Execute($this->oCommandCreator->ClearGroupsIdsByExceptContactsIds($iUserId, $aContactIds));
-		}
-
-		return $bResult;
-	}
+//	public function DeleteContactsExceptIds($iUserId, $aContactIds)
+//	{
+//		$bResult = false;
+//		if ($this->oConnection->Execute($this->oCommandCreator->DeleteContactsExceptIds($iUserId, $aContactIds)))
+//		{
+//			$bResult = true;
+//			$this->oConnection->Execute($this->oCommandCreator->ClearGroupsIdsByExceptContactsIds($iUserId, $aContactIds));
+//		}
+//
+//		return $bResult;
+//	}
 
 	/**
 	 * @param int $iUserId
 	 * @param array $aGroupIds
 	 * @return bool
 	 */
-	public function DeleteGroupsExceptIds($iUserId, $aGroupIds)
-	{
-		$bResult = false;
-		if ($this->oConnection->Execute($this->oCommandCreator->DeleteGroupsExceptIds($iUserId, $aGroupIds)))
-		{
-			$bResult = true;
-			$this->oConnection->Execute($this->oCommandCreator->ClearContactsIdsByExceptGroupsIds($iUserId, $aGroupIds));
-		}
-
-		return $bResult;
-	}
+//	public function DeleteGroupsExceptIds($iUserId, $aGroupIds)
+//	{
+//		$bResult = false;
+//		if ($this->oConnection->Execute($this->oCommandCreator->DeleteGroupsExceptIds($iUserId, $aGroupIds)))
+//		{
+//			$bResult = true;
+//			$this->oConnection->Execute($this->oCommandCreator->ClearContactsIdsByExceptGroupsIds($iUserId, $aGroupIds));
+//		}
+//
+//		return $bResult;
+//	}
 
 	/**
 	 * @param CAccount $oAccount
@@ -547,21 +618,6 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 		$bResult = true;
 
 		$bResult &= $this->oConnection->Execute($this->oCommandCreator->FlushContacts());
-
-		return (bool) $bResult;
-	}
-
-	/**
-	 * @deprecated
-	 * @param CContact $oContact
-	 * @param array $aGroupIds
-	 * @return bool
-	 */
-	public function AddContactToGroup($oContact, $aGroupIds)
-	{
-		$bResult = true;
-
-		$bResult &= $this->oConnection->Execute($this->oCommandCreator->AddContactToGroup($oContact, $aGroupIds));
 
 		return (bool) $bResult;
 	}
@@ -654,21 +710,6 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 		return $aResult;
 	}
 
-	/**
-	 * @deprecated
-	 * @param mixed $mContactId
-	 * @param array $aGroupIds
-	 * @return bool
-	 */
-	public function DeleteContactFromGroup($mContactId, $aGroupIds)
-	{
-		$bResult = true;
-
-		$bResult &= $this->oConnection->Execute($this->oCommandCreator->DeleteContactFromGroup($mContactId, $aGroupIds));
-
-		return (bool) $bResult;
-	}
-	
 	/**
 	 * @param int $iUserId
 	 * @param mixed $mContactId

@@ -1,7 +1,7 @@
 <div class="fields">
 	<div class="fieldset">
 		<div data-bind="visible: available">
-			<div class="row">
+			<div class="row enable">
 				<div>
 					<label class="custom_checkbox" data-bind="css: {'checked': enable}">
 						<span class="icon"></span>
@@ -10,11 +10,11 @@
 					<label for="enable_ar" data-i18n="SETTINGS/ACCOUNT_AUTORESPONDER_ENABLE" data-bind="i18n: 'text'"></label>
 				</div>
 			</div>
-			<div class="row">
+			<div class="row subject">
 				<span class="label" data-i18n="SETTINGS/ACCOUNT_AUTORESPONDER_SUBJECT" data-bind="i18n: 'text'"></span>
 				<input class="value input" type="text" data-bind="value: subject, disable: !enable()" />
 			</div>
-			<div class="row">
+			<div class="row message">
 				<span class="label" data-i18n="SETTINGS/ACCOUNT_AUTORESPONDER_MESSAGE" data-bind="i18n: 'text'"></span>
 				<textarea class="input" data-bind="value: message, disable: !enable()"></textarea>
 			</div>
@@ -22,8 +22,8 @@
 	</div>
 	<div class="buttons" data-bind="visible: available">
 		<span class="button" data-bind="click: onSaveClick">
-			<span data-bind="visible: loading">*</span>
-			<span data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text'"></span>
+			<span data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', visible: !loading()"></span>
+			<span data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', visible: loading()"></span>
 		</span>
 	</div>
 

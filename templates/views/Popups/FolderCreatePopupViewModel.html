@@ -1,4 +1,4 @@
-<div class="mask"></div>
+<div class="mask" data-bind="click: onCancelClick"></div>
 <div class="popup_panel">
 	<span class="close" data-bind="click: onCancelClick"></span>
 	<span class="title" data-i18n="SETTINGS/ACCOUNT_FOLDERS_NEW_FOLDER" data-bind="i18n: 'text'"></span>
@@ -6,8 +6,8 @@
 	<div class="fields">
 		<div class="row">
 			<span class="label" data-i18n="SETTINGS/ACCOUNT_FOLDERS_PARENT_FOLDER" data-bind="i18n: 'text'"></span>
-			<select class="value input" data-bind="customOptions: options, value: parentFolder, 
-					optionsBind: 'value: id, text: name, disable: disable'">
+			<select class="value input" data-bind="value: parentFolder, options: options,
+				optionsText: 'name', optionsValue: 'id', optionsAfterRender: defaultOptionsAfterRender">
 			</select>
 		</div>
 		<div class="row">
@@ -15,7 +15,8 @@
 			<input type="text" class="value input" maxlength="30" data-bind="value: folderName, hasfocus: folderNameFocus" />
 		</div>
 		<div class="buttons">
-			<span class="button" data-i18n="SETTINGS/ACCOUNT_FOLDERS_BUTTON_OK" data-bind="i18n: 'text', click: onOKClick"></span>
+			<span class="button" data-i18n="SETTINGS/ACCOUNT_FOLDERS_BUTTON_OK" data-bind="i18n: 'text', click: onOKClick, visible: !loading()"></span>
+			<span class="button" data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', click: onOKClick, visible: loading()"></span>
 			<span class="button" data-i18n="MAIN/BUTTON_CANCEL" data-bind="i18n: 'text', click: onCancelClick"></span>
 		</div>
 	</div>

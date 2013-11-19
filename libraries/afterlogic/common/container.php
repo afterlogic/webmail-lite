@@ -387,6 +387,14 @@ abstract class api_AContainer
 	}
 
 	/**
+	 * @return bool
+	 */
+	public function Validate()
+	{
+		return true;
+	}
+
+	/**
 	 * @return array
 	 */
 	public function GetMap()
@@ -455,11 +463,13 @@ abstract class api_AContainer
 	/**
 	 * @param object $oObject
 	 * @param object $oHelper
+	 * @param array $aExclude
 	 * @return array
 	 */
-	public static function DbUpdateArray($oObject, $oHelper)
+	public static function DbUpdateArray($oObject, $oHelper, $aExclude = array())
 	{
 		$aResult = array();
+		$aExclude = is_array($aExclude) && 0 < count($aExclude) ? $aExclude : array();
 
 		$sQueryParams = '';
 		$bUseLogQueryParams = (bool) CApi::GetConf('labs.db.log-query-params', false);
@@ -471,6 +481,11 @@ abstract class api_AContainer
 
 		foreach ($aMap as $sDbKey => $sObjectKey)
 		{
+			if (in_array($sDbKey, $aExclude))
+			{
+				continue;
+			}
+
 			$mValue = $oObject->{$sObjectKey};
 			if (isset($aStaticMap[$sObjectKey][0]))
 			{

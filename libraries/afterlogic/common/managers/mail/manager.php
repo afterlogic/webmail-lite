@@ -38,10 +38,12 @@ class CApiMailManager extends AApiManagerWithStorage
 
 	/**
 	 * @param CAccount $oAccount
+	 * @param int $iForceConnectTimeOut = 0
+	 * @param int $iForceSocketTimeOut = 0
 	 *
-	 * @return \MailSo\Imap\ImapClient | null
+	 * @return \MailSo\Imap\ImapClient|null
 	 */
-	protected function &getImapClient(CAccount $oAccount)
+	protected function &getImapClient(CAccount $oAccount, $iForceConnectTimeOut = 0, $iForceSocketTimeOut = 0)
 	{
 		$oResult = null;
 		if ($oAccount)
@@ -55,10 +57,21 @@ class CApiMailManager extends AApiManagerWithStorage
 							CApi::Log($sDesc);
 						})->DisableTimePrefix()
 					)
+					->AddForbiddenType(\MailSo\Log\Enumerations\Type::TIME);
 				;
 
-				$iConnectTimeOut = CApi::GetConf('socket.connect-timeout', 5);
-				$iSocketTimeOut = CApi::GetConf('socket.get-timeout', 5);
+				$iConnectTimeOut = CApi::GetConf('socket.connect-timeout', 10);
+				$iSocketTimeOut = CApi::GetConf('socket.get-timeout', 20);
+
+				if (0 < $iForceConnectTimeOut)
+				{
+					$iConnectTimeOut = $iForceConnectTimeOut;
+				}
+				
+				if (0 < $iForceSocketTimeOut)
+				{
+					$iSocketTimeOut = $iForceSocketTimeOut;
+				}
 
 				CApi::Plugin()->RunHook('webmail-imap-update-socket-timeouts',
 					array(&$iConnectTimeOut, &$iSocketTimeOut));
@@ -79,11 +92,34 @@ class CApiMailManager extends AApiManagerWithStorage
 
 			if (!$oResult->IsLoggined())
 			{
-				$oResult->Login($oAccount->IncomingMailLogin, $oAccount->IncomingMailPassword);
+				$sProxyAuthUser = !empty($oAccount->CustomFields['ProxyAuthUser'])
+					? $oAccount->CustomFields['ProxyAuthUser'] : '';
+
+				$oResult->Login($oAccount->IncomingMailLogin, $oAccount->IncomingMailPassword, $sProxyAuthUser);
 			}
 		}
 
 		return $oResult;
+	}
+
+	/**
+	 * @param CAccount $oAccount
+	 *
+	 * @return \MailSo\Imap\ImapClient|null
+	 * @throws CApiManagerException
+	 */
+	public function &ImapClient(CAccount $oAccount, $iForceConnectTimeOut = 0, $iForceSocketTimeOut = 0)
+	{
+		$oImap = false;
+		try
+		{
+			$oImap =& $this->getImapClient($oAccount, $iForceConnectTimeOut, $iForceSocketTimeOut);
+		}
+		catch (\Exception $oException)
+		{
+		}
+
+		return $oImap;
 	}
 
 	/**
@@ -147,6 +183,11 @@ class CApiMailManager extends AApiManagerWithStorage
 		{
 			$aFoldersMap = $oAccount->Domain->GetFoldersMap();
 			unset($aFoldersMap[EFolderType::Inbox]);
+
+			if (!$oAccount->IsEnabledExtension(CAccount::SpamFolderExtension) && isset($aFoldersMap[EFolderType::Spam]))
+			{
+				unset($aFoldersMap[EFolderType::Spam]);
+			}
 
 			$aTypes = array_keys($aFoldersMap);
 
@@ -280,7 +321,7 @@ class CApiMailManager extends AApiManagerWithStorage
 
 		$oNamespace = $oImapClient->GetNamespace();
 
-		$aFolders = $oImapClient->FolderList($sParent, $sListPattern, true);
+		$aFolders = $oImapClient->FolderList($sParent, $sListPattern);
 		$aSubscribedFolders = $oImapClient->FolderSubscribeList($sParent, $sListPattern);
 
 		$aImapSubscribedFoldersHelper = array();
@@ -327,8 +368,12 @@ class CApiMailManager extends AApiManagerWithStorage
 			$oFolderCollection->SetNamespace($oNamespace->GetPersonalNamespace());
 		}
 
-		$aFoldersOrderList = $this->FoldersOrder($oAccount);
-		$aFoldersOrderList = is_array($aFoldersOrderList) && 0 < count($aFoldersOrderList) ? $aFoldersOrderList : null;
+		$aFoldersOrderList = null;
+		if (!$oAccount->IsEnabledExtension(CAccount::DisableFoldersManualSort))
+		{
+			$aFoldersOrderList = $this->FoldersOrder($oAccount);
+			$aFoldersOrderList = is_array($aFoldersOrderList) && 0 < count($aFoldersOrderList) ? $aFoldersOrderList : null;
+		}
 
 		$oFolderCollection->SortByCallback(function ($oFolderA, $oFolderB) use ($aFoldersOrderList) {
 
@@ -365,7 +410,8 @@ class CApiMailManager extends AApiManagerWithStorage
 			return strnatcmp($oFolderA->FullName(), $oFolderB->FullName());
 		});
 		
-		if (null === $aFoldersOrderList)
+		if (null === $aFoldersOrderList &&
+			!$oAccount->IsEnabledExtension(CAccount::DisableFoldersManualSort))
 		{
 			$aNewFoldersOrderList = array();
 			$oFolderCollection->ForeachListWithSubFolders(function (/* @var $oFolder CApiMailFolder */ $oFolder) use (&$aNewFoldersOrderList) {
@@ -473,6 +519,23 @@ class CApiMailManager extends AApiManagerWithStorage
 
 	/**
 	 * @param CAccount $oAccount
+	 * @param string $sExtentionName
+	 *
+	 * @return bool
+	 */
+	public function IsSupported($oAccount, $sExtentionName)
+	{
+		if (0 === strlen($sExtentionName))
+		{
+			throw new CApiInvalidArgumentException();
+		}
+
+		$oImapClient =& $this->getImapClient($oAccount);
+		return $oImapClient->IsSupported($sExtentionName);
+	}
+
+	/**
+	 * @param CAccount $oAccount
 	 * @param string $sFolderFullNameRaw
 	 *
 	 * @return array
@@ -487,6 +550,69 @@ class CApiMailManager extends AApiManagerWithStorage
 		$oImapClient =& $this->getImapClient($oAccount);
 
 		return $this->folderInformation($oImapClient, $sFolderFullNameRaw);
+	}
+
+	/**
+	 * @param CAccount $oAccount
+	 * @param array $aFolderFullNamesRaw
+	 *
+	 * @return array
+	 */
+	public function FolderCountsFromArray($oAccount, $aFolderFullNamesRaw)
+	{
+		if (!is_array($aFolderFullNamesRaw) || 0 === count($aFolderFullNamesRaw))
+		{
+			throw new CApiInvalidArgumentException();
+		}
+
+		$oImapClient =& $this->getImapClient($oAccount);
+
+		$aResult = array();
+		if (2 < count($aFolderFullNamesRaw) && $oImapClient->IsSupported('LIST-STATUS'))
+		{
+			$aFolders = $oImapClient->FolderStatusList();
+
+			if (is_array($aFolders))
+			{
+				foreach ($aFolders as /* @var $oImapFolder \MailSo\Imap\Folder */ $oImapFolder)
+				{
+					$oFolder = CApiMailFolder::NewInstance($oImapFolder, true);
+					if ($oFolder)
+					{
+						$mStatus = $oFolder->Status();
+						if (is_array($mStatus) && isset($mStatus['MESSAGES'], $mStatus['UNSEEN'], $mStatus['UIDNEXT']))
+						{
+							$aResult[$oFolder->FullNameRaw()] = array(
+								(int) $mStatus['MESSAGES'],
+								(int) $mStatus['UNSEEN'],
+								(string) $mStatus['UIDNEXT'],
+								\api_Utils::GenerateFolderHash(
+									$oFolder->FullNameRaw(), $mStatus['MESSAGES'], $mStatus['UNSEEN'], $mStatus['UIDNEXT'])
+							);
+						}
+					}
+
+					unset($oFolder);
+				}
+			}
+		}
+		else
+		{
+			foreach ($aFolderFullNamesRaw as $sFolderFullNameRaw)
+			{
+				$sFolderFullNameRaw = (string) $sFolderFullNameRaw;
+
+				try
+				{
+					$aResult[$sFolderFullNameRaw] = $this->folderInformation($oImapClient, $sFolderFullNameRaw);
+				}
+				catch (\Exception $oException)
+				{
+				}
+			}
+		}
+
+		return $aResult;
 	}
 
 	/**
@@ -753,14 +879,21 @@ class CApiMailManager extends AApiManagerWithStorage
 
 		$oImapClient->FolderSelect($sFromFolderFullNameRaw);
 
-		$oImapClient->MessageCopy($sToFolderFullNameRaw, implode(',', $aUids), true);
-
-		$this->MessageDelete($oAccount, $sFromFolderFullNameRaw, $aUids);
+		if ($oImapClient->IsSupported('MOVE'))
+		{
+			$oImapClient->MessageMove($sToFolderFullNameRaw, implode(',', $aUids), true);
+		}
+		else
+		{
+			$oImapClient->MessageCopy($sToFolderFullNameRaw, implode(',', $aUids), true);
+			$this->MessageDelete($oAccount, $sFromFolderFullNameRaw, $aUids);
+		}
 	}
 
 	/**
 	 * @param CAccount $oAccount
 	 * @param \MailSo\Mime\Message $oMessage
+	 * @param CFetcher $oFetcher = null
 	 * @param string $sSentFolder = ''
 	 * @param string $sDraftFolder = ''
 	 * @param string $sDraftUid = ''
@@ -769,7 +902,7 @@ class CApiMailManager extends AApiManagerWithStorage
 	 *
 	 * @throws CApiInvalidArgumentException
 	 */
-	public function MessageSend($oAccount, $oMessage, $sSentFolder = '', $sDraftFolder = '', $sDraftUid = '')
+	public function MessageSend($oAccount, $oMessage, $oFetcher = null, $sSentFolder = '', $sDraftFolder = '', $sDraftUid = '')
 	{
 		if (!$oAccount || !$oMessage)
 		{
@@ -781,13 +914,11 @@ class CApiMailManager extends AApiManagerWithStorage
 		$rMessageStream = \MailSo\Base\ResourceRegistry::CreateMemoryResource();
 
 		$iMessageStreamSize = \MailSo\Base\Utils::MultipleStreamWriter(
-			$oMessage->ToStream(true), array($rMessageStream), 8192, true, true);
+			$oMessage->ToStream(true), array($rMessageStream), 8192, true, true, true);
 
 		$mResult = false;
 		if (false !== $iMessageStreamSize && is_resource($rMessageStream))
 		{
-			rewind($rMessageStream);
-
 			$oRcpt = $oMessage->GetRcpt();
 			if ($oRcpt && 0 < $oRcpt->Count())
 			{
@@ -809,24 +940,56 @@ class CApiMailManager extends AApiManagerWithStorage
 					}
 
 					$iSecure = \MailSo\Net\Enumerations\ConnectionSecurityType::AUTO_DETECT;
-					if ($oAccount->OutgoingMailUseSSL)
+					if ($oFetcher)
+					{
+						$iSecure = $oFetcher->OutgoingMailSecurity;
+					}
+					else if ($oAccount->OutgoingMailUseSSL)
 					{
 						$iSecure = \MailSo\Net\Enumerations\ConnectionSecurityType::SSL;
 					}
 
-					$sOutgoingMailLogin = $oAccount->OutgoingMailLogin;
-					$sOutgoingMailLogin = 0 <  strlen($sOutgoingMailLogin) ? $sOutgoingMailLogin : $oAccount->IncomingMailLogin;
+					$sOutgoingMailLogin = '';
+					if ($oFetcher)
+					{
+						$sOutgoingMailLogin = $oFetcher->IncomingMailLogin;
+					}
 
-					$sOutgoingMailPassword = $oAccount->OutgoingMailPassword;
-					$sOutgoingMailPassword = 0 < strlen($sOutgoingMailPassword) ? $sOutgoingMailPassword : $oAccount->IncomingMailPassword;
+					if (0 === strlen($sOutgoingMailLogin))
+					{
+						$sOutgoingMailLogin = $oAccount->OutgoingMailLogin;
+						$sOutgoingMailLogin = 0 < strlen($sOutgoingMailLogin) ? $sOutgoingMailLogin : $oAccount->IncomingMailLogin;
+					}
 
-					$oSmtpClient->Connect($oAccount->OutgoingMailServer, $oAccount->OutgoingMailPort, 'localhost', $iSecure);
-					if ($oAccount->OutgoingMailAuth)
+					$sOutgoingMailPassword = '';
+					if ($oFetcher)
+					{
+						$sOutgoingMailPassword = $oFetcher->IncomingMailPassword;
+					}
+
+					if (0 === strlen($sOutgoingMailPassword))
+					{
+						$sOutgoingMailPassword = $oAccount->OutgoingMailPassword;
+						$sOutgoingMailPassword = 0 < strlen($sOutgoingMailPassword) ? $sOutgoingMailPassword : $oAccount->IncomingMailPassword;
+					}
+
+					$sHostName = function_exists('gethostname') ? gethostname() : 'localhost';
+
+					if ($oFetcher)
+					{
+						$oSmtpClient->Connect($oFetcher->OutgoingMailServer, $oAccount->OutgoingMailPort, $sHostName, $iSecure);
+					}
+					else
+					{
+						$oSmtpClient->Connect($oAccount->OutgoingMailServer, $oAccount->OutgoingMailPort, $sHostName, $iSecure);
+					}
+					
+					if (($oFetcher && $oFetcher->OutgoingMailAuth) || (!$oFetcher && $oAccount->OutgoingMailAuth))
 					{
 						$oSmtpClient->Login($sOutgoingMailLogin, $sOutgoingMailPassword);
 					}
 
-					$oSmtpClient->MailFrom($oAccount->Email, (string) $iMessageStreamSize);
+					$oSmtpClient->MailFrom($oFetcher ? $oFetcher->Email : $oAccount->Email, (string) $iMessageStreamSize);
 
 					$aRcpt =& $oRcpt->GetAsArray();
 					foreach ($aRcpt as /* @var $oEmail \MailSo\Mime\Email */ $oEmail)
@@ -851,7 +1014,11 @@ class CApiMailManager extends AApiManagerWithStorage
 					throw new \CApiManagerException(Errs::Mail_CannotSendMessage, $oException);
 				}
 
-				rewind($rMessageStream);
+				if (is_resource($rMessageStream))
+				{
+					rewind($rMessageStream);
+//					@fclose($rMessageStream);
+				}
 
 				if (0 < strlen($sSentFolder))
 				{
@@ -861,10 +1028,34 @@ class CApiMailManager extends AApiManagerWithStorage
 							$sSentFolder, $rMessageStream, $iMessageStreamSize, array(
 								\MailSo\Imap\Enumerations\MessageFlag::SEEN
 							));
-					}
-					catch (\Exception $oException) {}
-				}
 
+// TODO
+//						$rAppendMessageStream = \MailSo\Base\ResourceRegistry::CreateMemoryResource();
+//
+//						$iAppendMessageStreamSize = \MailSo\Base\Utils::MultipleStreamWriter(
+//							$oMessage->ToStream(false), array($rAppendMessageStream), 8192, true, true, true);
+//
+//						$oImapClient->MessageAppendStream(
+//							$sSentFolder, $rAppendMessageStream, $iAppendMessageStreamSize, array(
+//								\MailSo\Imap\Enumerations\MessageFlag::SEEN
+//							));
+//
+//						if (is_resource($rAppendMessageStream))
+//						{
+//							@fclose($rAppendMessageStream);
+//						}
+					}
+					catch (\Exception $oException)
+					{
+						throw new \CApiManagerException(Errs::Mail_CannotSaveMessageInSentItems, $oException);
+					}
+
+					if (is_resource($rMessageStream))
+					{
+						@fclose($rMessageStream);
+					}
+				}
+				
 				if (0 < strlen($sDraftFolder) && 0 < strlen($sDraftUid))
 				{
 					try
@@ -963,7 +1154,7 @@ class CApiMailManager extends AApiManagerWithStorage
 	 */
 	public function MessageFlag($oAccount, $sFolderFullNameRaw, $aUids, $sFlagString, $iAction = EMailMessageStoreAction::Add, $bSetToAll = false)
 	{
-		if (0 === strlen($sFolderFullNameRaw) || !is_array($aUids) || 0 === count($aUids))
+		if (0 === strlen($sFolderFullNameRaw) || (!$bSetToAll && (!is_array($aUids) || 0 === count($aUids))))
 		{
 			throw new CApiInvalidArgumentException();
 		}
@@ -972,6 +1163,7 @@ class CApiMailManager extends AApiManagerWithStorage
 
 		$oImapClient->FolderSelect($sFolderFullNameRaw);
 
+		$aUids = is_array($aUids) ? $aUids : array();
 		$sUids = implode(',', $aUids);
 
 		if ($bSetToAll)
@@ -1067,20 +1259,26 @@ class CApiMailManager extends AApiManagerWithStorage
 
 		$oMessage = false;
 
-		$sTextMimeIndex = '';
 		$sICalMimeIndex = '';
 		$sVCardMimeIndex = '';
+		$aTextMimeIndexes = array();
 
 		$aFetchResponse = $oImapClient->Fetch(array(
 			\MailSo\Imap\Enumerations\FetchType::BODYSTRUCTURE), $iUid, true);
-		
+
 		$oBodyStructure = (0 < count($aFetchResponse)) ? $aFetchResponse[0]->GetFetchBodyStructure($sRfc822SubMimeIndex) : null;
 		
 		if ($oBodyStructure)
 		{
-			$oTextPart = $oBodyStructure->SearchHtmlOrPlainPart();
-			$sTextMimeIndex = $oTextPart ? $oTextPart->PartID() : '';
-			
+			$aTextParts = $oBodyStructure->SearchHtmlOrPlainParts();
+			if (is_array($aTextParts) && 0 < count($aTextParts))
+			{
+				foreach ($aTextParts as $oPart)
+				{
+					$aTextMimeIndexes[] = $oPart->PartID();
+				}
+			}
+
 			if ($bParseICal)
 			{
 				$aICalPart = $oBodyStructure->SearchByContentType('text/calendar');
@@ -1105,9 +1303,19 @@ class CApiMailManager extends AApiManagerWithStorage
 				: \MailSo\Imap\Enumerations\FetchType::BODY_HEADER_PEEK
 		);
 
-		if (0 < strlen($sTextMimeIndex))
+		if (0 < count($aTextMimeIndexes))
 		{
-			$aFetchItems[] = \MailSo\Imap\Enumerations\FetchType::BODY_PEEK.'['.$sTextMimeIndex.']';
+			if (0 < strlen($sRfc822SubMimeIndex) && is_numeric($sRfc822SubMimeIndex))
+			{
+				$aFetchItems[] = \MailSo\Imap\Enumerations\FetchType::BODY_PEEK.'['.$aTextMimeIndexes[0].'.1]';
+			}
+			else
+			{
+				foreach ($aTextMimeIndexes as $sTextMimeIndex)
+				{
+					$aFetchItems[] = \MailSo\Imap\Enumerations\FetchType::BODY_PEEK.'['.$sTextMimeIndex.']';
+				}
+			}
 		}
 		
 		if (0 < strlen($sICalMimeIndex))
@@ -1150,15 +1358,15 @@ class CApiMailManager extends AApiManagerWithStorage
 				$oMessage->SetSafety($oApiUsersManager->GetSafetySender($oAccount->IdUser, $sFromEmail, true));
 			}
 
+			
 			if ($bParseICal)
 			{
-				$oApiFileCache = /* @var $oApiFileCache CApiFilecacheManager */ CApi::Manager('filecache');
-				$oApiCollaboration = /* @var $oApiCollaboration CApiCollaborationManager */ CApi::Manager('collaboration');
-				$oApiLicensing = /* @var $oApiLicensing CApiLicensingManager */ CApi::Manager('licensing');
-
+				$oApiCapa = /* @var CApiCapabilityManager */ CApi::Manager('capability');
+				$oApiFileCache = /* @var CApiFilecacheManager */ CApi::Manager('filecache');
+				
 				// ICAL
 				$sICal = $oMessage->GetExtend('ICAL_RAW');
-				if (!empty($sICal))
+				if (!empty($sICal) && $oApiCapa->IsCalendarSupported($oAccount))
 				{
 					$oApiCalendarManager = CApi::Manager('calendar');
 					if ($oApiCalendarManager)
@@ -1178,13 +1386,14 @@ class CApiMailManager extends AApiManagerWithStorage
 								$oIcs->Description = !empty($mResult['Description']) ? $mResult['Description'] : '';
 								$oIcs->When = !empty($mResult['When']) ? $mResult['When'] : '';
 								$oIcs->CalendarId = !empty($mResult['CalendarId']) ? $mResult['CalendarId'] : '';
-//								$oIcs->Calendars = array();
 
-								if (!$oApiLicensing || !$oApiCollaboration || !$oApiCollaboration->IsCalendarAppointmentsSupported())
+								if (!$oApiCapa->IsCalendarAppointmentsSupported($oAccount))
 								{
 									$oIcs->Type = '';
 								}
 
+								// TODO
+//								$oIcs->Calendars = array();
 //								if (isset($mResult['Calendars']) && is_array($mResult['Calendars']) && 0 < count($mResult['Calendars']))
 //								{
 //									foreach ($mResult['Calendars'] as $sUid => $sName)
@@ -1205,7 +1414,7 @@ class CApiMailManager extends AApiManagerWithStorage
 
 				// VCARD
 				$sVCard = $oMessage->GetExtend('VCARD_RAW');
-				if (!empty($sVCard))
+				if (!empty($sVCard) && $oApiCapa->IsCalendarSupported($oAccount))
 				{
 					$oContact = new CContact();
 					$oContact->InitFromVCardStr($oAccount->IdUser, $sVCard);
@@ -1490,132 +1699,244 @@ class CApiMailManager extends AApiManagerWithStorage
 	 *
 	 * @return \MailSo\Imap\SearchBuilder
 	 */
-	private function getSearchBuilder($oImapClient, $sSearch, $iTimeZoneOffset = 0)
+	private function getSearchBuilder($oImapClient, $sSearch, $iTimeZoneOffset = 0, $aFilters = array())
 	{
+		$sSearch = trim($sSearch);
+
 		$oSearchBuilder = \MailSo\Imap\SearchBuilder::NewInstance();
-
-		$aLines = $this->parseSearchString($sSearch);
-
-		if (1 === count($aLines) && isset($aLines['OTHER']))
+		if (0 === strlen($sSearch) && 0 === count($aFilters))
 		{
-			if (true)
+			return $oSearchBuilder;
+		}
+		
+		$bFilterFlagged = false;
+		$bFilterUnseen = false;
+
+		if (0 < strlen($sSearch))
+		{
+			$aLines = $this->parseSearchString($sSearch);
+
+			if (1 === count($aLines) && isset($aLines['OTHER']))
 			{
-				$sValue = $this->escapeSearchString($oImapClient, $aLines['OTHER']);
-				
-				$oSearchBuilder->AddOr('FROM', $sValue);
-				$oSearchBuilder->AddOr('TO', $sValue);
-				$oSearchBuilder->AddOr('CC', $sValue);
-				$oSearchBuilder->AddOr('SUBJECT', $sValue);
+				if (true) // TODO
+				{
+					$sValue = $this->escapeSearchString($oImapClient, $aLines['OTHER']);
+
+					$oSearchBuilder->AddOr('FROM', $sValue);
+					$oSearchBuilder->AddOr('TO', $sValue);
+					$oSearchBuilder->AddOr('CC', $sValue);
+					$oSearchBuilder->AddOr('SUBJECT', $sValue);
+				}
+				else
+				{
+					$oSearchBuilder->AddOr('TEXT', $this->escapeSearchString($oImapClient, $aLines['OTHER']));
+				}
 			}
 			else
 			{
-				$oSearchBuilder->AddOr('TEXT', $this->escapeSearchString($oImapClient, $aLines['OTHER']));
+				if (isset($aLines['EMAIL']))
+				{
+					$sValue = $this->escapeSearchString($oImapClient, $aLines['EMAIL']);
+					$oSearchBuilder->AddOr('FROM', $sValue);
+					$oSearchBuilder->AddOr('TO', $sValue);
+					$oSearchBuilder->AddOr('CC', $sValue);
+					unset($aLines['EMAIL']);
+				}
+
+				if (isset($aLines['TO']))
+				{
+					$sValue = $this->escapeSearchString($oImapClient, $aLines['TO']);
+					$oSearchBuilder->AddAnd('TO', $sValue);
+					$oSearchBuilder->AddOr('CC', $sValue);
+					unset($aLines['TO']);
+				}
+
+				$sMainText = '';
+				foreach ($aLines as $sName => $sRawValue)
+				{
+					if ('' === \trim($sRawValue))
+					{
+						continue;
+					}
+
+					$sValue = $this->escapeSearchString($oImapClient, $sRawValue);
+					switch ($sName)
+					{
+						case 'FROM':
+							$oSearchBuilder->AddAnd('FROM', $sValue);
+							break;
+						case 'SUBJECT':
+							$oSearchBuilder->AddAnd('SUBJECT', $sValue);
+							break;
+						case 'OTHER':
+						case 'BODY':
+						case 'TEXT':
+							$sMainText .= ' '.$sRawValue;
+							break;
+						case 'HAS':
+							if (false !== strpos($sRawValue, 'attach'))
+							{
+								$oSearchBuilder->AddAnd('HEADER CONTENT-TYPE', '"MULTIPART/MIXED"');
+							}
+							if (false !== strpos($sRawValue, 'flag'))
+							{
+								$bFilterFlagged = true;
+								$oSearchBuilder->AddAnd('FLAGGED');
+							}
+							if (false !== strpos($sRawValue, 'unseen'))
+							{
+								$bFilterUnseen = true;
+								$oSearchBuilder->AddAnd('UNSEEN');
+							}
+							break;
+						case 'DATE':
+							$iDateStampFrom = $iDateStampTo = 0;
+
+							$sDate = $sRawValue;
+							$aDate = explode('/', $sDate);
+
+							if (is_array($aDate) && 2 === count($aDate))
+							{
+								if (0 < strlen($aDate[0]))
+								{
+									$iDateStampFrom = $this->parseSearchDate($aDate[0], $iTimeZoneOffset);
+								}
+
+								if (0 < strlen($aDate[1]))
+								{
+									$iDateStampTo = $this->parseSearchDate($aDate[1], $iTimeZoneOffset);
+									$iDateStampTo += 60 * 60 * 24;
+								}
+							}
+							else
+							{
+								if (0 < strlen($sDate))
+								{
+									$iDateStampFrom = $this->parseSearchDate($sDate, $iTimeZoneOffset);
+									$iDateStampTo = $iDateStampFrom + 60 * 60 * 24;
+								}
+							}
+
+							if (0 < $iDateStampFrom)
+							{
+								$oSearchBuilder->AddAnd('SINCE', gmdate('j-M-Y', $iDateStampFrom));
+							}
+
+							if (0 < $iDateStampTo)
+							{
+								$oSearchBuilder->AddAnd('BEFORE', gmdate('j-M-Y', $iDateStampTo));
+							}
+							break;
+					}
+				}
+
+				if ('' !== trim($sMainText))
+				{
+					$sMainText = trim(trim(preg_replace('/[\s]+/', ' ', $sMainText)), '"\'');
+					$oSearchBuilder->AddAnd('TEXT', $this->escapeSearchString($oImapClient, $sMainText));
+				}
 			}
 		}
-		else
+
+		if (0 < count($aFilters))
 		{
-			if (isset($aLines['EMAIL']))
+			foreach ($aFilters as $sFilter)
 			{
-				$sValue = $this->escapeSearchString($oImapClient, $aLines['EMAIL']);
-				$oSearchBuilder->AddOr('FROM', $sValue);
-				$oSearchBuilder->AddOr('TO', $sValue);
-				$oSearchBuilder->AddOr('CC', $sValue);
-				unset($aLines['EMAIL']);
-			}
-
-			if (isset($aLines['TO']))
-			{
-				$sValue = $this->escapeSearchString($oImapClient, $aLines['TO']);
-				$oSearchBuilder->AddAnd('TO', $sValue);
-				$oSearchBuilder->AddOr('CC', $sValue);
-				unset($aLines['TO']);
-			}
-
-			$sMainText = '';
-			foreach ($aLines as $sName => $sRawValue)
-			{
-				if ('' === \trim($sRawValue))
+				if ('flagged' === $sFilter && !$bFilterFlagged)
 				{
-					continue;
+					$oSearchBuilder->AddAnd('FLAGGED');
 				}
-
-				$sValue = $this->escapeSearchString($oImapClient, $sRawValue);
-				switch ($sName)
+				else if ('unseen' === $sFilter && !$bFilterUnseen)
 				{
-					case 'FROM':
-						$oSearchBuilder->AddAnd('FROM', $sValue);
-						break;
-					case 'SUBJECT':
-						$oSearchBuilder->AddAnd('SUBJECT', $sValue);
-						break;
-					case 'OTHER':
-					case 'BODY':
-					case 'TEXT':
-						$sMainText .= ' '.$sRawValue;
-						break;
-					case 'HAS':
-						if (false !== strpos($sRawValue, 'attach'))
-						{
-							$oSearchBuilder->AddAnd('HEADER CONTENT-TYPE', '"MULTIPART/MIXED"');
-						}
-						if (false !== strpos($sRawValue, 'flag'))
-						{
-							$oSearchBuilder->AddAnd('FLAGGED');
-						}
-						if (false !== strpos($sRawValue, 'unseen'))
-						{
-							$oSearchBuilder->AddAnd('UNSEEN');
-						}
-						break;
-					case 'DATE':
-						$iDateStampFrom = $iDateStampTo = 0;
-
-						$sDate = $sRawValue;
-						$aDate = explode('/', $sDate);
-
-						if (is_array($aDate) && 2 === count($aDate))
-						{
-							if (0 < strlen($aDate[0]))
-							{
-								$iDateStampFrom = $this->parseSearchDate($aDate[0], $iTimeZoneOffset);
-							}
-
-							if (0 < strlen($aDate[1]))
-							{
-								$iDateStampTo = $this->parseSearchDate($aDate[1], $iTimeZoneOffset);
-								$iDateStampTo += 60 * 60 * 24;
-							}
-						}
-						else
-						{
-							if (0 < strlen($sDate))
-							{
-								$iDateStampFrom = $this->parseSearchDate($sDate, $iTimeZoneOffset);
-								$iDateStampTo = $iDateStampFrom + 60 * 60 * 24;
-							}
-						}
-
-						if (0 < $iDateStampFrom)
-						{
-							$oSearchBuilder->AddAnd('SINCE', gmdate('j-M-Y', $iDateStampFrom));
-						}
-
-						if (0 < $iDateStampTo)
-						{
-							$oSearchBuilder->AddAnd('BEFORE', gmdate('j-M-Y', $iDateStampTo));
-						}
-						break;
+					$oSearchBuilder->AddAnd('UNSEEN');
 				}
-			}
-
-			if ('' !== trim($sMainText))
-			{
-				$sMainText = trim(trim(preg_replace('/[\s]+/', ' ', $sMainText)), '"\'');
-				$oSearchBuilder->AddAnd('TEXT', $this->escapeSearchString($oImapClient, $sMainText));
 			}
 		}
 
 		return $oSearchBuilder;
+	}
+
+	/**
+	 * @param array $aThreads
+	 * @return array
+	 */
+	private function threadArrayReverseRec($aThreads)
+	{
+		$aThreads = array_reverse($aThreads);
+		foreach ($aThreads as &$mItem)
+		{
+			if (is_array($mItem))
+			{
+				$mItem = $this->threadArrayReverseRec($mItem);
+			}
+		}
+		return $aThreads;
+	}
+
+	/**
+	 * @param array $aThreads
+	 * @return array
+	 */
+	private function threadArrayMap($aThreads)
+	{
+		$aNew = array();
+		foreach ($aThreads as $mItem)
+		{
+			if (!is_array($mItem))
+			{
+				$aNew[] = $mItem;
+			}
+			else
+			{
+				$mMap = $this->threadArrayMap($mItem);
+				if (is_array($mMap) && 0 < count($mMap))
+				{
+					$aNew = array_merge($aNew, $mMap);
+				}
+			}
+		}
+
+		sort($aNew, SORT_NUMERIC);
+		return $aNew;
+	}
+
+	/**
+	 * @param array $aThreads
+	 *
+	 * @return array
+	 */
+	private function compileThreadArray($aThreads)
+	{
+		$aThreads = $this->threadArrayReverseRec($aThreads);
+
+		$aResult = array();
+		foreach ($aThreads as $mItem)
+		{
+			if (is_array($mItem))
+			{
+				$aMap = $this->threadArrayMap($mItem);
+				if (is_array($aMap))
+				{
+					if (1 < count($aMap))
+					{
+						$iMax = array_pop($aMap);
+						rsort($aMap, SORT_NUMERIC);
+						$aResult[(int) $iMax] = $aMap;
+					}
+					else if (0 < count($aMap))
+					{
+						$aResult[(int) $aMap[0]] = $aMap[0];
+					}
+				}
+			}
+			else
+			{
+				$aResult[(int) $mItem] = $mItem;
+			}
+		}
+
+		krsort($aResult, SORT_NUMERIC);
+		return $aResult;
 	}
 
 	/**
@@ -1624,13 +1945,14 @@ class CApiMailManager extends AApiManagerWithStorage
 	 * @param int $iOffset = 0
 	 * @param int $iLimit = 20
 	 * @param string $sSearch = ''
-	 * @param array $aExistenUids = array()
+	 * @param bool $bUseThreads = false
+	 * @param array $aFilters = array()
 	 *
 	 * @return CApiMailMessageCollection
 	 *
 	 * @throws CApiInvalidArgumentException
 	 */
-	public function MessageList($oAccount, $sFolderFullNameRaw, $iOffset = 0, $iLimit = 20, $sSearch = '', $aExistenUids = array())
+	public function MessageList($oAccount, $sFolderFullNameRaw, $iOffset = 0, $iLimit = 20, $sSearch = '', $bUseThreads = false, $aFilters = array())
 	{
 		if (0 === strlen($sFolderFullNameRaw) || 0 > $iOffset || 0 >= $iLimit || 999 < $iLimit)
 		{
@@ -1640,13 +1962,14 @@ class CApiMailManager extends AApiManagerWithStorage
 		$oMessageCollection = false;
 
 		$oSettings =& CApi::GetSettings();
-		$oImapClient =& $this->getImapClient($oAccount);
+		$oImapClient =& $this->getImapClient($oAccount, 20, 60);
 
 		$oImapClient->FolderExamine($sFolderFullNameRaw);
 
 		$aList = $this->folderInformation($oImapClient, $sFolderFullNameRaw);
 
 		$iMessageCount = $aList[0];
+		$iRealMessageCount = $aList[0];
 		$iMessageUnseenCount = $aList[1];
 		$sUidNext = $aList[2];
 
@@ -1657,8 +1980,19 @@ class CApiMailManager extends AApiManagerWithStorage
 		$oMessageCollection->Limit = $iLimit;
 		$oMessageCollection->Search = $sSearch;
 		$oMessageCollection->UidNext = $sUidNext;
+		$oMessageCollection->Filters = implode(',', $aFilters);
 
-		if (0 < $iMessageCount)
+		$aThreads = array();
+		$bUseThreadsIfSupported = !!$oSettings->GetConf('WebMail/UseThreadsIfSupported');
+		if ($bUseThreadsIfSupported)
+		{
+			$bUseThreadsIfSupported = $bUseThreads;
+		}
+
+		$oMessageCollection->FolderHash = $aList[3];
+
+		$bSearch = false;
+		if (0 < $iRealMessageCount)
 		{
 			$bIndexAsUid = false;
 			$aIndexOrUids = array();
@@ -1668,10 +2002,16 @@ class CApiMailManager extends AApiManagerWithStorage
 			{
 				$bUseSortIfSupported = $oImapClient->IsSupported('SORT');
 			}
-
-			if (0 < strlen($sSearch))
+			
+			if ($bUseThreadsIfSupported)
 			{
-				$sSearchCriterias = $this->getSearchBuilder($oImapClient, $sSearch, $oAccount->GetDefaultTimeOffset() * 60)->Complete();
+				$bUseThreadsIfSupported = $oImapClient->IsSupported('THREAD=REFS') || $oImapClient->IsSupported('THREAD=REFERENCES') || $oImapClient->IsSupported('THREAD=ORDEREDSUBJECT');
+			}
+
+			if (0 < strlen($sSearch) || 0 < count($aFilters))
+			{
+				$bSearch = true;
+				$sSearchCriterias = $this->getSearchBuilder($oImapClient, $sSearch, $oAccount->GetDefaultTimeOffset() * 60, $aFilters)->Complete();
 
 				$bIndexAsUid = true;
 				$aIndexOrUids = null;
@@ -1679,7 +2019,6 @@ class CApiMailManager extends AApiManagerWithStorage
 				if ($bUseSortIfSupported)
 				{
 					$aIndexOrUids = $oImapClient->MessageSimpleSort(array('ARRIVAL'), $sSearchCriterias, $bIndexAsUid);
-//					$aIndexOrUids = $oImapClient->MessageSimpleSort(array('REVERSE', 'ARRIVAL'), $sSearchCriterias, $bIndexAsUid);
 				}
 				else
 				{
@@ -1704,11 +2043,27 @@ class CApiMailManager extends AApiManagerWithStorage
 			}
 			else
 			{
-				if ($bUseSortIfSupported)
+				if ($bUseThreadsIfSupported && 1 < $iMessageCount)
+				{
+					$bIndexAsUid = true;
+					$aThreadUids = array();
+					try
+					{
+						$aThreadUids = $oImapClient->MessageSimpleThread();
+					}
+					catch (\MailSo\Imap\Exceptions\RuntimeException $oException)
+					{
+						$aThreadUids = array();
+					}
+
+					$aThreads = $this->compileThreadArray($aThreadUids);
+					$aIndexOrUids = array_keys($aThreads);
+					$iMessageCount = count($aIndexOrUids);
+				}
+				else if ($bUseSortIfSupported && 1 < $iMessageCount)
 				{
 					$bIndexAsUid = true;
 					$aIndexOrUids = $oImapClient->MessageSimpleSort(array('ARRIVAL'),
-//					$aIndexOrUids = $oImapClient->MessageSimpleSort(array('REVERSE', 'ARRIVAL'),
 						\MailSo\Imap\SearchBuilder::NewInstance()->Complete(), $bIndexAsUid);
 				}
 				else
@@ -1722,78 +2077,181 @@ class CApiMailManager extends AApiManagerWithStorage
 				}
 			}
 
-			if (0 < count($aIndexOrUids))
+			if (is_array($aIndexOrUids))
 			{
-				$oMessageCollection->MessageCount = $iMessageCount;
+				$oMessageCollection->MessageCount = $iRealMessageCount;
 				$oMessageCollection->MessageUnseenCount = $iMessageUnseenCount;
-				$oMessageCollection->MessageSearchCount = 0 < strlen($sSearch)
-					? count($aIndexOrUids) : $oMessageCollection->MessageCount;
+				$oMessageCollection->MessageResultCount = 0 < strlen($sSearch) || 0 < count($aFilters)
+					? count($aIndexOrUids) : $iMessageCount;
 
-				$iOffset = (0 > $iOffset) ? 0 : $iOffset;
-				$aRequestIndexOrUids = array_slice($aIndexOrUids, $iOffset, $iLimit);
-
-				if ($bIndexAsUid)
+				if (0 < count($aIndexOrUids))
 				{
-					$oMessageCollection->Uids = $aRequestIndexOrUids;
+					$iOffset = (0 > $iOffset) ? 0 : $iOffset;
+					$aRequestIndexOrUids = array_slice($aIndexOrUids, $iOffset, $iLimit);
 
-					if (0 < count($aExistenUids))
+					if ($bIndexAsUid)
 					{
-						$aNew = array();
-						foreach ($aRequestIndexOrUids as $mItemUid)
+						$oMessageCollection->Uids = $aRequestIndexOrUids;
+					}
+
+					if (is_array($aRequestIndexOrUids) && 0 < count($aRequestIndexOrUids))
+					{
+						$aFetchResponse = $oImapClient->Fetch(array(
+							\MailSo\Imap\Enumerations\FetchType::INDEX,
+							\MailSo\Imap\Enumerations\FetchType::UID,
+							\MailSo\Imap\Enumerations\FetchType::RFC822_SIZE,
+							\MailSo\Imap\Enumerations\FetchType::INTERNALDATE,
+							\MailSo\Imap\Enumerations\FetchType::FLAGS,
+							\MailSo\Imap\Enumerations\FetchType::BODYSTRUCTURE,
+							\MailSo\Imap\Enumerations\FetchType::BODY_HEADER_PEEK
+						), implode(',', $aRequestIndexOrUids), $bIndexAsUid);
+
+						if (is_array($aFetchResponse) && 0 < count($aFetchResponse))
 						{
-							if (!in_array($mItemUid, $aExistenUids))
+							$aFetchIndexArray = array();
+							$oFetchResponseItem = null;
+							foreach ($aFetchResponse as /* @var $oFetchResponseItem \MailSo\Imap\FetchResponse */ &$oFetchResponseItem)
 							{
-								$aNew[] = $mItemUid;
+								$aFetchIndexArray[($bIndexAsUid)
+									? $oFetchResponseItem->GetFetchValue(\MailSo\Imap\Enumerations\FetchType::UID)
+									: $oFetchResponseItem->GetFetchValue(\MailSo\Imap\Enumerations\FetchType::INDEX)] =& $oFetchResponseItem;
+
+								unset($oFetchResponseItem);
+							}
+
+							foreach ($aRequestIndexOrUids as $iFUid)
+							{
+								if (isset($aFetchIndexArray[$iFUid]))
+								{
+									$oMailMessage = CApiMailMessage::NewFetchResponseInstance(
+										$oMessageCollection->FolderName, $aFetchIndexArray[$iFUid]);
+
+									if (!$bIndexAsUid)
+									{
+										$oMessageCollection->Uids[] = $oMailMessage->Uid();
+									}
+
+									$oMessageCollection->Add($oMailMessage);
+									unset($oMailMessage);
+								}
 							}
 						}
-
-						$aRequestIndexOrUids = $aNew;
 					}
 				}
+			}
+		}
 
-				if (is_array($aRequestIndexOrUids) && 0 < count($aRequestIndexOrUids))
+		if (!$bSearch && $bUseThreadsIfSupported && 0 < count($aThreads))
+		{
+			$oMessageCollection->ForeachList(function (/* @var $oMessage CApiMailMessage */ $oMessage) use ($aThreads) {
+				$iUid = $oMessage->Uid();
+				if (isset($aThreads[$iUid]) && is_array($aThreads[$iUid]))
 				{
-					$aFetchResponse = $oImapClient->Fetch(array(
-						\MailSo\Imap\Enumerations\FetchType::INDEX,
-						\MailSo\Imap\Enumerations\FetchType::UID,
-						\MailSo\Imap\Enumerations\FetchType::RFC822_SIZE,
-						\MailSo\Imap\Enumerations\FetchType::INTERNALDATE,
-						\MailSo\Imap\Enumerations\FetchType::FLAGS,
-						\MailSo\Imap\Enumerations\FetchType::BODYSTRUCTURE,
-						\MailSo\Imap\Enumerations\FetchType::BODY_HEADER_PEEK
-					), implode(',', $aRequestIndexOrUids), $bIndexAsUid);
+					$oMessage->SetThreads($aThreads[$iUid]);
+				}
+			});
+		}
 
-					if (is_array($aFetchResponse) && 0 < count($aFetchResponse))
+		return $oMessageCollection;
+	}
+
+	/**
+	 * @param CAccount $oAccount
+	 * @param string $sFolderFullNameRaw
+	 * @param array $aUids
+	 *
+	 * @return CApiMailMessageCollection
+	 *
+	 * @throws CApiInvalidArgumentException
+	 */
+	public function MessageListByUids($oAccount, $sFolderFullNameRaw, $aUids)
+	{
+		if (0 === strlen($sFolderFullNameRaw) || !is_array($aUids) || 0 === count($aUids))
+		{
+			throw new CApiInvalidArgumentException();
+		}
+
+		$oMessageCollection = false;
+
+		$oImapClient =& $this->getImapClient($oAccount);
+
+		$oImapClient->FolderExamine($sFolderFullNameRaw);
+
+		$aList = $this->folderInformation($oImapClient, $sFolderFullNameRaw);
+
+		$iMessageRealCount = $aList[0];
+		$iMessageUnseenCount = $aList[1];
+		$sUidNext = $aList[2];
+
+		$oMessageCollection = CApiMailMessageCollection::NewInstance();
+
+		$oMessageCollection->FolderName = $sFolderFullNameRaw;
+		$oMessageCollection->Offset = 0;
+		$oMessageCollection->Limit = 0;
+		$oMessageCollection->Search = '';
+		$oMessageCollection->UidNext = $sUidNext;
+
+		if (0 < $iMessageRealCount)
+		{
+			$bIndexAsUid = true;
+			$aIndexOrUids = $aUids;
+			
+			if (is_array($aIndexOrUids))
+			{
+				$oMessageCollection->MessageCount = $iMessageRealCount;
+				$oMessageCollection->MessageUnseenCount = $iMessageUnseenCount;
+				$oMessageCollection->MessageSearchCount = $oMessageCollection->MessageCount;
+				$oMessageCollection->MessageResultCount = $oMessageCollection->MessageCount;
+
+				if (0 < count($aIndexOrUids))
+				{
+					$aRequestIndexOrUids = $aIndexOrUids;
+
+					if ($bIndexAsUid)
 					{
-						$aFetchIndexArray = array();
-						$oFetchResponseItem = null;
-						foreach ($aFetchResponse as /* @var $oFetchResponseItem \MailSo\Imap\FetchResponse */ &$oFetchResponseItem)
-						{
-							$aFetchIndexArray[($bIndexAsUid)
-								? $oFetchResponseItem->GetFetchValue(\MailSo\Imap\Enumerations\FetchType::UID)
-								: $oFetchResponseItem->GetFetchValue(\MailSo\Imap\Enumerations\FetchType::INDEX)] =& $oFetchResponseItem;
+						$oMessageCollection->Uids = $aRequestIndexOrUids;
+					}
 
-							unset($oFetchResponseItem);
-						}
+					if (is_array($aRequestIndexOrUids) && 0 < count($aRequestIndexOrUids))
+					{
+						$aFetchResponse = $oImapClient->Fetch(array(
+							\MailSo\Imap\Enumerations\FetchType::INDEX,
+							\MailSo\Imap\Enumerations\FetchType::UID,
+							\MailSo\Imap\Enumerations\FetchType::RFC822_SIZE,
+							\MailSo\Imap\Enumerations\FetchType::INTERNALDATE,
+							\MailSo\Imap\Enumerations\FetchType::FLAGS,
+							\MailSo\Imap\Enumerations\FetchType::BODYSTRUCTURE,
+							\MailSo\Imap\Enumerations\FetchType::BODY_HEADER_PEEK
+						), implode(',', $aRequestIndexOrUids), $bIndexAsUid);
 
-						foreach ($aRequestIndexOrUids as $iFUid)
+						if (is_array($aFetchResponse) && 0 < count($aFetchResponse))
 						{
-							if (isset($aFetchIndexArray[$iFUid]))
+							$aFetchIndexArray = array();
+							$oFetchResponseItem = null;
+							foreach ($aFetchResponse as /* @var $oFetchResponseItem \MailSo\Imap\FetchResponse */ &$oFetchResponseItem)
 							{
-								$oMailMessage = CApiMailMessage::NewFetchResponseInstance(
-									$oMessageCollection->FolderName, $aFetchIndexArray[$iFUid]);
+								$aFetchIndexArray[($bIndexAsUid)
+									? $oFetchResponseItem->GetFetchValue(\MailSo\Imap\Enumerations\FetchType::UID)
+									: $oFetchResponseItem->GetFetchValue(\MailSo\Imap\Enumerations\FetchType::INDEX)] =& $oFetchResponseItem;
 
-								if (!$bIndexAsUid)
-								{
-									$oMessageCollection->Uids[] = $oMailMessage->Uid();
-								}
+								unset($oFetchResponseItem);
+							}
 
-								if (!in_array($oMailMessage->Uid(), $aExistenUids))
+							foreach ($aRequestIndexOrUids as $iFUid)
+							{
+								if (isset($aFetchIndexArray[$iFUid]))
 								{
+									$oMailMessage = CApiMailMessage::NewFetchResponseInstance(
+										$oMessageCollection->FolderName, $aFetchIndexArray[$iFUid]);
+
+									if (!$bIndexAsUid)
+									{
+										$oMessageCollection->Uids[] = $oMailMessage->Uid();
+									}
+
 									$oMessageCollection->Add($oMailMessage);
+									unset($oMailMessage);
 								}
-
-								unset($oMailMessage);
 							}
 						}
 					}

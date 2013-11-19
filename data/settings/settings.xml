@@ -41,28 +41,22 @@
 		<OutgoingMailUseSSL>Off</OutgoingMailUseSSL>
 		<OutgoingSendingMethod>Specified</OutgoingSendingMethod>
 		<UserQuota>0</UserQuota>
+		<ShowQuotaBar>On</ShowQuotaBar>
 		<AutoCheckMailInterval>0</AutoCheckMailInterval>
 		<DefaultSkin>AfterLogic</DefaultSkin>
 		<MailsPerPage>20</MailsPerPage>
-		<EnableMailboxSizeLimit>Off</EnableMailboxSizeLimit>
-		<MailboxSizeLimit>0</MailboxSizeLimit>
 		<AllowUsersChangeInterfaceSettings>On</AllowUsersChangeInterfaceSettings>
 		<AllowUsersChangeEmailSettings>On</AllowUsersChangeEmailSettings>
 		<EnableAttachmentSizeLimit>Off</EnableAttachmentSizeLimit>
-		<AttachmentSizeLimit>10240000</AttachmentSizeLimit>
+		<AttachmentSizeLimit>102400000</AttachmentSizeLimit>
+		<ImageUploadSizeLimit>10240000</ImageUploadSizeLimit>
 		<AllowLanguageOnLogin>On</AllowLanguageOnLogin>
 		<FlagsLangSelect>Off</FlagsLangSelect>
 		<LoginFormType>Email</LoginFormType>
-		<UseLoginAsEmailAddress>On</UseLoginAsEmailAddress>
-		<LoginAtDomainValue />
-		<DefaultDomainValue />
-		<UseAdvancedLogin>Off</UseAdvancedLogin>
-		<UseCaptcha>Off</UseCaptcha>
 		<UseReCaptcha>Off</UseReCaptcha>
 		<AllowNewUsersRegister>On</AllowNewUsersRegister>
 		<AllowUsersAddNewAccounts>Off</AllowUsersAddNewAccounts>
 		<AllowIdentities>Off</AllowIdentities>
-		<StoreMailsInDb>Off</StoreMailsInDb>
 		<AllowInsertImage>On</AllowInsertImage>
 		<AllowBodySize>Off</AllowBodySize>
 		<MaxBodySize>600</MaxBodySize>
@@ -76,8 +70,7 @@
 		<EnableLastLoginNotification>Off</EnableLastLoginNotification>
 		<ExternalHostNameOfLocalImap />
 		<ExternalHostNameOfLocalSmtp />
-		<ActiveSync>Off</ActiveSync>
-		<ExternalHostNameOfActiveSyncServer />
+		<ExternalHostNameOfDAVServer />
 	</WebMail>
 	<Calendar>
 		<AllowCalendar>Off</AllowCalendar>
@@ -93,15 +86,7 @@
 	<Contacts>
 		<AllowContacts>On</AllowContacts>
 		<ContactsPerPage>20</ContactsPerPage>
-		<PersonalAddressBook>
-			<Mode>Sql</Mode>
-		</PersonalAddressBook>
 		<ShowGlobalContactsInAddressBook>Off</ShowGlobalContactsInAddressBook>
-		<GlobalAddressBook>
-			<Mode>Off</Mode>
-			<Sql>
-				<Visibility>Off</Visibility>
-			</Sql>
-		</GlobalAddressBook>
+		<GlobalAddressBookVisibility>Off</GlobalAddressBookVisibility>
 	</Contacts>
 </Settings>
