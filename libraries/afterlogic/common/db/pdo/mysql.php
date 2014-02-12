@@ -100,9 +100,14 @@ class CDbPdoMySql extends CDbSql
 		}
 
 		$aPDOAttr = array(PDO::ATTR_TIMEOUT => 5, PDO::ATTR_EMULATE_PREPARES => false, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION);
-		if (defined('PDO::MYSQL_ATTR_MAX_BUFFER_SIZE' ))
+		if (defined('PDO::MYSQL_ATTR_MAX_BUFFER_SIZE'))
 		{
 			$aPDOAttr[PDO::MYSQL_ATTR_MAX_BUFFER_SIZE] = 1024*1024*50;
+		}
+		
+		if (defined('PDO::MYSQL_ATTR_USE_BUFFERED_QUERY'))
+		{
+			$aPDOAttr[PDO::MYSQL_ATTR_USE_BUFFERED_QUERY] = true;
 		}
 
 		$sDbPort = '';
@@ -275,6 +280,7 @@ class CDbPdoMySql extends CDbSql
 				{
 					$sExplainLog .= API_CRLF.print_r($mResult, true);
 				}
+				
 				$rExplainResult->closeCursor();
 			}
 
@@ -287,6 +293,7 @@ class CDbPdoMySql extends CDbSql
 					{
 						$sExplainLog .= API_CRLF.print_r($mResult, true);
 					}
+					
 					$rExplainResult->closeCursor();
 				}
 			}
@@ -321,6 +328,7 @@ class CDbPdoMySql extends CDbSql
 			{
 				$this->FreeResult();
 			}
+			
 			return $mResult;
 		}
 		else

@@ -5,9 +5,11 @@
 				<span class="icon" data-bind="i18n: 'title'" data-i18n="HELPDESK/ACTION_NEW_REQUEST"></span>
 				<span class="text" data-bind="i18n: 'text'" data-i18n="HELPDESK/ACTION_NEW_REQUEST"></span>
 			</span>
-			<span class="search_block custom_select">
-				<span class="button" data-i18n="HEPLDESK/BUTTON_SEARCH" data-bind="i18n: 'text'"></span>
-				<input type="text" data-bind="value: search, onEnter: searchSubmitCommand, hasfocus: isSearchFocused" />
+			<span class="search_block">
+				<span class="input" data-bind="css: {'focus': isSearchFocused}">
+					<span class="button" data-i18n="HEPLDESK/BUTTON_SEARCH" data-bind="i18n: 'text'"></span>
+					<input class="field" type="text" data-bind="value: search, onEnter: searchSubmitCommand, hasfocus: isSearchFocused" />
+				</span>
 			</span>
 			<span class="item checkmail" data-bind="command: checkCommand, checkmail: {'activeClass': 'process', 'state': checkStarted(), 'duration': 800}">
 				<span class="icon" data-bind="i18n: 'title'" data-i18n="HELPDESK/TOOL_CHECK"></span>

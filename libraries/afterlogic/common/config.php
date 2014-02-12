@@ -26,17 +26,6 @@ return array(
 	'log.max-view-size' => 100,
 
 	/**
-	 * Number of subsequent login errors which invokes CAPTCHA
-	 */
-	'captcha.limit-count' => 3,
-
-	/**
-	 * Keys for configuring reCaptcha
-	 */
-	'captcha.recaptcha-private-key' => '6LefZb0SAAAAAK5E2Bh8Cg7XOTf9UkBXgStn8ZXF',
-	'captcha.recaptcha-public-key' => '6LefZb0SAAAAADpYFCCIQakNCvNJTJVdBLp3gFAW',
-
-	/**
 	 * Socket connection timeout limit (in seconds)
 	 */
 	'socket.connect-timeout' => 20,
@@ -137,13 +126,13 @@ return array(
 
 	'mailsuite' => false,
 
-	'files' => true,
+	'files' => false,
 
-	'helpdesk' => true,
+	'helpdesk' => false,
 
 	'capa' => false,
 
-	'themes' => array('Default'),
+	'themes' => array('Default', 'White'),
 
 	/**
 	 * Which email should be treated as primary one in contact object
@@ -218,25 +207,28 @@ return array(
 	'labs.db.use-explain-extended' => false,
 	'labs.db.log-query-params' => false,
 	'labs.log.post-view' => false,
+	'labs.allow-social-integration' => false,
+	'labs.use-app-min-js' => true,
 	'labs.webmail.gmail-fix-folders' => true,
 	'labs.webmail.custom-login-url' => '',
 	'labs.webmail.custom-logout-url' => '',
 	'labs.webmail.disable-folders-manual-sort' => false,
 	'labs.webmail.ios-detect-on-login' => true,
+	'labs.allow-thumbnail' => true,
+	'labs.allow-post-login' => false,
 	'labs.dav.use-browser-plugin' => false,
 	'labs.dav.use-export-plugin' => true,
 	'labs.dav.use-files' => false,
 	'labs.dav.admin-principal' => 'principals/admin',
 	'labs.cache.i18n' => true,
 	'labs.cache.templates' => true,
-	'labs.twillio' => false,
+	'labs.cache.static' => true,
+	'labs.twilio' => false,
 	'labs.voice' => false,
-	'labs.voice.realm' => '',
-	'labs.voice.websocket-proxy-url' => '',
-	'labs.voice.outbound-proxy-url' => '',
-	'labs.voice.main-impi' => '',
-	'labs.voice.main-password' => '',
 	'labs.webmail.csrftoken-protection' => true,
+	'labs.webmail-client-debug' => false,
+	'labs.fetchers' => true,
+	'labs.simple-saas-api-key' => '',
 	'labs.unlim-quota-limit-size-in-kb' => 104857600,
 	'labs.use-date-from-headers' => false,
 	'labs.google-analytic.account' => '',

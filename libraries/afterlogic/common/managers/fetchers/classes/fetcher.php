@@ -19,6 +19,7 @@
  * @property string $Name
  * @property string $Email
  * @property string $Signature
+ * @property int $SignatureOptions
  * @property bool $LeaveMessagesOnServer
  * @property string $IncomingMailServer
  * @property int $IncomingMailPort
@@ -62,6 +63,7 @@ class CFetcher extends api_AContainer
 			'Name'			=> '',
 			'Email'			=> '',
 			'Signature'		=> '',
+			'SignatureOptions'		=> EAccountSignatureOptions::DontAdd,
 			'LeaveMessagesOnServer'	=> true,
 			'IncomingMailServer'	=> '',
 			'IncomingMailPort'		=> 110,
@@ -107,6 +109,7 @@ class CFetcher extends api_AContainer
 			'Name'			=> array('string', 'frienly_name'),
 			'Email'			=> array('string', 'email'),
 			'Signature'		=> array('string', 'signature'),
+			'SignatureOptions'		=> array('int', 'signature_opt'),
 
 			'IncomingMailServer'	=> array('string', 'inc_host'),
 			'IncomingMailPort'		=> array('int', 'inc_port'),

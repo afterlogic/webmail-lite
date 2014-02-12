@@ -522,11 +522,25 @@ class ECapa extends AEnumeration
 	const GAB = 'GAB';
 	const FILES = 'FILES';
 	const VOICE = 'VOICE';
+	const SIP = 'SIP';
+	const TWILIO = 'TWILIO';
 	const HELPDESK = 'HELPDESK';
 	const MOBILE_SYNC = 'MOBILE_SYNC';
 	const OUTLOOK_SYNC = 'OUTLOOK_SYNC';
 	
 	const NO = 'NO';
+}
+
+/**
+ * @package Api
+ * @subpackage Enum
+ */
+class ETenantCapa extends AEnumeration
+{
+	const SIP = 'SIP';
+	const TWILIO = 'TWILIO';
+	const FILES = 'FILES';
+	const HELPDESK = 'HELPDESK';
 }
 
 /**

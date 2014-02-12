@@ -42,10 +42,11 @@ class Directory extends \Sabre\DAV\FSExt\Directory {
 	
 	public function getTenantsMan()
 	{
-		if ($this->oApiTenants == null)
+		if ($this->oApiTenants === null)
 		{
 			$this->oApiTenants = \CApi::Manager('tenants');
 		}
+		
 		return $this->oApiTenants;
 	}
 

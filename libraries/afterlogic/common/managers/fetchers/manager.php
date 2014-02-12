@@ -84,7 +84,7 @@ class CApiFetchersManager extends AApiManagerWithStorage
 		{
 			$this->setLastException(new CApiBaseException(CApiErrorCodes::Fetcher_AuthError, $oException));
 		}
-		catch (Exceptions $oException)
+		catch (Exception $oException)
 		{
 			$this->setLastException(new CApiBaseException(CApiErrorCodes::Fetcher_AuthError, $oException));
 		}
@@ -156,7 +156,7 @@ class CApiFetchersManager extends AApiManagerWithStorage
 		{
 			$this->setLastException(new CApiBaseException(CApiErrorCodes::Fetcher_AuthError, $oException));
 		}
-		catch (Exceptions $oException)
+		catch (Exception $oException)
 		{
 			$this->setLastException(new CApiBaseException(CApiErrorCodes::Fetcher_AuthError, $oException));
 		}

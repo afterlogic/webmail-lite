@@ -803,9 +803,10 @@ class CApiMaincontactsLdapStorage extends CApiMaincontactsStorage
 	 * @param int $iUserId
 	 * @param string $sSearch
 	 * @param int $iRequestLimit
+	 * @param bool $bPhoneOnly = false
 	 * @return bool | array
 	 */
-	public function GetSuggestContactItems($iUserId, $sSearch, $iRequestLimit)
+	public function GetSuggestContactItems($iUserId, $sSearch, $iRequestLimit, $bPhoneOnly = false)
 	{
 		return $this->GetContactItems($iUserId, EContactSortField::EMail, ESortOrder::ASC, 0, $iRequestLimit, $sSearch, '', '');
 	}

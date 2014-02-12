@@ -57,7 +57,7 @@ class CApiMailManager extends AApiManagerWithStorage
 							CApi::Log($sDesc);
 						})->DisableTimePrefix()
 					)
-					->AddForbiddenType(\MailSo\Log\Enumerations\Type::TIME);
+					->AddForbiddenType(\MailSo\Log\Enumerations\Type::TIME)
 				;
 
 				$iConnectTimeOut = CApi::GetConf('socket.connect-timeout', 10);
@@ -409,7 +409,7 @@ class CApiMailManager extends AApiManagerWithStorage
 
 			return strnatcmp($oFolderA->FullName(), $oFolderB->FullName());
 		});
-		
+
 		if (null === $aFoldersOrderList &&
 			!$oAccount->IsEnabledExtension(CAccount::DisableFoldersManualSort))
 		{
@@ -442,6 +442,102 @@ class CApiMailManager extends AApiManagerWithStorage
 
 	/**
 	 * @param CAccount $oAccount
+	 * @param bool $bCreateUnExistenSystemFilders = true
+	 *
+	 * @return CApiMailFolderCollection
+	 */
+	public function FoldersNew($oAccount, $bCreateUnExistenSystemFilders = true)
+	{
+		$oFolderCollection = false;
+
+		$sParent = '';
+		$sListPattern = '*';
+
+		$oImapClient =& $this->getImapClient($oAccount);
+
+		$oNamespace = $oImapClient->GetNamespace();
+
+		$aFolders = $oImapClient->FolderList($sParent, $sListPattern);
+		$aSubscribedFolders = $oImapClient->FolderSubscribeList($sParent, $sListPattern);
+
+		$aImapSubscribedFoldersHelper = array();
+		if (is_array($aSubscribedFolders))
+		{
+			foreach ($aSubscribedFolders as /* @var $oImapFolder \MailSo\Imap\Folder */ $oImapFolder)
+			{
+				$aImapSubscribedFoldersHelper[] = $oImapFolder->FullNameRaw();
+			}
+		}
+
+		$aOrderList = null;
+		if (!$oAccount->IsEnabledExtension(CAccount::DisableFoldersManualSort))
+		{
+			$aOrderList = $this->FoldersOrderNames($oAccount);
+		}
+
+		$aMailFoldersHelper = null;
+		if (is_array($aFolders))
+		{
+			$aMailFoldersHelper = array();
+
+			foreach ($aFolders as /* @var $oImapFolder \MailSo\Imap\Folder */ $oImapFolder)
+			{
+				$oFolder = CApiMailFolder::NewInstance($oImapFolder,
+					in_array($oImapFolder->FullNameRaw(), $aImapSubscribedFoldersHelper) || $oImapFolder->IsInbox()
+				);
+
+				$sFullName = $oFolder->FullNameRaw();
+				if ($aOrderList && isset($aOrderList[$sFullName]))
+				{
+					$oFolder->SetFullNameSorted($aOrderList[$sFullName]);
+				}
+
+				$aMailFoldersHelper[] = $oFolder;
+			}
+		}
+
+		if (is_array($aMailFoldersHelper))
+		{
+			$oFolderCollection = CApiMailFolderCollection::NewInstance();
+
+			if ($oNamespace)
+			{
+				$oFolderCollection->SetNamespace($oNamespace->GetPersonalNamespace());
+			}
+
+			$oFolderCollection->InitByUnsortedMailFolderArray($aMailFoldersHelper);
+
+			if ($this->initSystemFolders($oAccount, $oFolderCollection, $bCreateUnExistenSystemFilders) && $bCreateUnExistenSystemFilders)
+			{
+				$oFolderCollection = $this->Folders($oAccount, false);
+			}
+			else
+			{
+				$oFolderCollection->ForeachListWithSubFolders(function (/* @var $oFolder CApiMailFolder */ $oFolder) {
+					/* @var $oFolder CApiMailFolder */
+					if ($oFolder && EFolderType::Custom !== $oFolder->Type() && !$oFolder->HasSortedName())
+					{
+						$sP = $oFolder->ParentFullName();
+						$oFolder->SetFullNameSorted((0 < \strlen($sP) ? $sP.$oFolder->Delimiter() : '').'00000000'.$oFolder->Type());
+					}
+				});
+
+				$oFolderCollection->SortByCallback(function ($oFolderA, $oFolderB) {
+					return strnatcmp($oFolderA->FullNameSorted(), $oFolderB->FullNameSorted());
+				});
+			}
+		}
+
+		if ($oFolderCollection && $oNamespace)
+		{
+			$oFolderCollection->SetNamespace($oNamespace->GetPersonalNamespace());
+		}
+
+		return $oFolderCollection;
+	}
+
+	/**
+	 * @param CAccount $oAccount
 	 *
 	 * @return array
 	 */
@@ -459,6 +555,80 @@ class CApiMailManager extends AApiManagerWithStorage
 	public function FoldersOrderUpdate($oAccount, $aOrder)
 	{
 		return $this->oStorage->FoldersOrderUpdate($oAccount, $aOrder);
+	}
+
+	/**
+	 * @param CAccount $oAccount
+	 * 
+	 * @return array
+	 */
+	public function FoldersOrderNames($oAccount)
+	{
+		return $this->oStorage->FoldersOrderNames($oAccount);
+	}
+
+	/**
+	 * @param CAccount $oAccount
+	 * @param string $sFolderName
+	 * @param string $sAboveName = ''
+	 * @param string $sBelowName = ''
+	 *
+	 * @return array
+	 */
+	public function FoldersOrderNamesUpdate($oAccount, $sFolderName, $sAboveName = '', $sBelowName = '',
+		$sParentName = '', $sParentDelimiter = '/')
+	{
+		$aList = $this->FoldersOrderNames($oAccount);
+		$sAboveSaveFolder = '';
+		$sBelowSaveFolder = '';
+		$iAboveIndex = 100;
+		$iBelowIndex = 999;
+
+		$aMatch = array();
+		if (0 < strlen($sAboveName))
+		{
+			if (isset($aList[$sAboveName]) && preg_match('/^(.+) __([\d]+)__$/', $aList[$sAboveName], $aMatch))
+			{
+				$sAboveSaveFolder = $aMatch[1];
+				$iAboveIndex = (int) $aMatch[2];
+			}
+			else
+			{
+				$sAboveSaveFolder = $sAboveName;
+			}
+		}
+
+		$aMatch = array();
+		if (0 < strlen($sBelowName))
+		{
+			if (isset($aList[$sBelowName]) && preg_match('/^(.+) __([\d]+)__$/', $aList[$sBelowName], $aMatch))
+			{
+				$sBelowSaveFolder = $aMatch[1];
+				$iBelowIndex = (int) $aMatch[2];
+			}
+			else
+			{
+				$sBelowSaveFolder = $sBelowName;
+			}
+		}
+
+		$iAboveIndex = 100 > $iAboveIndex ? 100 : $iAboveIndex;
+		$iBelowIndex = 999 < $iBelowIndex ? 999 : $iBelowIndex;
+		$iBelowIndex = 102 > $iBelowIndex ? 101 : $iBelowIndex;
+
+		if ($iAboveIndex > $iBelowIndex)
+		{
+			$iAboveIndex = $iBelowIndex - 1;
+		}
+
+		if (0 === strlen($sAboveSaveFolder))
+		{
+			$sAboveSaveFolder = (0 < strlen($sParentName) ? $sParentName.$sParentDelimiter : '').'0000000000';
+		}
+
+		$sOrderName = $sAboveSaveFolder.' __'.round(($iBelowIndex + $iAboveIndex) / 2).'__';
+
+		return $this->oStorage->FoldersOrderNamesUpdate($oAccount, $sFolderName, $sOrderName);
 	}
 
 	/**
@@ -973,15 +1143,16 @@ class CApiMailManager extends AApiManagerWithStorage
 						$sOutgoingMailPassword = 0 < strlen($sOutgoingMailPassword) ? $sOutgoingMailPassword : $oAccount->IncomingMailPassword;
 					}
 
-					$sHostName = function_exists('gethostname') ? gethostname() : 'localhost';
+					$sEhlo = \MailSo\Smtp\SmtpClient::EhloHelper();
+					CApi::Plugin()->RunHook('api-smtp-send-ehlo', array($oAccount, &$sEhlo));
 
 					if ($oFetcher)
 					{
-						$oSmtpClient->Connect($oFetcher->OutgoingMailServer, $oAccount->OutgoingMailPort, $sHostName, $iSecure);
+						$oSmtpClient->Connect($oFetcher->OutgoingMailServer, $oFetcher->OutgoingMailPort, $sEhlo, $iSecure);
 					}
 					else
 					{
-						$oSmtpClient->Connect($oAccount->OutgoingMailServer, $oAccount->OutgoingMailPort, $sHostName, $iSecure);
+						$oSmtpClient->Connect($oAccount->OutgoingMailServer, $oAccount->OutgoingMailPort, $sEhlo, $iSecure);
 					}
 					
 					if (($oFetcher && $oFetcher->OutgoingMailAuth) || (!$oFetcher && $oAccount->OutgoingMailAuth))
@@ -992,6 +1163,8 @@ class CApiMailManager extends AApiManagerWithStorage
 					$oSmtpClient->MailFrom($oFetcher ? $oFetcher->Email : $oAccount->Email, (string) $iMessageStreamSize);
 
 					$aRcpt =& $oRcpt->GetAsArray();
+					CApi::Plugin()->RunHook('api-smtp-send-rcpt', array($oAccount, &$aRcpt));
+
 					foreach ($aRcpt as /* @var $oEmail \MailSo\Mime\Email */ $oEmail)
 					{
 						$oSmtpClient->Rcpt($oEmail->GetEmail());
@@ -1014,36 +1187,39 @@ class CApiMailManager extends AApiManagerWithStorage
 					throw new \CApiManagerException(Errs::Mail_CannotSendMessage, $oException);
 				}
 
-				if (is_resource($rMessageStream))
-				{
-					rewind($rMessageStream);
-//					@fclose($rMessageStream);
-				}
-
 				if (0 < strlen($sSentFolder))
 				{
 					try
 					{
-						$oImapClient->MessageAppendStream(
-							$sSentFolder, $rMessageStream, $iMessageStreamSize, array(
-								\MailSo\Imap\Enumerations\MessageFlag::SEEN
-							));
+						if (!$oMessage->GetBcc())
+						{
+							if (is_resource($rMessageStream))
+							{
+								rewind($rMessageStream);
+							}
 
-// TODO
-//						$rAppendMessageStream = \MailSo\Base\ResourceRegistry::CreateMemoryResource();
-//
-//						$iAppendMessageStreamSize = \MailSo\Base\Utils::MultipleStreamWriter(
-//							$oMessage->ToStream(false), array($rAppendMessageStream), 8192, true, true, true);
-//
-//						$oImapClient->MessageAppendStream(
-//							$sSentFolder, $rAppendMessageStream, $iAppendMessageStreamSize, array(
-//								\MailSo\Imap\Enumerations\MessageFlag::SEEN
-//							));
-//
-//						if (is_resource($rAppendMessageStream))
-//						{
-//							@fclose($rAppendMessageStream);
-//						}
+							$oImapClient->MessageAppendStream(
+								$sSentFolder, $rMessageStream, $iMessageStreamSize, array(
+									\MailSo\Imap\Enumerations\MessageFlag::SEEN
+								));
+						}
+						else
+						{
+							$rAppendMessageStream = \MailSo\Base\ResourceRegistry::CreateMemoryResource();
+
+							$iAppendMessageStreamSize = \MailSo\Base\Utils::MultipleStreamWriter(
+								$oMessage->ToStream(false), array($rAppendMessageStream), 8192, true, true, true);
+
+							$oImapClient->MessageAppendStream(
+								$sSentFolder, $rAppendMessageStream, $iAppendMessageStreamSize, array(
+									\MailSo\Imap\Enumerations\MessageFlag::SEEN
+								));
+
+							if (is_resource($rAppendMessageStream))
+							{
+								@fclose($rAppendMessageStream);
+							}
+						}
 					}
 					catch (\Exception $oException)
 					{
@@ -1147,12 +1323,14 @@ class CApiMailManager extends AApiManagerWithStorage
 	 * @param string $sFlagString
 	 * @param int $iAction = EMailMessageStoreAction::Add
 	 * @param bool $bSetToAll = false
+	 * @param bool $bSkipNonPermanentsFlags = false
 	 *
 	 * @return true
 	 *
 	 * @throws CApiInvalidArgumentException
 	 */
-	public function MessageFlag($oAccount, $sFolderFullNameRaw, $aUids, $sFlagString, $iAction = EMailMessageStoreAction::Add, $bSetToAll = false)
+	public function MessageFlag($oAccount, $sFolderFullNameRaw, $aUids, $sFlagString,
+		$iAction = EMailMessageStoreAction::Add, $bSetToAll = false, $bSkipNonPermanentsFlags = false)
 	{
 		if (0 === strlen($sFolderFullNameRaw) || (!$bSetToAll && (!is_array($aUids) || 0 === count($aUids))))
 		{
@@ -1166,14 +1344,44 @@ class CApiMailManager extends AApiManagerWithStorage
 		$aUids = is_array($aUids) ? $aUids : array();
 		$sUids = implode(',', $aUids);
 
+		$oInfo = $oImapClient->FolderCurrentInformation();
 		if ($bSetToAll)
 		{
 			$sUids = '1:*';
-			$oInfo = $oImapClient->FolderCurrentInformation();
 			if ($oInfo && 0 === $oInfo->Exists)
 			{
 				return true;
 			}
+		}
+
+		$aFlagsOut = array();
+		$aFlags = explode(' ', $sFlagString);
+		if ($bSkipNonPermanentsFlags && $oInfo)
+		{
+			if (!\in_array('\\*', $oInfo->PermanentFlags))
+			{
+				foreach ($aFlags as $sFlag)
+				{
+					$sFlag = \trim($sFlag);
+					if (\in_array($sFlag, $oInfo->PermanentFlags))
+					{
+						$aFlagsOut[] = $sFlag;
+					}
+				}
+			}
+			else
+			{
+				$aFlagsOut = $aFlags;
+			}
+
+			if (0 === \count($aFlagsOut))
+			{
+				return true;
+			}
+		}
+		else
+		{
+			$aFlagsOut = $aFlags;
 		}
 
 		$sResultAction = \MailSo\Imap\Enumerations\StoreAction::ADD_FLAGS_SILENT;
@@ -1190,7 +1398,7 @@ class CApiMailManager extends AApiManagerWithStorage
 				break;
 		}
 
-		$oImapClient->MessageStoreFlag($sUids, $bSetToAll ? false : true, explode(' ', $sFlagString), $sResultAction);
+		$oImapClient->MessageStoreFlag($sUids, $bSetToAll ? false : true, $aFlags, $sResultAction);
 		return true;
 	}
 
@@ -1529,8 +1737,9 @@ class CApiMailManager extends AApiManagerWithStorage
 				}
 				else
 				{
-					$sSubject = $oHeaders->ValueByName(\MailSo\Mime\Enumerations\Header::SUBJECT);
-					$sFileName = (empty($sSubject) ? (string) $iUid : $sSubject).'.eml';
+					$sSubject = trim($oHeaders->ValueByName(\MailSo\Mime\Enumerations\Header::SUBJECT));
+					$sFileName = (empty($sSubject) ? 'message-'.$iUid : trim($sSubject)).'.eml';
+					$sFileName = '.eml' === $sFileName ? 'message.eml' : $sFileName;
 					$sContentType = 'message/rfc822';
 				}
 			}
@@ -1736,10 +1945,21 @@ class CApiMailManager extends AApiManagerWithStorage
 			{
 				if (isset($aLines['EMAIL']))
 				{
-					$sValue = $this->escapeSearchString($oImapClient, $aLines['EMAIL']);
-					$oSearchBuilder->AddOr('FROM', $sValue);
-					$oSearchBuilder->AddOr('TO', $sValue);
-					$oSearchBuilder->AddOr('CC', $sValue);
+					$aEmails = explode(',', $aLines['EMAIL']);
+					foreach ($aEmails as $sEmail)
+					{
+						$sEmail = trim($sEmail);
+						if (0 < strlen($sEmail))
+						{
+							$sValue = $this->escapeSearchString($oImapClient, $sEmail);
+							
+							$oSearchBuilder->AddOr('FROM', $sValue);
+							$oSearchBuilder->AddOr('TO', $sValue);
+							$oSearchBuilder->AddOr('CC', $sValue);
+							$oSearchBuilder->AddOr('BCC', $sValue);
+						}
+					}
+					
 					unset($aLines['EMAIL']);
 				}
 

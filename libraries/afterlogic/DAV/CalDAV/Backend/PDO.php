@@ -31,6 +31,7 @@ class PDO extends \Sabre\CalDAV\Backend\PDO {
      * Creates the backend 
      * 
      * @param \PDO $pdo 
+     * @param string $pdo 
      */
     public function __construct(\PDO $pdo, $dBPrefix) {
 
@@ -51,9 +52,10 @@ class PDO extends \Sabre\CalDAV\Backend\PDO {
     public function deleteCalendar($calendarId) {
 
 		parent::deleteCalendar($calendarId);
-		
+/*		
 		$stmt = $this->pdo->prepare('DELETE FROM '.$this->delegatesTableName.' WHERE calendarid = ?');
 		$stmt->execute(array($calendarId));
+ */
     }
 	
 }

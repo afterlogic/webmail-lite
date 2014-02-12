@@ -211,7 +211,6 @@ class CCommonModule extends ap_Module
 				}
 			}
 		}
-
 	}
 
 	/**
@@ -272,6 +271,7 @@ class CCommonModule extends ap_Module
 						$oScreen->Main->AddTopSwitcher($this->sPath.'/templates/main-top-edit-domain-name.php');
 						$oScreen->Main->AddTopSwitcher($this->sPath.'/templates/main-top-edit-domain.php');
 					}
+					
 					break;
 			}
 		}
@@ -440,7 +440,6 @@ class CCommonModule extends ap_Module
 	{
 		CSession::Set(AP_SESS_AUTH_TENANT_ID, $iTenantId);
 		$this->oAdminPanel->SetAuthTenantId($iTenantId);
-//
 //		if (0 < $iTenantId)
 //		{
 //			$oTenant = $this->oAdminPanel->GetTenantAdminObject();

@@ -12,6 +12,51 @@
 class CApiMailCommandCreator extends api_CommandCreator
 {
 	/**
+	 * @todo
+	 * @param CAccount $oAccount
+	 *
+	 * @return string
+	 */
+	public function FoldersOrderNames($oAccount)
+	{
+		$sSql = 'SELECT real_name, order_name FROM %sawm_folders_order_names WHERE id_acct = %d';
+		return sprintf($sSql, $this->Prefix(), $oAccount->IdAccount);
+	}
+
+	/**
+	 * @todo
+	 * @param CAccount $oAccount
+	 *
+	 * @return string
+	 */
+	public function FoldersOrderNamesClear($oAccount, $sRealName = null)
+	{
+		$sSql = 'DELETE FROM %sawm_folders_order_names WHERE id_acct = %d';
+		if (null !== $sRealName)
+		{
+			$sSql = 'DELETE FROM %sawm_folders_order_names WHERE id_acct = %d AND real_name = %s';
+			return sprintf($sSql, $this->Prefix(), $oAccount->IdAccount, $this->oHelper->EscapeString($sRealName));
+		}
+		
+		return sprintf($sSql, $this->Prefix(), $oAccount->IdAccount);
+	}
+
+	/**
+	 * @todo
+	 * @param CAccount $oAccount
+	 * @param string $sRealName
+	 * @param string $sOrderName
+	 *
+	 * @return string
+	 */
+	public function FoldersOrderNamesUpdate($oAccount, $sRealName, $sOrderName)
+	{
+		$sSql = 'INSERT INTO %sawm_folders_order_names (id_acct, real_name, order_name) VALUES (%d, %s, %s)';
+		return sprintf($sSql, $this->Prefix(), $oAccount->IdAccount,
+			$this->oHelper->EscapeString($sRealName), $this->oHelper->EscapeString($sOrderName));
+	}
+
+	/**
 	 * @param CAccount $oAccount
 	 *
 	 * @return string
@@ -19,7 +64,6 @@ class CApiMailCommandCreator extends api_CommandCreator
 	public function FoldersOrder($oAccount)
 	{
 		$sSql = 'SELECT folders_order FROM %sawm_folders_order WHERE id_acct = %d';
-
 		return sprintf($sSql, $this->Prefix(), $oAccount->IdAccount);
 	}
 
@@ -31,7 +75,6 @@ class CApiMailCommandCreator extends api_CommandCreator
 	public function FoldersOrderClear($oAccount)
 	{
 		$sSql = 'DELETE FROM %sawm_folders_order WHERE id_acct = %d';
-
 		return sprintf($sSql, $this->Prefix(), $oAccount->IdAccount);
 	}
 
@@ -44,7 +87,6 @@ class CApiMailCommandCreator extends api_CommandCreator
 	public function FoldersOrderUpdate($oAccount, $sOrder)
 	{
 		$sSql = 'INSERT INTO %sawm_folders_order (id_acct, folders_order) VALUES (%d, %s)';
-
 		return sprintf($sSql, $this->Prefix(), $oAccount->IdAccount, $this->oHelper->EscapeString($sOrder));
 	}
 	

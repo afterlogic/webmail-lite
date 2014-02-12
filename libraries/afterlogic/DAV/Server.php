@@ -61,11 +61,6 @@ class Server extends \Sabre\DAV\Server
 		return $this->GetBackend('reminders');
 	}
 
-	public function GetDelegatesBackend()
-	{
-		return $this->GetBackend('delegates');
-	}
-
 	public function __construct($baseUri = '/')
 	{
 		$this->debugExceptions = false;
@@ -86,14 +81,11 @@ class Server extends \Sabre\DAV\Server
 			$this->aBackends = array(
 				'auth'      => Auth\Backend\Factory::getBackend($oPdo, $sDbPrefix),
 				'principal' => new Principal\Backend\PDO($oPdo, $sDbPrefix),
-				'caldav'    => new CalDAV\Backend\PDO($oPdo, $sDbPrefix),
+				'caldav'    => CalDAV\Backend\Factory::getBackend($oPdo, $sDbPrefix),
 				'carddav'   => new CardDAV\Backend\PDO($oPdo, $sDbPrefix),
 				'lock'      => new Locks\Backend\PDO($oPdo, $sDbPrefix),
-				'delegates' => new Delegates\Backend\PDO($oPdo, $sDbPrefix),
 				'reminders' => new Reminders\Backend\PDO($oPdo, $sDbPrefix)
 			);
-
-			$this->oApiCapaManager = \CApi::Manager('capability');
 
 			/* Authentication Plugin */
 			$authPlugin = new Auth\Plugin($this->GetAuthBackend(), 'SabreDAV');
@@ -124,24 +116,30 @@ class Server extends \Sabre\DAV\Server
 				new CardDAV\GAddressBooks($authPlugin, 'gab', Constants::GLOBAL_CONTACTS),
 			);
 
-			if ($this->oApiCapaManager->IsCalendarSharingSupported())
-			{
-				array_push($aTree, new Delegates\Root($oPdo, $this->GetPrincipalBackend(), $this->GetCaldavBackend(), true));
-			}
+			$this->oApiCapaManager = \CApi::Manager('capability');
 
 			/* Files folder */
 			if ($this->oApiCapaManager->IsFilesSupported())
 			{
 				/* Public files folder */
 				$publicDir = \CApi::DataPath() . Constants::FILESTORAGE_PATH_ROOT;
-				if (!file_exists($publicDir)) mkdir($publicDir);
+				if (!file_exists($publicDir))
+				{
+					mkdir($publicDir);
+				}
 
 				$publicDir .= Constants::FILESTORAGE_PATH_CORPORATE;
-				if (!file_exists($publicDir))	mkdir($publicDir);
+				if (!file_exists($publicDir))	
+				{
+					mkdir($publicDir);
+				}
 				
 				$privateDir = \CApi::DataPath() . Constants::FILESTORAGE_PATH_ROOT . 
 						Constants::FILESTORAGE_PATH_PRIVATE;
-				if (!file_exists($privateDir)) mkdir($privateDir);
+				if (!file_exists($privateDir))
+				{
+					mkdir($privateDir);
+				}
 
 				array_push($aTree, new \Sabre\DAV\SimpleCollection('files', array(
 							new FS\RootPrivate($authPlugin, $privateDir),
@@ -181,8 +179,8 @@ class Server extends \Sabre\DAV\Server
 				$this->addPlugin(new \Sabre\CardDAV\VCFExportPlugin());
 			}
 
-			/* Calendar Delegation Plugin */
-			$this->addPlugin(new Delegates\Plugin($this->GetDelegatesBackend()));
+			/* Calendar Sharing Plugin */
+			$this->addPlugin(new \Sabre\CalDAV\SharingPlugin());
 
 			/* HTML Frontend Plugin */
 			if (\CApi::GetConf('labs.dav.use-browser-plugin', false) !== false)

@@ -1,0 +1,983 @@
+/*=== Helpdesk screen CSS ===*/
+.panel.threads {
+	width: 40%;
+}
+.panel.products {
+	width: 100%;
+}
+.HelpdeskLayout .panels {
+	.box-sizing;
+	
+	padding-left: 14px;
+	width: 100%;
+}
+html.rtl .HelpdeskLayout .panels {
+	padding-left: 0px;
+	padding-right: 14px;
+}
+.HelpdeskLayout .panels .panel_helper {
+	width: 100%;
+}
+.tabs_panel.helpdesk .item.helpdesk {
+	margin: 16px 0 0 14px;
+	font-size: 16pt;
+	text-shadow: 0 1px 0 #FFFFFF;
+	vertical-align: top;
+	display: inline-block;
+	color: #3D3D3D;
+	padding: 4px 10px;
+}
+
+.HelpdeskLayout .AgentArea .panel .panel_content {
+	margin-top: 0px !important;
+    padding-top: 0px !important;
+}
+.HelpdeskLayout .AgentArea .panel.threads .toolbar {
+	background: none;
+	filter: none;
+	border: 0px;
+	border-radius: 0px;
+	margin-left: 16px;
+}
+html.rtl .HelpdeskLayout .AgentArea .panel.threads .toolbar {
+	margin-left: 0px;
+	margin-right: 16px;
+}
+.HelpdeskLayout .AgentArea .panel.threads .toolbar .content {
+	padding: 0px;
+}
+.HelpdeskLayout .AgentArea .panel.threads .toolbar .checkmail {
+	float: none;
+	padding: 0px;
+	border-radius: 0px;
+	border: 0px;
+	box-shadow: none;
+	background: none;
+	margin: 4px 0px 0px 8px;
+}
+.HelpdeskLayout .AgentArea .panel.threads .toolbar .new_request {
+	/*margin-left: -56px;*/
+}
+.HelpdeskLayout .AgentArea .panel.threads .toolbar .new_request .icon {
+	display: none;
+}
+.HelpdeskLayout .AgentArea .panel.threads .toolbar .new_request .text {
+	display: inline-block;
+}
+.HelpdeskLayout .AgentArea .panel.threads .panel_top {
+	border-radius: 5px 0px 0px 0px;
+	padding: 10px 46px;
+	background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAACtJREFUeNo0iIEJACAAwlT8/1GPMAsaKGNMYpskAOPRdq9tWbrifpaOAAMAMvEO3ANCJPYAAAAASUVORK5CYII=") repeat scroll 0 0 #F1F1F1;
+}
+
+.HelpdeskLayout .panel.threads .toolbar .checkmail:hover {
+	background: none;
+}
+.HelpdeskLayout .UserArea .panel.threads .toolbar .new_request {
+	display: inline-block;
+	min-width: 200px;
+}
+.HelpdeskLayout .UserArea .panel.threads .toolbar .text {
+	display: inline-block;
+}
+.HelpdeskLayout .UserArea .panel.threads .toolbar .icon {
+	display: none;
+}
+.panel.threads .middle_bar {
+	margin-top: -47px;
+	padding-top: 47px;
+
+	margin-bottom: -41px;
+	padding-bottom: 41px;
+}
+.HelpdeskLayout .UserArea .panel.threads .middle_bar {
+	margin-top: 0px;
+	padding-top: 0px;
+
+	margin-bottom: 0px;
+	padding-bottom: 0px;
+
+	border-radius: 5px 5px 5px 5px;
+    box-shadow: -1px 0 4px rgba(0, 0, 0, 0.23);
+	overflow: hidden;
+}
+.panel.thread_viewer .new_request .fields {
+	padding: 16px;
+}
+.panel.thread_viewer .new_request .placeholder {
+	font-size: 10pt;
+    padding-top: 6px;
+    text-indent: 9px;
+}
+.panel.thread_viewer .new_request .fields .input {
+	font-size: 10pt;
+	width: 100%;
+	min-height: 200px;
+}
+.panel.thread_viewer .new_request .fields .buttons {
+	text-align: left;
+	margin: 15px 0px 20px;
+	padding: 0px;
+}
+.panel.thread_viewer .new_request .buttons .button.create {
+	margin-right: 6px;
+	padding: 5px 12px;
+}
+.panel.thread_viewer .new_request .buttons .button.upload {
+	float: right;
+	background: #FFFDD6;
+	border: 0px solid #fff;
+	background: none;
+	color: #555;
+	text-shadow: none;
+	font-weight: normal;
+	margin: 3px;
+	-webkit-transition: background 500ms ease, border-color 500ms ease;
+	-moz-transition: background 500ms ease, border-color 500ms ease;
+	-ms-transition: background 500ms ease, border-color 500ms ease;
+	transition: background 500ms ease, border-color 500ms ease;
+}
+.panel.thread_viewer .new_request .buttons .button.upload .icon {
+	display: inline-block;
+	vertical-align: middle;
+	width: 16px;
+	height: 16px;
+	background: url("images/sprites.png?%VERSION%") no-repeat -120px -120px;
+}
+.panel.thread_viewer .new_request .buttons .button.upload.dragOver {
+	margin: 0px;
+	background: #FFFDD6;
+	border: 3px dashed #EFE164;
+}
+
+.panel.thread_viewer .uploader_mask {
+	.box-sizing;
+	
+	background: #FFFDD6;
+	padding: 11px;
+	color: #D3B910;
+	font-size: 18pt;
+	text-align: center;
+	opacity: 0;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	height: 100%;
+	width: 100%;
+	min-height: 100%;
+	visibility: hidden;
+
+	-webkit-transition: ease 250ms opacity 0s;
+	-moz-transition: ease 250ms opacity 0s;
+	transition: ease 250ms opacity 0s;
+}
+.panel.thread_viewer .uploader_mask .inner {
+	.box-sizing;
+	
+	height: 100%;
+	border: 3px dashed #E2DA36;
+	border-radius: 5px;
+}
+.panel.thread_viewer .uploader_mask.active {
+	visibility: visible;
+	opacity: 0.5;
+}
+
+
+
+
+.panel.threads .panel_top .search_block,
+.panel.products .panel_top .search_block {
+    padding-right: 0;
+}
+
+html.rtl .panel.threads .panel_top .search_block,
+html.rtl .panel.products .panel_top .search_block {
+	padding-right: 30px;
+}
+
+.panel.threads .items_list .item .item_content {
+	padding-left: 16px;
+}
+.panel.threads .items_list .item .subject,
+.panel.threads .items_list .item .from {
+	display: block;
+    overflow: hidden;
+}
+.panel.threads .items_list .item .from {
+	font-weight: bold;
+}
+.panel.threads .items_list .item .subtitle {
+	color: #606060;
+	font-size: 11pt;
+}
+.panel.threads .items_list .item.selected .subtitle {
+	color: #fff;
+}
+.HelpdeskLayout .UserArea .panel.threads .items_list .item .subject {
+	font-size: 13pt;
+	font-weight: normal;
+}
+.panel.threads .items_list .item .separator {
+	display: block;
+}
+.panel.threads .items_list .item .state {
+	float: right;
+	display: inline-block;
+	padding: 2px 6px;
+	border-radius: 4px;
+	margin-left: 6px;
+}
+.panel.threads .items_list .item.resolved .state {
+	background: #B3EE90;
+	color: #587848;
+	border: 1px solid #BFE6A9;
+}
+.panel.threads .items_list .item.pending .state,
+.panel.threads .items_list .item.deferred .state  {
+	background: #F5F593;
+	color: #9F742B;
+	border: 1px solid #EEEDA8;
+}
+.panel.threads .items_list .item.answered .state,
+.panel.threads .items_list .item.waiting .state {
+	background: #DCDCDC;
+	color: #707070;
+	border: 1px solid #D7D7D7;
+}
+.panel.threads .panel_bottom {
+	padding: 8px 14px 6px;
+}
+.panel.threads .panel_bottom a {
+	display: inline-block;
+	margin-right: 10px;
+}
+.panel.threads .panel_bottom a.selected,
+.panel.threads .panel_bottom a.selected:hover {
+	background: #fff;
+	border-radius: 4px;
+	padding: 4px 9px;
+	color: #3d3d3d;
+	/*text-shadow: 0px 1px 0px #fff;*/
+	text-decoration: none;
+	cursor: default;
+	outline: none;
+
+	border: 1px solid #e0e0e0;
+	box-shadow: 0 2px 2px #E7E7E7 inset;
+}
+.panel.threads .panel_bottom .pagination {
+	float: right;
+}
+
+
+.panel.thread_viewer .toolbar .from .link {
+	margin-left: 5px;
+}
+.panel.thread_viewer .panel_content {
+	margin: 0px !important;
+	padding: 0px !important;
+}
+.panel.thread_viewer .middle_bar {
+	margin-top: -76px;
+	padding-top: 76px;
+
+	margin-bottom: -92px;
+	padding-bottom: 92px;
+}
+.panel.thread_viewer .middle_bar.new_request {
+	margin-bottom: 0px;
+	padding-bottom: 0px;
+
+	margin-top: -57px;
+	padding-top: 57px;
+}
+.panel.thread_viewer .middle_bar.own_thread {
+	margin-top: -57px;
+	padding-top: 57px;
+}
+.panel.thread_viewer .panel_top {
+	padding: 14px 18px !important;
+}
+.panel.thread_viewer .panel_top .subject {
+	min-height: 1.3em;
+}
+.panel.thread_viewer .panel_bottom {
+	height: auto;
+	border: 0px;
+	/*background: 0px;*/
+	/*padding: 0px;*/
+	border-radius: 0px;
+	/*background: #FCFCFC;*/
+	/*position: relative;*/
+}
+.panel.thread_viewer .panel_center {
+	background: #F9F9F9;
+}
+
+.panel.thread_viewer .toolbar {
+	float: right;
+	background: none;
+	filter: none;
+	border-bottom: 0px;
+}
+html.rtl .panel.thread_viewer .toolbar {
+	float: left;
+}
+.panel.thread_viewer .toolbar .content {
+	padding: 0px;
+}
+.panel.thread_viewer .panel_top .title {
+	display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+	margin: 4px 0px;
+    padding: 0;
+	font-size: 12pt;
+	font-weight: normal;
+}
+.panel.thread_viewer .panel_top .link.cancel {
+	float: right;
+	margin-top: 8px;
+}
+.panel.thread_viewer .panel_top .title.has_contactcard {
+	position: relative;
+	left: -11px;
+}
+.panel.thread_viewer .panel_top .title .text {
+	overflow: hidden;
+    padding: 4px 4px 0;
+    position: relative;
+    top: -4px;
+	display: block;
+}
+.panel.thread_viewer .panel_top .title .founded {
+	padding-left: 7px;
+}
+
+.panel.thread_viewer .panel_top .title.expand {
+	position: relative;
+	overflow: visible;
+}
+.panel.thread_viewer .panel_top .title .link {
+	font-size: 9pt;
+	display: inline-block;
+	margin: 0px 10px;
+}
+
+.panel.thread_viewer .panel_center .link.more {
+	margin: 17px 37px 0px;
+}
+.panel.thread_viewer .post {
+	font-size: 11pt;
+	margin: 18px 20px 18px 18px;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	overflow: hidden;
+
+	-webkit-transition: all 600ms linear;
+	-moz-transition: all 600ms linear;
+	transition: all 600ms linear;
+
+	box-shadow: 0px 0px 0px #CCCCCC;
+}
+.panel.thread_viewer .post.unseen {
+	/*border-width: 2px;*/
+	/*border-color: #656565;*/
+	box-shadow: -1px 3px 4px 0 #ddd;
+
+	-webkit-transform: translate(0px, -3px);
+	-moz-transform: translate(0px, -3px);
+	-ms-transform: translate(0px, -3px);
+	transform: translate(0px, -3px);
+}
+.panel.thread_viewer .post .attachments {
+	padding: 10px 0px;
+}
+.panel.thread_viewer .post .attachments .attachment {
+	margin: 14px 20px 0 0;
+	font-size: 9pt;
+}
+.panel.thread_viewer .attachments .attachment .download {
+	cursor: pointer;
+}
+.panel.thread_viewer .post .header {
+	padding: 12px 18px 0px;
+}
+.panel.thread_viewer .post .header .name {
+	/*font-weight: bold;*/
+	font-size: 13pt;
+}
+.panel.thread_viewer .post .header .close {
+	float: right;
+	display: inline-block;
+	height: 10px;
+	margin: 2px -6px 0 10px;
+	width: 10px;
+	cursor: pointer;
+	background: url("images/sprites.png?%VERSION%") no-repeat -240px -260px;
+	visibility: hidden;
+}
+html.rtl .panel.thread_viewer .post .header .close {
+	float: left;
+	margin-left: -6px;
+	margin-right: 10px;
+}
+.panel.thread_viewer .post:hover .close.canBeDeleted {
+	visibility: visible;
+}
+
+.panel.thread_viewer .post .header .date {
+	float: right;
+	color: #8B8B8B;
+	font-size: 9pt;
+}
+html.rtl .panel.thread_viewer .post .header .date {
+	float: left;
+}
+.panel.thread_viewer .post .header .link {
+	font-size: 9pt;
+}
+.panel.thread_viewer .post .content {
+	padding: 10px 19px 16px;
+}
+.panel.thread_viewer .post.request {
+	/*border-bottom: 1px solid #E3D8B9;*/
+	/*color: #53473C;*/
+/*	background: #FCF8E9;*/
+}
+.panel.thread_viewer .post.request .header {
+	/*background: #EDE6D0;*/
+	/*background: #F4F4F4;*/
+}
+.panel.thread_viewer .post.request .header .link {
+	color: #B2B2B2;
+}
+.panel.thread_viewer .post.request .content {
+/*	padding-right: 10%;*/
+	color: #656565;
+}
+.panel.thread_viewer .post.request.unseen .content {
+	color: #000000;
+}
+.panel.thread_viewer .post.response {
+	/*color: #2A4665;*/
+	/*background: #F4F5F2;*/
+	/*background: #FEFFD2;*/
+	background: #FEFFE7;
+	/*border-top: 1px solid #F1F2EE;*/
+
+	/*box-shadow: 0 1px 10px #bbb;*/
+	position: relative;
+	/*margin-bottom: 30px;*/
+}
+.panel.thread_viewer .post.response .header {
+	/*background: #E2E5DF;*/
+	/*background: #FCF9A5;*/
+	/*background: #FBF9C3;*/
+	/*padding-left: 10%;*/
+}
+.panel.thread_viewer .post.response .header .link {
+	color: #BAAE77;
+}
+.panel.thread_viewer .post.response .content {
+	/*padding-left: 10%;*/
+	color: #716D51;
+}
+.panel.thread_viewer .post.response.unseen .content {
+	color: #000000;
+}
+
+
+
+.panel.thread_viewer .post.internal {
+	/*border-bottom: 1px solid #D4D7CF;*/
+	/*color: #53473C;*/
+	/*background: #EBFEC0;*/
+	background: #F8FFE6;
+	/*box-shadow: 0 0 10px #bbb;*/
+	/*margin: 30px 0px;*/
+	margin-left: 100px;
+}
+.panel.thread_viewer .post.internal .header {
+	/*background: #D4F49A;*/
+	/*background: #EAFBCD;*/
+	/*padding-left: 10%;*/
+}
+.panel.thread_viewer .post.internal .header .link {
+	font-size: 9pt;
+	color: #9DBF7A
+}
+.panel.thread_viewer .post.internal .content {
+	padding-left: 100px;
+	color: #647151;
+}
+.panel.thread_viewer .post.internal.unseen .content {
+	color: #000;
+}
+.panel.thread_viewer .post.internal .content::before {
+	float: left;
+	background: url("images/sprites.png?%VERSION%") repeat -280px -200px;
+	content: "";
+	width: 60px;
+	height: 40px;
+	margin-left: -80px;
+	opacity: 0.3;
+}
+
+.panel.thread_viewer code,
+.panel.thread_viewer .code {
+	white-space: pre;
+	/*background: #FFFFF4;*/
+    border: 1px dashed #B6AD9E;
+    font-size: 12px;
+    overflow: auto;
+    padding: 8px;
+}
+
+
+
+
+	.panel.thread_viewer .upload_list .attachment {
+		.box-sizing;
+		
+		border: 0px;
+		border-radius: 0px;
+		background: none;
+
+		display: inline-block;
+		vertical-align: top;
+		white-space: nowrap;
+		opacity: 1;
+		padding: 0px 4px 6px 0px;
+		margin: 0px;
+/*		max-width: 240px;*/
+		min-width: 120px;
+
+		margin-left: 0px;
+		max-width: 100%;
+	}
+
+	.panel.thread_viewer .upload_list .count2 .attachment { max-width: 50%;	}
+	.panel.thread_viewer .upload_list .count3 .attachment { max-width: 33%;	}
+	.panel.thread_viewer .upload_list .count4 .attachment { max-width: 25%;	}
+	.panel.thread_viewer .upload_list .count5 .attachment { max-width: 20%;	}
+
+	.panel.thread_viewer .upload_list .attachment.fail {
+		opacity: 0.3;
+	}
+	.csstransitions .panel.thread_viewer .upload_list .attachment.fail {
+		-webkit-transition: opacity 1.5s ease 3s;
+		-moz-transition: opacity 1000ms ease 1s;
+		-transition: opacity 1000ms ease 1s;
+	}
+
+	.panel.thread_viewer .upload_list .attachment .file_content {
+		.box-sizing;
+		
+		display: inline-block;
+		background-color: #F7F7F7;
+		border: 1px solid #DDDDDD;
+		border-radius: 4px 4px 4px 4px;
+		padding: 10px 10px 15px;
+
+		width: 100%;
+	}
+	.panel.thread_viewer .upload_list .attachment .file_content .file {
+		.box-sizing;
+
+		display: inline-block;
+		padding: 0 20px 0 35px;
+		width: 100%;
+	}
+	.panel.thread_viewer .upload_list .attachment .cancel {
+		background: url("images/sprites.png?%VERSION%") no-repeat -80px -240px;
+		display: block;
+		float: right;
+		font-size: 0;
+		height: 14px;
+		width: 14px;
+		overflow: hidden;
+		margin-left: 4px;
+		cursor: pointer;
+
+		margin-right: -20px;
+	}
+	.panel.thread_viewer .upload_list .attachment .spinner {
+		background: url("images/wait.gif?%VERSION%") no-repeat left top;
+		background-color: rgba(255, 255, 255, 0.8);
+		border-radius: 10px 10px 10px 10px;
+		box-shadow: 0 0 5px #FFFFFF;
+		display:inline-block;
+		width:20px;
+		height:20px;
+		margin: 7px 0 0 5px;
+	}
+	.panel.thread_viewer .upload_list .title {
+		display: block;
+		/*max-height: 200px;*/
+		overflow: hidden;
+		white-space: normal;
+	}
+	.panel.thread_viewer .upload_list .title .file {
+		display: block;
+		/*max-width: 100px;*/
+		max-height: 2.6em;
+		overflow: hidden;
+		white-space: normal;
+		-ms-word-break: break-all;
+		word-wrap: break-word;
+	}
+	.panel.thread_viewer .upload_list .title .name {
+		display: inline-block;
+		vertical-align: bottom;
+		font-weight: normal;
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		-ms-word-break: break-all;
+		word-wrap: break-word;
+	}
+	.panel.thread_viewer .upload_list .title .ext {
+		display: inline-block;
+	}
+	.panel.thread_viewer .upload_list .title .size {
+		display: inline-block;
+		vertical-align: baseline;
+		/*float: right;*/
+		background: none;
+		color: #bbb;
+		font-size: 11px;
+		margin-left: 4px;
+		/*float: right;*/
+	}
+	.panel.thread_viewer .upload_list .title .separator {
+		display: block;
+	}
+
+
+	.panel.thread_viewer .fail .status_text,
+	.panel.thread_viewer .success .status_text {
+		color:#f00;
+		display: block;
+		overflow: hidden;
+		white-space: normal;
+		font-size: 9pt;
+		line-height: 100%;
+		margin-bottom: -1em;
+	}
+	.panel.thread_viewer .success .status_text {
+		color:#308F00;
+	}
+	.panel.thread_viewer .upload_list .attachment .progress {
+		display: block;
+		margin: 7px 0px -10px;
+		height: 3px;
+		width: 100%;
+	}
+	.panel.thread_viewer .upload_list .attachment .progress span {
+		display: block;
+		height: 3px;
+		background: #EF4A4A;
+	}
+
+	.panel.thread_viewer .upload_list .file .icon {
+		float: left;
+		margin: 0px 0px 0px -35px !important;
+	}
+
+
+
+
+
+
+
+.panel.thread_viewer .attachments {
+	margin: 0px 18px;
+	padding: 0 0px 16px;
+	border-top: 1px solid #EDE6D0;
+}
+
+.panel.thread_viewer .attachments .attachment .download {
+	cursor: pointer;
+}
+
+.panel.thread_viewer .panel_center .buttons {
+	padding: 0px 20px 18px 18px;
+	margin: 0px;
+}
+.panel.thread_viewer .panel_center .buttons .new_post {
+	float: left;
+}
+html.rtl .panel.thread_viewer .panel_center .buttons .new_post {
+	float: right;
+}
+
+.panel.thread_viewer .quick_reply {
+	max-height: 310px;
+	/*position: static;*/
+	/*bottom: auto;*/
+}
+.panel.thread_viewer .quick_reply.internal {
+	background: #F8FFE6;
+}
+
+.panel.thread_viewer .quick_reply.hidden {
+	max-height: 0px;
+}
+.panel.thread_viewer .quick_reply .buttons .button.upload {
+	float: right;
+	background: #FFFDD6;
+	border: 0px solid #fff;
+	background: none;
+	color: #555;
+	text-shadow: none;
+	font-weight: normal;
+	margin: 3px;
+	-webkit-transition: background 500ms ease, border-color 500ms ease;
+	-moz-transition: background 500ms ease, border-color 500ms ease;
+	-ms-transition: background 500ms ease, border-color 500ms ease;
+	transition: background 500ms ease, border-color 500ms ease;
+}
+html.rtl .panel.thread_viewer .quick_reply .buttons .button.upload {
+	float: left;
+}
+.panel.thread_viewer .quick_reply .buttons .button.upload .icon {
+	display: inline-block;
+	vertical-align: middle;
+	width: 16px;
+	height: 16px;
+	background: url("images/sprites.png?%VERSION%") no-repeat -120px -120px;
+}
+.panel.thread_viewer .quick_reply .buttons .button.upload.dragOver {
+	margin: 0px;
+	background: #FFFDD6;
+	border: 3px dashed #EFE164;
+}
+
+.panel.thread_viewer .quick_reply.active .upload_list {
+	max-height: 73px
+}
+
+.HelpdeskLayout .settings .panel .fieldset .buttons {
+	text-align: left;
+}
+
+
+.HelpdeskLayout .details {
+	border-bottom: 1px solid #EDEDED;
+	background: #FFFFEB;
+	/*max-height: 200px;*/
+	/*margin-top: 10px;*/
+}
+.HelpdeskLayout .details_content {
+	padding: 10px 18px;
+}
+.HelpdeskLayout .details_content .external_content {
+	border: 0px;
+	display: block;
+	width: 100%;
+	height: 200px;
+}
+.HelpdeskLayout .details .products {
+	margin-top: 10px;
+}
+.HelpdeskLayout .details .product {
+	border-bottom: 1px solid #EDEDED;
+}
+.HelpdeskLayout .details .product > .title {
+	margin-bottom: 10px;
+}
+.HelpdeskLayout .details .product .icon {
+	display: inline-block;
+	vertical-align: middle;
+	width: 31px;
+	height: 31px;
+	margin-right: 4px;
+	background: url("images/sprites.png?%VERSION%") no-repeat -400px -411px;
+}
+.HelpdeskLayout .details .product .name {
+	font-size:12pt;
+}
+.HelpdeskLayout .details .buttons {
+	text-align: left;
+}
+.HelpdeskLayout .details .licenses,
+.HelpdeskLayout .details .keys {
+	margin: 0px 0px 16px 35px;
+}
+.HelpdeskLayout .details .licenses .license {
+	display: inline-block;
+	background: #4AA14A;
+	border: 1px solid #2A912A;
+	border-radius: 3px;
+	color: #fff;
+	padding: 2px 6px;
+	line-height: 100%;
+}
+.HelpdeskLayout .details .keys .title {
+	margin-bottom: 6px;
+}
+.HelpdeskLayout .details .keys .key {
+	margin: 0px 0px 4px 10px;
+}
+.HelpdeskLayout .details .keys .text {
+	font-size: 11pt;
+	color: #000;
+	font-style: italic;
+}
+.HelpdeskLayout .details .keys .buttons {
+	margin-top: 4px;
+}
+
+.LoginLayout.helpdesk .login_panel .login_panel_content {
+	-webkit-perspective: 800px;
+	-moz-perspective: 800px;
+	-o-perspective: 800px;
+	perspective: 800px;
+
+/*	-webkit-transform-style: preserve-3d;
+	-moz-transform-style: preserve-3d;
+	-o-transform-style: preserve-3d;
+	transform-style: preserve-3d;*/
+
+	/*min-height: 360px;*/
+	height: 400px;
+}
+.LoginLayout.helpdesk .login_panel .content {
+	-webkit-transform-style: flat;
+	-moz-transform-style: flat;
+	-o-transform-style: flat;
+	transform-style: flat;
+
+	overflow: hidden;
+	position: relative;
+
+	/*background: #fff;*/
+}
+
+.LoginLayout.helpdesk .login_panel .content.forgot .row {
+	border-radius: 4px !important;
+}
+
+
+
+/*.LoginLayout.helpdesk .login_panel .content.flipIn {
+
+	-webkit-animation: flipIn 200ms ease-in forwards;
+	-moz-animation: flipIn 200ms ease-in forwards;
+	animation: flipIn 200ms ease-in forwards;
+}
+.LoginLayout.helpdesk .login_panel .content.flipOut {
+	-webkit-animation: flipOut 400ms ease-out forwards;
+	-moz-animation: flipOut 400ms ease-out forwards;
+	animation: flipOut 400ms ease-out forwards;
+}*/
+
+.LoginLayout.helpdesk .login_panel .content {
+	position: absolute;
+	visibility: visible;
+	opacity: 1;
+
+	-webkit-transition: -webkit-transform 400ms ease-in, opacity 100ms ease-in 250ms, visibility 10ms ease-in 260ms;
+	-moz-transition: -moz-transform 400ms ease-in, opacity 100ms ease-in 250ms, visibility 10ms ease-in 260ms;
+	transition: transform 400ms ease-in, opacity 100ms ease-in 250ms, visibility 10ms ease-in 260ms;
+
+	/*-webkit-box-shadow: 0px 0px 0px #fff;*/
+	/* hack for FF, fix antialiasing */
+	-moz-box-shadow: 0px 0px 0px #fff;
+	box-shadow: 0px 0px 0px #fff;
+
+/*	-webkit-backface-visibility: hidden;
+	-moz-backface-visibility: hidden;
+	-o-backface-visibility: hidden;
+	backface-visibility: hidden;*/
+}
+.LoginLayout.helpdesk .login_panel .content.login {
+	-webkit-transform: rotateY(0deg);
+	-moz-transform: rotateY(0deg);
+	transform: rotateY(0deg);
+}
+
+.LoginLayout.helpdesk .login_panel .content.login .test_request {
+	box-shadow: 0 1px 1px #DDDDDD inset;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+	box-sizing: border-box;
+	border: 1px solid #d7d7d7;
+	border-radius: 4px;
+	height: 100px;
+	width: 237px;
+	color: #000;
+	font-size: 11pt;
+	padding: 6px 8px;
+	resize: none;
+	margin-bottom: 5px;
+}
+.LoginLayout.helpdesk .login_panel .content.login.test .title {
+	display: block;
+	font-size: 11pt;
+	color: #929292;
+	margin-bottom: 10px;
+}
+
+.LoginLayout.helpdesk .login_panel .content.forgot,
+.LoginLayout.helpdesk .login_panel .content.changepass,
+.LoginLayout.helpdesk .login_panel .content.register,
+.LoginLayout.helpdesk .login_panel .content.signin,
+.LoginLayout.helpdesk .login_panel .content.activation,
+.LoginLayout.helpdesk .login_panel .content.social_register {
+	-webkit-transform: rotateY(180deg);
+	-moz-transform: rotateY(180deg);
+	transform: rotateY(180deg);
+	visibility: hidden;
+	opacity: 0;
+}
+.LoginLayout.helpdesk .login_panel .content.activation {
+	-webkit-transform: rotateY(180deg);
+	-moz-transform: rotateY(180deg);
+	transform: rotateY(180deg);
+	width: 240px;
+	white-space: normal;
+
+	font-size: 12pt;
+	text-shadow: 0px 1px 0px #f3f3f3;
+}
+
+.LoginLayout.helpdesk .login_panel.flipForgot .content.login,
+.LoginLayout.helpdesk .login_panel.flipRegister .content.login,
+.LoginLayout.helpdesk .login_panel.flipSignin .content.login,
+.LoginLayout.helpdesk .login_panel.flipSocialRegister .content.login,
+.LoginLayout.helpdesk .login_panel.flipTest .content.login,
+.LoginLayout.helpdesk .login_panel.flipActivation .content.login,
+.LoginLayout.helpdesk .login_panel.flipChangepass .content.login {
+	-webkit-transform: rotateY(180deg);
+	-moz-transform: rotateY(180deg);
+	transform: rotateY(180deg);
+	visibility: hidden;
+	opacity: 0;
+}
+.LoginLayout.helpdesk .login_panel.flipForgot .content.forgot,
+.LoginLayout.helpdesk .login_panel.flipChangepass .content.changepass,
+.LoginLayout.helpdesk .login_panel.flipRegister .content.register,
+.LoginLayout.helpdesk .login_panel.flipSignin .content.signin,
+.LoginLayout.helpdesk .login_panel.flipTest .content.test,
+.LoginLayout.helpdesk .login_panel.flipSocialRegister .content.social_register {
+	-webkit-transform: rotateY(360deg);
+	-moz-transform: rotateY(360deg);
+	transform: rotateY(360deg);
+	visibility: visible;
+	opacity: 1;
+}
+.LoginLayout.helpdesk .login_panel.flipActivation .content.activation {
+	-webkit-transform: rotateY(0deg);
+	-moz-transform: rotateY(0deg);
+	transform: rotateY(0deg);
+	visibility: visible;
+	opacity: 1;
+}
+/*=== END Helpdesk screen CSS ===*/
+

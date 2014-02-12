@@ -296,6 +296,15 @@ AND %sawm_addr_groups.id_user = %d';
 		return sprintf($sSql, $this->Prefix(), $this->Prefix(), $this->Prefix(),
 			$this->Prefix(), $this->Prefix(), $this->Prefix(), $iUserId);
 	}
+	/**
+	 * @param int $iUserId
+	 * @return string
+	 */
+	public function DeleteAllGroups($iUserId)
+	{
+		$sSql = 'DELETE FROM %sawm_addr_groups WHERE id_user = %d';
+		return sprintf($sSql, $this->Prefix(), $iUserId);
+	}
 
 	/**
 	 * @param int $iUserId
@@ -311,10 +320,10 @@ AND %sawm_addr_groups.id_user = %d';
 	 * @param int $iUserId
 	 * @return string
 	 */
-	public function DeleteAllGroups($iUserId)
+	public function DeleteUserGlobalContact($iUserId)
 	{
-		$sSql = 'DELETE FROM %sawm_addr_groups WHERE id_user = %d';
-		return sprintf($sSql, $this->Prefix(), $iUserId);
+		$sSql = 'DELETE FROM %sawm_addr_book WHERE type = %d AND type_id = %d';
+		return sprintf($sSql, $this->Prefix(), 2, $iUserId); // TODO
 	}
 
 	/**
@@ -504,31 +513,76 @@ FROM %sawm_addr_book WHERE id_user = %d AND deleted = 0 AND auto_create = 0 AND 
 	 * @param int $iUserId
 	 * @param string $sSearch
 	 * @param int $iRequestLimit
+	 * @param bool $bPhoneOnly = false
 	 * @return string
 	 */
-	public function GetSuggestContactItems($iUserId, $sSearch, $iRequestLimit)
+	public function GetSuggestContactItems($iUserId, $sSearch, $iRequestLimit, $bPhoneOnly = false)
 	{
 		$sSearchAdd = '';
-		if (!empty($sSearch))
+		if (0 < strlen($sSearch))
 		{
-			$sSearch = '\'%'.$this->escapeString($sSearch, true, true).'%\'';
+			$bPhone = api_Utils::IsPhoneSearch($sSearch);
+			$sPhoneSearch = $bPhone ? api_Utils::ClearPhoneSearch($sSearch) : '';
 			
-			$sSearchAdd = sprintf(' AND (h_email <> \'\' OR b_email <> \'\' OR other_email <> \'\') '.
+			$sSearch = '\'%'.$this->escapeString($sSearch, true, true).'%\'';
+
+			if ($bPhoneOnly)
+			{
+				$sSearchAdd .= '(b_phone <> \'\' OR h_phone <> \'\' OR h_mobile <> \'\') AND ';
+			}
+			
+			$sSearchAdd .= sprintf('(h_email <> \'\' OR b_email <> \'\' OR other_email <> \'\') '.
 ' AND (fullname LIKE %s OR firstname LIKE %s'.
 ' OR surname LIKE %s OR nickname LIKE %s'.
 ' OR h_email LIKE %s OR b_email LIKE %s'.
 ' OR other_email LIKE %s)', $sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch);
+
+			if (0 < strlen($sPhoneSearch))
+			{
+				$sPhoneSearch = '\'%'.$this->escapeString($sPhoneSearch, true, true).'%\'';
+
+				$sSearchAdd = '('.$sSearchAdd.sprintf(') OR '.
+					 '(b_phone <> \'\' AND REPLACE(REPLACE(REPLACE(REPLACE(b_phone, \'(\', \'\'), \')\', \'\'), \'+\', \'\'), \' \', \'\') LIKE %s) OR '.
+					 '(h_phone <> \'\' AND REPLACE(REPLACE(REPLACE(REPLACE(h_phone, \'(\', \'\'), \')\', \'\'), \'+\', \'\'), \' \', \'\') LIKE %s) OR '.
+					 '(h_mobile <> \'\' AND REPLACE(REPLACE(REPLACE(REPLACE(h_mobile, \'(\', \'\'), \')\', \'\'), \'+\', \'\'), \' \', \'\') LIKE %s)',
+					 $sPhoneSearch, $sPhoneSearch, $sPhoneSearch);
+			}
 		}
 
-		$sSql = 'SELECT id_addr, str_id, view_email, primary_email, h_email, b_email, other_email,
-use_frequency, fullname, firstname, use_friendly_nm, type, type_id
+		$sSql = 'SELECT id_addr, str_id, auto_create, view_email, primary_email, h_email, b_email, other_email,
+use_frequency, fullname, firstname, use_friendly_nm, type, type_id, b_phone, h_phone, h_mobile
 FROM %sawm_addr_book
 WHERE id_user = %d AND deleted = 0 AND type = 0%s
 ORDER BY use_frequency DESC
 LIMIT %d, %d';
 
-		return sprintf($sSql, $this->Prefix(), $iUserId, $sSearchAdd, 0, $iRequestLimit);
+		return sprintf($sSql, $this->Prefix(), $iUserId, 0 < strlen($sSearchAdd) ? ' AND ('.$sSearchAdd.')' : '', 0, $iRequestLimit);
 	}
+	
+	/**
+	 * @param int $iUserId
+	 * @param string $sSearch
+	 * @param int $iRequestLimit
+	 * @return string
+	 */
+	public function GetSuggestGroupItems($iUserId, $sSearch, $iRequestLimit)
+	{
+		$sWhere = '1=0';
+		if (0 < strlen($sSearch))
+		{
+			$sWhere = 'group_nm LIKE \'%'.$this->escapeString($sSearch, true, true).'%\'';
+		}
+		
+		
+		$sSql = 'SELECT id_group, use_frequency, group_nm
+FROM %sawm_addr_groups
+WHERE id_user = %d AND %s
+ORDER BY use_frequency DESC
+LIMIT %d, %d';
+
+		return sprintf($sSql, $this->Prefix(), $iUserId, $sWhere, 0, $iRequestLimit);
+	}
+	
 
 	/**
 	 * @param int $iUserId
@@ -555,24 +609,40 @@ INNER JOIN %sawm_addr_groups_contacts AS gr_cnt ON gr_cnt.id_addr = book.id_addr
 		}
 
 		$sSearchAdd = '';
-		if (!empty($sSearch))
-		{
-			$sSearch = '\'%'.$this->escapeString($sSearch, true, true).'%\'';
-
-			$sSearchAdd .= sprintf(' AND (book.fullname LIKE %s OR book.firstname LIKE %s OR book.surname LIKE %s OR book.nickname LIKE %s OR book.h_email LIKE %s OR book.b_email LIKE %s OR book.other_email LIKE %s)',
-				$sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch);
-		}
-
 		$sFirstCharacter = (0 < strlen(trim($sFirstCharacter))) ? trim($sFirstCharacter) : '';
 		if (!empty($sFirstCharacter))
 		{
 			$sSearch = '\''.$this->escapeString($sFirstCharacter, true, true).'%\'';
-			$sSearchAdd .= sprintf(' AND (book.fullname LIKE %s OR book.firstname LIKE %s OR book.surname LIKE %s OR book.nickname LIKE %s OR book.h_email LIKE %s OR book.b_email LIKE %s OR book.other_email LIKE %s)',
+			$sSearchAdd = sprintf('book.fullname LIKE %s OR book.firstname LIKE %s OR book.surname LIKE %s OR book.nickname LIKE %s OR book.h_email LIKE %s OR book.b_email LIKE %s OR book.other_email LIKE %s',
 				$sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch);
 		}
 
+		if (0 < strlen($sSearch))
+		{
+			$bPhone = api_Utils::IsPhoneSearch($sSearch);
+			$sPhoneSearch = $bPhone ? api_Utils::ClearPhoneSearch($sSearch) : '';
+
+			$sSearch = '\'%'.$this->escapeString($sSearch, true, true).'%\'';
+
+			$sMainSearch = sprintf('book.fullname LIKE %s OR book.firstname LIKE %s OR book.surname LIKE %s OR book.nickname LIKE %s OR book.h_email LIKE %s OR book.b_email LIKE %s OR book.other_email LIKE %s',
+				$sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch);
+			
+			if (0 < strlen($sPhoneSearch))
+			{
+				$sPhoneSearch = '\'%'.$this->escapeString($sPhoneSearch, true, true).'%\'';
+
+				$sMainSearch .= sprintf(' OR '.
+					 '(b_phone <> \'\' AND REPLACE(REPLACE(REPLACE(REPLACE(b_phone, \'(\', \'\'), \')\', \'\'), \'+\', \'\'), \' \', \'\') LIKE %s) OR '.
+					 '(h_phone <> \'\' AND REPLACE(REPLACE(REPLACE(REPLACE(h_phone, \'(\', \'\'), \')\', \'\'), \'+\', \'\'), \' \', \'\') LIKE %s) OR '.
+					 '(h_mobile <> \'\' AND REPLACE(REPLACE(REPLACE(REPLACE(h_mobile, \'(\', \'\'), \')\', \'\'), \'+\', \'\'), \' \', \'\') LIKE %s)',
+					 $sPhoneSearch, $sPhoneSearch, $sPhoneSearch);
+			}
+
+			$sSearchAdd = (0 === strlen($sSearchAdd)) ? $sMainSearch : '('.$sSearchAdd.') AND ('.$sMainSearch.')';
+		}
+		
 		$sSql = 'SELECT book.id_addr, book.id_user, book.str_id, book.view_email, book.primary_email, book.h_email, book.b_email, book.other_email,
-book.fullname, book.use_frequency, book.firstname, book.surname, book.use_friendly_nm, book.type, book.type_id
+book.fullname, book.use_frequency, book.firstname, book.surname, book.use_friendly_nm, book.type, book.type_id, book.b_phone, book.h_phone, book.h_mobile
 FROM %sawm_addr_book AS book%s
 WHERE book.id_user = %d AND book.deleted = 0'.$sGroupWhere.' AND book.auto_create = 0%s
 ORDER BY %s %s
@@ -581,7 +651,8 @@ LIMIT %d, %d';
 		$sField = 'book.'.EContactSortField::GetContactDbField($iSortField);
 		$sOrder = (ESortOrder::ASC === $iSortOrder) ? 'ASC' : 'DESC';
 
-		return sprintf($sSql, $this->Prefix(), $sGroupAdd, $iUserId, $sSearchAdd, $sField, $sOrder, $iOffset, $iRequestLimit);
+		return sprintf($sSql, $this->Prefix(), $sGroupAdd, $iUserId,
+			0 < strlen($sSearchAdd) ? ' AND ('.$sSearchAdd.')' : '', $sField, $sOrder, $iOffset, $iRequestLimit);
 	}
 
 	/**
@@ -651,25 +722,42 @@ INNER JOIN %sawm_addr_groups_contacts AS gr_cnt ON gr_cnt.id_addr = book.id_addr
 		}
 
 		$sSearchAdd = '';
-		if (!empty($sSearch))
-		{
-			$sSearch = '\'%'.$this->escapeString($sSearch, true, true).'%\'';
-			$sSearchAdd .= sprintf(' AND (fullname LIKE %s OR firstname LIKE %s OR surname LIKE %s OR nickname LIKE %s OR h_email LIKE %s OR b_email LIKE %s OR other_email LIKE %s)',
-				$sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch);
-		}
-
 		$sFirstCharacter = (0 < strlen(trim($sFirstCharacter))) ? trim($sFirstCharacter) : '';
 		if (!empty($sFirstCharacter))
 		{
 			$sSearch = '\''.$this->escapeString($sFirstCharacter, true, true).'%\'';
-			$sSearchAdd .= sprintf(' AND (fullname LIKE %s OR firstname LIKE %s OR surname LIKE %s OR nickname LIKE %s OR h_email LIKE %s OR b_email LIKE %s OR other_email LIKE %s)',
+			$sSearchAdd = sprintf('book.fullname LIKE %s OR book.firstname LIKE %s OR book.surname LIKE %s OR book.nickname LIKE %s OR book.h_email LIKE %s OR book.b_email LIKE %s OR book.other_email LIKE %s',
 				$sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch);
+		}
+
+		if (0 < strlen($sSearch))
+		{
+			$bPhone = api_Utils::IsPhoneSearch($sSearch);
+			$sPhoneSearch = $bPhone ? api_Utils::ClearPhoneSearch($sSearch) : '';
+
+			$sSearch = '\'%'.$this->escapeString($sSearch, true, true).'%\'';
+
+			$sMainSearch = sprintf('book.fullname LIKE %s OR book.firstname LIKE %s OR book.surname LIKE %s OR book.nickname LIKE %s OR book.h_email LIKE %s OR book.b_email LIKE %s OR book.other_email LIKE %s',
+				$sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch);
+
+			if (0 < strlen($sPhoneSearch))
+			{
+				$sPhoneSearch = '\'%'.$this->escapeString($sPhoneSearch, true, true).'%\'';
+
+				$sMainSearch .= sprintf(' OR '.
+					 '(b_phone <> \'\' AND REPLACE(REPLACE(REPLACE(REPLACE(b_phone, \'(\', \'\'), \')\', \'\'), \'+\', \'\'), \' \', \'\') LIKE %s) OR '.
+					 '(h_phone <> \'\' AND REPLACE(REPLACE(REPLACE(REPLACE(h_phone, \'(\', \'\'), \')\', \'\'), \'+\', \'\'), \' \', \'\') LIKE %s) OR '.
+					 '(h_mobile <> \'\' AND REPLACE(REPLACE(REPLACE(REPLACE(h_mobile, \'(\', \'\'), \')\', \'\'), \'+\', \'\'), \' \', \'\') LIKE %s)',
+					 $sPhoneSearch, $sPhoneSearch, $sPhoneSearch);
+			}
+
+			$sSearchAdd = (0 === strlen($sSearchAdd)) ? $sMainSearch : '('.$sSearchAdd.') AND ('.$sMainSearch.')';
 		}
 
 		$sSql = 'SELECT COUNT(book.id_addr) AS cnt FROM %sawm_addr_book as book%s
 WHERE book.id_user = %d AND book.deleted = 0'.$sGroupWhere.' AND book.auto_create = 0%s';
 
-		return sprintf($sSql, $this->Prefix(), $sGroupAdd, $iUserId, $sSearchAdd);
+		return sprintf($sSql, $this->Prefix(), $sGroupAdd, $iUserId, 0 < strlen($sSearchAdd) ? ' AND ('.$sSearchAdd.')' : '');
 	}
 
 	/**

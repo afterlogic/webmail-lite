@@ -1687,6 +1687,24 @@ class api_Utils
 	}
 
 	/**
+	 * @param string $sSearch
+	 * @return string
+	 */
+	public static function ClearPhoneSearch($sSearch)
+	{
+		return preg_replace('/[\s\-()]+/', '', preg_replace('/^[+]/', '', trim($sSearch)));
+	}
+
+	/**
+	 * @param string $sSearch
+	 * @return bool
+	 */
+	public static function IsPhoneSearch($sSearch)
+	{
+		return (bool) preg_match('/^[\d]{3,}$/', self::ClearPhoneSearch($sSearch));
+	}
+
+	/**
 	 * @param string $sFolder
 	 * @param int $iMessageCount
 	 * @param int $iMessageUnseenCount
@@ -1699,6 +1717,39 @@ class api_Utils
 
 		$sD = "\x0";
 		return md5($sFolder.$sD.$iMessageCount.$sD.$iMessageUnseenCount.$sD.$sUidNext);
+	}
+
+	/**
+	 * @param string $sMimeType
+	 * @return bool
+	 */
+	public static function IsGDImageMimeTypeSuppoted($sMimeType)
+	{
+		static $bCache = null;
+		if (null !== $bCache)
+		{
+			return $bCache;
+		}
+
+		$bResult = function_exists('gd_info');
+		if ($bResult)
+		{
+			$bResult = false;
+			switch (strtolower($sMimeType))
+			{
+				case 'image/jpg':
+				case 'image/jpeg':
+					$bResult = function_exists('imagecreatefromjpeg');
+					break;
+				case 'image/png':
+					$bResult = function_exists('imagecreatefrompng');
+					break;
+			}
+		}
+
+		$bCache = $bResult;
+
+		return $bResult;
 	}
 
 	public static function GetDirectorySize($path)

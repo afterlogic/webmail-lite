@@ -97,6 +97,8 @@ class CApiMailDbStorage extends CApiMailStorage
 					}
 				}
 			}
+
+			$this->oConnection->FreeResult();
 		}
 
 		$this->throwDbExceptionIfExist();
@@ -131,6 +133,42 @@ class CApiMailDbStorage extends CApiMailStorage
 		$this->FoldersOrderClear($oAccount);
 		
 		$this->oConnection->Execute($this->oCommandCreator->FoldersOrderUpdate($oAccount, @json_encode($aOrder)));
+		$this->throwDbExceptionIfExist();
+		return true;
+	}
+
+	/**
+	 * @param CAccount $oAccount
+	 *
+	 * @return array
+	 */
+	public function FoldersOrderNames($oAccount)
+	{
+		$aList = array();
+		if ($this->oConnection->Execute($this->oCommandCreator->FoldersOrderNames($oAccount)))
+		{
+			$oRow = null;
+			while (false !== ($oRow = $this->oConnection->GetNextRecord()))
+			{
+				$aList[$oRow->real_name] = $oRow->order_name;
+			}
+		}
+
+		$this->throwDbExceptionIfExist();
+		return $aList;
+	}
+
+	/**
+	 * @param CAccount $oAccount
+	 * @param string $sFolderName
+	 * @param string $sOrderName
+	 *
+	 * @return bool
+	 */
+	public function FoldersOrderNamesUpdate($oAccount, $sFolderName, $sOrderName)
+	{
+		$this->oConnection->Execute($this->oCommandCreator->FoldersOrderNamesClear($oAccount, $sFolderName));
+		$this->oConnection->Execute($this->oCommandCreator->FoldersOrderNamesUpdate($oAccount, $sFolderName, $sOrderName));
 		$this->throwDbExceptionIfExist();
 		return true;
 	}

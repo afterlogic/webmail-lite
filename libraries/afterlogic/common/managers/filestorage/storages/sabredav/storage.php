@@ -225,48 +225,41 @@ class CApiFilestorageSabredavStorage extends CApiFilestorageStorage
 				foreach ($aItems as $oValue) 
 				{
 					$sFilePath = str_replace($sRootPath, '', dirname($oValue->getPath()));
+					$aItem = array(
+						'Type' => $iType,
+						'Path' => $sFilePath,
+						'Name' => $oValue->getName()
+					);
+					$sID = '';
 					if ($oValue instanceof \afterlogic\DAV\FS\Directory)
 					{
-						$aResult[] = array(
-							'Type' => $iType,
-							'Path' => $sFilePath,
-							'Name' => $oValue->getName(),
-							'IsFolder' => true
-						);
+						$sID = $this->GenerateShareHash($oAccount, $iType, $sFilePath, $oValue->getName());
+						$aItem['IsFolder'] = true;
 					}
 					if ($oValue instanceof \afterlogic\DAV\FS\File)
 					{
 						$sID = $this->GenerateShareHash($oAccount, $iType, $sFilePath, $oValue->getName());
-						$mMin = $oMin->GetMinByID($sID);
-						$bShared = false;
-						if (!empty($mMin['__hash__']))
-						{
-							$bShared = true;
-						}
+						$aItem['IsFolder'] = false;
 
-						$aProps = $oValue->getProperties(array('Owner', 'Shared'));
-
-						$sOwner = isset($aProps['Owner']) ? $aProps['Owner'] : $oAccount->Email;
-						$bShared = isset($aProps['Shared']) ? $aProps['Shared'] : $bShared;
-
-						$aResult[] = array(
+						$aItem['Size'] = $oValue->getSize();
+						$aItem['LastModified'] = $oValue->getLastModified();
+						$aItem['ContentType'] = $oValue->getContentType();
+						$aItem['Thumb'] = \api_Utils::IsGDImageMimeTypeSuppoted($aItem['ContentType']);
+						
+						$aItem['Hash'] = \CApi::EncodeKeyValues(array(
 							'Type' => $iType,
 							'Path' => $sFilePath,
 							'Name' => $oValue->getName(),
-							'Size' => $oValue->getSize(),
-							'IsFolder' => false,
-							'LastModified' => $oValue->getLastModified(),
-							'ContentType' => $oValue->getContentType(),
-							'Shared' => $bShared,
-							'Owner' => $sOwner,
-							'Hash' => \CApi::EncodeKeyValues(array(
-								'Type' => $iType,
-								'Path' => $sFilePath,
-								'Name' => $oValue->getName(),
-								'Size' => $oValue->getSize()
-							))
-						);
+							'Size' => $oValue->getSize()
+						));
 					}
+					$mMin = $oMin->GetMinByID($sID);
+
+					$aProps = $oValue->getProperties(array('Owner', 'Shared'));
+					$aItem['Shared'] = isset($aProps['Shared']) ? $aProps['Shared'] : empty($mMin['__hash__']) ? false : true;
+					$aItem['Owner'] = isset($aProps['Owner']) ? $aProps['Owner'] : $oAccount->Email;
+					
+					$aResult[] = $aItem;
 				}
 			}
 		}

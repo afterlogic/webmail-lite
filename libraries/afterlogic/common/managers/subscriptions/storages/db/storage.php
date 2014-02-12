@@ -127,6 +127,8 @@ class CApiSubscriptionsDbStorage extends CApiSubscriptionsStorage
 
 				$mResult = $oSubscription;
 			}
+
+			$this->oConnection->FreeResult();
 		}
 
 		$this->throwDbExceptionIfExist();

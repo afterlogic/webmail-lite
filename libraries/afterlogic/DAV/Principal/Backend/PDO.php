@@ -176,4 +176,13 @@ class PDO extends \Sabre\DAVACL\PrincipalBackend\PDO {
 		return Constants::DAV_PUBLIC_PRINCIPAL;
 	}
 	
+	public function getOrCreatePrincipal($sName)
+	{
+		$this->createPrincipal(
+				'principals/'.$sName, 
+				$sName, 
+				$sName);
+		
+		return $sName;
+	}
 }

@@ -68,9 +68,10 @@ class Service
 	 * @param bool $bHelpdesk = false
 	 * @param string $sHelpdeskHash = ''
 	 * @param string $sCalendarPubHash = ''
+	 * @param string $sFileStoragePubHash = ''
 	 * @return string
 	 */
-	private function indexHTML($bHelpdesk = false, $sHelpdeskHash = '', $sCalendarPubHash = '')
+	private function indexHTML($bHelpdesk = false, $sHelpdeskHash = '', $sCalendarPubHash = '', $sFileStoragePubHash = '')
 	{
 		$sResult = '';
 		$mHelpdeskIdTenant = false;
@@ -163,8 +164,8 @@ class Service
 				$sResult = strtr($sResult, array(
 					'{{AppVersion}}' => PSEVEN_APP_VERSION,
 					'{{IntegratorDir}}' => $oApiIntegrator->GetAppDirValue(),
-					'{{IntegratorLinks}}' => $oApiIntegrator->BuildHeadersLink('.', $bHelpdesk, $sCalendarPubHash),
-					'{{IntegratorBody}}' => $oApiIntegrator->BuildBody('.', $bHelpdesk, $mHelpdeskIdTenant, $sHelpdeskHash, $sCalendarPubHash)
+					'{{IntegratorLinks}}' => $oApiIntegrator->BuildHeadersLink(),
+					'{{IntegratorBody}}' => $oApiIntegrator->BuildBody('.', $bHelpdesk, $mHelpdeskIdTenant, $sHelpdeskHash, $sCalendarPubHash, $sFileStoragePubHash)
 				));
 			}
 		}
@@ -193,6 +194,16 @@ class Service
 		{
 			echo 'AfterLogic API';
 			return '';
+		}
+
+		$sPathInfo = \trim(\trim($this->oHttp->GetServer('PATH_INFO', '')), ' /');
+		if (!empty($sPathInfo))
+		{
+			if ('dav' === \substr($sPathInfo, 0, 3))
+			{
+				$this->oActions->PathInfoDav();
+				return '';
+			}
 		}
 
 		$sResult = '';
@@ -252,20 +263,15 @@ class Service
 //						$oApiIntegrator->LogoutAccount();
 //					}
 
+					\CApi::LogException($oException);
+
 					$sAction = empty($sAction) ? 'Unknown' : $sAction;
-
-					$aAdd = null;
-					if ('Login' === $sAction && isset($GLOBALS['P7_CAPTCHA_ATTRIBUTE_ON_ERROR']) && $GLOBALS['P7_CAPTCHA_ATTRIBUTE_ON_ERROR'])
-					{
-						$aAdd = array(
-							'Captcha' => true
-						);
-					}
-
-					$aResponseItem = $this->oActions->ExceptionResponse(null, $sAction, $oException, $aAdd);
+					$aResponseItem = $this->oActions->ExceptionResponse(null, $sAction, $oException);
 				}
 
 				@header('Content-Type: application/json; charset=utf-8');
+
+				\CApi::Plugin()->RunHook('ajax.response-result', array($sAction, &$aResponseItem));
 
 				$sResult = \ProjectSeven\Base\Utils::JsonEncode($aResponseItem);
 //				\CApi::Log('AJAX: Response: '.$sResult);
@@ -352,6 +358,81 @@ class Service
 			{
 				\CApi::SpecifiedUserLogging('speclogon' === $sFirstPart);
 				\CApi::Location('./');
+			}
+			else if ('autodiscover' === $sFirstPart)
+			{
+				$oSettings =& \CApi::GetSettings();
+
+				$sInput = \file_get_contents('php://input');
+//$sInput = '<?'.'xml version="1.0" encoding="utf-8"?'.'><Autodiscover xmlns="http://schemas.microsoft.com/exchange/autodiscover/outlook/requestschema/2006"><Request><EMailAddress>test@afterlogic.com</EMailAddress><AcceptableResponseSchema>http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a</AcceptableResponseSchema></Request></Autodiscover>';
+
+				\CApi::Log('#autodiscover:');
+				\CApi::LogObject($sInput);
+
+				$aMatches = array();
+				$aEmailAddress = array();
+				\preg_match("/\<AcceptableResponseSchema\>(.*?)\<\/AcceptableResponseSchema\>/i", $sInput, $aMatches);
+				\preg_match("/\<EMailAddress\>(.*?)\<\/EMailAddress\>/", $sInput, $aEmailAddress);
+				if (!empty($aMatches[1]) && !empty($aEmailAddress[1]))
+				{
+					$sIncMailServer = $oSettings->GetConf('WebMail/ExternalHostNameOfLocalImap');
+					$sOutMailServer = $oSettings->GetConf('WebMail/ExternalHostNameOfLocalSmtp');
+
+					if (0 < \strlen($sIncMailServer) && 0 < \strlen($sOutMailServer))
+					{
+							$sResult = \implode("\n", array(
+'<Autodiscover xmlns="http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006">',
+'	<Response xmlns="'.$aMatches[1].'">',
+'		<Account>',
+'			<AccountType>email</AccountType>',
+'			<Action>settings</Action>',
+'			<Protocol>',
+'				<Type>IMAP</Type>',
+'				<Server>'.$sIncMailServer.'</Server>',
+'				<LoginName>'.$aEmailAddress[1].'</LoginName>',
+'				<Port>143</Port>',
+'				<SSL>off</SSL>',
+'				<SPA>off</SPA>',
+'				<AuthRequired>on</AuthRequired>',
+'			</Protocol>',
+'			<Protocol>',
+'				<Type>SMTP</Type>',
+'				<Server>'.$sOutMailServer.'</Server>',
+'				<LoginName>'.$aEmailAddress[1].'</LoginName>',
+'				<Port>25</Port>',
+'				<SSL>off</SSL>',
+'				<SPA>off</SPA>',
+'				<AuthRequired>on</AuthRequired>',
+'			</Protocol>',
+'		</Account>',
+'	</Response>',
+'</Autodiscover>'));
+					}
+				}
+
+				if (empty($sResult))
+				{
+					$usec = $sec = 0;
+					list($usec, $sec) = \explode(' ', microtime());
+					$sResult = \implode("\n", array('<Autodiscover xmlns="http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006">',
+(empty($aMatches[1]) ?
+'	<Response>' :
+'	<Response xmlns="'.$aMatches[1].'">'
+),
+'		<Error Time="'.\gmdate('H:i:s', $sec).\substr($usec, 0, \strlen($usec) - 2).'" Id="2477272013">',
+'			<ErrorCode>600</ErrorCode>',
+'			<Message>Invalid Request</Message>',
+'			<DebugData />',
+'		</Error>',
+'	</Response>',
+'</Autodiscover>'));
+				}
+
+				header('Content-Type: text/xml');
+				$sResult = '<'.'?xml version="1.0" encoding="utf-8"?'.'>'."\n".$sResult;
+
+				\CApi::Log('');
+				\CApi::Log($sResult);
 			}
 			else if ('profile' === $sFirstPart)
 			{
@@ -449,6 +530,18 @@ class Service
 					\CApi::LogException($oException, \ELogLevel::Error);
 				}
 			}
+			else if ($this->oHttp->HasQuery('facebook'))
+			{
+				\api_Social::Facebook();
+			}
+			else if ($this->oHttp->HasQuery('google'))
+			{
+				\api_Social::Google();
+			}
+			else if ($this->oHttp->HasQuery('twitter'))
+			{
+				\api_Social::Twitter();
+			}
 			else if ($this->oHttp->HasQuery('helpdesk'))
 			{
 				$sResult = $this->indexHTML(true, $this->oHttp->GetQuery('helpdesk'));
@@ -456,6 +549,10 @@ class Service
 			else if ($this->oHttp->HasQuery('calendar-pub') && 0 < strlen($this->oHttp->GetQuery('calendar-pub')))
 			{
 				$sResult = $this->indexHTML(false, '', $this->oHttp->GetQuery('calendar-pub'));
+			}
+			else if ($this->oHttp->HasQuery('files-pub') && 0 < strlen($this->oHttp->GetQuery('files-pub')))
+			{
+				$sResult = $this->indexHTML(false, '', '', $this->oHttp->GetQuery('files-pub'));
 			}
 			else if ('min' === $sFirstPart || 'window' === $sFirstPart)
 			{
@@ -531,83 +628,7 @@ class Service
 			}
 			else if ('twilio' === $sFirstPart)
 			{
-				\CApi::Log('twilio_xml');
-				
-				
-				\CApi::LogObject($aPaths);
-				\CApi::LogObject($_REQUEST);
-				\CApi::LogObject($this->oHttp->GetRequest('Direction'));
-
-				$bDirection = $this->oHttp->GetRequest('Direction') === 'inbound' ? true : false;
-				$sDigits = $this->oHttp->GetRequest('Digits');
-				
-				$sTenantId = isset($aPaths[1]) ? $aPaths[1] : null;
-				
-				$bAllowTwilio = false;
-
-				if (is_numeric($sTenantId)) {
-					$oApiTenants = \CApi::Manager('tenants');
-					$oTenant = $oApiTenants->GetTenantById($sTenantId);
-
-					$bAllowTwilio = $oTenant->TwilioAllow && $oTenant->TwilioAllowConfiguration;
-				} else {
-					// TODO
-					$bAllowTwilio = true;
-				}
-
-				@header('Content-type: text/xml');
-				$aResult = array('<?xml version="1.0" encoding="UTF-8"?>');
-				$aResult[] = '<Response>';
-				
-				\CApi::Log($bAllowTwilio);
-				\CApi::Log($bDirection);
-
-				if ($bAllowTwilio)
-				{
-					if ($bDirection) // inbound
-					{
-						if (!$sDigits)
-						{
-							$aResult[] = '<Gather timeout="10" numDigits="4">';
-							$aResult[] = '<Say>Please enter the extension number or stay on the line to talk to an operator</Say>';
-							$aResult[] = '</Gather>';
-							$aResult[] = '<Say>You will be connected with an operator</Say>';
-							$aResult[] = '<Dial><Client>TwilioAftId_'.$sTenantId.'_0</Client></Dial>';
-						}
-						else
-						{
-//							$aResult[] = '<Dial><Client>TwilioAftId_'.$sTenantId.'_'.$sDigits.'</Client></Dial>';
-							$aResult[] = '<Dial><Client>TwilioAftId_'.$sDigits.'</Client></Dial>';
-						}
-					}
-					else //Outbound
-					{
-						/* @var $oApiCapability \CApiCapabilityManager */
-						$oApiCapability = \CApi::Manager('capability');
-
-							/* @var $oApiIntegrator \CApiIntegratorManager */
-						$oApiIntegrator = \CApi::Manager('integrator');
-
-						$oAccount = $oApiIntegrator->GetLogginedDefaultAccount();
-						\CApi::LogObject($oAccount);
-						\CApi::Log($oApiCapability->IsVoiceSupported($oAccount));
-//						if ($oApiCapability->IsVoiceSupported($oAccount))
-//						{
-							$sPhoneNumber = $this->oHttp->GetRequest('PhoneNumber');
-							$aResult[] = '<Say>Call to phone number '.$sPhoneNumber.'</Say>';
-							$aResult[] = '<Dial callerId="17064030887">'.$sPhoneNumber.'</Dial>';
-//						}
-					}
-				} else {
-					$aResult[] = '<Say>This functionality doesn\'t allowed</Say>';
-				}
-					
-				$aResult[] = '</Response>';
-	
-				$sResult = implode("\r\n", $aResult);
-				
-				\CApi::Log('twilio_end_xml');
-
+				\api_Twilio::Init($aPaths, $this->oHttp);
 			}
 			else if ('plugins' === $sFirstPart)
 			{
@@ -617,6 +638,38 @@ class Service
 					@header('Content-Type: application/javascript; charset=utf-8');
 					$sResult = \CApi::Plugin()->CompileJs();
 				}
+			}
+			else if ('postlogin' === $sFirstPart && \CApi::GetConf('labs.allow-post-login', false))
+			{
+				$oSettings =& \CApi::GetSettings();
+
+				$sEmail = trim((string) $this->oHttp->GetRequest('Email', ''));
+				$sLogin = (string) $this->oHttp->GetRequest('Login', '');
+				$sPassword = (string) $this->oHttp->GetRequest('Password', '');
+
+				$sAtDomain = trim($oSettings->GetConf('WebMail/LoginAtDomainValue'));
+				if (\ELoginFormType::Login === (int) $oSettings->GetConf('WebMail/LoginFormType') && 0 < strlen($sAtDomain))
+				{
+					$sEmail = \api_Utils::GetAccountNameFromEmail($sLogin).'@'.$sAtDomain;
+					$sLogin = $sEmail;
+				}
+
+				if (0 !== strlen($sPassword) && 0 !== strlen($sEmail.$sLogin))
+				{
+					/* @var $oApiIntegrator \CApiIntegratorManager */
+					$oApiIntegrator = \CApi::Manager('integrator');
+
+					$oAccount = $oApiIntegrator->LoginToAccount(
+						$sEmail, $sPassword, $sLogin
+					);
+
+					if ($oAccount instanceof \CAccount)
+					{
+						$oApiIntegrator->SetAccountAsLoggedIn($oAccount);
+					}
+				}
+
+				\CApi::Location('./');
 			}
 			else if ('demo' === $sFirstPart)
 			{

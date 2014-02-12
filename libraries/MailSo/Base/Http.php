@@ -219,11 +219,18 @@ class Http
 	}
 
 	/**
+	 * @param string $sValueToCheck = ''
+	 *
 	 * @return bool
 	 */
-	public function IsLocalhost()
+	public function IsLocalhost($sValueToCheck = '')
 	{
-		return $this->CheckLocalhost($this->GetServer('REMOTE_ADDR', ''));
+		if (empty($sValueToCheck))
+		{
+			$sValueToCheck = $this->GetServer('REMOTE_ADDR', '');
+		}
+
+		return $this->CheckLocalhost($sValueToCheck);
 	}
 
 	/**
@@ -283,11 +290,12 @@ class Http
 
 	/**
 	 * @param bool $bWithRemoteUserData = false
-	 * @param bool $bRemoveWWW = true
+	 * @param bool $bWithoutWWW = true
+	 * @param bool $bWithoutPort = false
 	 *
 	 * @return string
 	 */
-	public function GetHost($bWithRemoteUserData = false, $bRemoveWWW = true)
+	public function GetHost($bWithRemoteUserData = false, $bWithoutWWW = true, $bWithoutPort = false)
 	{
 		$sHost = $this->GetServer('HTTP_HOST', '');
 		if (0 === \strlen($sHost))
@@ -300,7 +308,7 @@ class Http
 				? $sName : $sName.':'.$iPort;
 		}
 
-		if ($bRemoveWWW)
+		if ($bWithoutWWW)
 		{
 			$sHost = 'www.' === \substr(\strtolower($sHost), 0, 4) ? \substr($sHost, 4) : $sHost;
 		}
@@ -309,6 +317,11 @@ class Http
 		{
 			$sUser = \trim($this->HasServer('REMOTE_USER') ? $this->GetServer('REMOTE_USER', '') : '');
 			$sHost = (0 < \strlen($sUser) ? $sUser.'@' : '').$sHost;
+		}
+
+		if ($bWithoutPort)
+		{
+			$sHost = \preg_replace('/:[\d]+$/', '', $sHost);
 		}
 
 		return $sHost;
@@ -341,13 +354,17 @@ class Http
 	/**
 	 * @param string $sUrl
 	 * @param array $aPost = array()
-	 * @param string $sCustomUserAgent = 'MaiSo Http User Agent (v1)'
+	 * @param string $sCustomUserAgent = 'MailSo Http User Agent (v1)'
 	 * @param int $iCode = 0
 	 * @param \MailSo\Log\Logger $oLogger = null
+	 * @param int $iTimeout = 20
+	 * @param string $sProxy = ''
+	 * @param string $sProxyAuth = ''
 	 *
 	 * @return string|bool
 	 */
-	public function SendPostRequest($sUrl, $aPost = array(), $sCustomUserAgent = 'MaiSo Http User Agent (v1)', &$iCode = 0, $oLogger = null)
+	public function SendPostRequest($sUrl, $aPost = array(), $sCustomUserAgent = 'MailSo Http User Agent (v1)', &$iCode = 0,
+		$oLogger = null, $iTimeout = 20, $sProxy = '', $sProxyAuth = '')
 	{
 		$aOptions = array(
 			CURLOPT_URL => $sUrl,
@@ -357,12 +374,21 @@ class Http
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_POST => true,
 			CURLOPT_POSTFIELDS => $aPost,
-			CURLOPT_TIMEOUT => 20
+			CURLOPT_TIMEOUT => (int) $iTimeout
 		);
 
 		if (0 < \strlen($sCustomUserAgent))
 		{
 			$aOptions[CURLOPT_USERAGENT] = $sCustomUserAgent;
+		}
+
+		if (0 < \strlen($sProxy))
+		{
+			$aOptions[CURLOPT_PROXY] = $sProxy;
+			if (0 < \strlen($sProxyAuth))
+			{
+				$aOptions[CURLOPT_PROXYUSERPWD] = $sProxyAuth;
+			}
 		}
 
 		$oCurl = \curl_init();
@@ -398,15 +424,18 @@ class Http
 	/**
 	 * @param string $sUrl
 	 * @param resource $rFile
-	 * @param string $sCustomUserAgent = 'MaiSo Http User Agent (v1)'
+	 * @param string $sCustomUserAgent = 'MailSo Http User Agent (v1)'
 	 * @param string $sContentType = ''
 	 * @param int $iCode = 0
 	 * @param \MailSo\Log\Logger $oLogger = null
 	 * @param int $iTimeout = 10
+	 * @param string $sProxy = ''
+	 * @param string $sProxyAuth = ''
 	 *
 	 * @return bool
 	 */
-	public function SaveUrlToFile($sUrl, $rFile, $sCustomUserAgent = 'MaiSo Http User Agent (v1)', &$sContentType = '', &$iCode = 0, $oLogger = null, $iTimeout = 10)
+	public function SaveUrlToFile($sUrl, $rFile, $sCustomUserAgent = 'MailSo Http User Agent (v1)', &$sContentType = '', &$iCode = 0,
+		$oLogger = null, $iTimeout = 10, $sProxy = '', $sProxyAuth = '')
 	{
 		if (!is_resource($rFile))
 		{
@@ -431,6 +460,15 @@ class Http
 		if (0 < \strlen($sCustomUserAgent))
 		{
 			$aOptions[CURLOPT_USERAGENT] = $sCustomUserAgent;
+		}
+
+		if (0 < \strlen($sProxy))
+		{
+			$aOptions[CURLOPT_PROXY] = $sProxy;
+			if (0 < \strlen($sProxyAuth))
+			{
+				$aOptions[CURLOPT_PROXYUSERPWD] = $sProxyAuth;
+			}
 		}
 
 		$oCurl = \curl_init();
@@ -465,17 +503,21 @@ class Http
 
 	/**
 	 * @param string $sUrl
-	 * @param string $sCustomUserAgent = 'MaiSo Http User Agent (v1)'
+	 * @param string $sCustomUserAgent = 'MailSo Http User Agent (v1)'
 	 * @param string $sContentType = ''
 	 * @param int $iCode = 0
 	 * @param \MailSo\Log\Logger $oLogger = null
+	 * @param int $iTimeout = 10
+	 * @param string $sProxy = ''
+	 * @param string $sProxyAuth = ''
 	 *
 	 * @return string|bool
 	 */
-	public function GetUrlAsString($sUrl, $sCustomUserAgent = 'MaiSo Http User Agent (v1)', &$sContentType = '', &$iCode = 0, $oLogger = null)
+	public function GetUrlAsString($sUrl, $sCustomUserAgent = 'MailSo Http User Agent (v1)', &$sContentType = '', &$iCode = 0,
+		$oLogger = null, $iTimeout = 10, $sProxy = '', $sProxyAuth = '')
 	{
 		$rMemFile = \MailSo\Base\ResourceRegistry::CreateMemoryResource();
-		if ($this->SaveUrlToFile($sUrl, $rMemFile, $sCustomUserAgent, $sContentType, $iCode, $oLogger) && \is_resource($rMemFile))
+		if ($this->SaveUrlToFile($sUrl, $rMemFile, $sCustomUserAgent, $sContentType, $iCode, $oLogger, $iTimeout, $sProxy, $sProxyAuth) && \is_resource($rMemFile))
 		{
 			\rewind($rMemFile);
 			return \stream_get_contents($rMemFile);
@@ -530,23 +572,25 @@ class Http
 	 */
 	public function StatusHeader($iStatus, $sCustomStatusText = '')
 	{
-		switch ($iStatus)
+		$iStatus = (int) $iStatus;
+		if (99 < $iStatus)
 		{
-			default:
-				\header('Status: '.$iStatus, true, $iStatus);
-				break;
-			case 304:
-				\header($this->ServerProtocol().' 304 '.(0 === \strlen($sCustomStatusText) ? 'Not Modified' : $sCustomStatusText), true, $iStatus);
-				break;
-			case 200:
-				\header($this->ServerProtocol().' 200 '.(0 === \strlen($sCustomStatusText) ? 'OK' : $sCustomStatusText), true, $iStatus);
-				break;
-			case 401:
-				\header($this->ServerProtocol().' 401 '.(0 === \strlen($sCustomStatusText) ? 'Please sign in' : $sCustomStatusText), true, $iStatus);
-				break;
-			case 404:
-				\header($this->ServerProtocol().' 404 '.(0 === \strlen($sCustomStatusText) ? 'Not Found' : $sCustomStatusText), true, $iStatus);
-				break;
+			$aStatus = array(
+				301 => 'Moved Permanently',
+				304 => 'Not Modified',
+				200 => 'OK',
+				400 => 'Bad Request',
+				401 => 'Unauthorized',
+				403 => 'Forbidden',
+				404 => 'Not Found',
+				405 => 'Method Not Allowed'
+			);
+
+			$sCustomStatusText = \trim($sCustomStatusText);
+			$sHeaderHead = \ini_get('cgi.rfc2616_headers') && false !== \strpos(\strtolower(\php_sapi_name()), 'cgi') ? 'Status:' : $this->ServerProtocol();
+			$sHeaderText = (0 === \strlen($sCustomStatusText) && isset($aStatus[$iStatus]) ? $aStatus[$iStatus] : $sCustomStatusText);
+
+			\header(\trim($sHeaderHead.' '.$iStatus.' '.$sHeaderText), true, $iStatus);
 		}
 	}
 
@@ -564,7 +608,7 @@ class Http
 	 */
 	public function GetUrl()
 	{
-		return '/'.$this->GetServer('REQUEST_URI', '');
+		return $this->GetServer('REQUEST_URI', '');
 	}
 
 	/**
@@ -573,13 +617,5 @@ class Http
 	public function GetFullUrl()
 	{
 		return $this->GetScheme().'://'.$this->GetHost(true, false).$this->GetPath();
-	}
-
-	/**
-	 * @return string
-	 */
-	public function GetFullUrlWithQuery()
-	{
-		return $this->GetScheme().'://'.$this->GetHost(true, false).$this->GetUrl();
 	}
 }

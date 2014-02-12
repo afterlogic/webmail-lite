@@ -48,9 +48,9 @@ class Helper
 
 		$stmt = $oPdo->prepare(
 			'SELECT principaluri FROM '.$dbPrefix.Constants::T_CALENDARS.'
-				WHERE principaluri = ? and uri = ? LIMIT 1'
+				WHERE principaluri = ?'
 		);
-		$stmt->execute(array($sPrincipal, Constants::CALENDAR_DEFAULT_NAME));
+		$stmt->execute(array($sPrincipal));
 		if (count($stmt->fetchAll()) === 0)
 		{
 			$stmt = $oPdo->prepare(
@@ -61,10 +61,29 @@ class Helper
 			$stmt->execute(array(
 					$sPrincipal,
 					Constants::CalendarDefaultName,
-					Constants::CALENDAR_DEFAULT_NAME,
+					\Sabre\DAV\UUIDUtil::getUUID(),
 					'',
 					'VEVENT,VTODO',
 					Constants::CALENDAR_DEFAULT_COLOR
+				)
+			);
+		}		
+		
+		$stmt = $oPdo->prepare(
+			'SELECT principaluri FROM '.$dbPrefix.Constants::T_CALENDARS.'
+				WHERE principaluri = ? and uri = ? LIMIT 1'
+		);
+		$stmt->execute(array($sPrincipal, Constants::CALENDAR_DEFAULT_NAME));
+		if (count($stmt->fetchAll()) !== 0)
+		{
+			$stmt = $oPdo->prepare(
+				'UPDATE '.$dbPrefix.Constants::T_CALENDARS.'
+					SET uri = ? WHERE principaluri = ? and uri = ?'
+			);
+			$stmt->execute(array(
+					\Sabre\DAV\UUIDUtil::getUUID(),
+					$sPrincipal,
+					Constants::CALENDAR_DEFAULT_NAME
 				)
 			);
 		}

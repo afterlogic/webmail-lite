@@ -51,6 +51,8 @@ class CApiHelpdeskDbStorage extends CApiHelpdeskStorage
 				$oUser = new CHelpdeskUser();
 				$oUser->InitByDbRow($oRow);
 			}
+
+			$this->oConnection->FreeResult();
 		}
 
 		$this->throwDbExceptionIfExist();
@@ -94,6 +96,11 @@ class CApiHelpdeskDbStorage extends CApiHelpdeskStorage
 		return $this->getUserBySql($this->oCommandCreator->GetUserByEmail($iIdTenant, $sEmail));
 	}
 
+	public function GetUserBySocialId($iIdTenant, $sSocialId)
+	{
+		return $this->getUserBySql($this->oCommandCreator->GetUserBySocialId($iIdTenant, $sSocialId));
+	}
+
 	/**
 	 * @param int $iIdTenant
 	 * @param string $sActivateHash
@@ -135,6 +142,7 @@ class CApiHelpdeskDbStorage extends CApiHelpdeskStorage
 	public function UserExists(CHelpdeskUser $oHelpdeskUser)
 	{
 		$bResult = false;
+
 		if ($this->oConnection->Execute($this->oCommandCreator->UserExists($oHelpdeskUser)))
 		{
 			$oRow = $this->oConnection->GetNextRecord();
@@ -142,7 +150,10 @@ class CApiHelpdeskDbStorage extends CApiHelpdeskStorage
 			{
 				$bResult = true;
 			}
+
+			$this->oConnection->FreeResult();
 		}
+
 		$this->throwDbExceptionIfExist();
 		return $bResult;
 	}
@@ -343,6 +354,8 @@ class CApiHelpdeskDbStorage extends CApiHelpdeskStorage
 				$oThread = new CHelpdeskThread();
 				$oThread->InitByDbRow($oRow);
 			}
+
+			$this->oConnection->FreeResult();
 		}
 
 		$this->throwDbExceptionIfExist();
@@ -365,6 +378,8 @@ class CApiHelpdeskDbStorage extends CApiHelpdeskStorage
 			{
 				$iThreadID = (int) $oRow->id_helpdesk_thread;
 			}
+
+			$this->oConnection->FreeResult();
 		}
 
 		$this->throwDbExceptionIfExist();
@@ -419,6 +434,8 @@ class CApiHelpdeskDbStorage extends CApiHelpdeskStorage
 			{
 				$iResult = (int) $oRow->item_count;
 			}
+
+			$this->oConnection->FreeResult();
 		}
 
 		$this->throwDbExceptionIfExist();
@@ -473,6 +490,8 @@ class CApiHelpdeskDbStorage extends CApiHelpdeskStorage
 			{
 				$iResult = (int) $oRow->item_count;
 			}
+
+			$this->oConnection->FreeResult();
 		}
 
 		$this->throwDbExceptionIfExist();
@@ -579,6 +598,65 @@ class CApiHelpdeskDbStorage extends CApiHelpdeskStorage
 			$bResult = true;
 		}
 
+		$this->throwDbExceptionIfExist();
+		return $bResult;
+	}
+
+	/**
+	 * @param int $iThreadID
+	 *
+	 * @return array|bool
+	 */
+	public function GetOnline(CHelpdeskUser $oHelpdeskUser, $iThreadID)
+	{
+		$mResult = false;
+		if ($this->oConnection->Execute($this->oCommandCreator->GetOnline($oHelpdeskUser, $iThreadID, 5)))
+		{
+			$oRow = null;
+			$mResult = array();
+
+			while (false !== ($oRow = $this->oConnection->GetNextRecord()))
+			{
+				if ($oRow && isset($oRow->id_helpdesk_user) && isset($oRow->name) &&
+					isset($oRow->email))
+				{
+					if ((string) $oRow->id_helpdesk_user !== (string) $oHelpdeskUser->IdHelpdeskUser)
+					{
+						$mResult[$oRow->id_helpdesk_user] = array((string) $oRow->name, (string) $oRow->email);
+					}
+				}
+			}
+
+			$mResult = array_values($mResult);
+		}
+
+		$this->throwDbExceptionIfExist();
+		return $mResult;
+	}
+
+	/**
+	 * @param int $iTimeoutInMin = 15
+	 *
+	 * @return bool
+	 */
+	public function ClearAllOnline($iTimeoutInMin = 15)
+	{
+		$bResult = $this->oConnection->Execute($this->oCommandCreator->ClearAllOnline($iTimeoutInMin));
+		$this->throwDbExceptionIfExist();
+		return $bResult;
+	}
+
+	/**
+	 * @param CHelpdeskUser $oHelpdeskUser
+	 * @param int $iThreadID
+	 *
+	 * @return bool
+	 */
+	public function SetOnline(CHelpdeskUser $oHelpdeskUser, $iThreadID)
+	{
+		$this->oConnection->Execute($this->oCommandCreator->ClearOnline($oHelpdeskUser, $iThreadID));
+
+		$bResult = $this->oConnection->Execute($this->oCommandCreator->SetOnline($oHelpdeskUser, $iThreadID));
 		$this->throwDbExceptionIfExist();
 		return $bResult;
 	}

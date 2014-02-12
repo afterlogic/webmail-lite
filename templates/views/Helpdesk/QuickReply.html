@@ -15,9 +15,9 @@
 				hasfocus: replyTextFocus, onCtrlEnter: postCommand, valueUpdate: 'afterkeydown'"></textarea>
 		</div>
 
-		<div class="row data upload_list" data-bind="visible: uploadedFiles().length > 0">
+		<div class="row data attachments upload" data-bind="visible: uploadedFiles().length > 0">
 			<div data-bind="css: 'count' + uploadedFiles().length">
-			<!-- ko template: {name: 'Helpdesk_Attachment', foreach: uploadedFiles} --><!-- /ko -->
+			<!-- ko template: {name: 'Common_FileViewModel', foreach: uploadedFiles} --><!-- /ko -->
 			</div>
 		</div>
 

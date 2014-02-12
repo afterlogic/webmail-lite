@@ -428,7 +428,29 @@ class CDbStorage
 			{
 				return $this->oSlaveConnector->GetNextRecord($bAutoFree);
 			}
+			
 			return $this->oConnector->GetNextRecord($bAutoFree);
+		}
+		catch (CApiDbException $oException)
+		{
+			$this->SetException($oException);
+		}
+		return false;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function FreeResult()
+	{
+		try
+		{
+			if ($this->oSlaveConnector)
+			{
+				return $this->oSlaveConnector->FreeResult();
+			}
+			
+			return $this->oConnector->FreeResult();
 		}
 		catch (CApiDbException $oException)
 		{

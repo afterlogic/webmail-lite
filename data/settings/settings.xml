@@ -56,7 +56,7 @@
 		<UseReCaptcha>Off</UseReCaptcha>
 		<AllowNewUsersRegister>On</AllowNewUsersRegister>
 		<AllowUsersAddNewAccounts>Off</AllowUsersAddNewAccounts>
-		<AllowIdentities>Off</AllowIdentities>
+		<AllowIdentities>On</AllowIdentities>
 		<AllowInsertImage>On</AllowInsertImage>
 		<AllowBodySize>Off</AllowBodySize>
 		<MaxBodySize>600</MaxBodySize>

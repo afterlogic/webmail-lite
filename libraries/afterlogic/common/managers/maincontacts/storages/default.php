@@ -177,13 +177,25 @@ class CApiMaincontactsStorage extends AApiManagerStorage
 	 * @param int $iUserId
 	 * @param string $sSearch
 	 * @param int $iRequestLimit
+	 * @param bool $bPhoneOnly = false
 	 * @return bool | array
 	 */
-	public function GetSuggestContactItems($iUserId, $sSearch, $iRequestLimit)
+	public function GetSuggestContactItems($iUserId, $sSearch, $iRequestLimit, $bPhoneOnly = false)
 	{
 		return array();
 	}
 
+	/**
+	 * @param int $iUserId
+	 * @param string $sSearch
+	 * @param int $iRequestLimit
+	 * @return bool | array
+	 */
+	public function GetSuggestGroupItems($iUserId, $sSearch, $iRequestLimit)
+	{
+		return array();
+	}
+	
 	/**
 	 * @param CContact $oContact
 	 * @return bool

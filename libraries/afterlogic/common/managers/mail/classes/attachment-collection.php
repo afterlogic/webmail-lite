@@ -19,12 +19,14 @@ class CApiMailAttachmentCollection extends \MailSo\Base\Collection
 	}
 
 	/**
+	 * @param bool $bCheckContentID = false
 	 * @return int
 	 */
-	public function InlineCount()
+	public function InlineCount($bCheckContentID = false)
 	{
-		$aList = $this->FilterList(function ($oAttachment) {
-			return $oAttachment && $oAttachment->IsInline();
+		$aList = $this->FilterList(function ($oAttachment) use ($bCheckContentID) {
+			return $oAttachment && $oAttachment->IsInline() &&
+				($bCheckContentID ? ($oAttachment->Cid() ? true : false) : true);
 		});
 
 		return is_array($aList) ? count($aList) : 0;

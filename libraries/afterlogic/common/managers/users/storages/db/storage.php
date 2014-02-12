@@ -86,6 +86,8 @@ class CApiUsersDbStorage extends CApiUsersStorage
 				$oUser = new CUser($oDomain);
 				$oUser->InitByDbRow($oRow);
 			}
+
+			$this->oConnection->FreeResult();
 		}
 
 		$this->throwDbExceptionIfExist();
@@ -110,6 +112,8 @@ class CApiUsersDbStorage extends CApiUsersStorage
 					$iResult = -1;
 				}
 			}
+
+			$this->oConnection->FreeResult();
 		}
 		return $iResult;
 	}
@@ -132,6 +136,8 @@ class CApiUsersDbStorage extends CApiUsersStorage
 					$iResult = -1;
 				}
 			}
+
+			$this->oConnection->FreeResult();
 		}
 		return $iResult;
 	}
@@ -154,6 +160,8 @@ class CApiUsersDbStorage extends CApiUsersStorage
 					$iResult = (int) ($sQuotaUsageBytes / 1024);
 				}
 			}
+
+			$this->oConnection->FreeResult();
 		}
 		return $iResult;
 	}
@@ -204,6 +212,30 @@ class CApiUsersDbStorage extends CApiUsersStorage
 	}
 
 	/**
+	 * @param CAccount $oAccount
+	 * @return array | bool
+	 */
+	public function GetIdentitiesByUserID($oAccount)
+	{
+		$aIdentities = false;
+		if ($this->oConnection->Execute($this->oCommandCreator->GetIdentitiesByUserID($oAccount)))
+		{
+			$aIdentities = array();
+
+			$oRow = null;
+			while (false !== ($oRow = $this->oConnection->GetNextRecord()))
+			{
+				$oIdentity = new CIdentity();
+				$oIdentity->InitByDbRow($oRow);
+				$aIdentities[] = $oIdentity;
+			}
+		}
+
+		$this->throwDbExceptionIfExist();
+		return $aIdentities;
+	}
+
+	/**
 	 * @param string $sSql
 	 * @return CAccount
 	 */
@@ -217,6 +249,8 @@ class CApiUsersDbStorage extends CApiUsersStorage
 			$oRow = $this->oConnection->GetNextRecord();
 			if ($oRow)
 			{
+				$this->oConnection->FreeResult();
+				
 				/* @var $oApiDomainsManager CApiDomainsManager */
 				$oApiDomainsManager = CApi::Manager('domains');
 
@@ -247,6 +281,10 @@ class CApiUsersDbStorage extends CApiUsersStorage
 					}
 				}
 			}
+			else
+			{
+				$this->oConnection->FreeResult();
+			}
 		}
 
 		$this->throwDbExceptionIfExist();
@@ -270,6 +308,8 @@ class CApiUsersDbStorage extends CApiUsersStorage
 				$oCalUser = new CCalUser(0);
 				$oCalUser->InitByDbRow($oRow);
 			}
+
+			$this->oConnection->FreeResult();
 		}
 
 		$this->throwDbExceptionIfExist();
@@ -400,6 +440,8 @@ class CApiUsersDbStorage extends CApiUsersStorage
 			{
 				$bResult = true;
 			}
+			
+			$this->oConnection->FreeResult();
 		}
 		$this->throwDbExceptionIfExist();
 		return $bResult;
@@ -429,6 +471,8 @@ class CApiUsersDbStorage extends CApiUsersStorage
 				$bIsDefaultAccount = (bool) $oRow->def_acct;
 				$bIsMailingList = (bool) $oRow->mailing_list;
 				$iUserId = (int) $oRow->id_user;
+
+				$this->oConnection->FreeResult();
 
 				if ($bIsMailingList)
 				{
@@ -470,6 +514,10 @@ class CApiUsersDbStorage extends CApiUsersStorage
 						$bResult = $this->deleteAccountRequests($iAccountId);
 					}
 				}
+			}
+			else
+			{
+				$this->oConnection->FreeResult();
 			}
 		}
 
@@ -545,7 +593,7 @@ class CApiUsersDbStorage extends CApiUsersStorage
 	 * @param string $sOrderBy = 'email'
 	 * @param bool $bOrderType = true
 	 * @param string $sSearchDesc = ''
-	 * @return array | false [IdAccount => [IsMailingList, Email, FriendlyName, IsDisabled, IdUser, StorageQuota]]
+	 * @return array | false [IdAccount => [IsMailingList, Email, FriendlyName, IsDisabled, IdUser, StorageQuota, LastLogin]]
 	 */
 	public function GetUserList($iDomainId, $iPage, $iUsersPerPage, $sOrderBy = 'email', $bOrderType = true, $sSearchDesc = '')
 	{
@@ -560,7 +608,7 @@ class CApiUsersDbStorage extends CApiUsersStorage
 			{
 				$aUsers[$oRow->id_acct] = array(
 					(bool) $oRow->mailing_list, $oRow->email, $oRow->friendly_nm, (bool) $oRow->deleted,
-					$oRow->id_user, $oRow->quota);
+					$oRow->id_user, $oRow->quota, $oRow->last_login);
 			}
 		}
 		$this->throwDbExceptionIfExist();
@@ -605,6 +653,8 @@ class CApiUsersDbStorage extends CApiUsersStorage
 			{
 				$iResultCount = (int) $oRow->users_count;
 			}
+
+			$this->oConnection->FreeResult();
 		}
 		$this->throwDbExceptionIfExist();
 		return $iResultCount;
@@ -624,6 +674,8 @@ class CApiUsersDbStorage extends CApiUsersStorage
 			{
 				$iResultCount = (int) $oRow->users_count;
 			}
+
+			$this->oConnection->FreeResult();
 		}
 		$this->throwDbExceptionIfExist();
 		return $iResultCount;
@@ -642,6 +694,8 @@ class CApiUsersDbStorage extends CApiUsersStorage
 			{
 				$iResult = (int) $oRow->users_count;
 			}
+
+			$this->oConnection->FreeResult();
 		}
 
 		$this->throwDbExceptionIfExist();
@@ -712,6 +766,8 @@ class CApiUsersDbStorage extends CApiUsersStorage
 			{
 				$bResult = true;
 			}
+
+			$this->oConnection->FreeResult();
 		}
 
 		$this->throwDbExceptionIfExist();
@@ -733,6 +789,8 @@ class CApiUsersDbStorage extends CApiUsersStorage
 			{
 				$bResult = $this->oConnection->Execute($this->oCommandCreator->InsertSafetySender($iUserId, $sEmail));
 			}
+
+			$this->oConnection->FreeResult();
 		}
 
 		$this->throwDbExceptionIfExist();
@@ -766,6 +824,9 @@ class CApiUsersDbStorage extends CApiUsersStorage
 			default:
 			case 'email':
 				$sResult = 'email';
+				break;
+			case 'last login':
+				$sResult = 'last_login';
 				break;
 		}
 		return $sResult;

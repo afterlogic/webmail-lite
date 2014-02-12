@@ -251,9 +251,10 @@ abstract class ActionsBase
 
 	/**
 	 * @param string $sMimeType
+	 * @param string $sFileName = ''
 	 * @return bool
 	 */
-	private function isImageMimeTypeSuppoted($sMimeType)
+	public function isImageMimeTypeSupported($sMimeType, $sFileName = '')
 	{
 		$bResult = function_exists('gd_info');
 		if ($bResult)
@@ -268,9 +269,24 @@ abstract class ActionsBase
 				case 'image/png':
 					$bResult = function_exists('imagecreatefrompng');
 					break;
+				case 'image/gif':
+					$bResult = function_exists('imagecreatefromgif');
+					break;
 			}
 		}
 
+		return $bResult;
+	}
+
+	/**
+	 * @param string $sMimeType
+	 * @param string $sFileName = ''
+	 * @return bool
+	 */
+	public function isExpandMimeTypeSupported($sMimeType, $sFileName = '')
+	{
+		$bResult = false;
+		\CApi::Plugin()->RunHook('webmail.supports-expanding-attachments', array(&$bResult, $sMimeType, $sFileName));
 		return $bResult;
 	}
 
@@ -318,7 +334,7 @@ abstract class ActionsBase
 					'IsFlagged' => in_array('\\flagged', $aFlags),
 					'IsAnswered' => in_array('\\answered', $aFlags),
 					'IsForwarded' => false,
-					'HasAttachments' => $oAttachments && 0 < $oAttachments->Count(),
+					'HasAttachments' => $oAttachments && 0 < $oAttachments->Count() && $oAttachments->Count() > $oAttachments->InlineCount(true),
 					'HasVcardAttachment' => $oAttachments && $oAttachments->HasVcardAttachment(),
 					'HasIcalAttachment' => $oAttachments && $oAttachments->HasIcalAttachment(),
 					'Priority' => $mResponse->Priority(),
@@ -346,13 +362,18 @@ abstract class ActionsBase
 					$mResult['InReplyTo'] = $mResponse->InReplyTo();
 					$mResult['References'] = $mResponse->References();
 					$mResult['ReadingConfirmation'] = $mResponse->ReadingConfirmation();
+					if (!empty($mResult['ReadingConfirmation']) && 
+						(in_array('$readconfirm', $aFlags) || ($oAccount && \strtolower($mResult['ReadingConfirmation']) === \strtolower($oAccount->Email))))
+					{
+						$mResult['ReadingConfirmation'] = '';
+					}
 
 					$bHasExternals = false;
 					$aFoundedCIDs = array();
 
 					$bRtl = false;
 					$sPlain = '';
-					$sHtml = $mResponse->Html();
+					$sHtml = trim($mResponse->Html());
 					
 					if (0 === strlen($sHtml))
 					{
@@ -364,7 +385,14 @@ abstract class ActionsBase
 						$bRtl = \MailSo\Base\Utils::IsRTL($sHtml);
 					}
 
-					$mResult['Html'] = 0 === strlen($sHtml) ? '' : \MailSo\Base\HtmlUtils::ClearHtml($sHtml, $bHasExternals, $aFoundedCIDs);
+					// TODO
+					$aContentLocationUrls = array();
+					$aFoundedContentLocationUrls = array();
+
+					$mResult['Html'] = 0 === strlen($sHtml) ? '' :
+						\MailSo\Base\HtmlUtils::ClearHtml($sHtml, $bHasExternals, $aFoundedCIDs,
+						$aContentLocationUrls, $aFoundedContentLocationUrls, false, true);
+					
 					$mResult['Plain'] = 0 === strlen($sPlain) ? '' : \MailSo\Base\HtmlUtils::ConvertPlainToHtml($sPlain);
 					$mResult['Rtl'] = $bRtl;
 
@@ -400,7 +428,7 @@ abstract class ActionsBase
 					'Description' => \MailSo\Base\LinkFinder::NewInstance()
 						->Text($mResponse->Description)
 						->UseDefaultWrappers(true)
-						->CompileText(true, false),
+						->CompileText(),
 					'When' => $mResponse->When,
 					'CalendarId' => $mResponse->CalendarId
 				));
@@ -486,6 +514,7 @@ abstract class ActionsBase
 					'Name' => $mResponse->Name,
 					'Email' => $mResponse->Email,
 					'Signature' => $mResponse->Signature,
+					'SignatureOptions' => $mResponse->SignatureOptions,
 					'LeaveMessagesOnServer' => $mResponse->LeaveMessagesOnServer,
 					'IncomingMailServer' => $mResponse->IncomingMailServer,
 					'IncomingMailPort' => $mResponse->IncomingMailPort,
@@ -536,14 +565,18 @@ abstract class ActionsBase
 				$sMimeIndex = strtolower(trim($mResponse->MimeIndex()));
 				$sContentTransferEncoding = strtolower(trim($mResponse->ContentTransferEncoding()));
 
+				$sFileName = $mResponse->FileName(true);
+
 				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), array(
-					'FileName' => $mResponse->FileName(true),
+					'FileName' => $sFileName,
 					'MimeType' => $sMimeType,
 					'MimePartIndex' => ('message/rfc822' === $sMimeType && ('base64' === $sContentTransferEncoding || 'quoted-printable' === $sContentTransferEncoding))
 						? '' :  $sMimeIndex,
 					'EstimatedSize' => $mResponse->EstimatedSize(),
 					'CID' => $mResponse->Cid(),
-					'Thumb' => $this->isImageMimeTypeSuppoted($sMimeType),
+					'Thumb' => \CApi::GetConf('labs.allow-thumbnail', true) &&
+						$this->isImageMimeTypeSupported($sMimeType, $sFileName),
+					'Expand' => $this->isExpandMimeTypeSupported($sMimeType, $sFileName),
 					'IsInline' => $mResponse->IsInline(),
 					'IsLinked' => in_array(trim(trim($mResponse->Cid()), '<>'), $aFoundedCIDs)
 				));
@@ -582,6 +615,18 @@ abstract class ActionsBase
 					'Filters' => $mResponse->Filters
 				));
 			}
+			else if ('CIdentity' === $sClassName)
+			{
+				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), array(
+					'IdIdentity' => $mResponse->IdIdentity,
+					'IdAccount' => $mResponse->IdAccount,
+					'Enabled' => $mResponse->Enabled,
+					'Email' => $mResponse->Email,
+					'FriendlyName' => $mResponse->FriendlyName,
+					'UseSignature' => $mResponse->UseSignature,
+					'Signature' => $mResponse->Signature
+				));
+			}
 			else if ('CApiMailFolderCollection' === $sClassName)
 			{
 				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), array(
@@ -595,10 +640,13 @@ abstract class ActionsBase
 					'Id' => $mResponse->Id,
 					'Name' => $mResponse->Name,
 					'Email' => $mResponse->Email,
+					'Emails' => $mResponse->Emails,
+					'Phones' => $mResponse->Phones,
 					'UseFriendlyName' => $mResponse->UseFriendlyName,
 					'IsGroup' => $mResponse->IsGroup,
 					'ReadOnly' => $mResponse->ReadOnly,
 					'ItsMe' => $mResponse->ItsMe,
+					'ForSharedToAll' => $mResponse->ForSharedToAll,
 					'Frequency' => $mResponse->Frequency
 				));
 			}

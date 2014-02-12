@@ -19,11 +19,11 @@
 			<span class="date" data-bind="text: oDateModel.getShortDate()"></span>
 			<span class="attachments" data-bind="visible: hasAttachments(), css: {'has_attachments': hasAttachments()}"></span>
 			<span class="marker"></span>
-			<span class="from fade" data-bind="text: fromOrToText()"></span>
+			<span class="from fadeout" data-bind="text: fromOrToText()"></span>
 			<span class="separator"></span>
-			<span class="thread" data-bind="text: threadCount(), visible: threadCountVisible(), click: openThread"></span>
-			<span class="thread_loading" data-i18n="MAILBOX/THREAD_LOADING" data-bind="i18n: 'text', visible: threadLoadingVisible()"></span>
-			<span class="subject fade" data-bind="text: subjectForDisplay()"></span>
+			<span class="thread" data-bind="text: threadCount(), visible: threadCountVisible(), click: openThread, css: {'unreed': threadUnreedCount() > 0}"></span>
+			<span class="thread loading" data-i18n="MAILBOX/THREAD_LOADING" data-bind="i18n: 'text', visible: threadLoadingVisible()"></span>
+			<span class="subject fadeout" data-bind="text: subjectForDisplay()"></span>
 		</span>
 		<div class="separator"></div>
 	</div>

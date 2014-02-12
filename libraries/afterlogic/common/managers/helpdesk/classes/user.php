@@ -46,8 +46,12 @@ class CHelpdeskUser extends api_AContainer
 			'Activated'				=> false,
 			'Blocked'				=> false,
 			'IsAgent'				=> false,
+//			'IsSocial'				=> false,
 			'Name'					=> '',
 			'Email'					=> '',
+			'NotificationEmail'		=> '',
+			'SocialId'				=> '',
+			'SocialType'			=> '',
 			'ActivateHash'			=> md5(microtime(true).rand(1000, 9999)),
 			'Language'				=> $oSettings->GetConf('Common/DefaultLanguage'),
 			'DateFormat'			=> $oSettings->GetConf('Common/DefaultDateFormat'),
@@ -56,6 +60,7 @@ class CHelpdeskUser extends api_AContainer
 			'PasswordSalt'			=> md5(microtime(true).rand(10000, 99999)),
 			'MailNotifications'		=> false,
 			'Created'				=> time()
+
 		));
 	}
 
@@ -87,15 +92,27 @@ class CHelpdeskUser extends api_AContainer
 	 */
 	public function Validate()
 	{
-		switch (true)
+		if($this->SocialId)
 		{
-			case api_Validate::IsEmpty($this->Email):
-				throw new CApiValidationException(Errs::Validation_FieldIsEmpty, null, array(
-					'{{ClassName}}' => 'CHelpdeskUser', '{{ClassField}}' => 'Email'));
-				
-			case api_Validate::IsEmpty($this->PasswordHash):
-				throw new CApiValidationException(Errs::Validation_FieldIsEmpty, null, array(
-					'{{ClassName}}' => 'CHelpdeskUser', '{{ClassField}}' => 'PasswordHash'));
+			switch (true)
+			{
+				case (api_Validate::IsEmpty($this->NotificationEmail)) :
+					throw new CApiValidationException(Errs::Validation_FieldIsEmpty, null, array(
+						'{{ClassName}}' => 'CHelpdeskUser', '{{NotificationEmail}}' => 'NotificationEmail'));
+			}
+		}
+		else
+		{
+			switch (true)
+			{
+				case (api_Validate::IsEmpty($this->Email)) :
+					throw new CApiValidationException(Errs::Validation_FieldIsEmpty, null, array(
+						'{{ClassName}}' => 'CHelpdeskUser', '{{ClassField}}' => 'Email'));
+
+				case (api_Validate::IsEmpty($this->PasswordHash)) :
+					throw new CApiValidationException(Errs::Validation_FieldIsEmpty, null, array(
+						'{{ClassName}}' => 'CHelpdeskUser', '{{ClassField}}' => 'PasswordHash'));
+			}
 		}
 
 		return true;
@@ -159,7 +176,10 @@ class CHelpdeskUser extends api_AContainer
 			'ActivateHash'		=> array('string', 'activate_hash'),
 			'Blocked'			=> array('bool', 'blocked'),
 			'Email'				=> array('string', 'email', true, false),
+			'NotificationEmail'	=> array('string', 'notification_email'),
 			'Name'				=> array('string', 'name'),
+			'SocialId'			=> array('string', 'social_id'),
+			'SocialType'		=> array('string', 'social_type'),
 			'Language'			=> array('string(100)', 'language'),
 			'DateFormat'		=> array('string(50)', 'date_format'),
 			'TimeFormat'		=> array('int', 'time_format'),

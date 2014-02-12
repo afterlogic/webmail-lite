@@ -48,6 +48,13 @@ class CApiHelpdeskCommandCreator extends api_CommandCreator
 			$this->escapeColumn('id_tenant'), $iIdTenant,
 			$this->escapeColumn('email'), strtolower($this->escapeString($sEmail))));
 	}
+
+	public function GetUserBySocialId($iIdTenant, $sSocialId)
+	{
+		return $this->getUserByWhere(sprintf('%s = %d AND %s = %s',
+			$this->escapeColumn('id_tenant'), $iIdTenant,
+			$this->escapeColumn('social_id'), strtolower($this->escapeString($sSocialId))));
+	}
 	
 	/**
 	 * @param int $iIdTenant
@@ -560,7 +567,7 @@ WHERE %s = %s AND %s = %s%s';
 
 		$aWhere[] = $this->escapeColumn('id_helpdesk_thread').' = '.$oHelpdeskThread->IdHelpdeskThread;
 
-		return $sSql.' WHERE '.implode(' AND ', $aWhere);;
+		return $sSql.' WHERE '.implode(' AND ', $aWhere);
 	}
 
 	/**
@@ -630,6 +637,64 @@ WHERE %s = %s AND %s = %s%s';
 		return sprintf($sSql, $this->Prefix(),
 			$oHelpdeskUser->IdTenant, $oHelpdeskUser->IdHelpdeskUser,
 			$oHelpdeskThread->IdHelpdeskThread, $oHelpdeskThread->LastPostId
+		);
+	}
+
+	/**
+	 * @param CHelpdeskUser $oHelpdeskUser
+	 * @param int $iThreadID
+	 * @param int $iTimeoutInMin = 5
+	 *
+	 * @return string
+	 */
+	public function GetOnline(CHelpdeskUser $oHelpdeskUser, $iThreadID, $iTimeoutInMin = 5)
+	{
+		$sSql = 'SELECT * FROM %sahd_online WHERE id_helpdesk_thread = %d AND id_tenant = %d AND ping_time > %d';
+		return sprintf($sSql, $this->Prefix(), $iThreadID, $oHelpdeskUser->IdTenant,
+			time() - $iTimeoutInMin * 60
+		);
+	}
+
+	/**
+	 * @param CHelpdeskUser $oHelpdeskUser
+	 * @param int $iThreadID
+	 *
+	 * @return string
+	 */
+	public function ClearOnline(CHelpdeskUser $oHelpdeskUser, $iThreadID)
+	{
+		$sSql = 'DELETE FROM %sahd_online  WHERE id_helpdesk_user = %d AND id_tenant = %d AND id_helpdesk_thread = %d';
+		return sprintf($sSql, $this->Prefix(),
+			$oHelpdeskUser->IdHelpdeskUser, $oHelpdeskUser->IdTenant, $iThreadID
+		);
+	}
+
+	/**
+	 * @param int $iTimeoutInMin = 15
+	 *
+	 * @return string
+	 */
+	public function ClearAllOnline($iTimeoutInMin = 15)
+	{
+		$sSql = 'DELETE FROM %sahd_online WHERE ping_time < %d';
+		return sprintf($sSql, $this->Prefix(),
+			time() - $iTimeoutInMin * 60
+		);
+	}
+
+	/**
+	 * @param CHelpdeskUser $oHelpdeskUser
+	 * @param int $iThreadID
+	 * 
+	 * @return string
+	 */
+	public function SetOnline(CHelpdeskUser $oHelpdeskUser, $iThreadID)
+	{
+		$sSql = 'INSERT INTO %sahd_online (id_helpdesk_thread, id_helpdesk_user, id_tenant, name, email, ping_time) VALUES ( %d, %d, %d, %s, %s, %d )';
+		return sprintf($sSql, $this->Prefix(),
+			$iThreadID, $oHelpdeskUser->IdHelpdeskUser, $oHelpdeskUser->IdTenant,
+			$this->escapeString($oHelpdeskUser->Name), $this->escapeString($oHelpdeskUser->Email),
+			time()
 		);
 	}
 }

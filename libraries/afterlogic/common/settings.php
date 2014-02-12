@@ -438,6 +438,8 @@ class api_Settings
 			'Common/LoggingLevel' => array(ELogLevel::Full, 'spec'),
 			'Common/EnableMobileSync' => array(false, 'bool'),
 
+			'Common/TenantGlobalCapa' => array('', 'string'),
+
 			// WebMail
 			'WebMail/AllowWebMail' => array(true, 'bool'),
 			'WebMail/IncomingMailProtocol' => array(EMailProtocol::IMAP4, 'spec'),
@@ -469,10 +471,9 @@ class api_Settings
 			'WebMail/LoginAtDomainValue' => array('', 'string'),
 			'WebMail/UseLoginWithoutDomain' => array(false, 'bool'),
 
-			'WebMail/UseReCaptcha' => array(false, 'bool'),
 			'WebMail/AllowNewUsersRegister' => array(false, 'bool'),
 			'WebMail/AllowUsersAddNewAccounts' => array(true, 'bool'),
-			'WebMail/AllowIdentities' => array(false, 'bool'),
+			'WebMail/AllowIdentities' => array(true, 'bool'),
 			'WebMail/AllowInsertImage' => array(true, 'bool'),
 			'WebMail/AllowBodySize' => array(false, 'bool'),
 			'WebMail/MaxBodySize' => array(600, 'int'),  //TODO Magic
@@ -508,6 +509,8 @@ class api_Settings
 
 			// Files
 			'Files/AllowFiles' => array(true, 'bool'),
+			'Files/EnableSizeLimit' => array(false, 'bool'),
+			'Files/SizeLimit' => array(0, 'int'),
 
 			// Sip
 			'Sip/AllowSip' => array(false, 'bool'),
@@ -518,16 +521,38 @@ class api_Settings
 			
 			// Twilio
 			'Twilio/AllowTwilio' => array(false, 'bool'),
+			'Twilio/PhoneNumber' => array('', 'string'),
 			'Twilio/AccountSID' => array('', 'string'),
 			'Twilio/AuthToken' => array('', 'string'),
 			'Twilio/AppSID' => array('', 'string'),
+
+			// Social
+			'Social/FacebookAllow' => array(false, 'bool'),
+			'Social/FacebookId' => array('', 'string'),
+			'Social/FacebookSecret' => array('', 'string'),
+			'Social/GoogleAllow' => array(false, 'bool'),
+			'Social/GoogleId' => array('', 'string'),
+			'Social/GoogleSecret' => array('', 'string'),
+			'Social/TwitterAllow' => array(false, 'bool'),
+			'Social/TwitterId' => array('', 'string'),
+			'Social/TwitterSecret' => array('', 'string'),
 
 			// Helpdesk
 			'Helpdesk/AllowHelpdesk' => array(true, 'bool'),
 			'Helpdesk/AdminEmailAccount' => array('', 'string'),
 			'Helpdesk/ClientIframeUrl' => array('', 'string'),
 			'Helpdesk/AgentIframeUrl' => array('', 'string'),
-			'Helpdesk/SiteName' => array('', 'string')
+			'Helpdesk/SiteName' => array('', 'string'),
+
+			'Helpdesk/FacebookAllow' => array(false, 'bool'),
+			'Helpdesk/FacebookId' => array('', 'string'),
+			'Helpdesk/FacebookSecret' => array('', 'string'),
+			'Helpdesk/GoogleAllow' => array(false, 'bool'),
+			'Helpdesk/GoogleId' => array('', 'string'),
+			'Helpdesk/GoogleSecret' => array('', 'string'),
+			'Helpdesk/TwitterAllow' => array(false, 'bool'),
+			'Helpdesk/TwitterId' => array('', 'string'),
+			'Helpdesk/TwitterSecret' => array('', 'string'),
 		);
 
 		foreach ($this->aMap as $sKey => $aField)

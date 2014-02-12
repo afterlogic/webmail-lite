@@ -1,5 +1,5 @@
 <div class="panel_center" data-bind="heightAdjust: {'elements': [domMessageHeader, domQuickReply], 'triggers': [detailsVisible(), currentMessage(), replyPaneVisible(), replyTextFocusThrottled()]}">
-	<div class="message_header" data-bind="initDom: domMessageHeader">
+	<div class="message_header" data-bind="initDom: domMessageHeader, visible: isCurrentMessage">
 		<span class="resizer_top" data-bind="event: { 'dblclick': resizeDblClick}, visible: fakeHeader"></span>
 		<span class="resizer_bottom" data-bind="event: { 'dblclick': resizeDblClick}"></span>
 		<div class="notice" data-bind="visible: visiblePicturesControl">
@@ -24,7 +24,7 @@
 		</div>
 
 		<div class="header_content clearfix">
-			<div class="header_row" data-bind="visible: isCurrentMessage">
+			<div class="header_row">
 				<div class="toolbar">
 					<span class="content">
 						<!--<span class="item" data-bind="command: prevMessageCommand, visible: singleMode">
@@ -43,6 +43,10 @@
 							<span class="icon" data-bind="i18n: 'title'" data-i18n="MAILBOX/TOOL_REPLY_TO_ALL"></span>
 							<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_REPLY_TO_ALL"></span>
 						</span>
+						<!--<span class="item resend" data-bind="command: resendCommand, visible: isVisibleResendTool">-->
+							<!--<span class="icon" data-bind="i18n: 'title'" data-i18n="MAILBOX/TOOL_RESEND"></span>-->
+							<!--<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_RESEND"></span>-->
+						<!--</span>-->
 						<span class="item forward" data-bind="command: forwardCommand, visible: isVisibleForwardTool">
 							<span class="icon" data-bind="i18n: 'title'" data-i18n="MAILBOX/TOOL_FORWARD"></span>
 							<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_FORWARD"></span>
@@ -79,24 +83,24 @@
 				<span class="link details_hide" data-i18n="MESSAGE/ACTION_HIDE_DETAILS"
 					data-bind="i18n: 'title', click: hideDetails, visible: detailsVisible()"></span>
 				
-				<div class="message_info" data-bind="contactcard: {'trigger': hasFromContact}, visible: !detailsVisible()">
+				<div class="message_info" data-bind="contactcard: {'trigger': hasFromContact, 'controlWidth': contactCardWidth}, visible: !detailsVisible()">
 					<div class="message_info_line">
 						<span class="from control" data-bind="text: shortFromToDisplay, css: {'founded': hasFromContact}"></span>
 						<span class="add_contact" data-i18n="MESSAGE/ACTION_ADD_TO_CONTACTS" 
 							  data-bind="i18n: 'title', click: addToContacts, visible: visibleAddToContacts"></span>
-						<span data-i18n="MESSAGE/HEADER_TO" data-bind="i18n: 'text', visible: allRecipients() !== ''"></span>
+						<span data-i18n="MESSAGE/SHORT_LINE_TO" data-bind="i18n: 'text', visible: allRecipients() !== ''"></span>
 						<span data-bind="text: allRecipients"></span>
 					</div>
 					<span class="dropdown control contact_card" data-bind="visible: hasFromContact">
 						<span class="dropdown_helper">
 							<span class="dropdown_arrow"><span></span></span>
-							<span class="dropdown_content" data-bind="template: {name: 'Mail_ContactCard', data: fromContact}">
+							<span class="dropdown_content" data-bind="template: {name: 'Common_ContactCard', data: fromContact}, style: {'width': contactCardWidth()+'px'}">
 							</span>
 						</span>
 					</span>
 				</div>
 				
-				<div class="message_info message_detail_info" data-bind="contactcard: {'trigger': hasFromContact}, visible: detailsVisible()">
+				<div class="message_info message_detail_info" data-bind="contactcard: {'trigger': hasFromContact, 'controlWidth': contactCardWidth}, visible: detailsVisible()">
 					<div class="message_info_line">
 						<span class="title" data-i18n="MESSAGE/HEADER_FROM" data-bind="i18n: 'text'"></span>: 
 						<span class="from control" data-bind="text: fullFrom, css: {'founded': hasFromContact}"></span>
@@ -107,8 +111,7 @@
 						<span class="dropdown control contact_card" data-bind="visible: hasFromContact">
 							<span class="dropdown_helper">
 								<span class="dropdown_arrow"><span></span></span>
-								<span class="dropdown_content" data-bind="template: {name: 'Mail_ContactCard', data: fromContact}">
-								</span>
+								<span class="dropdown_content" data-bind="template: {name: 'Common_ContactCard', data: fromContact}, style: {'width': contactCardWidth()+'px'}"></span>
 							</span>
 						</span>
 					</div>
@@ -132,7 +135,7 @@
 				</div>
 			</div>
 
-			<div class="header_row" data-bind="visible: isCurrentMessage">
+			<div class="header_row">
 				<span class="date" data-bind="text: midDate, visible: !detailsVisible()"></span>
 				<span class="icon importance"></span>
 				<span class="icon attachments" data-bind="visible: hasNotInlineAttachments, click: function() { scrollToAttachment.valueHasMutated(); }"></span>
@@ -141,61 +144,41 @@
 		</div>
 	</div>
 	
-	<div class="message" data-bind="customScrollbar: {'reset': currentMessage(), scrollTo: scrollToAttachment}, css: {'has_bodytext': hasBodyText, 'has_attachments': hasNotInlineAttachments}">
-		<div class="message_content scroll-inner" data-bind="hasfocus: contentHasFocus">
-			
-			<!-- ko if: visibleAppointmentInfo -->
-				<div class="appointment" data-bind="template: {name: 'Mail_AppointmentViewModel', data: ical}"></div>
-			<!-- /ko -->
-			
-			<!-- ko if: visibleVcardInfo -->
-				<div class="appointment" data-bind="template: {name: 'Mail_VcardAttachmentViewModel', data: vcard}"></div>
-			<!-- /ko -->
-			
-			<div class="message_body_info" data-bind="visible: visibleNoMessageSelectedText">
-				<div data-i18n="MESSAGE/INFO_NO_MESSAGE_SELECTED" 
-					 data-bind="i18n: 'text'"></div>
-				<div class="message_body_secondary_info" data-i18n="MESSAGE/INFO_SINGLE_DOUBLE_CLICK" 
-					 data-bind="i18n: 'text'"></div>
+	<div class="panels" data-bind="css: {'has_attachments': hasNotInlineAttachments}">
+		<div class="panel right_panel" data-bind="visible: hasNotInlineAttachments, customScrollbar: {x: false, 'reset': currentMessage()}">
+			<div class="scroll-inner">
+				<div class="attachments large">
+					<a class="download_all" href="javascript: void(0)" 
+					   data-bind="click: downloadAllAttachments, visible: visibleDownloadAllAttachments">
+						<span class="icon"></span>
+						<span class="text" data-i18n="MESSAGE/ATTACHMENT_DOWNLOAD_ALL" data-bind="i18n: 'text'"></span>
+					</a>
+					<div data-bind="template: {name: 'Common_FileViewModel', foreach: notInlineAttachments}"></div>
+				</div>
 			</div>
-			<div class="message_body_info" data-i18n="MESSAGE/INFO_LOADING" 
-				 data-bind="visible: isLoading, i18n: 'text'"></div>
-			<div class="message_body html" data-bind="initDom: domTextBody, attr: {'dir': rtlMessage() ? 'rtl' : 'ltr'}"></div>
-			
-			<div class="bodyparts_separator"></div>
-			
-			<div class="attachments" data-bind="visible: hasNotInlineAttachments">
-				<a class="download_all" href="javascript: void(0)">
-					<span class="icon"></span>
-					<span class="text" data-i18n="MESSAGE/ATTACHMENT_DOWNLOAD_ALL" data-bind="i18n: 'text'"></span>
-				</a>
-				<div data-bind="foreach: notInlineAttachments">
-					<div class="file attachment" draggable="true" data-bind="event: { 'dragstart': eventDragStart }">
-						<!-- ko if: thumb() -->
-							<img class="thumb download" style="height: 32px; width: 32px;" data-bind="attr: {'title': downloadTitle(), 'src': viewThumbnailLink}, click: downloadAttachment" />
-						<!-- /ko -->
-						<!-- ko if: !thumb() -->
-							<span class="icon download" data-bind="attr: {'title': downloadTitle()}, 'click': downloadAttachment, 'css': extension().toLowerCase()"></span>
-						<!-- /ko -->
-						<span class="attachment_content">
-							<span class="file">
-								<span class="name" data-bind="text: fileName()"></span>
-								<span class="size" data-bind="text: friendlySize()"></span>
-							</span>
-							<br />
-							<span class="buttons">
-								<a class="button view" href="javascript: void(0)" 
-								   data-bind="visible: visibleViewLink(), i18n: 'text', click: viewAttachment" 
-								   data-i18n="MESSAGE/ATTACHMENT_VIEW"></a>
-								<a class="button download" href="javascript: void(0)" 
-								   data-bind="attr: {'title': downloadTitle()}, click: downloadAttachment, i18n: 'text'"
-								   data-i18n="MESSAGE/ATTACHMENT_DOWNLOAD"></a>
-							</span>
-						</span>
-					</div>
-					<!-- ko if: isMessageType() && messagePart() -->
-						<!-- ko template: {name: 'Mail_PrintMessageViewModel', data: messagePart} --><!-- /ko -->
+		</div>
+		<div class="panel left_panel">
+			<div class="message" data-bind="customScrollbar: {'reset': currentMessage(), scrollTo: scrollToAttachment}, css: {'has_bodytext': hasBodyText, 'has_attachments': hasNotInlineAttachments}">
+				<div class="message_content scroll-inner" data-bind="hasfocus: contentHasFocus">
+
+					<!-- ko if: visibleAppointmentInfo -->
+						<div class="appointment" data-bind="template: {name: 'Mail_AppointmentViewModel', data: ical}"></div>
 					<!-- /ko -->
+
+					<!-- ko if: visibleVcardInfo -->
+						<div class="appointment" data-bind="template: {name: 'Mail_VcardAttachmentViewModel', data: vcard}"></div>
+					<!-- /ko -->
+
+					<div class="message_body_info" data-bind="visible: visibleNoMessageSelectedText">
+						<div data-i18n="MESSAGE/INFO_NO_MESSAGE_SELECTED" 
+							 data-bind="i18n: 'text'"></div>
+						<div class="message_body_secondary_info" data-i18n="MESSAGE/INFO_SINGLE_DOUBLE_CLICK" 
+							 data-bind="i18n: 'text'"></div>
+					</div>
+					<div class="message_body_info" data-i18n="MESSAGE/INFO_LOADING" 
+						 data-bind="visible: isLoading, i18n: 'text'"></div>
+					<div class="message_body html" data-bind="initDom: domTextBody, attr: {'dir': rtlMessage() ? 'rtl' : 'ltr'}"></div>
+					<!--<div class="bodyparts_separator"></div>-->
 				</div>
 			</div>
 		</div>

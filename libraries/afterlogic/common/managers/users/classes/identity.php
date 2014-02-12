@@ -11,6 +11,7 @@
  * @property int $IdUser
  * @property int $IdAccount
  * @property bool $Virtual
+ * @property bool $Enabled
  * @property string $Email
  * @property string $FriendlyName
  * @property string $Signature
@@ -37,6 +38,7 @@ class CIdentity extends api_AContainer
 			'IdUser'		=> 0,
 			'IdAccount'		=> 0,
 			'Virtual'		=> false,
+			'Enabled'		=> true,
 			'Email'			=> '',
 			'FriendlyName'	=> '',
 			'Signature'		=> '',
@@ -97,6 +99,7 @@ class CIdentity extends api_AContainer
 			'IdUser'		=> array('int', 'id_user'),
 			'IdAccount'		=> array('int', 'id_acct'),
 			'Virtual'		=> array('bool'),
+			'Enabled'		=> array('bool', 'enabled'),
 
 			'Email'			=> array('string(255)', 'email'),
 			'FriendlyName'	=> array('string(255)', 'friendly_nm'),

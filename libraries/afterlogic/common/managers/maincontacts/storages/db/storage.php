@@ -156,7 +156,12 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 					}
 				}
 
+				$this->oConnection->FreeResult();
 				$this->updateContactGroupIds($oContact);
+			}
+			else
+			{
+				$this->oConnection->FreeResult();
 			}
 		}
 
@@ -211,6 +216,8 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 				$oGroup = new CGroup();
 				$oGroup->InitByDbRow($oRow);
 			}
+
+			$this->oConnection->FreeResult();
 		}
 
 		$this->throwDbExceptionIfExist();
@@ -313,6 +320,8 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 			{
 				$iResult = (int) $oRow->cnt;
 			}
+
+			$this->oConnection->FreeResult();
 		}
 		return $iResult;
 	}
@@ -363,6 +372,8 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 			{
 				$iResult = (int) $oRow->cnt;
 			}
+
+			$this->oConnection->FreeResult();
 		}
 		return $iResult;
 	}
@@ -371,13 +382,14 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 	 * @param int $iUserId
 	 * @param string $sSearch
 	 * @param int $iRequestLimit
+	 * @param bool $bPhoneOnly = false
 	 * @return bool | array
 	 */
-	public function GetSuggestContactItems($iUserId, $sSearch, $iRequestLimit)
+	public function GetSuggestContactItems($iUserId, $sSearch, $iRequestLimit, $bPhoneOnly = false)
 	{
 		$mContactItems = false;
 		if ($this->oConnection->Execute($this->oCommandCreator->GetSuggestContactItems(
-			$iUserId, $sSearch, $iRequestLimit)))
+			$iUserId, $sSearch, $iRequestLimit, $bPhoneOnly)))
 		{
 			$mContactItems = array();
 
@@ -389,8 +401,44 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 				unset($oContactItem);
 			}
 		}
+		
 		return $mContactItems;
 	}
+	
+	/**
+	 * @param int $iUserId
+	 * @param string $sSearch
+	 * @param int $iRequestLimit
+	 * @return bool | array
+	 */
+	public function GetSuggestGroupItems($iUserId, $sSearch, $iRequestLimit)
+	{
+		$mGroupItems = false;
+		if ($this->oConnection->Execute($this->oCommandCreator->GetSuggestGroupItems(
+			$iUserId, $sSearch, $iRequestLimit)))
+		{
+			$mGroupItems = array();
+
+			while (false !== ($oRow = $this->oConnection->GetNextRecord()))
+			{
+				$oItem = new CContactListItem();
+				$oItem->InitByDbRowWithType('group', $oRow);
+				
+				$oContactItems = $this->GetContactItems($iUserId, EContactSortField::Frequency, ESortOrder::ASC, 0, 99, '', '', $oItem->Id);
+				$aEmails = array();
+				foreach ($oContactItems as $oContactItem)
+				{
+					$aEmails[] = $oContactItem->UseFriendlyName && 0 < strlen(trim($oContactItem->Name)) ? 
+							'"'.trim($oContactItem->Name).'" <'.trim($oContactItem->Email).'>' : trim($oContactItem->Email);
+				}
+				$oItem->Email = implode(", ", $aEmails);
+				
+				$mGroupItems[] = $oItem;
+				unset($oItem);
+			}
+		}
+		return $mGroupItems;
+	}	
 
 	/**
 	 * @param CContact $oContact
@@ -605,6 +653,7 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 			$bResult &= $this->oConnection->Execute($this->oCommandCreator->DeleteAllGroupsContacts($iUserId));
 			$bResult &= $this->oConnection->Execute($this->oCommandCreator->DeleteAllContacts($iUserId));
 			$bResult &= $this->oConnection->Execute($this->oCommandCreator->DeleteAllGroups($iUserId));
+			$bResult &= $this->oConnection->Execute($this->oCommandCreator->DeleteUserGlobalContact($iUserId));
 		}
 
 		return (bool) $bResult;
@@ -669,6 +718,7 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 				$mResult = (int) $oRow->id_addr;
 				$mResult = 0 < $mResult ? $mResult : null;
 			}
+			$this->oConnection->FreeResult();
 		}
 		return $mResult;
 	}
@@ -688,6 +738,7 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 			{
 				$aResult[(int) $oRow->id_addr] = (string) $oRow->type_id;
 			}
+			$this->oConnection->FreeResult();
 		}
 		return $aResult;
 	}
@@ -706,6 +757,7 @@ class CApiMaincontactsDbStorage extends CApiMaincontactsStorage
 			{
 				$aResult[] = (int) $oRow->id_addr;
 			}
+			$this->oConnection->FreeResult();
 		}
 		return $aResult;
 	}

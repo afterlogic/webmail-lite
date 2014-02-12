@@ -99,7 +99,7 @@ class CApiMailFolderCollection extends \MailSo\Base\Collection
 	 */
 	protected function aASortHelper($oFolderA, $oFolderB)
 	{
-		return strnatcmp($oFolderA->FullNameRaw(), $oFolderB->FullNameRaw());
+		return strnatcmp($oFolderA->FullName(), $oFolderB->FullName());
 	}
 
 	/**

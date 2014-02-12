@@ -112,5 +112,17 @@ class SharedCalendar extends Calendar implements ISharedCalendar {
         return $this->caldavBackend->getShares($this->calendarInfo['id']);
 
     }
+	
+    /**
+     * Updates properties such as the display name and description
+     *
+     * @param array $mutations
+     * @return array
+     */
+    public function updateProperties($mutations) {
+
+        return $this->caldavBackend->updateShares($this->calendarInfo['id'], array($mutations));
+
+    }	
 
 }

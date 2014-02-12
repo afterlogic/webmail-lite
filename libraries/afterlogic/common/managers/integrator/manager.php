@@ -571,6 +571,7 @@ class CApiIntegratorManager extends AApiManager
 		);
 
 		$iTime = $bSignMe ? time() + 60 * 60 * 24 * 30 : 0;
+		$_COOKIE[self::AUTH_KEY] = CApi::EncodeKeyValues($aAccountHashTable);
 		@setcookie(self::AUTH_KEY, CApi::EncodeKeyValues($aAccountHashTable), $iTime, $this->getCookiePath(), null, null, true);
 	}
 
@@ -589,6 +590,7 @@ class CApiIntegratorManager extends AApiManager
 		);
 
 		$iTime = $bSignMe ? time() + 60 * 60 * 24 * 30 : 0;
+		$_COOKIE[self::AUTH_HD_KEY] = CApi::EncodeKeyValues($aUserHashTable);
 		@setcookie(self::AUTH_HD_KEY, CApi::EncodeKeyValues($aUserHashTable), $iTime, $this->getCookiePath(), null, null, true);
 	}
 
@@ -851,6 +853,54 @@ class CApiIntegratorManager extends AApiManager
 		return $bResult;
 	}
 
+	public function RegisterSocialAccount($iIdTenant, $sTenantHash, $sNotificationEmail, $sSocialId, $sSocialType, $sSocialName)
+	{
+		$bResult = false;
+
+		$oApiHelpdeskManager = /* @var $oApiHelpdeskManager CApiHelpdeskManager */ CApi::Manager('helpdesk');
+		$oApiUsersManager = /* @var $oApiUsersManager CApiUsersManager */ CApi::Manager('users');
+		$oApiCapabilityManager = /* @var $oApiCapabilityManager CApiCapabilityManager */ CApi::Manager('capability');
+		if (!$oApiHelpdeskManager || !$oApiUsersManager || !$oApiCapabilityManager ||
+			!$oApiCapabilityManager->IsHelpdeskSupported())
+		{
+			return $bResult;
+		}
+
+		$oUser = /* @var $oUser CHelpdeskUser */ $oApiHelpdeskManager->GetUserBySocialId($iIdTenant, $sSocialId);
+		if (!$oUser)
+		{
+			$oAccount = $this->GetAhdSocialUser($sTenantHash, $sSocialId);
+			if ($oAccount && $oAccount->IdTenant === $iIdTenant && $oApiCapabilityManager->IsHelpdeskSupported($oAccount))
+			{
+				throw new CApiManagerException(Errs::HelpdeskManager_UserAlreadyExists);
+			}
+
+			$oUser = new CHelpdeskUser();
+			$oUser->Activated = true;
+			$oUser->Name = $sSocialName;
+			$oUser->NotificationEmail = $sNotificationEmail;
+			$oUser->SocialId = $sSocialId;
+			$oUser->SocialType = $sSocialType;
+			$oUser->IdTenant = $iIdTenant;
+			$oUser->IsAgent = false;
+			$oApiHelpdeskManager->CreateUser($oUser);
+			if (!$oUser || 0 === $oUser->IdHelpdeskUser)
+			{
+				throw new CApiManagerException(Errs::HelpdeskManager_UserCreateFailed);
+			}
+			else
+			{
+				$bResult = true;
+			}
+		}
+		else
+		{
+			throw new CApiManagerException(Errs::HelpdeskManager_UserAlreadyExists);
+		}
+
+		return $bResult;
+	}
+
 	/**
 	 * @return int|bool
 	 */
@@ -923,7 +973,7 @@ class CApiIntegratorManager extends AApiManager
 			$aResult['AllowUsersChangeInterfaceSettings'] = (bool) $oDomain->AllowUsersChangeInterfaceSettings;
 			$aResult['AllowUsersChangeEmailSettings'] = (bool) $oDomain->AllowUsersChangeEmailSettings;
 			$aResult['AllowUsersAddNewAccounts'] = (bool) $oDomain->AllowUsersAddNewAccounts;
-			$aResult['AllowFetcher'] = (bool) $oDomain->IsInternal;
+			$aResult['AllowFetcher'] = (bool) $oDomain->IsInternal && CApi::GetConf('labs.fetchers', false);
 
 			$aResult['SiteName'] = $oDomain->SiteName;
 
@@ -959,9 +1009,13 @@ class CApiIntegratorManager extends AApiManager
 			
 			$iImageUploadSizeLimit = ((bool) $oSettings->GetConf('WebMail/EnableAttachmentSizeLimit'))
 				? (int) $oSettings->GetConf('WebMail/ImageUploadSizeLimit') : 0;
+			
+			$iFileSizeLimit = ((bool) $oSettings->GetConf('Files/EnableSizeLimit'))
+				? (int) $oSettings->GetConf('Files/SizeLimit') : 0;
 
 			$aResult['AttachmentSizeLimit'] = $iAttachmentSizeLimit;
 			$aResult['ImageUploadSizeLimit'] = $iImageUploadSizeLimit;
+			$aResult['FileSizeLimit'] = $iFileSizeLimit;
 			$aResult['AutoSave'] = (bool) CApi::GetConf('webmail.autosave', true);
 
 			$aResult['IdleSessionTimeout'] = (int) $oSettings->GetConf('WebMail/IdleSessionTimeout');
@@ -988,30 +1042,11 @@ class CApiIntegratorManager extends AApiManager
 			$aResult['ServerUseUrlRewrite'] = (bool) CApi::GetConf('labs.server-use-url-rewrite', false);
 			$aResult['ServerUrlRewriteBase'] = (string) CApi::GetConf('labs.server-url-rewrite-base', '');
 			$aResult['IosDetectOnLogin'] = (bool) CApi::GetConf('labs.webmail.ios-detect-on-login', true);
-			$aResult['ReCaptchaPublicKey'] = CApi::GetConf('captcha.recaptcha-public-key', '');
-			$aResult['UseReCaptcha'] = false;
 
 			if ($aResult['IosDetectOnLogin'])
 			{
 				$aResult['IosDetectOnLogin'] = isset($_COOKIE['skip_ios']) &&
 					'1' === (string) $_COOKIE['skip_ios'] ? false : true;
-			}
-
-			if ($oSettings->GetConf('WebMail/UseReCaptcha'))
-			{
-				$iLimitCaptcha = (int) CApi::GetConf('captcha.limit-count', 0);
-				if (0 === $iLimitCaptcha)
-				{
-					$aResult['UseReCaptcha'] = true;
-				}
-				else
-				{
-					$iLimitCaptcha -= \CApi::CatchaLocalLimit();
-					if (0 >= $iLimitCaptcha)
-					{
-						$aResult['UseReCaptcha'] = true;
-					}
-				}
 			}
 
 			$sCustomLanguage = $this->GetLoginLanguage();
@@ -1086,10 +1121,12 @@ class CApiIntegratorManager extends AApiManager
 
 			$aResult['ThreadsEnabled'] = !!$oSettings->GetConf('WebMail/UseThreadsIfSupported');
 			$aResult['UseThreads'] = false;
+			$aResult['SaveRepliedMessagesToCurrentFolder'] = false;
 			
 			if ($aResult['ThreadsEnabled'])
 			{
 				$aResult['UseThreads'] = (bool) $oAccount->User->UseThreads;
+				$aResult['SaveRepliedMessagesToCurrentFolder'] = (bool) $oAccount->User->SaveRepliedMessagesToCurrentFolder;
 			}
 			
 			$aResult['OutlookSyncEnable'] = $oApiCapabilityManager->IsOutlookSyncSupported($oAccount);
@@ -1115,65 +1152,51 @@ class CApiIntegratorManager extends AApiManager
 			$aResult['VoiceWebsocketProxyUrl'] = '';
 			$aResult['VoiceOutboundProxyUrl'] = '';
 			$aResult['VoiceCallerID'] = '';
+			$aResult['TwilioNumber'] = '';
+			$aResult['VoiceImpi'] = '';
+			$aResult['VoicePassword'] = '';
 			
 //			$aResult['VoiceAccountSID'] = '';
 //			$aResult['VoiceAuthToken'] = '';
 //			$aResult['VoiceAppSID'] = '';
-
-			$aResult['VoiceImpi'] = $oAccount->User->SipImpi;
-			$aResult['VoicePassword'] = $oAccount->User->SipPassword;
 			
-//			0 < strlen($aResult['VoiceImpi']) && 
-			if ($oApiCapabilityManager->IsVoiceSupported($oAccount))
+			$oApiTenants = CApi::Manager('tenants');
+			/* @var $oApiTenants CApiTenantsManager */
+
+			if ($oApiTenants)
 			{
-				if (0 < $oAccount->IdTenant)
+				$oTenant = 0 < $oAccount->IdTenant ?
+					$oApiTenants->GetTenantById($oAccount->IdTenant) : $oApiTenants->GetDefaultGlobalTenant();
+				if ($oTenant)
 				{
-					$oApiTenants = CApi::Manager('tenants');
-					$oTenant = $oApiTenants ? $oApiTenants->GetTenantById($oAccount->IdTenant) : null;
-					/* @var $oTenant CTenant */
-					
-					if ($oTenant && $oTenant->IsVoiceSupported()) {
-						
-						if ($oTenant->SipAllowConfiguration || $oTenant->TwilioAllowConfiguration)
-						{
-							if ($oTenant->SipAllow) {
-								$aResult['AllowVoice'] = $oTenant->SipAllow;
-								$aResult['VoiceProvider'] = 'sip';
-								$aResult['VoiceRealm'] = (string) $oTenant->SipRealm;
-								$aResult['VoiceWebsocketProxyUrl'] = (string) $oTenant->SipWebsocketProxyUrl;
-								$aResult['VoiceOutboundProxyUrl'] = (string) $oTenant->SipOutboundProxyUrl;
-								$aResult['VoiceCallerID'] = (string) $oTenant->SipCallerID;
-							} 
-							else if ($oTenant->TwilioAllow) 
-							{
-								$aResult['AllowVoice'] = $oTenant->TwilioAllow;
-								$aResult['VoiceProvider'] = 'twilio';
-	//							$aResult['VoiceAccountSID'] = (string) $oTenant->TwilioAccountSID;
-	//							$aResult['VoiceAuthToken'] = (string) $oTenant->TwilioAuthToken;
-	//							$aResult['VoiceAppSID'] = (string) $oTenant->TwilioAppSID;
-							}
-						}
-					}
-				} else {
-					if ($oSettings->GetConf('Sip/AllowSip'))
+					if ($oTenant->SipAllowConfiguration && $oTenant->SipAllow &&
+						$oTenant->IsSipSupported() &&
+						$oApiCapabilityManager->IsSipSupported($oAccount))
 					{
-						$aResult['AllowVoice'] = true;
+						$aResult['AllowVoice'] = $oTenant->SipAllow;
 						$aResult['VoiceProvider'] = 'sip';
-						$aResult['VoiceRealm'] = (string) $this->oSettings->GetConf('Sip/Realm');
-						$aResult['VoiceWebsocketProxyUrl'] = (string) $this->oSettings->GetConf('Sip/WebsocketProxyUrl');
-						$aResult['VoiceOutboundProxyUrl'] = (string) $this->oSettings->GetConf('Sip/OutboundProxyUrl');
-						$aResult['VoiceCallerID'] = (string) $this->oSettings->GetConf('Sip/CallerID');
+						$aResult['VoiceRealm'] = (string) $oTenant->SipRealm;
+						$aResult['VoiceWebsocketProxyUrl'] = (string) $oTenant->SipWebsocketProxyUrl;
+						$aResult['VoiceOutboundProxyUrl'] = (string) $oTenant->SipOutboundProxyUrl;
+						$aResult['VoiceCallerID'] = (string) $oTenant->SipCallerID;
+
+						$aResult['VoiceImpi'] = $oAccount->User->SipImpi;
+						$aResult['VoicePassword'] = $oAccount->User->SipPassword;
 					}
-					else if ($oSettings->GetConf('Twilio/AllowTwilio'))
+					else if ($oTenant->TwilioAllowConfiguration && $oTenant->TwilioAllow &&
+						$oTenant->IsTwilioSupported() &&
+						$oApiCapabilityManager->IsTwilioSupported($oAccount))
 					{
-						$aResult['AllowVoice'] = true;
+						$aResult['AllowVoice'] = $oTenant->TwilioAllow;
 						$aResult['VoiceProvider'] = 'twilio';
-	//					$aResult['VoiceAccountSID'] = (string) $this->oSettings->GetConf('Twilio/AccountSID');
-	//					$aResult['VoiceAuthToken'] = (string) $this->oSettings->GetConf('Twilio/AuthToken');
-	//					$aResult['VoiceAppSID'] = (string) $this->oSettings->GetConf('Twilio/AppSID');
+//						$aResult['VoiceAccountSID'] = (string) $oTenant->TwilioAccountSID;
+//						$aResult['VoiceAuthToken'] = (string) $oTenant->TwilioAuthToken;
+//						$aResult['VoiceAppSID'] = (string) $oTenant->TwilioAppSID;
+
+						$aResult['TwilioNumber'] = $oAccount->User->TwilioNumber;
 					}
 				}
-				
+
 				if ($aResult['VoiceProvider'] === 'sip' && (0 === strlen($aResult['VoiceRealm']) || 0 === strlen($aResult['VoiceWebsocketProxyUrl'])))
 				{
 					$aResult['AllowVoice'] = false;
@@ -1183,37 +1206,11 @@ class CApiIntegratorManager extends AApiManager
 					$aResult['VoiceCallerID'] = '';
 					$aResult['VoiceImpi'] = '';
 					$aResult['VoicePassword'] = '';
-					
+
 //					$aResult['VoiceAccountSID'] = '';
 //					$aResult['VoiceAuthToken'] = '';
 //					$aResult['VoiceAppSID'] = '';
 				}
-				\CApi::Log($aResult['AllowVoice']);
-//				else if ($aResult['VoiceProvider'] === 'twilio' &&
-//						(
-//							0 === strlen($aResult['VoiceAccountSID']) ||
-//							0 === strlen($aResult['VoiceTwilioAuthToken']) ||
-//							0 === strlen($aResult['VoiceTwilioAppSID'])
-//						)
-//					)
-//				{
-//					$aResult['AllowVoice'] = false;
-////					$aResult['VoiceAccountSID'] = '';
-////					$aResult['VoiceAuthToken'] = '';
-////					$aResult['VoiceAppSID'] = '';
-//					
-//					$aResult['VoiceRealm'] = '';
-//					$aResult['VoiceWebsocketProxyUrl'] = '';
-//					$aResult['VoiceOutboundProxyUrl'] = '';
-//					$aResult['VoiceCallerID'] = '';
-//					$aResult['VoiceImpi'] = '';
-//					$aResult['VoicePassword'] = '';
-//				}
-			}
-			else
-			{
-				$aResult['VoiceImpi'] = '';
-				$aResult['VoicePassword'] = '';
 			}
 
 			/* @var $oApiUsersManager CApiUsersManager */
@@ -1360,9 +1357,11 @@ class CApiIntegratorManager extends AApiManager
 	 * @param bool $bHelpdesk = false
 	 * @param int $iHelpdeskIdTenant = null
 	 * @param string $sHelpdeskTenantHash = ''
+	 * @param string $sCalendarPubHash = ''
+	 * @param string $sFileStoragePubHash = ''
 	 * @return array
 	 */
-	public function AppData($bHelpdesk = false, $iHelpdeskIdTenant = null, $sHelpdeskTenantHash = '', $sCalendarPubHash = '')
+	public function AppData($bHelpdesk = false, $iHelpdeskIdTenant = null, $sHelpdeskTenantHash = '', $sCalendarPubHash = '', $sFileStoragePubHash = '')
 	{
 		$aAppData = array(
 			'Auth' => false,
@@ -1374,10 +1373,23 @@ class CApiIntegratorManager extends AApiManager
 			'HelpdeskThreadId' => 0,
 			'HelpdeskActivatedEmail' => '',
 			'HelpdeskForgotHash' => '',
+			'ClientDebug' => \CApi::GetConf('labs.webmail-client-debug', false),
 			'LastErrorCode' => $this->GetLastErrorCode(),
-			'Token' => $this->GetCsrfToken()
+			'Token' => $this->GetCsrfToken(),
+			'ZipAttachments' => !!class_exists('ZipArchive'),
+			'AllowIdentities' => !!$this->oSettings->GetConf('WebMail/AllowIdentities'),
+			'SocialFacebook' => false,
+			'SocialGoogle' => false,
+			'SocialTwitter' => false,
+			'SocialEmail' => '',
+			'SocialIsLoggined' => false
 		);
-		
+
+		if(\CApi::GetConf('labs.allow-social-integration', false))
+		{
+			$aAppData = \api_Social::Init($aAppData, $sHelpdeskTenantHash);
+		}
+
 		if (0 < $aAppData['LastErrorCode'])
 		{
 			$this->ClearLastErrorCode();
@@ -1390,37 +1402,50 @@ class CApiIntegratorManager extends AApiManager
 			return $aAppData;
 		}
 
+		if (!empty($sFileStoragePubHash))
+		{
+			$aAppData['FileStoragePubHash'] = $sFileStoragePubHash;
+			$oMin = \CApi::Manager('min');
+			$mMin = $oMin->GetMinByHash($sFileStoragePubHash);
+			$aAppData['FileStoragePubParams'] = array();
+			if (!empty($mMin['__hash__']))
+			{
+				$aAppData['FileStoragePubParams'] = $mMin;
+			}
+			return $aAppData;
+		}
+
 		$oApiHelpdeskManager = CApi::Manager('helpdesk');
 		/* @var $oApiHelpdeskManager CApiHelpdeskManager */
 
 		$mThreadId = $this->GetThreadIdFromRequestAndClear();
 		if ($bHelpdesk)
 		{
-			$aHelpdesMainData = null;
+			$aHelpdeskMainData = null;
 			$aAppData['TenantHash'] = $sHelpdeskTenantHash;
-			
+
 			$iUserId = $this->GetLogginedHelpdeskUserId();
 			if (0 < $iUserId && $oApiHelpdeskManager)
 			{
 				$oHelpdeskUser = $oApiHelpdeskManager->GetUserById($iHelpdeskIdTenant, $iUserId);
 				if ($oHelpdeskUser)
 				{
-					$aHelpdesMainData = $oApiHelpdeskManager->GetHelpdesMainSettings($oHelpdeskUser->IdTenant);
+					$aHelpdeskMainData = $oApiHelpdeskManager->GetHelpdesMainSettings($oHelpdeskUser->IdTenant);
 
 					$aAppData['Auth'] = true;
-					$aAppData['HelpdeskIframeUrl'] = $oHelpdeskUser->IsAgent ? $aHelpdesMainData['AgentIframeUrl'] : $aHelpdesMainData['ClientIframeUrl'];
-					$aAppData['HelpdeskSiteName'] = isset($aHelpdesMainData['SiteName']) ? $aHelpdesMainData['SiteName'] : '';
+					$aAppData['HelpdeskIframeUrl'] = $oHelpdeskUser->IsAgent ? $aHelpdeskMainData['AgentIframeUrl'] : $aHelpdeskMainData['ClientIframeUrl'];
+					$aAppData['HelpdeskSiteName'] = isset($aHelpdeskMainData['SiteName']) ? $aHelpdeskMainData['SiteName'] : '';
 					$aAppData['User'] = $this->appDataHelpdeskUserSettings($oHelpdeskUser);
 				}
 			}
 
-			if (!$aHelpdesMainData && $oApiHelpdeskManager)
+			if (!$aHelpdeskMainData && $oApiHelpdeskManager)
 			{
 				$iIdTenant = $this->GetTenantIdByHash($sHelpdeskTenantHash);
 				if (0 < $iIdTenant)
 				{
-					$aHelpdesMainData = $oApiHelpdeskManager->GetHelpdesMainSettings($iIdTenant);
-					$aAppData['HelpdeskSiteName'] = isset($aHelpdesMainData['SiteName']) ? $aHelpdesMainData['SiteName'] : '';
+					$aHelpdeskMainData = $oApiHelpdeskManager->GetHelpdesMainSettings($iIdTenant);
+					$aAppData['HelpdeskSiteName'] = isset($aHelpdeskMainData['SiteName']) ? $aHelpdeskMainData['SiteName'] : '';
 				}
 			}
 
@@ -1505,12 +1530,27 @@ class CApiIntegratorManager extends AApiManager
 
 		$oDomain = $this->getDefaultAccountDomain($oDefaultAccount);
 		$aAppData['App'] = $this->appDataDomainSettings($oDomain);
+		$aAppData['Plugins'] = array();
 
 		$aAppData['HelpdeskThreadId'] = null === $aAppData['HelpdeskThreadId'] ? 0 : $aAppData['HelpdeskThreadId'];
 
-		CApi::Plugin()->RunHook('api-app-data', $oDefaultAccount, $aAppData);
+		CApi::Plugin()->RunHook('api-app-data', array($oDefaultAccount, &$aAppData));
 
 		return $aAppData;
+	}
+
+	public function GetAhdSocialUser($sHelpdeskTenantHash = '', $sUserId = '')
+	{
+		$sTenantHash = $sHelpdeskTenantHash;
+		$iIdTenant = $this->GetTenantIdByHash($sTenantHash);
+		if (!is_int($iIdTenant))
+		{
+			throw new \ProjectSeven\Exceptions\ClientException(\ProjectSeven\Notifications::InvalidInputParameter);
+		}
+		$oApiHelpdeskManager = CApi::Manager('helpdesk');
+		$oUser = $oApiHelpdeskManager->GetUserBySocialId($iIdTenant, $sUserId);
+
+		return $oUser;
 	}
 
 	/**
@@ -1518,12 +1558,13 @@ class CApiIntegratorManager extends AApiManager
 	 * @param int $iHelpdeskIdTenant = null
 	 * @param string $sHelpdeskHash = ''
 	 * @param string $sCalendarPubHash = ''
+	 * @param string $sFileStoragePubHash = ''
 	 *
 	 * @return string
 	 */
-	private function compileAppData($bHelpdesk = false, $iHelpdeskIdTenant = null, $sHelpdeskHash = '', $sCalendarPubHash = '')
+	private function compileAppData($bHelpdesk = false, $iHelpdeskIdTenant = null, $sHelpdeskHash = '', $sCalendarPubHash = '', $sFileStoragePubHash = '')
 	{
-		return '<script>window.pSevenAppData='.json_encode($this->AppData($bHelpdesk, $iHelpdeskIdTenant, $sHelpdeskHash, $sCalendarPubHash)).';</script>';
+		return '<script>window.pSevenAppData='.@json_encode($this->AppData($bHelpdesk, $iHelpdeskIdTenant, $sHelpdeskHash, $sCalendarPubHash, $sFileStoragePubHash)).';</script>';
 	}
 
 	/**
@@ -1578,16 +1619,17 @@ class CApiIntegratorManager extends AApiManager
 	public function GetAppDirValue($bHelpdesk = false)
 	{
 		list($sLanguage, $sTheme) = $this->getThemeAndLanguage();
-		return \in_array($sLanguage, array('Arabic', 'Hebrew')) ? 'rtl' : 'ltr';
+		return \in_array($sLanguage, array('Arabic', 'Hebrew', 'Persian')) ? 'rtl' : 'ltr';
 	}
 
 	/**
 	 * @param string $sWebPath = '.'
 	 * @param bool $bHelpdesk = false
 	 * @param string $sCalendarPubHash = ''
+	 * @param string $sFileStoragePubHash = ''
 	 * @return string
 	 */
-	public function BuildHeadersLink($sWebPath = '.', $bHelpdesk = false, $sCalendarPubHash = '')
+	public function BuildHeadersLink($sWebPath = '.', $bHelpdesk = false, $sCalendarPubHash = '', $sFileStoragePubHash = '')
 	{
 		list($sLanguage, $sTheme) = $this->getThemeAndLanguage($bHelpdesk);
 		
@@ -1598,21 +1640,24 @@ class CApiIntegratorManager extends AApiManager
 		{
 			return
 '<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/static/css/libs.css'.$sVersionJs.'" />'.
-'<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/static/css/app.css'.$sVersionJs.'" />'.
 '<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/skins/'.$sTheme.'/styles.css'.$sVersionJs.'" />';
 		}
 		else if (!empty($sCalendarPubHash))
 		{
 			return
 '<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/static/css/libs.css'.$sVersionJs.'" />'.
-'<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/static/css/app.css'.$sVersionJs.'" />'.
+'<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/skins/'.$sTheme.'/styles.css'.$sVersionJs.'" />';
+		}
+		else if (!empty($sFileStoragePubHash))
+		{
+			return
+'<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/static/css/libs.css'.$sVersionJs.'" />'.
 '<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/skins/'.$sTheme.'/styles.css'.$sVersionJs.'" />';
 		}
 		else
 		{
 			return
 '<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/static/css/libs.css'.$sVersionJs.'" />'.
-'<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/static/css/app.css'.$sVersionJs.'" />'.
 '<link type="text/css" rel="stylesheet" href="'.$sWebPath.'/skins/'.$sTheme.'/styles.css'.$sVersionJs.'" />';
 		}
 	}
@@ -1623,10 +1668,11 @@ class CApiIntegratorManager extends AApiManager
 	 * @param int $iHelpdeskIdTenant = null
 	 * @param string $sHelpdeskHash = ''
 	 * @param string $sCalendarPubHash = ''
+	 * @param string $sFileStoragePubHash = ''
 	 *
 	 * @return string
 	 */
-	public function BuildBody($sWebPath = '.', $bHelpdesk = false, $iHelpdeskIdTenant = null, $sHelpdeskHash = '', $sCalendarPubHash = '')
+	public function BuildBody($sWebPath = '.', $bHelpdesk = false, $iHelpdeskIdTenant = null, $sHelpdeskHash = '', $sCalendarPubHash = '', $sFileStoragePubHash = '')
 	{
 		list($sLanguage, $sTheme) = $this->getThemeAndLanguage();
 
@@ -1637,9 +1683,9 @@ class CApiIntegratorManager extends AApiManager
 $this->compileTemplates($sTheme).
 '<script src="'.$sWebPath.'/static/js/libs.js?'.CApi::VersionJs().'"></script>'.
 $this->compileLanguage($sLanguage).
-$this->compileAppData($bHelpdesk, $iHelpdeskIdTenant, $sHelpdeskHash, $sCalendarPubHash).
+$this->compileAppData($bHelpdesk, $iHelpdeskIdTenant, $sHelpdeskHash, $sCalendarPubHash, $sFileStoragePubHash).
 '<script src="'.$sWebPath.'/static/js/app'.($bHelpdesk ? '-helpdesk' :
-	(empty($sCalendarPubHash) ? '' : '-calendar-pub')).(CApi::GetConf('labs.use-app-min-js', false) ? '.min' : '').'.js?'.CApi::VersionJs().'"></script>'.
+	(empty($sCalendarPubHash) ? (empty($sFileStoragePubHash) ? '' : '-filestorage-pub') : '-calendar-pub')).(CApi::GetConf('labs.use-app-min-js', false) ? '.min' : '').'.js?'.CApi::VersionJs().'"></script>'.
 	(CApi::Plugin()->HasJsFiles() ? '<script src="?/Plugins/js/'.CApi::Plugin()->Hash().'/"></script>' : '').
 '</div></div>'."\r\n".'<!-- '.CApi::Version().' -->'
 		;

@@ -61,14 +61,14 @@ class CApiSubscriptionsManager extends AApiManagerWithStorage
 			$this->setLastException($oException);
 		}
 
-		if ($bResult)
-		{
-			$oTenant = $this->TenantManager();
-			if ($oTenant)
-			{
-				$oTenant->UpdateTenantMainCapa($oSubscription->IdTenant);
-			}
-		}
+//		if ($bResult)
+//		{
+//			$oTenant = $this->TenantManager();
+//			if ($oTenant)
+//			{
+//				$oTenant->UpdateTenantMainCapa($oSubscription->IdTenant);
+//			}
+//		}
 
 		return $bResult;
 	}
@@ -93,14 +93,14 @@ class CApiSubscriptionsManager extends AApiManagerWithStorage
 			$this->setLastException($oException);
 		}
 
-		if ($bResult)
-		{
-			$oTenant = $this->TenantManager();
-			if ($oTenant)
-			{
-				$oTenant->UpdateTenantMainCapa($oSubscription->IdTenant);
-			}
-		}
+//		if ($bResult)
+//		{
+//			$oTenant = $this->TenantManager();
+//			if ($oTenant)
+//			{
+//				$oTenant->UpdateTenantMainCapa($oSubscription->IdTenant);
+//			}
+//		}
 
 		return $bResult;
 	}
@@ -123,14 +123,14 @@ class CApiSubscriptionsManager extends AApiManagerWithStorage
 			$this->setLastException($oException);
 		}
 
-		if ($bResult)
-		{
-			$oTenant = $this->TenantManager();
-			if ($oTenant)
-			{
-				$oTenant->UpdateTenantMainCapa($iTenantID);
-			}
-		}
+//		if ($bResult)
+//		{
+//			$oTenant = $this->TenantManager();
+//			if ($oTenant)
+//			{
+//				$oTenant->UpdateTenantMainCapa($iTenantID);
+//			}
+//		}
 
 		return $bResult;
 	}

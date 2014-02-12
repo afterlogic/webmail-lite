@@ -274,6 +274,7 @@ class CDbPdoPostgres extends CDbSql
 				{
 					$sExplainLog .= API_CRLF.print_r($mResult, true);
 				}
+				
 				$rExplainResult->closeCursor();
 			}
 
@@ -286,6 +287,7 @@ class CDbPdoPostgres extends CDbSql
 					{
 						$sExplainLog .= API_CRLF.print_r($mResult, true);
 					}
+					
 					$rExplainResult->closeCursor();
 				}
 			}
@@ -320,6 +322,7 @@ class CDbPdoPostgres extends CDbSql
 			{
 				$this->FreeResult();
 			}
+			
 			return $mResult;
 		}
 		else

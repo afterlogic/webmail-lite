@@ -1,10 +1,10 @@
-<div class="panels" data-bind="splitter: {sizeLeft: 200, minLeft: 20, minRight: 40, resizeToWidth: true}">
-	<div class="panel folders">
+<div class="panels" data-bind="splitter: {name: (isPublic ? 'file_storages_pub' : 'file_storages'), sizeLeft: (isPublic ? 0 : 200), minLeft: (isPublic ? 0 : 20), minRight: 40, resizeToWidth: true}">
+	<div class="panel storages" data-bind="visible: !isPublic">
 		<div class="resize_handler"></div>
 		<div class="panel_content">
 			<div class="toolbar">
 				<span class="content"> 
-					<a class="item compose" data-bind="initDom: uploaderButton"> 
+					<a class="item upload" data-bind="initDom: uploaderButton"> 
 						<span data-bind="i18n: 'text'" data-i18n="FILESTORAGE/BUTTON_UPLOAD_FILES"></span> 
 					</a>
 				</span>

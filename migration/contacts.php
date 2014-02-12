@@ -7,16 +7,25 @@
  */
 
 // remove the following line for real use
-//exit('remove this line');
+exit('remove this line');
 
 require_once dirname(__FILE__).'/../libraries/afterlogic/api.php';
+
+$bReverse = isset($_REQUEST['rev']) ? true : false;
 
 $sStorageFrom = 'db';
 $sStorageTo = 'sabredav';
 
+if ($bReverse)
+{
+	$sStorageTmp = $sStorageTo;
+	$sStorageTo = $sStorageFrom;
+	$sStorageFrom = $sStorageTmp;
+}
+
 $iItemsPerPage = 20;
 $iCurDomainId = -1;
-$iCurUsersPage = 0;
+$iCurUsersPage = 1;
 $iCurUserId = 0;
 
 /* @var $oApiDomainsManager CApiDomainsManager */
@@ -51,6 +60,9 @@ if (file_exists($sFilePath))
 	}
 }
 
+CApi::Log('From storage: ' . $sStorageFrom, ELogLevel::Full, 'migration-');
+CApi::Log('To storage: ' . $sStorageTo, ELogLevel::Full, 'migration-');
+
 $aDomains = $oApiDomainsManager->GetFullDomainsList();
 $aDomains[0] = array(false, 'Default'); // Default Domain
 
@@ -62,6 +74,8 @@ function GetIdFromList($oItem)
 	return $oItem->Id;
 }
 
+$iUserCount = 0;
+$aUsersCache = array();
 foreach ($aDomains as $iDomainId => $oDomainItem)
 {
 	if (!$bFindDomain && $iCurDomainId !== -1 && $iCurDomainId !== $iDomainId)
@@ -84,7 +98,7 @@ foreach ($aDomains as $iDomainId => $oDomainItem)
 	CApi::Log('Users count: ' . $iUsersCount, ELogLevel::Full, 'migration-');
 
 	$aUsers = array();
-	while ($iCurUsersPage < $iPageUserCount)
+	while ($iCurUsersPage - 1 < $iPageUserCount)
 	{
 		file_put_contents($sFilePath, $iDomainId . ':' . $iCurUsersPage . ':' . $iCurUserId);
 		$aUsers = $oApiUsersManager->GetUserList($iDomainId, $iCurUsersPage, $iItemsPerPage);
@@ -92,8 +106,14 @@ foreach ($aDomains as $iDomainId => $oDomainItem)
 		{
 			foreach ($aUsers as $aUserItem)
 			{
+				if (in_array($aUserItem[1], $aUsersCache))
+				{
+					CApi::Log('WARNING: Duplicate user - ' . $aUserItem[1], ELogLevel::Full, 'migration-');
+				}
+				$aUsersCache[] = $aUserItem[1];
 				$iUserId = (int) $aUserItem[4];
-				CApi::Log('Process user: ' . $aUserItem[1], ELogLevel::Full, 'migration-');
+				$iUserCount++;
+				CApi::Log('Process user: ' . $iUserCount . ' - ' . $aUserItem[1], ELogLevel::Full, 'migration-');
 				if (!$bFindUser && $iCurUserId !== 0 && $iCurUserId !== $iUserId)
 				{
 					CApi::Log('Skip user: ' . $aUserItem[1], ELogLevel::Full, 'migration-');
@@ -116,7 +136,10 @@ foreach ($aDomains as $iDomainId => $oDomainItem)
 					if (!$oContactFrom)
 					{
 						$oContactTo = $oApiContactsManagerFrom->GetContactById($iUserId, $oListItem->Id);
-//						$oContactTo = $oApiContactsManagerFrom->GetContactByStrId($iUserId, $oListItem->Id);
+						if ($bReverse)						
+						{
+							$oContactTo = $oApiContactsManagerFrom->GetContactByStrId($iUserId, $oListItem->Id);
+						}
 
 						$oContactTo->IdContact = '';
 						if (empty($oContactTo->FullName))
@@ -124,6 +147,18 @@ foreach ($aDomains as $iDomainId => $oDomainItem)
 							$oContactTo->FullName = $oContactTo->FirstName . ' ' . $oContactTo->LastName;
 						}
 
+/*						
+						if (0 < count($oContact->GroupsIds))
+						{
+							foreach ($oContact->GroupsIds as $iGroupId)
+							{
+								$oGroup = $oApiContactsManagerTo->GetGroupById($iUserId, $iGroupId);
+							}
+						}
+*/
+						
+						$oContactTo->GroupsIds = array();
+						
 						CApi::Log('Add contact: ' . $oListItem->Id, ELogLevel::Full, 'migration-');
 						$oContactTo->__SKIP_VALIDATE__ = true;
 						$oApiContactsManagerTo->CreateContact($oContactTo);

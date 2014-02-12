@@ -33,10 +33,12 @@
  * @property string $Capa
  * @property string $ClientTimeZone
  * @property bool $UseThreads
+ * @property bool $SaveRepliedMessagesToCurrentFolder
  * @property bool $AllowHelpdeskNotifications
  * @property mixed $CustomFields
  * @property string $SipImpi
  * @property string $SipPassword
+ * @property string $TwilioNumber
  *
  * @package Users
  * @subpackage Classes
@@ -96,12 +98,14 @@ class CUser extends api_AContainer
 			'Answer1'	=> '',
 			'Answer2'	=> '',
 
+			'TwilioNumber'	=> '',
 			'SipImpi'		=> '',
 			'SipPassword'	=> '',
 
 			'Capa'				=> '',
 			'ClientTimeZone'	=> '',
 			'UseThreads'		=> $oDomain->UseThreads,
+			'SaveRepliedMessagesToCurrentFolder' => false,
 			'AllowHelpdeskNotifications' => false,
 			'CustomFields'		=> ''
 		));
@@ -110,12 +114,16 @@ class CUser extends api_AContainer
 	}
 
 	/**
+	 * @todo
 	 * @param string $sCapaName
 	 *
 	 * @return bool
 	 */
 	public function GetCapa($sCapaName)
 	{
+		return true;
+		// TODO
+
 		if (!CApi::GetConf('capa', false) || '' === $this->Capa ||
 			0 === $this->IdSubscription)
 		{
@@ -159,105 +167,106 @@ class CUser extends api_AContainer
 			return true;
 		}
 
-		$oSub = null;
-		if (0 < $this->IdSubscription)
-		{
-			if ($this->oSubCache && $this->IdSubscription === $this->oSubCache->IdSubscription)
-			{
-				$oSub = $this->oSubCache;
-			}
-			else
-			{
-				$oApiSubscriptionsManager = /* @var $oApiSubscriptionsManager CApiSubscriptionsManager */ CApi::Manager('subscriptions');
-				if ($oApiSubscriptionsManager)
-				{
-					$oSub = $oApiSubscriptionsManager->GetSubscriptionById($this->IdSubscription);
-					$oSub = $oSub && $this->IdSubscription === $oSub->IdSubscription ? $oSub : null;
-					if ($oSub)
-					{
-						$this->oSubCache = $oSub;
-					}
-				}
-			}
-		}
-
-		$sSubCapa = $oSub ? $oSub->Capa : $oTenant->Capa;
-
-		$sCapaName = preg_replace('/[^A-Z0-9_]/', '', strtoupper($sCapaName));
-		if ('' === $sSubCapa || false !== strpos($sSubCapa, $sCapaName))
-		{
-			if ($bValue && '' === $this->Capa)
-			{
-				$this->Capa = '';
-			}
-			else if ($bValue && 0 < strlen($this->Capa))
-			{
-				$aCapa = explode(' ', $this->Capa);
-				$aCapa[] = $sCapaName;
-				$this->Capa = 0 < count($aCapa) ? implode(' ', $aCapa) : ECapa::NO;
-			}
-			else if (!$bValue && '' === $this->Capa)
-			{
-				$aCapa = array();
-				if ('' === $sSubCapa)
-				{
-					$oApiTenantsManager = /* @var $oApiTenantsManager CApiTenantsManager */ CApi::Manager('tenants');
-					if ($oApiTenantsManager)
-					{
-						$oTenant = $oApiTenantsManager->GetTenantById($oTenant->IdTenant);
-						if ($oTenant)
-						{
-							if ('' === $oTenant->Capa)
-							{
-								$oApiCapabilityManager = /* @var $oApiCapabilityManager CApiCapabilityManager */ CApi::Manager('capability');
-								if ($oApiCapabilityManager)
-								{
-									$aCapa = explode(' ', $oApiCapabilityManager->GetSystemCapaAsString());
-								}
-							}
-							else
-							{
-								$aCapa = explode(' ', $oTenant->Capa);
-							}
-						}
-					}
-				}
-				else
-				{
-					$aCapa = explode(' ', $sSubCapa);
-				}
-
-				$aCapa = array_diff($aCapa, array($sCapaName));
-				$this->Capa = 0 < count($aCapa) ? implode(' ', $aCapa) : ECapa::NO;
-			}
-			else if (!$bValue && 0 < strlen($this->Capa))
-			{
-				$aCapa = explode(' ', $this->Capa);
-				$aCapa = array_diff($aCapa, array($sCapaName));
-				$this->Capa = 0 < count($aCapa) ? implode(' ', $aCapa) : ECapa::NO;
-			}
-		}
-		else
-		{
-			return false;
-		}
-
-		if ('' !== $this->Capa && ECapa::NO !== $this->Capa)
-		{
-			$aResult = array();
-			$aCapa = explode(' ', $this->Capa);
-			foreach ($aCapa as $sItem)
-			{
-				if ('' === $sSubCapa || false !== strpos($sSubCapa, $sItem))
-				{
-					$aResult[] = $sItem;
-				}
-			}
-
-			$aResult = array_unique($aResult);
-			$aResult = array_values($aResult);
-			$this->Capa = 0 < count($aResult) ? implode(' ', $aResult) : ECapa::NO;
-		}
+		// TODO subscriptions
+//		$oSub = null;
+//		if (0 < $this->IdSubscription)
+//		{
+//			if ($this->oSubCache && $this->IdSubscription === $this->oSubCache->IdSubscription)
+//			{
+//				$oSub = $this->oSubCache;
+//			}
+//			else
+//			{
+//				$oApiSubscriptionsManager = /* @var $oApiSubscriptionsManager CApiSubscriptionsManager */ CApi::Manager('subscriptions');
+//				if ($oApiSubscriptionsManager)
+//				{
+//					$oSub = $oApiSubscriptionsManager->GetSubscriptionById($this->IdSubscription);
+//					$oSub = $oSub && $this->IdSubscription === $oSub->IdSubscription ? $oSub : null;
+//					if ($oSub)
+//					{
+//						$this->oSubCache = $oSub;
+//					}
+//				}
+//			}
+//		}
+//
+//		$sSubCapa = $oSub ? $oSub->Capa : $oTenant->Capa;
+//
+//		$sCapaName = preg_replace('/[^A-Z0-9_]/', '', strtoupper($sCapaName));
+//		if ('' === $sSubCapa || false !== strpos($sSubCapa, $sCapaName))
+//		{
+//			if ($bValue && '' === $this->Capa)
+//			{
+//				$this->Capa = '';
+//			}
+//			else if ($bValue && 0 < strlen($this->Capa))
+//			{
+//				$aCapa = explode(' ', $this->Capa);
+//				$aCapa[] = $sCapaName;
+//				$this->Capa = 0 < count($aCapa) ? implode(' ', $aCapa) : ECapa::NO;
+//			}
+//			else if (!$bValue && '' === $this->Capa)
+//			{
+//				$aCapa = array();
+//				if ('' === $sSubCapa)
+//				{
+//					$oApiTenantsManager = /* @var $oApiTenantsManager CApiTenantsManager */ CApi::Manager('tenants');
+//					if ($oApiTenantsManager)
+//					{
+//						$oTenant = $oApiTenantsManager->GetTenantById($oTenant->IdTenant);
+//						if ($oTenant)
+//						{
+//							if ('' === $oTenant->Capa)
+//							{
+//								$oApiCapabilityManager = /* @var $oApiCapabilityManager CApiCapabilityManager */ CApi::Manager('capability');
+//								if ($oApiCapabilityManager)
+//								{
+//									$aCapa = explode(' ', $oApiCapabilityManager->GetSystemCapaAsString());
+//								}
+//							}
+//							else
+//							{
+//								$aCapa = explode(' ', $oTenant->Capa);
+//							}
+//						}
+//					}
+//				}
+//				else
+//				{
+//					$aCapa = explode(' ', $sSubCapa);
+//				}
+//
+//				$aCapa = array_diff($aCapa, array($sCapaName));
+//				$this->Capa = 0 < count($aCapa) ? implode(' ', $aCapa) : ECapa::NO;
+//			}
+//			else if (!$bValue && 0 < strlen($this->Capa))
+//			{
+//				$aCapa = explode(' ', $this->Capa);
+//				$aCapa = array_diff($aCapa, array($sCapaName));
+//				$this->Capa = 0 < count($aCapa) ? implode(' ', $aCapa) : ECapa::NO;
+//			}
+//		}
+//		else
+//		{
+//			return false;
+//		}
+//
+//		if ('' !== $this->Capa && ECapa::NO !== $this->Capa)
+//		{
+//			$aResult = array();
+//			$aCapa = explode(' ', $this->Capa);
+//			foreach ($aCapa as $sItem)
+//			{
+//				if ('' === $sSubCapa || false !== strpos($sSubCapa, $sItem))
+//				{
+//					$aResult[] = $sItem;
+//				}
+//			}
+//
+//			$aResult = array_unique($aResult);
+//			$aResult = array_values($aResult);
+//			$this->Capa = 0 < count($aResult) ? implode(' ', $aResult) : ECapa::NO;
+//		}
 
 		return true;
 	}
@@ -325,8 +334,10 @@ class CUser extends api_AContainer
 
 			'SipImpi'			=> array('string', 'sip_impi'),
 			'SipPassword'		=> array('password', 'sip_password'),
+			'TwilioNumber'		=> array('string', 'twilio_number'),
 
 			'UseThreads'		=> array('bool', 'use_threads'),
+			'SaveRepliedMessagesToCurrentFolder'		=> array('bool', 'save_replied_messages_to_current_folder'),
 			'AllowHelpdeskNotifications'	=> array('bool', 'allow_helpdesk_notifications'),
 
 			'Capa'				=> array('string(255)', 'capa'),

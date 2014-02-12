@@ -167,10 +167,19 @@ class CApiCapabilityManager extends AApiManager
 	 */
 	public function IsFilesSupported($oAccount = null)
 	{
-		$bResult = $this->IsCollaborationSupported() && !!CApi::GetConf('files', true);
+		$bResult = $this->IsCollaborationSupported() && !!CApi::GetConf('files', false);
 		if ($bResult && $oAccount)
 		{
-			$bResult = $oAccount->Domain->AllowFiles && $oAccount->User->GetCapa(ECapa::FILES);
+			$oTenant = $this->getCachedTenant($oAccount->IdTenant);
+			if ($oTenant)
+			{
+				$bResult = $oTenant->IsFilesSupported();
+			}
+
+			if ($bResult)
+			{
+				$bResult = $oAccount->Domain->AllowFiles && $oAccount->User->GetCapa(ECapa::FILES);
+			}			
 		}
 
 		return $bResult;
@@ -180,15 +189,45 @@ class CApiCapabilityManager extends AApiManager
 	 * @param CAccount $oAccount = null
 	 * @return bool
 	 */
-	public function IsVoiceSupported($oAccount = null)
+	public function IsTwilioSupported($oAccount = null)
 	{
-		$bResult = $this->IsCollaborationSupported() && 
-			(!!CApi::GetConf('labs.voice', false) || !!CApi::GetConf('labs.twillio', false));
-
+		$bResult = $this->IsCollaborationSupported() && !!CApi::GetConf('labs.twilio', false);
 		if ($bResult && $oAccount)
 		{
-			$bResult = $oAccount->User->GetCapa(ECapa::VOICE);
-			$bResult = true; // TODO VOice Capability
+			$oTenant = $this->getCachedTenant($oAccount->IdTenant);
+			if ($oTenant)
+			{
+				$bResult = $oTenant->IsTwilioSupported();
+			}
+			
+			if ($bResult)
+			{
+				$bResult = $oAccount->User->GetCapa(ECapa::TWILIO);
+			}
+		}
+
+		return $bResult;
+	}
+
+	/**
+	 * @param CAccount $oAccount = null
+	 * @return bool
+	 */
+	public function IsSipSupported($oAccount = null)
+	{
+		$bResult = $this->IsCollaborationSupported() && !!CApi::GetConf('labs.voice', false);
+		if ($bResult && $oAccount)
+		{
+			$oTenant = $this->getCachedTenant($oAccount->IdTenant);
+			if ($oTenant)
+			{
+				$bResult = $oTenant->IsSipSupported();
+			}
+
+			if ($bResult)
+			{
+				$bResult = $oAccount->User->GetCapa(ECapa::SIP);
+			}
 		}
 
 		return $bResult;
@@ -200,10 +239,19 @@ class CApiCapabilityManager extends AApiManager
 	 */
 	public function IsHelpdeskSupported($oAccount = null)
 	{
-		$bResult = $this->IsCollaborationSupported() && !!CApi::GetConf('helpdesk', true);
+		$bResult = $this->IsCollaborationSupported() && !!CApi::GetConf('helpdesk', false);
 		if ($bResult && $oAccount)
 		{
-			$bResult = $oAccount->Domain->AllowHelpdesk && $oAccount->User->GetCapa(ECapa::HELPDESK);
+			$oTenant = $this->getCachedTenant($oAccount->IdTenant);
+			if ($oTenant)
+			{
+				$bResult = $oTenant->IsHelpdeskSupported();
+			}
+
+			if ($bResult)
+			{
+				$bResult = $oAccount->Domain->AllowHelpdesk && $oAccount->User->GetCapa(ECapa::HELPDESK);
+			}
 		}
 
 		return $bResult;
@@ -247,6 +295,7 @@ class CApiCapabilityManager extends AApiManager
 //		{
 //			$bResult = $oAccount->User->GetCapa(ECapa::OUTLOOK_SYNC);
 //		}
+// TODO
 
 		return $bResult;
 	}
@@ -307,9 +356,14 @@ class CApiCapabilityManager extends AApiManager
 				$aCapa[] = ECapa::HELPDESK;
 			}
 
-			if ($this->IsVoiceSupported())
+			if ($this->IsSipSupported())
 			{
-				$aCapa[] = ECapa::VOICE;
+				$aCapa[] = ECapa::SIP;
+			}
+			
+			if ($this->IsTwilioSupported())
+			{
+				$aCapa[] = ECapa::TWILIO;
 			}
 
 			$sCache = trim(strtoupper(implode(' ', $aCapa)));
@@ -332,5 +386,35 @@ class CApiCapabilityManager extends AApiManager
 	public function HasGdSupport()
 	{
 		return api_Utils::HasGdSupport();
+	}
+
+	/**
+	 * @param int $iIdTenant
+	 * @return CTenant
+	 */
+	private function getCachedTenant($iIdTenant)
+	{
+		static $aCache = array();
+		$oTenant = null;
+
+		if (isset($aCache[$iIdTenant]))
+		{
+			$oTenant = $aCache[$iIdTenant];
+		}
+		else
+		{
+			$oApiTenants = /* @var $oApiTenants CApiTenantsManager */ CApi::Manager('tenants');
+			if ($oApiTenants)
+			{
+				$oTenant = (0 < $iIdTenant) ? $oApiTenants->GetTenantById($iIdTenant) : $oApiTenants->GetDefaultGlobalTenant();
+			}
+		}
+
+		if ($oTenant && !isset($aCache[$iIdTenant]))
+		{
+			$aCache[$iIdTenant] = $oTenant;
+		}
+
+		return $oTenant;
 	}
 }

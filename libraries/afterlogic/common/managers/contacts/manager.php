@@ -296,12 +296,13 @@ class CApiContactsManager extends AApiManager
 	 * @param string $sSearch = ''
 	 * @param int $iRequestLimit = 20
 	 * @param bool $bGlobalOnly = false
+	 * @param bool $bPhoneOnly = false
 	 *
 	 * @return bool | array
 	 */
-	public function GetSuggestItems($oAccount, $sSearch = '', $iRequestLimit = 20, $bGlobalOnly = false)
+	public function GetSuggestItems($oAccount, $sSearch = '', $iRequestLimit = 20, $bGlobalOnly = false, $bPhoneOnly = false)
 	{
-		return $this->oApiContactsManager->GetSuggestItems($oAccount, $sSearch, $iRequestLimit, $bGlobalOnly);
+		return $this->oApiContactsManager->GetSuggestItems($oAccount, $sSearch, $iRequestLimit, $bGlobalOnly, $bPhoneOnly);
 	}
 
 	/**

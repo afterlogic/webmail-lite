@@ -40,6 +40,7 @@
  * @property bool $AllowUsersChangeInterfaceSettings
  * @property bool $AllowUsersChangeEmailSettings
  * @property bool $AllowUsersAddNewAccounts
+ * @property bool $AllowNewUsersRegister
  * @property int $Layout
  * @property int $SaveMail
  * @property int $ContactsPerPage

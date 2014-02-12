@@ -24,7 +24,7 @@
 	<div class="fieldset" data-bind="visible: !personalIsEmpty()">
 		<h2 data-i18n="CONTACTS/HEADER_BASIC_INFO" data-bind="i18n: 'text'"></h2>
 		
-		<div class="row" data-bind="visible: personalEmail()">
+		<div class="row" data-bind="visible: (personalEmail() && personalEmail() !== email())">
 			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_PERSONAL_EMAIL"></span>
 			<a class="button" href="javascript: void(0)"
 				data-bind="text: personalEmail, attr: {href: sendMailToPersonalLink}"></a>
@@ -71,7 +71,7 @@
 	<div class="fieldset" data-bind="visible: !businessIsEmpty()">
 		<h2 data-i18n="CONTACTS/HEADER_BUSINESS_INFO" data-bind="i18n: 'text'"></h2>
 		
-		<div class="row" data-bind="visible: businessEmail()">
+		<div class="row" data-bind="visible: (businessEmail() && businessEmail() !== email())">
 			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_BUSINESS_EMAIL"></span>
 			<a class="button" href="javascript: void(0)"
 				data-bind="text: businessEmail, attr: {href: sendMailToBusinessLink}"></a>
@@ -128,7 +128,7 @@
 	</div>
 	<div class="fieldset" data-bind="visible: !otherIsEmpty()">
 		<h2 data-i18n="CONTACTS/HEADER_OTHER_INFO" data-bind="i18n: 'text'"></h2>
-		<div class="row" data-bind="visible: otherEmail()">
+		<div class="row" data-bind="visible: (otherEmail() && otherEmail() !== email())">
 			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_OTHER_EMAIL"></span>
 			<a class="button" href="javascript: void(0)"
 				data-bind="text: otherEmail, attr: {href: sendMailToOtherLink}"></a>
@@ -143,7 +143,7 @@
 		</div>
 	</div>
 </div>
-<div class="toolbar">
-	<a class="item" href="javascript: void(0)" data-i18n="CONTACTS/LINK_SEND_MAIL" data-bind="i18n: 'text', attr: {href: sendMailLink}"></a>
-	<a class="item" href="javascript: void(0)" data-i18n="CONTACTS/LINK_VIEW_MAILS" data-bind="i18n: 'text', click: $parent.viewAllMailsWithContactBinded"></a>
+<div class="buttons">
+	<a class="link" href="javascript: void(0)" data-i18n="CONTACTS/LINK_SEND_MAIL" data-bind="i18n: 'text', attr: {href: sendMailLink}"></a>
+	<span class="link" data-i18n="CONTACTS/LINK_VIEW_MAILS" data-bind="i18n: 'text', click: $parent.viewAllMailsWithContactBinded"></span>
 </div>

@@ -19,18 +19,26 @@
 							<div class="items_list calendars">
 								<span class="section_title">
 									<span class="control" data-bind="click: openCreateCalendarForm"></span>
-									<span class="title" data-i18n="CALENDAR/TITLE_CALENDARS" data-bind="i18n: 'text'"></span>
+									<span class="title" data-i18n="CALENDAR/TITLE_CALENDARS" data-bind="i18n: 'text', visible: (calendars.ownCount() > 0)"></span>
 								</span>
-								<!-- ko foreach: calendars.collection() -->
-									<!-- ko template: {name: 'Calendar_CalendarListItem', 'if': !isShared} --><!-- /ko -->
+								<!-- ko foreach: calendars.own() -->
+									<!-- ko template: {name: 'Calendar_CalendarListItem'} --><!-- /ko -->
 								<!-- /ko -->
 							</div>
 							<div class="items_list calendars" data-bind="visible: (calendars.sharedCount() > 0 && calendarSharing)">
 								<span class="section_title">
 									<span class="title" data-i18n="CALENDAR/TITLE_SHARED_CALENDARS" data-bind="i18n: 'text'"></span>
 								</span>
-								<!-- ko foreach: calendars.collection() -->
-									<!-- ko template: {name: 'Calendar_CalendarListItem', 'if': isShared} --><!-- /ko -->
+								<!-- ko foreach: calendars.shared() -->
+									<!-- ko template: {name: 'Calendar_CalendarListItem'} --><!-- /ko -->
+								<!-- /ko -->						
+							</div>
+							<div class="items_list calendars" data-bind="visible: (calendars.sharedToAllCount() > 0 && calendarSharing)">
+								<span class="section_title">
+									<span class="title" data-i18n="CALENDAR/TITLE_SHARED_WITH_ALL_CALENDARS" data-bind="i18n: 'text'"></span>
+								</span>
+								<!-- ko foreach: calendars.sharedToAll() -->
+									<!-- ko template: {name: 'Calendar_CalendarListItem'} --><!-- /ko -->
 								<!-- /ko -->						
 							</div>
 						</div>
@@ -55,13 +63,13 @@
 						<span class="item" data-bind="click: displayToday">
 							<span class="text" data-i18n="CALENDAR/BUTTON_TODAY" data-bind="i18n: 'text'"></span>
 						</span>
-						<span class="item" data-bind="click: displayDayView, css: {'selected': selectedView() === 'agendaDay'}">
+						<span class="item" data-bind="click: function(){changeView('agendaDay');}, css: {'selected': selectedView() === 'agendaDay'}">
 							<span class="text" data-i18n="CALENDAR/BUTTON_DAY_VIEW" data-bind="i18n: 'text'"></span>
 						</span>
-						<span class="item" data-bind="click: displayWeekView, css: {'selected': selectedView() === 'agendaWeek'}">
+						<span class="item" data-bind="click: function(){changeView('agendaWeek');}, css: {'selected': selectedView() === 'agendaWeek'}">
 							<span class="text" data-i18n="CALENDAR/BUTTON_WEEK_VIEW" data-bind="i18n: 'text'"></span>
 						</span>
-						<span class="item" data-bind="click: displayMonthView, css: {'selected': selectedView() === 'month'}">
+						<span class="item" data-bind="click: function(){changeView('month');}, css: {'selected': selectedView() === 'month'}">
 							<span class="text" data-i18n="CALENDAR/BUTTON_MONTH_VIEW" data-bind="i18n: 'text'"></span>
 						</span>
 					</span>

@@ -15,6 +15,11 @@ class CApiMailFolder
 	protected $aNamesRaw;
 
 	/**
+	 * @var string
+	 */
+	protected $sFullNameSorted;
+
+	/**
 	 * @var int
 	 */
 	protected $iNestingLevel;
@@ -70,6 +75,8 @@ class CApiMailFolder
 			$this->oSubFolders = null;
 			$this->iType = EFolderType::Custom;
 			$this->iDeep = 0;
+			
+			$this->sFullNameSorted = '';
 
 			$this->bNamespaceFolder = false;
 			$this->bGmailFolder = false;
@@ -174,6 +181,31 @@ class CApiMailFolder
 		return BaseUtils::ConvertEncoding($this->FullNameRaw(),
 			\MailSo\Base\Enumerations\Charset::UTF_7_IMAP,
 			\MailSo\Base\Enumerations\Charset::UTF_8);
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function HasSortedName()
+	{
+		return 0 < \strlen($this->sFullNameSorted);
+	}
+
+	/**
+	 * @return string
+	 */
+	public function FullNameSorted()
+	{
+		return 0 === \strlen($this->sFullNameSorted) ?
+			$this->FullName() : $this->sFullNameSorted;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function SetFullNameSorted($sFullNameSorted)
+	{
+		$this->sFullNameSorted = $sFullNameSorted;
 	}
 
 	/**

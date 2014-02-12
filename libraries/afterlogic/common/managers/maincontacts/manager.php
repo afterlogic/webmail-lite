@@ -439,10 +439,11 @@ class CApiMaincontactsManager extends AApiManagerWithStorage
 	 * @param string $sSearch = ''
 	 * @param int $iRequestLimit = 20
 	 * @param bool $bGlobalOnly = false
+	 * @param bool $bPhoneOnly = false
 	 *
 	 * @return bool | array
 	 */
-	public function GetSuggestItems($oAccount, $sSearch = '', $iRequestLimit = 20, $bGlobalOnly = false)
+	public function GetSuggestItems($oAccount, $sSearch = '', $iRequestLimit = 20, $bGlobalOnly = false, $bPhoneOnly = false)
 	{
 		$mResult = false;
 		try
@@ -452,10 +453,16 @@ class CApiMaincontactsManager extends AApiManagerWithStorage
 
 			if (!$bGlobalOnly && $oApiCapaManager->IsPersonalContactsSupported($oAccount))
 			{
-				$aContactItems = $this->oStorage->GetSuggestContactItems($oAccount->IdUser, $sSearch, $iRequestLimit);
+				$aGroupItems = $this->oStorage->GetSuggestGroupItems($oAccount->IdUser, $sSearch, $iRequestLimit);
+				if (is_array($aGroupItems))
+				{
+					$mResult = array_merge($mResult, $aGroupItems);
+				}
+
+				$aContactItems = $this->oStorage->GetSuggestContactItems($oAccount->IdUser, $sSearch, $iRequestLimit, $bPhoneOnly);
 				if (is_array($aContactItems))
 				{
-					$mResult = $aContactItems;
+					$mResult = array_merge($mResult, $aContactItems);
 				}
 			}
 
@@ -465,7 +472,7 @@ class CApiMaincontactsManager extends AApiManagerWithStorage
 				if ($oApiGcontactManager)
 				{
 					$aAccountItems = $oApiGcontactManager->GetContactItems($oAccount,
-						EContactSortField::EMail, ESortOrder::ASC, 0, $iRequestLimit, $sSearch);
+						EContactSortField::EMail, ESortOrder::ASC, 0, $iRequestLimit, $sSearch, $bPhoneOnly);
 
 					if (is_array($aAccountItems))
 					{
@@ -481,20 +488,29 @@ class CApiMaincontactsManager extends AApiManagerWithStorage
 					}
 				}
 			}
-
+			
 			if (is_array($mResult) && 1 < count($mResult))
 			{
+				$aEmails = array();
 				$aTemp = array();
 				foreach ($mResult as /* @var $oItem CContactListItem */ $oItem)
 				{
 					$sName = trim($oItem->ToString());
 					if (!isset($aTemp[$sName]))
 					{
+						if (!$oItem->Auto)
+						{
+							$aEmails[$oItem->Email] = true;
+						}
+
 						$aTemp[$sName] = $oItem;
 					}
 				}
 
 				$mResult = array_values($aTemp);
+				$mResult = array_filter($mResult, function (/* @var $oItem CContactListItem */ $oItem) use ($aEmails) {
+					return !($oItem->Auto && isset($aEmails[$oItem->Email]));
+				});
 			}
 
 			if (is_array($mResult) && $iRequestLimit < count($mResult))

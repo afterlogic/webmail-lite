@@ -71,11 +71,17 @@ class CApiWebmailManager extends AApiManagerWithStorage
 				{
 					$oAccountToCreate = new CAccount($oDomain);
 					$oAccountToCreate->Email = $sEmail;
-					
-					$oAccountToCreate->IncomingMailLogin = (isset($aExtValues['Login'])) ? $aExtValues['Login'] :
-						(($this->oSettings->GetConf('WebMail/UseLoginWithoutDomain'))
-							? api_Utils::GetAccountNameFromEmail($sEmail) : $sEmail);
-					
+
+//					$oAccountToCreate->IncomingMailLogin = (isset($aExtValues['Login'])) ? $aExtValues['Login'] :
+//						(($this->oSettings->GetConf('WebMail/UseLoginWithoutDomain'))
+//							? api_Utils::GetAccountNameFromEmail($sEmail) : $sEmail);
+										
+					$oAccountToCreate->IncomingMailLogin = (isset($aExtValues['Login']) ? $aExtValues['Login'] : $sEmail);
+					if ($this->oSettings->GetConf('WebMail/UseLoginWithoutDomain'))
+					{
+						$oAccountToCreate->IncomingMailLogin = api_Utils::GetAccountNameFromEmail($oAccountToCreate->IncomingMailLogin);
+					}
+
 					$oAccountToCreate->IncomingMailPassword = $sPassword;
 
 					if (0 < strlen($sChangeLang) && $sChangeLang !== $oAccountToCreate->User->DefaultLanguage)

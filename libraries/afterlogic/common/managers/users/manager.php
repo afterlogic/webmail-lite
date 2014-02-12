@@ -261,49 +261,50 @@ class CApiUsersManager extends AApiManagerWithStorage
 	 */
 	private function validateAccountSubscriptionLimits(&$oAccount, $oTenant, $bCreate = false)
 	{
-		if (CApi::GetConf('capa', false) && $oAccount && $oTenant)
-		{
-			$oSubscriptionsApi = CApi::Manager('subscriptions');
-			/* @var $oSubscriptionsApi CApiSubscriptionsManager */
-
-			$oTenantsApi = CApi::Manager('tenants');
-			/* @var $oTenantsApi CApiTenantsManager */
-
-			if ($oSubscriptionsApi && $oTenantsApi && $oAccount->IsDefaultAccount && !$oAccount->IsDisabled)
-			{
-				if (0 < $oAccount->User->IdSubscription)
-				{
-					$oSub = $oSubscriptionsApi->GetSubscriptionById($oAccount->User->IdSubscription);
-					if (/* @var $oSub CSubscription */ $oSub)
-					{
-						$aUsage = $oTenantsApi->GetSubscriptionUserUsage($oTenant->IdTenant,
-							$bCreate ? null : $oAccount->IdUser);
-
-						$iLimit = is_array($aUsage) && isset($aUsage[$oAccount->User->IdSubscription])
-							? $aUsage[$oAccount->User->IdSubscription] : 0;
-
-						if ($iLimit + 1 <= $oSub->Limit)
-						{
-							if ($bCreate)
-							{
-								$oAccount->User->Capa = $oSub->Capa;
-							}
-
-							return true;
-						}
-					}
-
-					if ($bCreate)
-					{
-						throw new CApiManagerException(Errs::TenantsManager_AccountCreateUserLimitReached);
-					}
-					else
-					{
-						throw new CApiManagerException(Errs::TenantsManager_AccountUpdateUserLimitReached);
-					}
-				}
-			}
-		}
+		// TODO subscriptions
+//		if (CApi::GetConf('capa', false) && $oAccount && $oTenant)
+//		{
+//			$oSubscriptionsApi = CApi::Manager('subscriptions');
+//			/* @var $oSubscriptionsApi CApiSubscriptionsManager */
+//
+//			$oTenantsApi = CApi::Manager('tenants');
+//			/* @var $oTenantsApi CApiTenantsManager */
+//
+//			if ($oSubscriptionsApi && $oTenantsApi && $oAccount->IsDefaultAccount && !$oAccount->IsDisabled)
+//			{
+//				if (0 < $oAccount->User->IdSubscription)
+//				{
+//					$oSub = $oSubscriptionsApi->GetSubscriptionById($oAccount->User->IdSubscription);
+//					if (/* @var $oSub CSubscription */ $oSub)
+//					{
+//						$aUsage = $oTenantsApi->GetSubscriptionUserUsage($oTenant->IdTenant,
+//							$bCreate ? null : $oAccount->IdUser);
+//
+//						$iLimit = is_array($aUsage) && isset($aUsage[$oAccount->User->IdSubscription])
+//							? $aUsage[$oAccount->User->IdSubscription] : 0;
+//
+//						if ($iLimit + 1 <= $oSub->Limit)
+//						{
+//							if ($bCreate)
+//							{
+//								$oAccount->User->Capa = $oSub->Capa;
+//							}
+//
+//							return true;
+//						}
+//					}
+//
+//					if ($bCreate)
+//					{
+//						throw new CApiManagerException(Errs::TenantsManager_AccountCreateUserLimitReached);
+//					}
+//					else
+//					{
+//						throw new CApiManagerException(Errs::TenantsManager_AccountUpdateUserLimitReached);
+//					}
+//				}
+//			}
+//		}
 
 		return false;
 	}
@@ -1023,34 +1024,33 @@ class CApiUsersManager extends AApiManagerWithStorage
 
 	/**
 	 * @param CAccount $oAccount
-	 * @param int $iIdentityType = EIdentityType::Normal
-	 * @return array | bool
+	 * @return array|bool
 	 */
-	public function GetIdentities($oAccount, $iIdentityType = EIdentityType::Normal)
+	public function GetIdentities($oAccount)
 	{
 		$aResult = false;
 		try
 		{
-			$aResult = array();
-			if (EIdentityType::Virtual === $iIdentityType)
-			{
-				$oIdentity = new CIdentity();
-				$oIdentity->IdIdentity = -1;
-				$oIdentity->IdUser = $oAccount->IdUser;
-				$oIdentity->IdAccount = $oAccount->IdAccount;
-				$oIdentity->Virtual = true;
-				$oIdentity->Email = $oAccount->Email;
-				$oIdentity->FriendlyName = $oAccount->FriendlyName;
-				$oIdentity->Signature = $oAccount->Signature;
-				$oIdentity->SignatureType = $oAccount->SignatureType;
-				$oIdentity->UseSignature = EAccountSignatureOptions::DontAdd !== $oAccount->SignatureOptions;
+			$aResult = $this->oStorage->GetIdentities($oAccount);
+		}
+		catch (CApiBaseException $oException)
+		{
+			$aResult = false;
+			$this->setLastException($oException);
+		}
+		return $aResult;
+	}
 
-				array_unshift($aResult, $oIdentity);
-			}
-			else
-			{
-				$aResult = $this->oStorage->GetIdentities($oAccount);
-			}
+	/**
+	 * @param CAccount $oAccount
+	 * @return array|bool
+	 */
+	public function GetIdentitiesByUserID($oAccount)
+	{
+		$aResult = false;
+		try
+		{
+			$aResult = $this->oStorage->GetIdentitiesByUserID($oAccount);
 		}
 		catch (CApiBaseException $oException)
 		{
@@ -1087,7 +1087,7 @@ class CApiUsersManager extends AApiManagerWithStorage
 	 * @param string $sOrderBy = 'email'
 	 * @param bool $bOrderType = true
 	 * @param string $sSearchDesc = ''
-	 * @return array | false [IdAccount => [IsMailingList, Email, FriendlyName, IsDisabled, IdUser, StorageQuota]]
+	 * @return array | false [IdAccount => [IsMailingList, Email, FriendlyName, IsDisabled, IdUser, StorageQuota, LastLogin]]
 	 */
 	public function GetUserList($iDomainId, $iPage, $iUsersPerPage, $sOrderBy = 'email', $bOrderType = true, $sSearchDesc = '')
 	{

@@ -204,10 +204,10 @@ class CApiUsersStorage extends AApiManagerStorage
 	 * @param int $iDomainId
 	 * @param int $iPage
 	 * @param int $iUsersPerPage
-	 * @param string $sOrderBy = 'name'
+	 * @param string $sOrderBy = 'email'
 	 * @param bool $bOrderType = true
 	 * @param string $sSearchDesc = ''
-	 * @return array | false [IdAccount => [IsMailingList, Email, FriendlyName, IsDisabled]]
+	 * @return array | false [IdAccount => [IsMailingList, Email, FriendlyName, IsDisabled, IdUser, StorageQuota, LastLogin]]
 	 */
 	public function GetUserList($iDomainId, $iPage, $iUsersPerPage, $sOrderBy = 'name', $bOrderType = true, $sSearchDesc = '')
 	{

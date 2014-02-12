@@ -42,19 +42,21 @@ class Utils
 
 	/**
 	 * @param string $sEncoding
+	 * @param bool $bAsciAsUtf8 = false
 	 *
 	 * @return string
 	 */
-	private static function normalizeCharset($sEncoding)
+	public static function NormalizeCharset($sEncoding, $bAsciAsUtf8 = false)
 	{
 		$sEncoding = \strtolower($sEncoding);
 		switch ($sEncoding)
 		{
-			case 'ansi':
-			case 'ansii':
-			case 'us-ansi':
-			case 'us-ansii':
-				$sEncoding = \MailSo\Base\Enumerations\Charset::ISO_8859_1;
+			case 'asci':
+			case 'ascii':
+			case 'us-asci':
+			case 'us-ascii':
+				$sEncoding = $bAsciAsUtf8 ? \MailSo\Base\Enumerations\Charset::UTF_8 :
+					\MailSo\Base\Enumerations\Charset::ISO_8859_1;
 				break;
 			case 'unicode-1-1-utf-7':
 				$sEncoding = \MailSo\Base\Enumerations\Charset::UTF_7;
@@ -117,7 +119,7 @@ class Utils
 	 */
 	public static function ValidateCharsetName($sCharset)
 	{
-		$sCharset = \strtolower(\MailSo\Base\Utils::normalizeCharset($sCharset));
+		$sCharset = \strtolower(\MailSo\Base\Utils::NormalizeCharset($sCharset));
 		return 0 < \strlen($sCharset) && (\in_array($sCharset, array(\MailSo\Base\Enumerations\Charset::UTF_7_IMAP)) ||
 			\in_array($sCharset, \MailSo\Base\Utils::$SuppostedCharsets));
 	}
@@ -133,8 +135,8 @@ class Utils
 	{
 		$sResult = $sInputString;
 
-		$sFromEncoding = \MailSo\Base\Utils::normalizeCharset($sInputFromEncoding);
-		$sToEncoding = \MailSo\Base\Utils::normalizeCharset($sInputToEncoding);
+		$sFromEncoding = \MailSo\Base\Utils::NormalizeCharset($sInputFromEncoding);
+		$sToEncoding = \MailSo\Base\Utils::NormalizeCharset($sInputToEncoding);
 
 		if ('' === \trim($sResult) || ($sFromEncoding === $sToEncoding && \MailSo\Base\Enumerations\Charset::UTF_8 !== $sFromEncoding))
 		{
@@ -226,6 +228,16 @@ class Utils
 	public static function IsAscii($sValue)
 	{
 		return !\preg_match('/[^\x09\x10\x13\x0A\x0D\x20-\x7E]/', $sValue);
+	}
+
+	/**
+	 * @param string $sValue
+	 *
+	 * @return bool
+	 */
+	public static function IsUtf8($sValue)
+	{
+		 return (bool) \preg_match('//u', $sValue);
 	}
 
 	/**
@@ -539,6 +551,12 @@ class Utils
 	public static function MimeContentType($sFileName)
 	{
 		$sResult = 'application/octet-stream';
+		$sFileName = \trim(\strtolower($sFileName));
+
+		if ('winmail.dat' === $sFileName)
+		{
+			return 'application/ms-tnef';
+		}
 
 		$aMimeTypes = array(
 
@@ -703,7 +721,7 @@ class Utils
 
 		);
 
-		$sExt = \strtolower(\MailSo\Base\Utils::GetFileExtension($sFileName));
+		$sExt = \MailSo\Base\Utils::GetFileExtension($sFileName);
 		if (0 < \strlen($sExt) && isset($aMimeTypes[$sExt]))
 		{
 			$sResult = $aMimeTypes[$sExt];
@@ -722,7 +740,7 @@ class Utils
 	{
 		$sResult = '';
 		$sContentType = \strtolower($sContentType);
-		if (0 === strpos($sContentType, 'image/'))
+		if (0 === \strpos($sContentType, 'image/'))
 		{
 			$sResult = 'image';
 		}
@@ -829,57 +847,57 @@ class Utils
 	 */
 	public static function Php2js($mInput)
 	{
-		return \json_encode($mInput, defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0);
+		return \json_encode($mInput, \defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0);
 
-		if (\is_null($mInput))
-		{
-			return 'null';
-		}
-		else if ($mInput === false)
-		{
-			return 'false';
-		}
-		else if ($mInput === true)
-		{
-			return 'true';
-		}
-		else if (\is_scalar($mInput))
-		{
-			if (\is_float($mInput))
-			{
-				$mInput = \str_replace(',', '.', \strval($mInput));
-			}
-
-			return '"'.\MailSo\Base\Utils::InlineRebuildStringToJsString($mInput).'"';
-		}
-
-		$bIsList = true;
-		for ($iIndex = 0, \reset($mInput), $iLen = \count($mInput); $iIndex < $iLen; $iIndex++, \next($mInput))
-		{
-			if (\key($mInput) !== $iIndex)
-			{
-				$bIsList = false;
-				break;
-			}
-		}
-
-		$aResult = array();
-		if ($bIsList)
-		{
-			foreach ($mInput as $mValue)
-			{
-				$aResult[] = \MailSo\Base\Utils::Php2js($mValue);
-			}
-			return '['.\join(',', $aResult).']';
-		}
-		else
-		{
-			foreach ($mInput as $sKey => $mValue)
-			{
-				$aResult[] = \MailSo\Base\Utils::Php2js($sKey).':'.\MailSo\Base\Utils::Php2js($mValue);
-			}
-			return '{'.\join(',', $aResult).'}';
-		}
+//		if (\is_null($mInput))
+//		{
+//			return 'null';
+//		}
+//		else if ($mInput === false)
+//		{
+//			return 'false';
+//		}
+//		else if ($mInput === true)
+//		{
+//			return 'true';
+//		}
+//		else if (\is_scalar($mInput))
+//		{
+//			if (\is_float($mInput))
+//			{
+//				$mInput = \str_replace(',', '.', \strval($mInput));
+//			}
+//
+//			return '"'.\MailSo\Base\Utils::InlineRebuildStringToJsString($mInput).'"';
+//		}
+//
+//		$bIsList = true;
+//		for ($iIndex = 0, \reset($mInput), $iLen = \count($mInput); $iIndex < $iLen; $iIndex++, \next($mInput))
+//		{
+//			if (\key($mInput) !== $iIndex)
+//			{
+//				$bIsList = false;
+//				break;
+//			}
+//		}
+//
+//		$aResult = array();
+//		if ($bIsList)
+//		{
+//			foreach ($mInput as $mValue)
+//			{
+//				$aResult[] = \MailSo\Base\Utils::Php2js($mValue);
+//			}
+//			return '['.\join(',', $aResult).']';
+//		}
+//		else
+//		{
+//			foreach ($mInput as $sKey => $mValue)
+//			{
+//				$aResult[] = \MailSo\Base\Utils::Php2js($sKey).':'.\MailSo\Base\Utils::Php2js($mValue);
+//			}
+//			return '{'.\join(',', $aResult).'}';
+//		}
 	}
 
 	/**
@@ -900,25 +918,25 @@ class Utils
 	 */
 	public static function RecRmDir($sDir)
 	{
-		if (@is_dir($sDir))
+		if (@\is_dir($sDir))
 		{
-			$aObjects = scandir($sDir);
+			$aObjects = \scandir($sDir);
 			foreach ($aObjects as $sObject)
 			{
 				if ('.' !== $sObject && '..' !== $sObject)
 				{
-					if ('dir' === filetype($sDir.'/'.$sObject))
+					if ('dir' === \filetype($sDir.'/'.$sObject))
 					{
 						self::RecRmDir($sDir.'/'.$sObject);
 					}
 					else
 					{
-						@unlink($sDir.'/'.$sObject);
+						@\unlink($sDir.'/'.$sObject);
 					}
 				}
 			}
 
-			return @rmdir($sDir);
+			return @\rmdir($sDir);
 		}
 
 		return false;
@@ -1090,6 +1108,11 @@ class Utils
 	 */
 	public static function Utf8Clear($sUtfString, $sReplaceOn = '')
 	{
+		if ('' === $sUtfString)
+		{
+			return $sUtfString;
+		}
+
 		$sUtfString = @\iconv('UTF-8', 'UTF-8//IGNORE', $sUtfString);
 
 		$sUtfString = \preg_replace(
@@ -1118,9 +1141,11 @@ class Utils
 	public static function IsRTL($sUtfString)
 	{
 		// \x{0591}-\x{05F4} - Hebrew
-		// \x{FB1D}-\x{FB40} - Hebrew ?
-		// \x{0621}-\x{064A} - Arabic
-		return 0 < (int) preg_match('/[\x{0591}-\x{05F4}\x{FB1D}-\x{FB40}\x{0621}-\x{064A}]/u', $sUtfString);
+		// \x{0600}-\x{068F} - Arabic
+		// \x{0750}-\x{077F} - Arabic
+		// \x{08A0}-\x{08FF} - Arabic
+		// \x{103A0}-\x{103DF} - Old Persian
+		return 0 < (int) preg_match('/[\x{0591}-\x{05F4}\x{0600}-\x{068F}\x{0750}-\x{077F}\x{08A0}-\x{08FF}\x{103A0}-\x{103DF}]/u', $sUtfString);
 	}
 
 	/**

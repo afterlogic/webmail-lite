@@ -77,6 +77,9 @@ class CApi
 
 			CApi::Inc('common.http');
 
+			CApi::Inc('common.social');
+			CApi::Inc('common.twilio');
+
 			CApi::Inc('common.db.storage');
 
 			$sSalt = '';
@@ -101,6 +104,22 @@ class CApi
 				if (is_array($aAppConfig))
 				{
 					CApi::$aConfig = array_merge(CApi::$aConfig, $aAppConfig);
+				}
+			}
+
+			$oHtml = \MailSo\Base\Http::SingletonInstance();
+			$sHost = $oHtml->GetHost();
+			
+			if (0 < \strlen($sHost))
+			{
+				$sDomainSettingsFile = CApi::DataPath().'/settings/'.$sHost.'.config.php';
+				if (@file_exists($sDomainSettingsFile))
+				{
+					$aDomainAppConfig = include $sDomainSettingsFile;
+					if (is_array($aDomainAppConfig))
+					{
+						CApi::$aConfig = array_merge(CApi::$aConfig, $aDomainAppConfig);
+					}
 				}
 			}
 
@@ -180,39 +199,6 @@ class CApi
 		}
 
 		return $oCacher;
-	}
-
-	public static function CatchaLocalLimit($bAddToLimit = false, $bClear = false)
-	{
-		$iResult = 0;
-		$oApiIntegrator = CApi::Manager('integrator');
-		if ($oApiIntegrator)
-		{
-			$sKey = 'Login/Captcha/Limit/'.$oApiIntegrator->GetCsrfToken();
-			$oCacher = \CApi::Cacher();
-			if ($oCacher->IsInited())
-			{
-				if ($bClear)
-				{
-					$oCacher->Delete($sKey);
-				}
-				else
-				{
-					$sData = $oCacher->Get($sKey);
-					if (0 < strlen($sData) && is_numeric($sData))
-					{
-						$iResult = (int) $sData;
-					}
-
-					if ($bAddToLimit)
-					{
-						$oCacher->Set($sKey, ++$iResult);
-					}
-				}
-			}
-		}
-
-		return $iResult;
 	}
 
 	/**
@@ -580,7 +566,8 @@ class CApi
 	 */
 	public static function VersionJs()
 	{
-		return preg_replace('/[^0-9a-z]/', '', CApi::Version());
+		return preg_replace('/[^0-9a-z]/', '', CApi::Version().
+			(CApi::GetConf('labs.cache.static', true) ? '' : '-'.md5(time())));
 	}
 
 	/**

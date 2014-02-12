@@ -46,13 +46,15 @@
 
 		<div class="main_panel">
 			<span class="close" data-bind="click: closePopup"></span>
-			<span class="title calendar_selector" data-bind="dropdown: {'control': false}, style: {backgroundColor: calendarColor}">
-				<span data-bind="text: selectedCalendarName"></span>
-				<span class="dropdown" data-bind="visible: visibleCalendarList()">
+			<span class="title" data-bind="dropdown: {'control': false}, style: {backgroundColor: calendarColor}, css: {'calendar_selector': selectedCalendarIsEditable()}">
+				<span class="current">
+					<span data-bind="text: selectedCalendarName, fade: {color: calendarColor}"></span>
+				</span>
+				<span class="dropdown" data-bind="visible: calendarsList().length > 0 && selectedCalendarIsEditable()">
 					<span class="dropdown_helper">
 						<span class="dropdown_arrow"><span></span></span>
 						<span class="dropdown_content" data-bind="foreach: calendarsList()">
-							<span class="item" data-bind="visible: $parent.isVisibleCalendarListItem(id), text: name, style: { backgroundColor: color }, click: function (item) { $parent.selectedCalendar(id) }"></span>
+							<span class="item" data-bind="visible: $parent.selectedCalendar() !== id, text: name, style: { backgroundColor: color }, click: function () { $parent.selectedCalendar(id) }"></span>
 						</span>
 					</span>
 				</span>
@@ -63,7 +65,7 @@
 					<div class="row dates" data-bind="click: isEditable() ? showDates : '', css: {'editable': isEditable()}">
 						<span class="value" data-bind="text: startDate() + ' '"></span>
 						<span class="value" data-bind="text: startTime, visible: !allDay()"></span>
-						<span data-bind="visible: !allDay() && (!isEvOneDay() || !isEvOneTime())">&nbsp;&ndash;&nbsp;</span>
+						<span data-bind="visible: !isEvOneDay() || !isEvOneTime()">&nbsp;&ndash;&nbsp;</span>
 						<span class="value" data-bind="text: endDate() + ' ', visible: !isEvOneDay()"></span>
 						<span class="value" data-bind="text: endTime, visible: !allDay() && (!isEvOneDay() || !isEvOneTime())"></span>
 					</div>
@@ -221,13 +223,13 @@
 							<div class="form_content">
 								<div class="alarms" data-bind="foreach: displayedAlarms()">
 									<span class="item alarm">
-										<span class="link remove" data-i18n="CALENDAR/EVENT_REMINDER_REMOVE" data-bind="i18n: 'text', visible: $parent.isEditable(), click: function(oItem) {$parent.removeAlarm(oItem);}"></span>
+										<span class="link remove" data-i18n="CALENDAR/EVENT_REMINDER_REMOVE" data-bind="i18n: 'text', visible: $parent.isEditableReminders(), click: function(oItem) {$parent.removeAlarm(oItem);}"></span>
 
 										<span data-i18n="CALENDAR/EVENT_REMINDER_ALARM" data-bind="i18n: 'text'"></span>
-										<span class="value" data-bind="text: $data.text, visible: !$parent.isEditable()"></span>
-										<span class="custom_selector" data-bind="visible: $parent.isEditable(), customSelect: {'control': false, 'alarmOptions': $parent.alarmOptions, 'options': $parent.alarmOptions(), value: alarm, optionsText: 'text', optionsValue: 'value'}">
+										<span class="value" data-bind="text: $data.text, visible: !$parent.isEditableReminders()"></span>
+										<span class="custom_selector" data-bind="visible: $parent.isEditableReminders(), customSelect: {'control': false, 'alarmOptions': $parent.alarmOptions, 'options': $parent.alarmOptions(), value: alarm, optionsText: 'text', optionsValue: 'value'}">
 											<span class="link value" data-bind="text: $data.text"></span>
-											<span class="dropdown" data-bind="visible: $parent.isEditable()">
+											<span class="dropdown" data-bind="visible: $parent.isEditableReminders()">
 												<span class="dropdown_helper">
 													<span class="dropdown_arrow"><span></span></span>
 													<span class="dropdown_content">
@@ -238,7 +240,7 @@
 										</span>
 									</span>
 								</div>
-								<span class="link" data-i18n="CALENDAR/EVENT_REMINDER_NEW_ALARM" data-bind="i18n: 'text', click: addAlarm, visible: isEditable() && (displayedAlarms().length < 5)"></span>
+								<span class="link" data-i18n="CALENDAR/EVENT_REMINDER_NEW_ALARM" data-bind="i18n: 'text', click: addAlarm, visible: isEditableReminders() && (displayedAlarms().length < 5)"></span>
 							</div>
 							<span class="form_arrow"></span>
 						</div>
@@ -246,7 +248,7 @@
 
 					<div class="toolbar">
 						<span class="content">
-							<span class="item alarm" data-bind="click: isEditable() ? addFirstAlarm : '', css: {'selected': displayedAlarms().length > 0, 'readonly': !isEditable()}">
+							<span class="item alarm" data-bind="click: isEditableReminders() ? addFirstAlarm : '', css: {'selected': displayedAlarms().length > 0, 'readonly': !isEditableReminders()}">
 								<span class="icon" data-i18n="CALENDAR/EVENT_REMINDER" data-bind="i18n: 'title'"></span>
 								<span class="text" data-i18n="CALENDAR/EVENT_REMINDER" data-bind="i18n: 'text'"></span>
 							</span>
@@ -257,7 +259,7 @@
 							</span>
 						</span>
 					</div>
-					<span class="button save" data-i18n="CALENDAR/BUTTON_SAVE" data-bind="i18n: 'text', click: onSaveClick, visible: isEditable()"></span>
+					<span class="button save" data-i18n="CALENDAR/BUTTON_SAVE" data-bind="i18n: 'text', click: onSaveClick, visible: isEditable() || isEditableReminders()"></span>
 					<span class="link remove" data-i18n="CALENDAR/LINK_REMOVE" data-bind="i18n: 'text', click: onDeleteClick, visible: isEditForm() && isEditable()"></span>
 				</div>
 

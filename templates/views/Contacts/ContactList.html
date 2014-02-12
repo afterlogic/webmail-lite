@@ -3,9 +3,11 @@
 		<span class="icon"></span>
 		<input type="checkbox" data-bind="checked: checkAll" />
 	</label>
-	<span class="search_block custom_select">
-		<span class="button" data-i18n="CONTACTS/BUTTON_SEARCH" data-bind="i18n: 'text', click: searchSubmitCommand"></span>
-		<input type="text" data-bind="value: search, onEnter: searchSubmitCommand, hasfocus: isSearchFocused" />
+	<span class="search_block">
+		<span class="input" data-bind="css: {'focus': isSearchFocused}">
+			<span class="button" data-i18n="CONTACTS/BUTTON_SEARCH" data-bind="i18n: 'text', click: searchSubmitCommand"></span>
+			<input class="field" type="text" data-bind="value: search, onEnter: searchSubmitCommand, hasfocus: isSearchFocused" />
+		</span>
 	</span>
 </div>
 <div class="panel_center unselectable">
@@ -32,7 +34,7 @@
 			</span>
 
 			<div class="items_sub_list contact_sub_list" data-bind="foreach: collection, draggablePlace: dragAndDropHelper">
-				<div class="item dragHandle" data-bind="css: {'checked': checked, 'selected': selected, 'deleted': deleted}">
+				<div class="item dragHandle nosubject" data-bind="css: {'checked': checked, 'selected': selected, 'deleted': deleted, 'noname': !Name()}">
 					<div class="item_content">
 						<span class="me" data-i18n="CONTACTS/LABEL_ITS_ME" data-bind="visible: ItsMe(), i18n: 'text'"></span>
 						<span class="controls">
@@ -41,9 +43,11 @@
 								<input type="checkbox" data-bind="checked: checked" />
 							</label>
 						</span>
-						<span class="data fade">
+						<span class="data fadeout">
 							<span class="name" data-bind="text: Name(), visible: !!Name()"></span>
+							<span class="name" data-i18n="CONTACTS/NO_NAME" data-bind="i18n: 'text', visible: Name() === ''"></span>
 							<span class="email" data-bind="text: Email(), visible: !!Email()"></span>
+							<span class="email" data-i18n="CONTACTS/NO_EMAIL" data-bind="i18n: 'text', visible: Email() === ''"></span>
 						</span>
 						<div class="separator"></div>
 					</div>

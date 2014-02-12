@@ -502,6 +502,20 @@ AND %sacal_calendars.user_id = %d';
 	}
 
 	/**
+	 * @param CAccount $oAccount
+	 * @return string
+	 */
+	public function GetIdentitiesByUserID($oAccount)
+	{
+		$aMap = api_AContainer::DbReadKeys(CIdentity::GetStaticMap());
+		$aMap = array_map(array($this, 'escapeColumn'), $aMap);
+
+		$sSql = 'SELECT %s FROM %sawm_identities WHERE id_user = %d';
+
+		return sprintf($sSql, implode(', ', $aMap), $this->Prefix(), $oAccount->IdUser);
+	}
+
+	/**
 	 * @param int $iUserId
 	 * @return string
 	 */
@@ -743,15 +757,23 @@ WHERE def_acct = 1 AND id_domain = %d LIMIT %d, %d';
 		if (!empty($sSearchDesc))
 		{
 			$sSearchDesc = '\'%'.$this->escapeString($sSearchDesc, true, true).'%\'';
-			$sWhere = ' AND (email LIKE '.$sSearchDesc.' OR friendly_nm LIKE '.$sSearchDesc.')';
+			$sWhere = ' AND (acc.email LIKE '.$sSearchDesc.' OR acc.friendly_nm LIKE '.$sSearchDesc.')';
 		}
 
-		$sOrderBy = empty($sOrderBy) ? 'email' : $sOrderBy;
+		if ('last_login' === $sOrderBy)
+		{
+			$sOrderBy = 'sett.last_login';
+		}
+		else
+		{
+			$sOrderBy = empty($sOrderBy) ? 'acc.email' : 'acc.'.$sOrderBy;
+		}
 
-		$sSql = 'SELECT id_user, id_acct, email, mailing_list, friendly_nm, deleted, quota FROM %sawm_accounts
-WHERE def_acct = 1 AND id_domain = %d%s ORDER BY %s %s LIMIT %d, %d';
+		$sSql = 'SELECT acc.id_user, acc.id_acct, acc.email, acc.mailing_list, acc.friendly_nm, acc.deleted, acc.quota, sett.last_login FROM %sawm_accounts AS acc
+INNER JOIN %sawm_settings AS sett ON sett.id_user = acc.id_user
+WHERE acc.def_acct = 1 AND acc.id_domain = %d%s ORDER BY %s %s LIMIT %d, %d';
 
-		return sprintf($sSql, $this->Prefix(), $iDomainId, $sWhere, $sOrderBy, ((bool) $bOrderType) ? 'ASC' : 'DESC',
+		return sprintf($sSql, $this->Prefix(), $this->Prefix(), $iDomainId, $sWhere, $sOrderBy, ((bool) $bOrderType) ? 'ASC' : 'DESC',
 			($iPage > 0) ? ($iPage - 1) * $iUsersPerPage : 0, $iUsersPerPage);
 	}
 

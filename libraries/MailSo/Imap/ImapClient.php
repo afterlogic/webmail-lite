@@ -74,6 +74,11 @@ class ImapClient extends \MailSo\Net\NetClient
 	private $sLogginedUser;
 
 	/**
+	 * @var bool
+	 */
+	public $__FORCE_SELECT_ON_EXAMINE__;
+
+	/**
 	 * @access protected
 	 */
 	protected function __construct()
@@ -95,6 +100,8 @@ class ImapClient extends \MailSo\Net\NetClient
 		$this->bIsLoggined = false;
 		$this->bIsSelected = false;
 		$this->sLogginedUser = '';
+
+		$this->__FORCE_SELECT_ON_EXAMINE__ = false;
 
 		@\ini_set('xdebug.max_nesting_level', 500);
 	}
@@ -854,7 +861,7 @@ class ImapClient extends \MailSo\Net\NetClient
 	 */
 	public function FolderExamine($sFolderName, $bReSelectSameFolders = false)
 	{
-		return $this->selectOrExamineFolder($sFolderName, false, $bReSelectSameFolders);
+		return $this->selectOrExamineFolder($sFolderName, $this->__FORCE_SELECT_ON_EXAMINE__, $bReSelectSameFolders);
 	}
 
 	/**
@@ -1092,19 +1099,31 @@ class ImapClient extends \MailSo\Net\NetClient
 		if (\is_numeric($aValue))
 		{
 			$mResult = (int) $aValue;
+			if (0 >= $mResult)
+			{
+				$mResult = false;
+			}
 		}
 		else if (\is_array($aValue))
 		{
-			if (1 === count($aValue) && \is_numeric($aValue[0]))
+			if (1 === \count($aValue) && \is_numeric($aValue[0]))
 			{
 				$mResult = (int) $aValue[0];
+				if (0 >= $mResult)
+				{
+					$mResult = false;
+				}
 			}
 			else
 			{
 				$mResult = array();
 				foreach ($aValue as $aValueItem)
 				{
-					$mResult[] = $this->validateThreadItem($aValueItem);
+					$mTemp = $this->validateThreadItem($aValueItem);
+					if (false !== $mTemp)
+					{
+						$mResult[] = $mTemp;
+					}
 				}
 			}
 		}

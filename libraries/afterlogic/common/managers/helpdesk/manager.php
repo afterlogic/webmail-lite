@@ -327,7 +327,7 @@ class CApiHelpdeskManager extends AApiManagerWithStorage
 					throw new CApiManagerException(Errs::HelpdeskManager_UserAlreadyExists);
 				}
 			}
-
+			;
 			$bResult = true;
 		}
 		catch (CApiBaseException $oException)
@@ -397,12 +397,42 @@ class CApiHelpdeskManager extends AApiManagerWithStorage
 		$sAgentIframeUrl = '';
 		$sSiteName = '';
 
+		$bFacebookAllow = false;
+		$sFacebookId = '';
+		$sFacebookSecret = '';
+		$bGoogleAllow = false;
+		$sGoogleId = '';
+		$sGoogleSecret = '';
+		$bTwitterAllow = false;
+		$sTwitterId = '';
+		$sTwitterSecret = '';
+
 		if (0 < $iIdTenant && $oTenant)
 		{
 			$sAdminEmailAccount = $oTenant->HelpdeskAdminEmailAccount;
 			$sClientIframeUrl = $oTenant->HelpdeskClientIframeUrl;
 			$sAgentIframeUrl = $oTenant->HelpdeskAgentIframeUrl;
 			$sSiteName = $oTenant->HelpdeskSiteName;
+
+			/*$bFacebookAllow = $oTenant->HelpdeskFacebookAllow;
+			$sFacebookId = $oTenant->HelpdeskFacebookId;
+			$sFacebookSecret = $oTenant->HelpdeskFacebookSecret;
+			$bGoogleAllow = $oTenant->HelpdeskGoogleAllow;
+			$sGoogleId = $oTenant->HelpdeskGoogleId;
+			$sGoogleSecret = $oTenant->HelpdeskGoogleSecret;
+			$bTwitterAllow = $oTenant->HelpdeskTwitterAllow;
+			$sTwitterId = $oTenant->HelpdeskTwitterId;
+			$sTwitterSecret = $oTenant->HelpdeskTwitterSecret;*/
+
+			$bFacebookAllow = $oTenant->SocialFacebookAllow;
+			$sFacebookId = $oTenant->SocialFacebookId;
+			$sFacebookSecret = $oTenant->SocialFacebookSecret;
+			$bGoogleAllow = $oTenant->SocialGoogleAllow;
+			$sGoogleId = $oTenant->SocialGoogleId;
+			$sGoogleSecret = $oTenant->SocialGoogleSecret;
+			$bTwitterAllow = $oTenant->SocialTwitterAllow;
+			$sTwitterId = $oTenant->SocialTwitterId;
+			$sTwitterSecret = $oTenant->SocialTwitterSecret;
 		}
 		else
 		{
@@ -410,13 +440,43 @@ class CApiHelpdeskManager extends AApiManagerWithStorage
 			$sClientIframeUrl = $this->oSettings->GetConf('Helpdesk/ClientIframeUrl');
 			$sAgentIframeUrl = $this->oSettings->GetConf('Helpdesk/AgentIframeUrl');
 			$sSiteName = $this->oSettings->GetConf('Helpdesk/SiteName');
+
+			/*$bFacebookAllow = $this->oSettings->GetConf('Helpdesk/FacebookAllow');
+			$sFacebookId = $this->oSettings->GetConf('Helpdesk/FacebookId');
+			$sFacebookSecret = $this->oSettings->GetConf('Helpdesk/FacebookSecret');
+			$bGoogleAllow = $this->oSettings->GetConf('Helpdesk/GoogleAllow');
+			$sGoogleId = $this->oSettings->GetConf('Helpdesk/GoogleId');
+			$sGoogleSecret = $this->oSettings->GetConf('Helpdesk/GoogleSecret');
+			$bTwitterAllow = $this->oSettings->GetConf('Helpdesk/TwitterAllow');
+			$sTwitterId = $this->oSettings->GetConf('Helpdesk/TwitterId');
+			$sTwitterSecret = $this->oSettings->GetConf('Helpdesk/TwitterSecret');*/
+
+			$bFacebookAllow = $this->oSettings->GetConf('Social/FacebookAllow');
+			$sFacebookId = $this->oSettings->GetConf('Social/FacebookId');
+			$sFacebookSecret = $this->oSettings->GetConf('Social/FacebookSecret');
+			$bGoogleAllow = $this->oSettings->GetConf('Social/GoogleAllow');
+			$sGoogleId = $this->oSettings->GetConf('Social/GoogleId');
+			$sGoogleSecret = $this->oSettings->GetConf('Social/GoogleSecret');
+			$bTwitterAllow = $this->oSettings->GetConf('Social/TwitterAllow');
+			$sTwitterId = $this->oSettings->GetConf('Social/TwitterId');
+			$sTwitterSecret = $this->oSettings->GetConf('Social/TwitterSecret');
 		}
 
 		return array(
 			'AdminEmailAccount' => $sAdminEmailAccount,
 			'ClientIframeUrl' => $sClientIframeUrl,
 			'AgentIframeUrl' => $sAgentIframeUrl,
-			'SiteName' => $sSiteName
+			'SiteName' => $sSiteName,
+
+			'FacebookAllow' => $bFacebookAllow,
+			'FacebookId' => $sFacebookId,
+			'FacebookSecret' => $sFacebookSecret,
+			'GoogleAllow' => $bGoogleAllow,
+			'GoogleId' => $sGoogleSecret,
+			'GoogleSecret' => $sGoogleId,
+			'TwitterAllow' => $bTwitterAllow,
+			'TwitterId' => $sTwitterId,
+			'TwitterSecret' => $sTwitterSecret,
 		);
 	}
 
@@ -461,6 +521,21 @@ class CApiHelpdeskManager extends AApiManagerWithStorage
 		return $oUser;
 	}
 
+	public function GetUserBySocialId($iIdTenant, $sSocialId)
+	{
+		$oUser = null;
+		try
+		{
+			$oUser = $this->oStorage->GetUserBySocialId($iIdTenant, $sSocialId);
+		}
+		catch (CApiBaseException $oException)
+		{
+			$oUser = false;
+			$this->setLastException($oException);
+		}
+		return $oUser;
+	}
+
 	/**
 	 * @param CHelpdeskUser $oHelpdeskUser
 	 * @return bool
@@ -478,14 +553,17 @@ class CApiHelpdeskManager extends AApiManagerWithStorage
 	public function UserExists(CHelpdeskUser $oHelpdeskUser)
 	{
 		$bResult = false;
-		try
+		if(!$oHelpdeskUser->SocialId)
 		{
-			$bResult = $this->oStorage->UserExists($oHelpdeskUser);
-		}
-		catch (CApiBaseException $oException)
-		{
-			$bResult = false;
-			$this->setLastException($oException);
+			try
+			{
+				$bResult = $this->oStorage->UserExists($oHelpdeskUser);
+			}
+			catch (CApiBaseException $oException)
+			{
+				$bResult = false;
+				$this->setLastException($oException);
+			}
 		}
 		return $bResult;
 	}
@@ -969,6 +1047,77 @@ class CApiHelpdeskManager extends AApiManagerWithStorage
 		}
 
 		return $aResult;
+	}
+
+	/**
+	 * @param int $iTimeoutInMin = 15
+	 *
+	 * @return bool
+	 */
+	public function ClearAllOnline($iTimeoutInMin = 15)
+	{
+		$bResult = false;
+		if (0 < $iTimeoutInMin)
+		{
+			try
+			{
+				$bResult = $this->oStorage->ClearAllOnline($iTimeoutInMin);
+			}
+			catch (CApiBaseException $oException)
+			{
+				$this->setLastException($oException);
+			}
+		}
+
+		return $bResult;
+	}
+
+	/**
+	 * @param CHelpdeskUser $oHelpdeskUser
+	 * @param int $iThreadID
+	 *
+	 * @return array|bool
+	 */
+	public function GetOnline(CHelpdeskUser $oHelpdeskUser, $iThreadID)
+	{
+		$aResult = false;
+		if ($oHelpdeskUser && $oHelpdeskUser->IsAgent)
+		{
+			try
+			{
+				$aResult = $this->oStorage->GetOnline($oHelpdeskUser, $iThreadID);
+			}
+			catch (CApiBaseException $oException)
+			{
+				$this->setLastException($oException);
+			}
+		}
+
+		return $aResult;
+	}
+
+	/**
+	 * @param CHelpdeskUser $oHelpdeskUser
+	 * @param int $iThreadID
+	 *
+	 * @return bool
+	 */
+	public function SetOnline(CHelpdeskUser $oHelpdeskUser, $iThreadID)
+	{
+		$bResult = false;
+		if ($oHelpdeskUser)
+		{
+			try
+			{
+				$bResult = $this->oStorage->SetOnline($oHelpdeskUser, $iThreadID);
+			}
+			catch (CApiBaseException $oException)
+			{
+				$this->setLastException($oException);
+			}
+		}
+
+		return $bResult;
 	}
 
 	/**

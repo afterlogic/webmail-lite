@@ -611,6 +611,7 @@ class CApiMailMessage
 		}
 
 		$sCharset = $oBodyStructure ? $oBodyStructure->SearchCharset() : '';
+		$sCharset = \MailSo\Base\Utils::NormalizeCharset($sCharset);
 
 		$this->sHeaders = trim($oFetchResponse->GetHeaderFieldsValue($sRfc822SubMimeIndex));
 		if (!empty($this->sHeaders))
@@ -625,6 +626,7 @@ class CApiMailMessage
 			if (!empty($sContentTypeCharset))
 			{
 				$sCharset = $sContentTypeCharset;
+				$sCharset = \MailSo\Base\Utils::NormalizeCharset($sCharset);
 			}
 
 			if (!empty($sCharset))
@@ -775,6 +777,11 @@ class CApiMailMessage
 
 		if (is_array($aTextParts) && 0 < count($aTextParts))
 		{
+			if (0 === \strlen($sCharset))
+			{
+				$sCharset = \MailSo\Base\Enumerations\Charset::UTF_8;
+			}
+			
 			$sHtmlParts = array();
 			$sPlainParts = array();
 
@@ -804,6 +811,8 @@ class CApiMailMessage
 					{
 						$sTextCharset = $sCharset;
 					}
+
+					$sTextCharset = \MailSo\Base\Utils::NormalizeCharset($sTextCharset, true);
 
 					$sText = \MailSo\Base\Utils::DecodeEncodingValue($sText, $oPart->MailEncodingName());
 					$sText = \MailSo\Base\Utils::ConvertEncoding($sText, $sTextCharset, \MailSo\Base\Enumerations\Charset::UTF_8);

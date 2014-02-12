@@ -743,9 +743,10 @@ class CApiMaincontactsSabredavStorage extends CApiMaincontactsStorage
 	 * @param int $iUserId
 	 * @param string $sSearch
 	 * @param int $iRequestLimit
+	 * @param bool $bPhoneOnly = false
 	 * @return bool | array
 	 */
-	public function GetSuggestContactItems($iUserId, $sSearch, $iRequestLimit)
+	public function GetSuggestContactItems($iUserId, $sSearch, $iRequestLimit, $bPhoneOnly = false)
 	{
 		$aResult = array();
 		$this->Init($iUserId);

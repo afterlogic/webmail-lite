@@ -5,12 +5,12 @@
 			<span class="dropdown_content" data-bind="style: {backgroundColor: color}">
 				<!--span class="item" data-i18n="CALENDAR/ACTION_CREATE_EVENT" data-bind="visible: (access !== 2), i18n: 'text', click: function (item) {$parent.createNewEventInCalendar(id);}"></span>
 				<span class="item" data-i18n="CALENDAR/ACTION_HIDE_OTHER" data-bind="i18n: 'text', click: function () {$parent.calendars.hideOtherCalendars(id);}"></span-->
-				<span class="item" data-i18n="CALENDAR/ACTION_EDIT_CALENDAR" data-bind="i18n: 'text', visible: !isShared, click: function (oItem) {$parent.openUpdateCalendarForm(oItem);}"></span>
-				<span class="item" data-i18n="CALENDAR/ACTION_GETLINK_CALENDAR" data-bind="i18n: 'text', visible: !isShared, click: function (oItem) {$parent.openGetLinkCalendarForm(oItem);}"></span>
-				<span class="item" data-i18n="CALENDAR/ACTION_SHARE_AND_PUBLISH" data-bind="i18n: 'text', visible: (!isShared && $parent.calendarSharing), click: function (oItem) {$parent.openShareCalendarForm(oItem);}"></span>
-				<span class="item" data-i18n="CALENDAR/ACTION_REMOVE_CALENDAR" data-bind="i18n: 'text', visible: !isDefault, click: function () {$parent.deleteCalendar(id);}"></span>
-				<span class="separator" data-bind="visible: !isShared"></span>
-				<span class="colors" data-bind="visible: !isShared, foreach: $parent.colors">
+				<span class="item" data-i18n="CALENDAR/ACTION_EDIT_CALENDAR" data-bind="i18n: 'text', click: function (oItem) {console.log(oItem); $parent.openUpdateCalendarForm(oItem);}"></span>
+				<span class="item" data-i18n="CALENDAR/ACTION_GETLINK_CALENDAR" data-bind="i18n: 'text', visible: (!isShared() || isOwner()), click: function (oItem) {$parent.openGetLinkCalendarForm(oItem);}"></span>
+				<span class="item" data-i18n="CALENDAR/ACTION_SHARE_AND_PUBLISH" data-bind="i18n: 'text', visible: (!isShared() || isOwner() && $parent.calendarSharing), click: function (oItem) {$parent.openShareCalendarForm(oItem);}"></span>
+				<span class="item" data-i18n="CALENDAR/ACTION_REMOVE_CALENDAR" data-bind="i18n: 'text', visible: !isDefault && !isSharedToAll(), click: function () {$parent.deleteCalendar(id);}"></span>
+				<span class="separator" data-bind="visible: (!isShared() || isOwner())"></span>
+				<span class="colors" data-bind="foreach: $parent.colors">
 					<span class="item color_pick" data-bind="style: {backgroundColor: $data}, css: {'selected': $parent.color() === $data},
 						 click: function () {$root.updateCalendarColor($data, $parent.id);}"></span>
 				</span>

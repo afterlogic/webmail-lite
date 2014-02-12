@@ -84,6 +84,20 @@
 					<label for="useThreads" data-i18n="SETTINGS/COMMON_USE_THREADING" data-bind="i18n: 'text'"></label>
 				</span>
 			</div>
+			<div class="row" style="margin-bottom: 4px;">
+				<span class="label"></span>
+				<span class="value">
+					<label class="custom_checkbox" data-bind="css: {'checked': saveRepliedToCurrFolder}">
+						<span class="icon"></span>
+						<input type="checkbox" id="saveRepliedToCurrFolder" data-bind="checked: saveRepliedToCurrFolder" />
+					</label>
+					<label for="saveRepliedToCurrFolder" data-i18n="SETTINGS/COMMON_SAVE_REPLIED_TO_CURR_FOLDER" data-bind="i18n: 'text'"></label>
+				</span>
+			</div>
+			<div class="hint row">
+				<span class="label"></span>
+				<span class="value" data-bind="i18n: 'text'" data-i18n="SETTINGS/COMMON_SAVE_REPLIED_TO_CURR_FOLDER_HINT"></span>
+			</div>
 		</div>
 
 		<div class="buttons">

@@ -76,6 +76,7 @@ class CApiDomainsDbStorage extends CApiDomainsStorage
 				$oDomain = new CDomain();
 				$oDomain->InitByDbRow($oRow);
 			}
+			$this->oConnection->FreeResult();
 		}
 
 		$this->throwDbExceptionIfExist();
@@ -138,6 +139,8 @@ class CApiDomainsDbStorage extends CApiDomainsStorage
 			{
 				$bIsEmpty = !(0 < (int) $oRow->users_count);
 			}
+
+			$this->oConnection->FreeResult();
 		}
 
 		$this->throwDbExceptionIfExist();
@@ -255,6 +258,8 @@ class CApiDomainsDbStorage extends CApiDomainsStorage
 			{
 				$bResult = 0 < (int) $oRow->domains_count;
 			}
+
+			$this->oConnection->FreeResult();
 		}
 		$this->throwDbExceptionIfExist();
 		return $bResult;
@@ -276,6 +281,8 @@ class CApiDomainsDbStorage extends CApiDomainsStorage
 			{
 				$iResultCount = (int) $oRow->domains_count;
 			}
+
+			$this->oConnection->FreeResult();
 		}
 		$this->throwDbExceptionIfExist();
 		return $iResultCount;

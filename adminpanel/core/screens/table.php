@@ -11,6 +11,8 @@ class ap_Table_Screen extends ap_Screen
 	const SESS_SEARCH = 'search';
 	const SESS_PAGE = 'page';
 
+	const SESS_FILTER = 'filter';
+
 	const SESS_ORDERBY = 'orderby';
 	const SESS_ORDERTYPE = 'ordertype';
 
@@ -153,6 +155,11 @@ class ap_Table_Screen extends ap_Screen
 			CSession::Set($sScreenName.self::SESS_PAGE, 1);
 		}
 		else if (isset($_GET['reset_search']))
+		{
+			CSession::Clear($sScreenName.self::SESS_SEARCH);
+			CSession::Set($sScreenName.self::SESS_PAGE, 1);
+		}
+		else if (isset($_GET['filter']) && (string) $_GET['filter'] !== (string) CSession::Get($sScreenName.self::SESS_FILTER))
 		{
 			CSession::Clear($sScreenName.self::SESS_SEARCH);
 			CSession::Set($sScreenName.self::SESS_PAGE, 1);
@@ -524,6 +531,7 @@ $(window).resize(function(){ ResizeElements("all"); });
                                 if ($sName=="Email") $sNameLoc = CApi::I18N('ADMIN_PANEL/LIST_HEADER_EMAIL');
                                 if ($sName=="Name") $sNameLoc = CApi::I18N('ADMIN_PANEL/LIST_HEADER_NAME');
                                 if ($sName=="Friendly name") $sNameLoc = CApi::I18N('ADMIN_PANEL/LIST_HEADER_FNAME');
+                                if ($sName=="Last login") $sNameLoc = CApi::I18N('ADMIN_PANEL/LIST_HEADER_LAST_LOGIN');
                                 if ($sName=="Description") $sNameLoc = CApi::I18N('ADMIN_PANEL/LIST_HEADER_DESC');
                                 
                                 $iHeadersCountCacl--;
@@ -929,8 +937,6 @@ class ap_Table_Screen_MainTopSwitcher
 
 class ap_Table_Screen_ListFilter
 {
-	const SESS_FILTER = 'filter';
-
 	/**
 	 * @var	string
 	 */
@@ -973,10 +979,10 @@ class ap_Table_Screen_ListFilter
 		$sScreenName = $this->oTableScreen->GetScreenName();
 		if (isset($_GET['filter']) && 0 < strlen($_GET['filter']))
 		{
-			CSession::Set($sScreenName.self::SESS_FILTER, $_GET['filter']);
+			CSession::Set($sScreenName.ap_Table_Screen::SESS_FILTER, $_GET['filter']);
 		}
 
-		$this->sSelectedItem = CSession::Get($sScreenName.self::SESS_FILTER, '');
+		$this->sSelectedItem = CSession::Get($sScreenName.ap_Table_Screen::SESS_FILTER, '');
 	}
 
 	/**
@@ -995,8 +1001,8 @@ class ap_Table_Screen_ListFilter
 		}
 
 		$sScreenName = $this->oTableScreen->GetScreenName();
-		CSession::Set($sScreenName.self::SESS_FILTER, (0 < count($aTemp)) ? $aTemp[0] : '');
-		$this->sSelectedItem = CSession::Get($sScreenName.self::SESS_FILTER, '');
+		CSession::Set($sScreenName.ap_Table_Screen::SESS_FILTER, (0 < count($aTemp)) ? $aTemp[0] : '');
+		$this->sSelectedItem = CSession::Get($sScreenName.ap_Table_Screen::SESS_FILTER, '');
 
 		return $this->sSelectedItem;
 	}

@@ -1,0 +1,269 @@
+/*=== Login screen CSS ===*/
+.LoginLayout {
+	text-align: center;
+	height: 100%;
+	
+	.vhelper {
+		display: inline-block;
+		vertical-align: middle;
+		height: 100%;
+		width: 0px;
+	}
+}
+
+.login_panel {
+    display: inline-block;
+    vertical-align: middle;
+	font-size: 9pt;
+	width: 280px;
+
+	.header {
+		text-indent: 100%;
+		white-space: nowrap;
+		overflow: hidden;
+		height: 95px;
+		margin-top: 10px;
+		background: url("images/logo.png?%VERSION%") no-repeat center top;
+		
+		.loginLogoX2();
+	}
+	
+	 .content {
+		border-top: 0px;
+		padding: 30px 20px 0px;
+	}
+	
+	.languages {
+		position: absolute;
+		top: 20px;
+		right: 20px;
+		
+		html.rtl & {
+			right: auto;
+			left: 20px;
+		}
+	}
+	
+	.description {
+		color: #929292;
+		margin-top: 20px;
+	}
+}
+	
+.login_panel {
+		
+	.row {
+		background:#ffffff;
+		margin: -1px 0px 0px;
+		padding:10px;
+		border: 1px solid #cac7c7;
+		border-width: 1px;
+		text-align: right;
+		white-space: nowrap;
+
+		&.focused{
+			background: #fff3ce;
+			border-width: 1px;
+			border-color: #cfbf8e;
+			position: relative;
+		}
+
+		&:first-child {
+			box-shadow: 0 1px 1px #DDDDDD inset;
+			border-radius: 4px 4px 0px 0px;
+		}
+
+		&:last-child {
+			border-width: 1px;
+			border-radius: 0px 0px 4px 4px;
+		}
+
+		.value {
+			vertical-align: middle;
+
+			&.suffix {
+				margin-left: 16px;
+
+				.text {
+					font: 12pt Helvetica,Tahoma,Arial,sans-serif;
+					color: #777;
+				}
+			}
+		}
+
+		.title {
+			display: inline-block;
+			vertical-align: middle;
+			width: 20px;
+			height: 20px;
+			position: relative;
+			text-indent: 25px;
+			color: #929292;
+			font-size: 12pt;
+			float: none;
+
+			cursor: text;
+
+			zoom: 1;
+			*display: inline;
+		}
+		
+		.input {
+			background: transparent;
+			color: #444;
+			font: 12pt Helvetica,Tahoma,Arial,sans-serif;
+			padding: 1px 0px;
+			text-indent: 3px;
+			width: 195px;
+			outline: none;
+			border: 0px !important;
+			box-shadow: none;
+			border-radius: 0px;
+
+			&:focus {
+				box-shadow: none;
+			}
+		}
+	}
+	
+	.buttons {
+		padding: 0px;
+		margin-top: 20px;
+		border: 0px;
+		background: none;
+
+		.button{
+			display: block;
+			padding: 10px;
+			font-size: 12pt;
+			text-align: center;
+			background: #6fa8de;
+			border: 1px solid #5d97cd;
+			border-radius: 4px;
+			color: #fff;
+			text-shadow: 0px 1px 0px #4d759b;
+			width: 100%;
+
+			&.disabled {
+				cursor: default;
+				background: #6fa8de !important;
+				color: #BEE1FF !important;
+				text-shadow: none;
+			}
+
+			&:hover{
+				background: #7Fb8eE;
+			}
+		}
+	}
+	
+	.signme,
+	.links {
+		font-size: 9pt;
+		text-align: left;
+		padding: 0px;
+		margin-top: 14px;
+		background: none;
+		border: 0px;
+		border-radius: 0px;
+
+		html.rtl & {
+			text-align: right;
+		}
+	}
+	
+	.signme {
+
+		.title {
+			height: auto;
+			width: auto;
+			font-size: 9pt;
+			text-indent: 0px;
+			cursor: pointer;
+		}
+
+		input {
+			vertical-align: middle;
+		}
+	}
+	
+	.links .forgot {
+		float: right;
+		margin-left: 16px;
+	}
+}
+
+.login_panel.login .row.login {
+	border-radius: 4px 4px 0px 0px;
+}
+.login_panel.login.email .row.login {
+	border-radius: 0px;
+}
+
+.login_panel .row.email > .title {
+	background: url("images/sprites.png?%VERSION%") no-repeat -360px -80px;
+}
+.login_panel .row.password > .title {
+	background: url("images/sprites.png?%VERSION%") no-repeat -400px -80px;
+}
+.login_panel .row.name > .title {
+	background: url("images/sprites.png?%VERSION%") no-repeat -840px -80px;
+}
+.login_panel .row.login > .title {
+	background: url("images/sprites.png?%VERSION%") no-repeat -840px -80px;
+}
+
+.login_panel .social {
+	
+	.facebook,
+	.google,
+	.twitter {
+		display: inline-block;
+		height: 20px;
+		width: 75px;
+		color: #fff;
+		text-align: right;
+		cursor: pointer;
+
+		.text {
+			padding: 3px 7px 2px 8px;
+			line-height: 21px;
+			vertical-align: top;
+			color: #fff;
+			text-decoration: none;
+		}
+	}
+	
+	.facebook {
+//		background: #5f78ab url(https://fbstatic-a.akamaihd.net/rsrc.php/v2/yx/r/j_i0CTUUUEe.png) -1px -133px no-repeat;
+		background: #5f78ab url("images/facebook-icon_9x18.png") 10px 3px no-repeat;
+		border: 1px solid #29447e;
+		
+		.text {
+			background-color: #5f78ab;
+			border-left: 1px solid #29447e;
+		}
+	}
+	
+	.google {
+//		background: #dd4b39 url(https://ssl.gstatic.com/s2/oz/images/sprites/signinbutton-094c03c836f9f91d08b943a90778d34e.png) 3px 0px no-repeat;
+		background: #dd4b39 url("images/google-icon_20x20.png") 3px 0px no-repeat;
+		border: 1px solid #bb3f30;
+		
+		.text{
+			background-color: #dd4b39;
+			border-left: 1px solid #bb3f30;
+		}
+	}
+	
+	.twitter {
+		background: #55ACEE url("images/twitter-icon_17x14.png") 4px 3px no-repeat;
+		border: 1px solid #5399cd;
+		
+		.text {
+			background: #55ACEE;
+			border-left: 1px solid #5399cd;
+		}
+	}
+}
+/*=== END Login screen CSS ===*/

@@ -13,7 +13,7 @@
 					<div class="row login" data-bind="visible: loginVisible, css: {'focused': loginFocus(), 'filled': login().length > 0}">
 						<label for="login" class="title placeholder" data-i18n="LOGIN/LABEL_LOGIN" data-bind="i18n: 'text'"></label>
 						<span class="value">
-							<input id="login" class="input" type="text" data-bind="value: login, hasfocus: loginFocus, valueUpdate: 'afterkeydown'" />
+							<input id="login" class="input" autocomplete="off" type="text" data-bind="value: login, hasfocus: loginFocus, valueUpdate: 'afterkeydown'" />
 						</span>
 						<span class="value suffix">
 							<span class="text" data-bind="text: loginAtDomainValueWithAt"></span>
@@ -22,7 +22,7 @@
 					<div class="row password" data-bind="css: {'focused': passwordFocus(), 'filled': password().length > 0}">
 						<label for="password" class="title placeholder" data-i18n="LOGIN/LABEL_PASSWORD" data-bind="i18n: 'text'"></label>
 						<span class="value">
-							<input id="password" class="input" type="password" data-bind="value: password, hasfocus: passwordFocus, valueUpdate: 'afterkeydown'" />
+							<input id="password" class="input" autocomplete="off" type="password" data-bind="value: password, hasfocus: passwordFocus, valueUpdate: 'afterkeydown'" />
 						</span>
 					</div>
 				</div>

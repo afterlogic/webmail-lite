@@ -1,0 +1,163 @@
+/*=== Search Block CSS ===*/
+.search_block {
+	.box-sizing;
+	
+	font-size: 0px;
+	vertical-align: middle;
+	padding-right: 20px;
+	width: 100%;
+	display: inline-block;
+	
+	html.rtl & {
+		padding-right: 0px;
+		padding-left: 20px;
+	}
+	
+	& > .input {
+		.box-sizing;
+		
+		border: 1px solid #c5c7c8;
+		border-radius:10px;
+		padding-left: 30px;
+		outline: none;
+		width: 100%;
+		display: inline-block;
+		vertical-align: middle;
+		box-shadow: none;
+		overflow: hidden;
+		
+		html.rtl & {
+			padding-left: 0px;
+			padding-right: 30px;
+		}
+		
+		&.focus {
+			border: 1px solid #93B5E3;
+			box-shadow: 0 0 2px 0 #1D67CD;
+		}
+		
+		.field {
+			font-size: 11pt;
+			line-height: 160%;
+			display: inline-block;
+			vertical-align: middle;
+			width: 100%;
+			height: 24px;
+			overflow: hidden;
+			white-space:nowrap;
+			padding: 0px;
+			border: 0px;
+		}
+		
+		.field.hide {
+			display: block;
+			position: absolute;
+			top: -200px;
+		}
+		
+		.button {
+			border-right-width: 0px;
+			font-size: 11pt;
+			margin-left: -30px;
+			width: 30px;
+			height: 24px;
+			display: inline-block;
+			vertical-align: middle;
+			text-indent: -1000px;
+			overflow: hidden;
+			cursor: pointer;
+			background: #fff url("images/sprites.png?%VERSION%") no-repeat -313px -79px;
+
+			.spritesX2();
+
+			html.rtl & {
+				border-radius: 0px 10px 10px 0px;
+				border-right-width: 1px;
+				border-left-width: 0px;
+				margin-left: 0px;
+				margin-right: -25px;
+			}
+		}
+	}
+	
+	.control .icon {
+		display: inline-block;
+		vertical-align: middle;
+		height: 8px;
+		width: 13px;
+		cursor: pointer;
+		margin: 0px 0px 0px 4px;
+		background: url("images/sprites.png?%VERSION%") no-repeat -320px -45px;
+		
+		.spritesX2();
+		
+		html.rtl & {
+			margin: 0px 4px 0px 0px;
+		}
+	}
+	
+	.search_highlight {
+		color: #ccc;
+	}
+	
+	.theme-seach-block();
+	
+	.dropdown {
+		
+		.dropdown_helper {
+			min-width: 100%;
+		}
+		
+		.dropdown_arrow{
+			display: none;
+		}
+		
+		.dropdown_content{
+			border-radius: 0px 0px 4px 4px;
+
+			display: block;
+			margin: -1px 27px 0px 20px;
+			
+			html.rtl & {
+				margin-left: 27px;
+				margin-right: 20px;
+			}
+		}
+		
+		.fields {
+	
+			.row {
+				display: block;
+				padding: 0 2px 0 78px;
+				position: relative;
+				
+				html.rtl & {
+					padding: 0 78px 0 2px;
+				}
+				
+				.label {
+					width: 80px;
+					margin-left: -78px;
+					
+					html.rtl & {
+						margin-left: 0px;
+						margin-right: -78px;
+						text-align: right;
+					}
+				}
+				
+				.input {
+					width: 100%;
+					border-radius: 4px;
+					border: 1px solid #C5C7C8;
+					box-shadow: none;
+				}
+			}
+			
+			.buttons {
+				display: block;
+			}
+		}
+	}
+}
+/*=== END Search Block CSS ===*/

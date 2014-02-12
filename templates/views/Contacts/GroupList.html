@@ -4,7 +4,7 @@
 			
 			<div class="item selectable " data-bind="visible: showPersonalContacts, css: {'selected': Enums.ContactsGroupListType.Personal === selectedGroupType()}">
 				<a href="javascript: void(0);" class="title" data-bind="click: function () { selectedGroupType(0); }">
-					<span class="name fade">
+					<span class="name fadeout">
 						<span class="icon type1"></span>
 						<span class="text animGoal" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_GROUP_PERSONAL"></span>
 					</span>
@@ -13,7 +13,7 @@
 
 			<div class="item selectable" data-bind="visible: showGlobalContacts, css: {'selected': Enums.ContactsGroupListType.Global === selectedGroupType()}">
 				<a href="javascript: void(0);" class="title" data-bind="click: function () { selectedGroupType(2); }">
-					<span class="name fade">
+					<span class="name fadeout">
 						<span class="icon type2"></span>
 						<span class="text animGoal" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_GROUP_GLOBAL"></span>
 					</span>
@@ -21,11 +21,11 @@
 			</div>
 
 			<div data-bind="visible: showPersonalContacts() && 0 < groupFullCollection().length">
-				<div class="section_title fade" data-i18n="CONTACTS/LABEL_GROUPS" data-bind="i18n: 'text'"></div>
+				<div class="section_title fadeout" data-i18n="CONTACTS/LABEL_GROUPS" data-bind="i18n: 'text'"></div>
 				<div class="items_section" data-bind="foreach: groupFullCollection">
 					<div class="item selectable" data-bind="css: {'selected': selected}">
 						<a href="javascript: void(0);" class="title" data-bind="css: {'recivedAnim': recivedAnim()}, droppable: function (oEvent, oUi) { $root.contactsDrop($data, oEvent, oUi); }, click: function () { $root.viewGroup($data); }">
-							<span class="name fade">
+							<span class="name fadeout">
 								<span class="icon"></span>
 								<span class="text animGoal" data-bind="text: Name()"></span>
 							</span>

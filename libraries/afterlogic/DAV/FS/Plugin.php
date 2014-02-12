@@ -52,10 +52,11 @@ class Plugin extends \Sabre\DAV\ServerPlugin {
 	
 	public function getTenantsMan()
 	{
-		if ($this->oApiTenants == null)
+		if ($this->oApiTenants === null)
 		{
 			$this->oApiTenants = \CApi::Manager('tenants');
 		}
+		
 		return $this->oApiTenants;
 	}
 

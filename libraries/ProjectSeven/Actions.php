@@ -450,6 +450,7 @@ class Actions extends ActionsBase
 			$oFetcher->Name = (string) $this->oHttp->GetPost('Name', $oFetcher->Name);
 			$oFetcher->Email = (string) $this->oHttp->GetPost('Email', $oFetcher->Email);
 			$oFetcher->Signature = (string) $this->oHttp->GetPost('Signature', $oFetcher->Signature);
+			$oFetcher->SignatureOptions = (string) $this->oHttp->GetPost('SignatureOptions', $oFetcher->SignatureOptions);
 
 			$oFetcher->IsOutgoingEnabled = '1' === (string) $this->oHttp->GetPost('IsOutgoingEnabled', $oFetcher->IsOutgoingEnabled ? '1' : '0');
 			$oFetcher->OutgoingMailServer = (string) $this->oHttp->GetPost('OutgoingMailServer', $oFetcher->OutgoingMailServer);
@@ -489,6 +490,12 @@ class Actions extends ActionsBase
 		$bResult = $this->ApiFetchers()->CreateFetcher($oAccount, $oFetcher);
 		if ($bResult)
 		{
+			$sStartScript = '/opt/aurora/scripts/mailfetch-on-create.sh';
+			if (@\file_exists($sStartScript))
+			{
+				@\shell_exec($sStartScript);
+			}
+
 			return $this->TrueResponse($oAccount, __FUNCTION__);
 		}
 
@@ -575,6 +582,33 @@ class Actions extends ActionsBase
 		$iFetcherID = (int) $this->getParamValue('FetcherID', 0);
 		return $this->DefaultResponse($oAccount, 'FetcherDelete', $this->ApiFetchers()->DeleteFetcher($oAccount, $iFetcherID));
 	}
+	
+	/**
+	 * @return array
+	 */
+	public function AjaxEmailDomainData()
+	{
+		$oAccount = $this->getAccountFromParam();
+
+		$sEmail = (string) $this->getParamValue('Email', '');
+		$sDomainName = \MailSo\Base\Utils::GetDomainFromEmail($sEmail);
+		if (empty($sEmail) || empty($sDomainName))
+		{
+			throw new \ProjectSeven\Exceptions\ClientException(\ProjectSeven\Notifications::InvalidInputParameter);
+		}
+
+		$oApiDomains = /* @var $oApiDomains \CApiDomainsManager */ \CApi::Manager('domains');
+		$oDomain = $oApiDomains->GetDomainByName($sDomainName);
+
+		return $this->DefaultResponse($oAccount, __FUNCTION__, $oDomain ? array(
+			'IsInternal' => $oDomain->IsInternal,
+			'IncomingMailServer' => $oDomain->IncomingMailServer,
+			'IncomingMailPort' => $oDomain->IncomingMailPort,
+			'OutgoingMailServer' => $oDomain->OutgoingMailServer,
+			'OutgoingMailPort' => $oDomain->OutgoingMailPort,
+			'OutgoingMailAuth' => $oDomain->OutgoingMailAuth
+		) : false);
+	}
 
 	/**
 	 * @return array
@@ -583,6 +617,61 @@ class Actions extends ActionsBase
 	{
 		$oAccount = $this->getAccountFromParam();
 		return $this->DefaultResponse($oAccount, 'FolderList', $this->oApiMail->Folders($oAccount));
+	}
+
+	/**
+	 * @return array
+	 */
+	public function AjaxExpandAttachment()
+	{
+		$self = $this;
+		$mResult = false;
+		$oAccount = null;
+		
+		$sHash = \md5(\microtime(true).\rand(1000, 9999));
+		$this->rawCallback((string) $this->getParamValue('RawKey', ''), function ($oAccount, $sContentType, $sFileName, $rResource) use ($self, $sHash, &$mResult) {
+
+			if ($self->ApiFileCache()->PutFile($oAccount, $sHash, $rResource))
+			{
+				$sFullFilePath = $self->ApiFileCache()->GenerateFullFilePath($oAccount, $sHash);
+
+				$aExpand = array();
+				\CApi::Plugin()->RunHook('webmail.expand-attachment',
+					array($oAccount, $sContentType, $sFileName, $sFullFilePath, &$aExpand, $self->ApiFileCache()));
+
+				if (is_array($aExpand) && 0 < \count($aExpand))
+				{
+					foreach ($aExpand as $aItem)
+					{
+						if ($aItem && isset($aItem['FileName'], $aItem['MimeType'], $aItem['Size'], $aItem['TempName']))
+						{
+							$mResult[] = array(
+								'FileName' => $aItem['FileName'],
+								'MimeType' => $aItem['MimeType'],
+								'EstimatedSize' => $aItem['Size'],
+								'CID' => '',
+								'Thumb' => \CApi::GetConf('labs.allow-thumbnail', true) &&
+									$self->isImageMimeTypeSupported($aItem['MimeType'], $aItem['FileName']),
+								'Expand' => $self->isExpandMimeTypeSupported($aItem['MimeType'], $aItem['FileName']),
+								'IsInline' => false,
+								'IsLinked' => false,
+								'Hash' => \CApi::EncodeKeyValues(array(
+									'TempFile' => true,
+									'AccountID' => $oAccount->IdAccount,
+									'Name' => $aItem['FileName'],
+									'TempName' => $aItem['TempName']
+								))
+							);
+						}
+					}
+				}
+				
+				$self->ApiFileCache()->Clear($oAccount, $sHash);
+			}
+
+		}, false, $oAccount);
+
+		return $this->DefaultResponse($oAccount, __FUNCTION__, $mResult);
 	}
 
 	/**
@@ -760,6 +849,28 @@ class Actions extends ActionsBase
 	/**
 	 * @return array
 	 */
+	public function AjaxFolderListOrderNameUpdate()
+	{
+		$sFolderName = $this->getParamValue('FolderName', '');
+		$sAboveName = $this->getParamValue('AboveName', '');
+		$sBelowName = $this->getParamValue('BelowName', '');
+		$sParentName = $this->getParamValue('ParentName', '');
+		$sParentDelimiter = $this->getParamValue('ParentDelimiter', '/');
+		
+		if (0 === strlen($sFolderName))
+		{
+			throw new \ProjectSeven\Exceptions\ClientException(\ProjectSeven\Notifications::InvalidInputParameter);
+		}
+		
+		$oAccount = $this->getAccountFromParam();
+
+		return $this->DefaultResponse($oAccount, __FUNCTION__, $this->oApiMail->FoldersOrderNamesUpdate($oAccount,
+			$sFolderName, $sAboveName, $sBelowName, $sParentName, $sParentDelimiter));
+	}
+
+	/**
+	 * @return array
+	 */
 	public function AjaxFolderClear()
 	{
 		$sFolderFullNameRaw = (string) $this->getParamValue('Folder', '');
@@ -835,6 +946,60 @@ class Actions extends ActionsBase
 	/**
 	 * @return array
 	 */
+	public function AjaxMessageZipAttachments()
+	{
+		$aHashes = $this->getParamValue('Hashes', null);
+		if (!is_array($aHashes) || 0 === count($aHashes) || !class_exists('ZipArchive'))
+		{
+			throw new \ProjectSeven\Exceptions\ClientException(\ProjectSeven\Notifications::InvalidInputParameter);
+		}
+
+		$mResult = false;
+		$oAccount = $this->getAccountFromParam();
+
+		$self = $this;
+		$aAdd = array();
+		foreach ($aHashes as $sHash)
+		{
+			$this->rawCallback($sHash, function ($oAccount, $sContentType, $sFileName, $rResource) use ($self, $sHash, &$aAdd) {
+
+				$sHash = md5($sHash.rand(1000, 9999));
+				if ($self->ApiFileCache()->PutFile($oAccount, $sHash, $rResource))
+				{
+					$sFullFilePath = $self->ApiFileCache()->GenerateFullFilePath($oAccount, $sHash);
+					$aAdd[] = array($sFullFilePath, $sFileName, $sContentType);
+				}
+
+			}, false, $oAccount);
+		}
+
+		if (0 < count($aAdd))
+		{
+			include_once PSEVEN_APP_ROOT_PATH.'libraries/other/Zip.php';
+
+			$oZip = new \Zip();
+			
+			$sZipHash = md5(implode(',', $aHashes).rand(1000, 9999));
+			foreach ($aAdd as $aItem)
+			{
+				$oZip->addFile(fopen($aItem[0], 'r'), $aItem[1]);
+			}
+
+			$self->ApiFileCache()->PutFile($oAccount, $sZipHash, $oZip->getZipFile());
+			$mResult = \CApi::EncodeKeyValues(array(
+				'TempFile' => true,
+				'AccountID' => $oAccount->IdAccount,
+				'Name' => 'attachments.zip',
+				'TempName' => $sZipHash
+			));
+		}
+
+		return $this->DefaultResponse($oAccount, __FUNCTION__, $mResult);
+	}
+
+	/**
+	 * @return array
+	 */
 	public function AjaxMessageMove()
 	{
 		$sFromFolderFullNameRaw = (string) $this->getParamValue('Folder', '');
@@ -857,7 +1022,7 @@ class Actions extends ActionsBase
 		{
 			throw new \ProjectSeven\Exceptions\ClientException(\ProjectSeven\Notifications::CanNotMoveMessageQuota, $oException);
 		}
-		catch (\Exceptions $oException)
+		catch (\Exception $oException)
 		{
 			throw new \ProjectSeven\Exceptions\ClientException(\ProjectSeven\Notifications::CanNotMoveMessage, $oException);
 		}
@@ -889,10 +1054,11 @@ class Actions extends ActionsBase
 	 * @param \CAccount $oAccount
 	 * @param \CFetcher $oFetcher = null
 	 * @param bool $bWithDraftInfo = true
+	 * @param \CIdentity $oIdentity = null
 	 *
 	 * @return \MailSo\Mime\Message
 	 */
-	private function buildMessage($oAccount, $oFetcher = null, $bWithDraftInfo = true)
+	private function buildMessage($oAccount, $oFetcher = null, $bWithDraftInfo = true, $oIdentity = null)
 	{
 		$sTo = $this->getParamValue('To', '');
 		$sCc = $this->getParamValue('Cc', '');
@@ -919,9 +1085,16 @@ class Actions extends ActionsBase
 			$oMessage->SetXMailer($sXMailer);
 		}
 
-		$oFrom = $oFetcher
-			? \MailSo\Mime\Email::NewInstance($oFetcher->Email, $oFetcher->Name)
-			: \MailSo\Mime\Email::NewInstance($oAccount->Email, $oAccount->FriendlyName);
+		if ($oIdentity)
+		{
+			$oFrom = \MailSo\Mime\Email::NewInstance($oIdentity->Email, $oIdentity->FriendlyName);
+		}
+		else
+		{
+			$oFrom = $oFetcher
+				? \MailSo\Mime\Email::NewInstance($oFetcher->Email, $oFetcher->Name)
+				: \MailSo\Mime\Email::NewInstance($oAccount->Email, $oAccount->FriendlyName);
+		}
 
 		$oMessage
 			->SetFrom($oFrom)
@@ -987,14 +1160,28 @@ class Actions extends ActionsBase
 
 		$aFoundCids = array();
 
+		\CApi::Plugin()->RunHook('webmail.message-text-html-raw', array($oAccount, &$oMessage, &$sText, &$bTextIsHtml));
+
 		if ($bTextIsHtml)
 		{
-			$oMessage->AddText(\MailSo\Base\HtmlUtils::ConvertHtmlToPlain($sText), false);
+			$sTextConverted = \MailSo\Base\HtmlUtils::ConvertHtmlToPlain($sText);
+			\CApi::Plugin()->RunHook('webmail.message-plain-part', array($oAccount, &$oMessage, &$sTextConverted));
+			$oMessage->AddText($sTextConverted, false);
 		}
 
 		$mFoundDataURL = array();
-		$oMessage->AddText($bTextIsHtml ?
-			\MailSo\Base\HtmlUtils::BuildHtml($sText, $aFoundCids, $mFoundDataURL) : $sText, $bTextIsHtml);
+
+		$sTextConverted = $bTextIsHtml ? \MailSo\Base\HtmlUtils::BuildHtml($sText, $aFoundCids, $mFoundDataURL) : $sText;
+		if ($bTextIsHtml)
+		{
+			\CApi::Plugin()->RunHook('webmail.message-html-part', array($oAccount, &$oMessage, &$sTextConverted));
+		}
+		else
+		{
+			\CApi::Plugin()->RunHook('webmail.message-plain-part', array($oAccount, &$oMessage, &$sTextConverted));
+		}
+
+		$oMessage->AddText($sTextConverted, $bTextIsHtml);
 
 		if (is_array($aAttachments))
 		{
@@ -1127,6 +1314,7 @@ class Actions extends ActionsBase
 		$aDraftInfo = $this->getParamValue('DraftInfo', null);
 		
 		$sFetcherID = $this->getParamValue('FetcherID', '');
+		$sIdIdentity = $this->getParamValue('IdentityID', '');
 
 		$oFetcher = null;
 		if (!empty($sFetcherID) && is_numeric($sFetcherID) && 0 < (int) $sFetcherID)
@@ -1148,32 +1336,17 @@ class Actions extends ActionsBase
 			}
 		}
 
-		$oMessage = $this->buildMessage($oAccount, $oFetcher, false);
+		$oIdentity = null;
+		if (!empty($sIdIdentity) && is_numeric($sIdIdentity) && 0 < (int) $sIdIdentity)
+		{
+			$oIdentity = $this->oApiUsers->GetIdentity((int) $sIdIdentity);
+		}
+
+		$oMessage = $this->buildMessage($oAccount, $oFetcher, true, $oIdentity);
 		if ($oMessage)
 		{
-			$bIsDemo = false;
-			\CApi::Plugin()->RunHook('plugin-is-demo-account', array(&$oAccount, &$bIsDemo));
-			if ($bIsDemo)
-			{
-				$oRcpt = $oMessage->GetRcpt();
-				if ($oRcpt && 0 < $oRcpt->Count())
-				{
-					$bExternal = false;
-					$oRcpt->ForeachList(function (/* @var $oItem \MailSo\Mime\Email */ $oItem) use (&$bExternal) {
-						if (!$bExternal && $oItem && !in_array(strtolower($oItem->GetDomain()),
-							array('afterlogic.com', 'quickme.net', 'dotterra.net')))
-						{
-							$bExternal = true;
-						}
-					});
-
-					if ($bExternal)
-					{
-						throw new \ProjectSeven\Exceptions\ClientException(\ProjectSeven\Notifications::DemoAccount);
-					}
-				}
-			}
-
+			\CApi::Plugin()->RunHook('webmail.validate-message-for-send', array(&$oAccount, &$oMessage));
+			
 			try
 			{
 				\CApi::Plugin()->RunHook('webmail.build-message-for-send', array(&$oMessage));
@@ -1279,6 +1452,19 @@ class Actions extends ActionsBase
 
 				throw new \ProjectSeven\Exceptions\ClientException($iCode, $oException);
 			}
+
+			$sConfirmFolderFullNameRaw = $this->getParamValue('ConfirmFolder', '');
+			$sConfirmUid = $this->getParamValue('ConfirmUid', '');
+
+			if (0 < \strlen($sConfirmFolderFullNameRaw) && 0 < \strlen($sConfirmUid))
+			{
+				try
+				{
+					$mResult = $this->oApiMail->MessageFlag($oAccount, $sConfirmFolderFullNameRaw, array($sConfirmUid), '$ReadConfirm', 
+						\EMailMessageStoreAction::Add, false, true);
+				}
+				catch (\Exception $oException) {}
+			}
 		}
 
 		return $this->DefaultResponse($oAccount, 'MessageSendConfirmation', $mResult);
@@ -1355,6 +1541,7 @@ class Actions extends ActionsBase
 		$sDraftUid = $this->getParamValue('DraftUid', '');
 
 		$sFetcherID = $this->getParamValue('FetcherID', '');
+		$sIdIdentity = $this->getParamValue('IdentityID', '');
 
 		if (0 === strlen($sDraftFolder))
 		{
@@ -1381,7 +1568,13 @@ class Actions extends ActionsBase
 			}
 		}
 
-		$oMessage = $this->buildMessage($oAccount, $oFetcher);
+		$oIdentity = null;
+		if (!empty($sIdIdentity) && is_numeric($sIdIdentity) && 0 < (int) $sIdIdentity)
+		{
+			$oIdentity = $this->oApiUsers->GetIdentity((int) $sIdIdentity);
+		}
+
+		$oMessage = $this->buildMessage($oAccount, $oFetcher, true, $oIdentity);
 		if ($oMessage)
 		{
 			try
@@ -1661,15 +1854,15 @@ class Actions extends ActionsBase
 
 				$oAccount->OutgoingMailServer = (string) $this->oHttp->GetPost('OutgoingMailServer', '');
 
+				$sIncomingMailPassword = (string) $this->oHttp->GetPost('IncomingMailPassword', '');
+				$sIncomingMailPassword = trim($sIncomingMailPassword);
+				if (API_DUMMY !== $sIncomingMailPassword && !empty($sIncomingMailPassword))
+				{
+					$oAccount->IncomingMailPassword = $sIncomingMailPassword;
+				}
 				if (!$bIsUpdate)
 				{
 					$oAccount->IncomingMailProtocol = \EMailProtocol::IMAP4;
-
-					$sIncomingMailPassword = (string) $this->oHttp->GetPost('IncomingMailPassword', '');
-					if (API_DUMMY !== $sIncomingMailPassword)
-					{
-						$oAccount->IncomingMailPassword = $sIncomingMailPassword;
-					}
 
 					$oAccount->OutgoingMailLogin = (string) $this->oHttp->GetPost('OutgoingMailLogin', '');
 					$sOutgoingMailPassword = (string) $this->oHttp->GetPost('OutgoingMailPassword', '');
@@ -1897,6 +2090,7 @@ class Actions extends ActionsBase
 		$iLayout = (int) $this->oHttp->GetPost('Layout', $oAccount->User->Layout);
 		$iDefaultEditor = (int) $this->oHttp->GetPost('DefaultEditor', $oAccount->User->DefaultEditor);
 		$bUseThreads = '1' === (string) $this->oHttp->GetPost('UseThreads', $oAccount->User->UseThreads ? '1' : '0');
+		$bSaveRepliedMessagesToCurrentFolder = '1' === (string) $this->oHttp->GetPost('SaveRepliedMessagesToCurrentFolder', $oAccount->User->SaveRepliedMessagesToCurrentFolder ? '1' : '0');
 
 		$sTheme = (string) $this->oHttp->GetPost('DefaultTheme', $oAccount->User->DefaultSkin);
 //		$sTheme = $this->validateTheme($sTheme);
@@ -1917,6 +2111,7 @@ class Actions extends ActionsBase
 		$oAccount->User->DefaultTimeFormat = $iTimeFormat;
 		$oAccount->User->AutoCheckMailInterval = $iAutoCheckMailInterval;
 		$oAccount->User->UseThreads = $bUseThreads;
+		$oAccount->User->SaveRepliedMessagesToCurrentFolder = $bSaveRepliedMessagesToCurrentFolder;
 
 		// calendar
 		$oCalUser = $this->oApiUsers->GetOrCreateCalUserByUserId($oAccount->IdUser);
@@ -1958,41 +2153,9 @@ class Actions extends ActionsBase
 
 		$bSignMe = '1' === (string) $this->getParamValue('SignMe', '0');
 
+		\CApi::Plugin()->RunHook('webmail-login-custom-data', array($this->getParamValue('CustomLoginData', null)));
+
 		$oSettings =& \CApi::GetSettings();
-		$iLimitCaptcha = (int) \CApi::GetConf('captcha.limit-count', 0);
-
-		$bCaptchaLimit = false;
-		if ($oSettings && $oSettings->GetConf('WebMail/UseReCaptcha'))
-		{
-			if (0 < $iLimitCaptcha)
-			{
-				$bCaptchaLimit = true;
-				$iLimitCaptcha -= \CApi::CatchaLocalLimit();
-			}
-
-			if (1 === $iLimitCaptcha)
-			{
-				$GLOBALS['P7_CAPTCHA_ATTRIBUTE_ON_ERROR'] = true;
-			}
-			else if (0 >= $iLimitCaptcha)
-			{
-				include_once PSEVEN_APP_ROOT_PATH.'libraries/recaptcha/recaptchalib.php';
-
-				$oResp = \recaptcha_check_answer(
-					\CApi::GetConf('captcha.recaptcha-private-key', ''),
-					isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '',
-					(string) $this->getParamValue('ReCaptchaChallengeField', ''),
-					(string) $this->getParamValue('ReCaptchaResponseField', '')
-				);
-
-				if (!$oResp || !$oResp->is_valid)
-				{
-					$GLOBALS['P7_CAPTCHA_ATTRIBUTE_ON_ERROR'] = true;
-					throw new \ProjectSeven\Exceptions\ClientException(\ProjectSeven\Notifications::CaptchaError);
-				}
-			}
-		}
-
 		$sAtDomain = trim($oSettings->GetConf('WebMail/LoginAtDomainValue'));
 		if (\ELoginFormType::Login === (int) $oSettings->GetConf('WebMail/LoginFormType') && 0 < strlen($sAtDomain))
 		{
@@ -2002,11 +2165,6 @@ class Actions extends ActionsBase
 
 		if (0 === strlen($sIncPassword) || 0 === strlen($sEmail.$sIncLogin))
 		{
-			if ($bCaptchaLimit)
-			{
-				\CApi::CatchaLocalLimit(true);
-			}
-			
 			throw new \ProjectSeven\Exceptions\ClientException(\ProjectSeven\Notifications::InvalidInputParameter);
 		}
 
@@ -2057,28 +2215,13 @@ class Actions extends ActionsBase
 				}
 			}
 
-			if ($bCaptchaLimit)
-			{
-				\CApi::CatchaLocalLimit(true);
-			}
-
 			throw new \ProjectSeven\Exceptions\ClientException($iErrorCode);
 		}
 
 		if ($oAccount instanceof \CAccount)
 		{
-			if ($bCaptchaLimit)
-			{
-				\CApi::CatchaLocalLimit(false, true);
-			}
-
 			$this->oApiIntegrator->SetAccountAsLoggedIn($oAccount, $bSignMe);
 			return $this->TrueResponse($oAccount, __FUNCTION__);
-		}
-
-		if ($bCaptchaLimit)
-		{
-			\CApi::CatchaLocalLimit(true);
 		}
 
 		throw new \ProjectSeven\Exceptions\ClientException(\ProjectSeven\Notifications::AuthError);
@@ -2153,45 +2296,41 @@ class Actions extends ActionsBase
 	public function AjaxGetTwilioToken()
 	{
 		$oAccount = $this->getAccountFromParam();
-		$oTenant = $this->oApiTenants->GetTenantById($oAccount->IdTenant);
+		
+		$oTenant = null;
+		if ($this->oApiTenants)
+		{
+			$oTenant = (0 < $oAccount->IdTenant) ? $this->oApiTenants->GetTenantById($oAccount->IdTenant) :
+				$this->oApiTenants->GetDefaultGlobalTenant();
+		}
 		
 		$mToken = false;
-		if ( $this->oApiCapability->IsVoiceSupported($oAccount) &&
-			file_exists(PSEVEN_APP_ROOT_PATH.'libraries/Services/Twilio.php') )
+		if ($oTenant && $this->oApiCapability->IsTwilioSupported($oAccount) &&
+			$oTenant->IsTwilioSupported() &&
+			file_exists(PSEVEN_APP_ROOT_PATH.'libraries/Services/Twilio.php'))
 		{
 			try
 			{
 				include PSEVEN_APP_ROOT_PATH.'libraries/Services/Twilio.php';
 
-				if ($oTenant)
-				{
-					// put your Twilio API credentials here
-					$sAccountSid = $oTenant->TwilioAccountSID;
-					$sAuthToken = $oTenant->TwilioAuthToken;
-
-					// put your Twilio Application Sid here
-					$sAppSid = $oTenant->TwilioAppSID;
-				}
-				else
-				{
-					$oSettings =& \CApi::GetSettings();
-					// put your Twilio API credentials here
-					$sAccountSid = $oSettings->GetConf('Twilio/AccountSID');
-					$sAuthToken = $oSettings->GetConf('Twilio/AuthToken');
-
-					// put your Twilio Application Sid here
-					$sAppSid = $oSettings->GetConf('Twilio/AppSID');
-				}
+				$sPhoneNumber = $oTenant->TwilioPhoneNumber;
+				// put your Twilio API credentials here
+				$sAccountSid = $oTenant->TwilioAccountSID;
+				$sAuthToken = $oTenant->TwilioAuthToken;
+				// put your Twilio Application Sid here
+				$sAppSid = $oTenant->TwilioAppSID;
 
 				$oCapability = new \Services_Twilio_Capability($sAccountSid, $sAuthToken);
 				$oCapability->allowClientOutgoing($sAppSid);
+
 				\CApi::Log('twilio_debug');
 				\CApi::Log($sAccountSid);
 				\CApi::Log($sAuthToken);
 				\CApi::Log($sAppSid);
-				\CApi::Log('TwilioAftId_'.$oAccount->User->SipImpi);
-				$oCapability->allowClientIncoming('TwilioAftId_'.$oAccount->User->SipImpi);
-//				$oCapability->allowClientIncoming('TwilioAftId_'.$oAccount->IdTenant.'_'.$oAccount->User->SipImpi);
+				\CApi::Log('TwilioAftId_'.$oAccount->User->TwilioNumber);
+
+				$oCapability->allowClientIncoming('TwilioAftId_'.$oAccount->User->TwilioNumber);
+//				$oCapability->allowClientIncoming('TwilioAftId_'.$oAccount->IdTenant.'_'.$oAccount->User->TwilioNumber);
 
 				$mToken = $oCapability->generateToken();
 			}
@@ -2488,6 +2627,9 @@ class Actions extends ActionsBase
 		{
 			\CApi::Log('GC: Clear Unregistred Users');
 			$oApiHelpdesk->ClearUnregistredUsers();
+
+			\CApi::Log('GC: Clear Online');
+			$oApiHelpdesk->ClearAllOnline();
 		}
 
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $bResult);
@@ -2719,13 +2861,15 @@ class Actions extends ActionsBase
 
 		$sSearch = (string) $this->getParamValue('Search', '');
 		$bGlobalOnly = '1' === (string) $this->getParamValue('GlobalOnly', '0');
+		$bPhoneOnly = '1' === (string) $this->getParamValue('PhoneOnly', '0');
 
 		$aList = array();
 
 		if ($this->oApiCapability->IsContactsSupported($oAccount))
 		{
 			$aContacts = $oApiContacts ?
-				$oApiContacts->GetSuggestItems($oAccount, $sSearch, \CApi::GetConf('webmail.suggest-contacts-limit', 20), $bGlobalOnly) : null;
+				$oApiContacts->GetSuggestItems($oAccount, $sSearch,
+					\CApi::GetConf('webmail.suggest-contacts-limit', 20), $bGlobalOnly, $bPhoneOnly) : null;
 
 			if (is_array($aContacts))
 			{
@@ -2847,6 +2991,82 @@ class Actions extends ActionsBase
 			'Search' => $sSearch,
 			'List' => $aList
 		));
+	}
+
+	/**
+	 * @return array
+	 */
+	public function AjaxGetIdentities()
+	{
+		$oAccount = $this->getAccountFromParam();
+		return $this->DefaultResponse($oAccount, __FUNCTION__, $this->oApiUsers->GetIdentitiesByUserID($oAccount));
+	}
+
+	/**
+	 * @return array
+	 */
+	public function AjaxCreateIdentity()
+	{
+		$oAccount = $this->getAccountFromParam();
+		$sEmail = trim((string) $this->getParamValue('Email', ''));
+
+		if (empty($sEmail))
+		{
+			throw new \ProjectSeven\Exceptions\ClientException(\ProjectSeven\Notifications::InvalidInputParameter);
+		}
+
+		$oIdentity = new \CIdentity();
+		$oIdentity->IdAccount = $oAccount->IdAccount;
+		$oIdentity->IdUser  = $oAccount->IdUser;
+		$oIdentity->Enabled = '1' === (string) $this->getParamValue('Enabled', '1');
+		$oIdentity->Email = $sEmail;
+		$oIdentity->Signature = (string) $this->getParamValue('Signature', '');
+		$oIdentity->UseSignature = '1' === (string) $this->getParamValue('UseSignature', '0');
+		$oIdentity->FriendlyName = (string) $this->getParamValue('FriendlyName', '');
+
+		return $this->DefaultResponse($oAccount, __FUNCTION__, $this->oApiUsers->CreateIdentity($oIdentity));
+	}
+
+	/**
+	 * @return array
+	 */
+	public function AjaxUpdateIdentity()
+	{
+		$oAccount = $this->getAccountFromParam();
+
+		$iIdentityId = (int) $this->getParamValue('IdIdentity', 0);
+
+		$oIdentity = $this->oApiUsers->GetIdentity($iIdentityId);
+		if (0 >= $iIdentityId || !$oIdentity || $oIdentity->IdUser !== $oAccount->IdUser || $oIdentity->IdAccount !== $oAccount->IdAccount)
+		{
+			throw new \ProjectSeven\Exceptions\ClientException(\ProjectSeven\Notifications::InvalidInputParameter);
+		}
+
+		$oIdentity->Enabled = '1' === (string) $this->getParamValue('Enabled', '1');
+		$oIdentity->Email = trim((string) $this->getParamValue('Email', ''));
+		$oIdentity->Signature = (string) $this->getParamValue('Signature', '');
+		$oIdentity->UseSignature = '1' === (string) $this->getParamValue('UseSignature', '0');
+		$oIdentity->FriendlyName = (string) $this->getParamValue('FriendlyName', '');
+
+		return $this->DefaultResponse($oAccount, __FUNCTION__, $this->oApiUsers->UpdateIdentity($oIdentity));
+	}
+
+	/**
+	 * @return array
+	 */
+	public function AjaxDeleteIdentity()
+	{
+		$oAccount = $this->getAccountFromParam();
+
+		$iIdentityId = (int) $this->getParamValue('IdIdentity', 0);
+		
+		$oIdentity = $this->oApiUsers->GetIdentity($iIdentityId);
+		if (0 >= $iIdentityId || !$oIdentity || $oIdentity->IdUser !== $oAccount->IdUser || $oIdentity->IdAccount !== $oAccount->IdAccount)
+		{
+			throw new \ProjectSeven\Exceptions\ClientException(\ProjectSeven\Notifications::InvalidInputParameter);
+		}
+		
+		return $this->DefaultResponse($oAccount, __FUNCTION__, $this->oApiUsers->DeleteIdentity($iIdentityId));
 	}
 
 	/**
@@ -3313,6 +3533,39 @@ class Actions extends ActionsBase
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $oResult);
 	}	
 
+	public function AjaxFilesPub()
+	{
+		$oAccount = null;
+		$oResult = array();
+
+		$oMin = \CApi::Manager('min');
+
+		$sHash = $this->getParamValue('Hash');
+		$sPath = $this->getParamValue('Path', '');
+		
+		$mMin = $oMin->GetMinByHash($sHash);
+		if (!empty($mMin['__hash__']))
+		{
+			$oAccount = $this->oApiUsers->GetAccountById($mMin['Account']);
+			if ($oAccount)
+			{
+				if (!$this->oApiCapability->IsFilesSupported($oAccount))
+				{
+					throw new \ProjectSeven\Exceptions\ClientException(\ProjectSeven\Notifications::FilesNotAllowed);
+				}
+				$iType = (int) $mMin['Type'];
+
+				$sPath =  implode('/', array($mMin['Path'], $mMin['Name']))  . $sPath;
+
+				$oResult['Items'] = $this->oApiFilestorage->GetFiles($oAccount, $iType, $sPath);
+				$oResult['Quota'] = $this->oApiFilestorage->GetQuota($oAccount);
+				
+			}
+		}
+
+		return $this->DefaultResponse($oAccount, __FUNCTION__, $oResult);
+	}	
+
 	public function AjaxFilesQuota()
 	{
 		$oAccount = $this->getDefaultAccountFromParam();
@@ -3444,6 +3697,7 @@ class Actions extends ActionsBase
 		$sPath = $this->getParamValue('Path'); 
 		$sName = $this->getParamValue('Name');
 		$sSize = $this->getParamValue('Size');
+		$bIsFolder = (bool) $this->getParamValue('IsFolder');
 		
 		$sID = implode('|', array($oAccount->IdAccount,	$iType, $sPath, $sName));
 
@@ -3463,7 +3717,8 @@ class Actions extends ActionsBase
 					'Type' => $iType, 
 					'Path' => $sPath, 
 					'Name' => $sName,
-					'Size' => $sSize
+					'Size' => $sSize,
+					'IsFolder' => $bIsFolder
 				)
 			);
 		}
@@ -3543,7 +3798,15 @@ class Actions extends ActionsBase
 		$sDescription = $this->getParamValue('Description'); 
 		$sColor = $this->getParamValue('Color'); 
 		
-		$mResult = $this->oApiCalendar->CreateCalendar($oAccount, $sName, $sDescription, 0, $sColor);
+		$mCalendarId = $this->oApiCalendar->CreateCalendar($oAccount, $sName, $sDescription, 0, $sColor);
+		if ($mCalendarId)
+		{
+			$oCalendar = $this->oApiCalendar->GetCalendar($oAccount, $mCalendarId);
+			if ($oCalendar)
+			{
+				$mResult = $this->oApiCalendar->GetCalendarAsArray($oAccount, $oCalendar);
+			}
+		}
 		
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $mResult);
 	}
@@ -3599,15 +3862,7 @@ class Actions extends ActionsBase
 		$oAccount = $this->getDefaultAccountFromParam();
 		
 		$sCalendarId = $this->getParamValue('Id');
-		
-		if (!is_numeric($sCalendarId))
-		{
-			$mResult = $this->oApiCalendar->DeleteCalendar($oAccount, $sCalendarId);
-		}
-		else
-		{
-			$mResult = $this->oApiCalendar->UnsubscribeCalendar($oAccount, $sCalendarId);
-		}
+		$mResult = $this->oApiCalendar->DeleteCalendar($oAccount, $sCalendarId);
 		
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $mResult);
 	}
@@ -3623,22 +3878,28 @@ class Actions extends ActionsBase
 		$bIsPublic = (bool) $this->getParamValue('IsPublic');
 		$aShares = @json_decode($this->getParamValue('Shares'), true);
 		
+		$bShareToAll = (bool) $this->getParamValue('ShareToAll', false);
+		$iShareToAllAccess = (int) $this->getParamValue('ShareToAllAccess', \ECalendarPermission::Read);
+		
 		if (!$this->oApiCapability->IsCalendarSupported($oAccount))
 		{
 			throw new \ProjectSeven\Exceptions\ClientException(\ProjectSeven\Notifications::CalendarsNotAllowed);
 		}
 		
-		$this->oApiCalendar->UpdateCalendarShares($oAccount, $sCalendarId, $aShares);
-		if ($bIsPublic)
-		{
-			$this->oApiCalendar->PublicCalendar($oAccount, $sCalendarId);
-		}
-		else
-		{
-			$this->oApiCalendar->UnPublicCalendar($oAccount, $sCalendarId);
-		}
+		// Share calendar to all users
+		$aShares[] = array(
+			'email' => $this->oApiCalendar->GetTenantUser($oAccount),
+			'access' => $bShareToAll ? $iShareToAllAccess : \ECalendarPermission::RemovePermission
+		);
 		
-		$mResult = true;
+		// Public calendar
+		$aShares[] = array(
+			'email' => $this->oApiCalendar->GetPublicUser(),
+			'access' => $bIsPublic ? \ECalendarPermission::Read : \ECalendarPermission::RemovePermission
+		);
+		
+		$mResult = $this->oApiCalendar->UpdateCalendarShares($oAccount, $sCalendarId, $aShares);
+		
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $mResult);
 	}		
 	
@@ -3657,15 +3918,7 @@ class Actions extends ActionsBase
 			throw new \ProjectSeven\Exceptions\ClientException(\ProjectSeven\Notifications::CalendarsNotAllowed);
 		}
 		
-		if ($bIsPublic)
-		{
-			$this->oApiCalendar->PublicCalendar($oAccount, $sCalendarId);
-		}
-		else
-		{
-			$this->oApiCalendar->UnPublicCalendar($oAccount, $sCalendarId);
-		}
-		$mResult = true;
+		$mResult = $this->oApiCalendar->PublicCalendar($oAccount, $sCalendarId, $bIsPublic);
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $mResult);
 	}	
 	
@@ -3938,7 +4191,18 @@ class Actions extends ActionsBase
 		$sRawKey = (string) $this->getParamValue('RawKey', '');
 		$aValues = \CApi::DecodeKeyValues($sRawKey);
 		
-		$oAccount = $this->getDefaultAccountFromParam();
+		$sHash = (string) $this->getParamValue('TenantHash', '');
+		$oMin = \CApi::Manager('min');
+
+		$mMin = $oMin->GetMinByHash($sHash);
+		if (!empty($mMin['__hash__']))
+		{
+			$oAccount = $this->oApiUsers->GetAccountById($mMin['Account']);
+		}
+		else
+		{
+			$oAccount = $this->getDefaultAccountFromParam();
+		}
 		
 		if ($this->oApiCapability->IsFilesSupported($oAccount))
 		{
@@ -3993,14 +4257,15 @@ class Actions extends ActionsBase
 	public function WindowPublicCalendar()
 	{
 		$sRawKey = (string) $this->getParamValue('RawKey', '');
-		$aValues = \CApi::DecodeKeyValues($sRawKey);
-		print_r($aValues);
+//		$aValues = \CApi::DecodeKeyValues($sRawKey);
+//		print_r($aValues);
 		
 		$sUrlRewriteBase = (string) \CApi::GetConf('labs.server-url-rewrite-base', '');
 		if (!empty($sUrlRewriteBase))
 		{
 			$sUrlRewriteBase = '<base href="'.$sUrlRewriteBase.'" />';
 		}
+		
 		return array(
 			'Template' => 'templates/CalendarPub.html',
 			'{{BaseUrl}}' => $sUrlRewriteBase 
@@ -4084,6 +4349,25 @@ class Actions extends ActionsBase
 		}
 		
 		return true;
+	}
+
+	public function PathInfoDav()
+	{
+		set_error_handler(function ($errno, $errstr, $errfile, $errline ) {
+			throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+		});
+
+		@set_time_limit(3000);
+
+		$sBaseUri = '/';
+		if (false !== \strpos($this->oHttp->GetUrl(), 'index.php/dav/'))
+		{
+			$aPath = \trim($this->oHttp->GetPath(), '/\\ ');
+			$sBaseUri = (0 < \strlen($aPath) ? '/'.$aPath : '').'/index.php/dav/';
+		}
+		
+		$server = new \afterlogic\DAV\Server($sBaseUri);
+		$server->exec();
 	}
 
 	/**
@@ -4351,85 +4635,6 @@ class Actions extends ActionsBase
 	}
 
 	/**
-	 * @return array
-	 */
-//	public function Upload111()
-//	{
-//		$oAccount = $this->getAccountFromParam();
-//		$oSettings =& \CApi::GetSettings();
-//
-//		$sInputName = 'jua-uploader';
-//		$aResponse = array();
-//
-//		$sError = '';
-//		$iSizeLimit = !!$oSettings->GetConf('WebMail/EnableAttachmentSizeLimit', false) ?
-//			((int) $oSettings->GetConf('WebMail/AttachmentSizeLimit', 0)) * 1024 * 1024 : 0;
-//
-//		if ($oAccount)
-//		{
-//			$iError = UPLOAD_ERR_OK;
-//			$_FILES = isset($_FILES) ? $_FILES : null;
-//			if (isset($_FILES, $_FILES[$sInputName], $_FILES[$sInputName]['name'], $_FILES[$sInputName]['tmp_name'], $_FILES[$sInputName]['size'], $_FILES[$sInputName]['type']))
-//			{
-//				$iError = (isset($_FILES[$sInputName]['error'])) ? (int) $_FILES[$sInputName]['error'] : UPLOAD_ERR_OK;
-//				if (UPLOAD_ERR_OK === $iError)
-//				{
-//					if (0 < $iSizeLimit && $iSizeLimit < (int) $_FILES[$sInputName]['size'])
-//					{
-//						$sError = 'size';
-//					}
-//					else
-//					{
-//						$sSavedName = 'upload-post-'.md5($_FILES[$sInputName]['name'].$_FILES[$sInputName]['tmp_name']);
-//						if ($this->ApiFileCache()->MoveUploadedFile($oAccount, $sSavedName, $_FILES[$sInputName]['tmp_name']))
-//						{
-//							$sUploadName = $_FILES[$sInputName]['name'];
-//							$iSize = $_FILES[$sInputName]['size'];
-//							$sMimeType = \MailSo\Base\Utils::MimeContentType($sUploadName);
-//
-//							$aResponse['Attachment'] = array(
-//								'Name' => $sUploadName,
-//								'TempName' => $sSavedName,
-//								'MimeType' => $sMimeType,
-//								'Size' =>  (int) $iSize,
-//								'Hash' => \CApi::EncodeKeyValues(array(
-//									'TempFile' => true,
-//									'AccountID' => $oAccount->IdAccount,
-//									'Name' => $sUploadName,
-//									'TempName' => $sSavedName
-//								))
-//							);
-//						}
-//						else
-//						{
-//							$sError = 'unknown';
-//						}
-//					}
-//				}
-//				else
-//				{
-//					$sError = $this->convertUploadErrorToString($iError);
-//				}
-//			}
-//			else if (!isset($_FILES) || !is_array($_FILES) || 0 === count($_FILES))
-//			{
-//				$sError = 'size';
-//			}
-//			else
-//			{
-//				$sError = 'unknown';
-//			}
-//		}
-//
-//		if (0 < strlen($sError))
-//		{
-//			$aResponse['Error'] = $sError;
-//		}
-//
-//		return $this->DefaultResponse($oAccount, 'Upload', $aResponse);
-//	}
-
-	/**
 	 * @param bool $bDownload
 	 * @param string $sContentType
 	 * @param string $sFileName
@@ -4446,7 +4651,7 @@ class Actions extends ActionsBase
 		{
 			$aParts = explode('/', $sContentType, 2);
 			if (in_array(strtolower($aParts[0]), array('image', 'video', 'audio')) ||
-				in_array(strtolower($sContentType), array('application/pdf', 'application/x-pdf')))
+				in_array(strtolower($sContentType), array('application/pdf', 'application/x-pdf', 'text/html')))
 			{
 				header('Content-Type: '.$sContentType, true);
 			}
@@ -4467,14 +4672,28 @@ class Actions extends ActionsBase
 		header('Content-Transfer-Encoding: binary');
 	}
 
+	public function thumbResource($oAccount, $rResource, $sFileName)
+	{
+		$sMd5Hash = md5(rand(1000, 9999));
+
+		$this->ApiFileCache()->PutFile($oAccount, 'Raw/Thumbnail/'.$sMd5Hash, $rResource, '_'.$sFileName);
+
+		$oThumb = new \PHPThumb\GD(
+			$this->ApiFileCache()->GenerateFullFilePath($oAccount, 'Raw/Thumbnail/'.$sMd5Hash, '_'.$sFileName)
+		);
+
+//		$oThumb->resize(300, 80)->show();
+		$oThumb->adaptiveResize(120, 100)->show();
+
+		$this->ApiFileCache()->Clear($oAccount, 'Raw/Thumbnail/'.$sMd5Hash, $rResource, '_'.$sFileName);
+	}
+
 	/**
 	 * @return bool
 	 */
-	private function raw($bDownload = true)
+	private function rawCallback($sRawKey, $fCallback, $bCache = true, &$oAccount = null)
 	{
-		$sRawKey = (string) $this->getParamValue('RawKey', '');
 		$aValues = \CApi::DecodeKeyValues($sRawKey);
-
 		if (!is_array($aValues) || 0 === count($aValues))
 		{
 			return false;
@@ -4487,7 +4706,7 @@ class Actions extends ActionsBase
 		$oAccount = null;
 		$oHelpdeskUser = null;
 		$oHelpdeskUserFromAttachment = null;
-		
+
 		if (isset($aValues['HelpdeskUserID'], $aValues['HelpdeskTenantID']))
 		{
 			$oAccount = null;
@@ -4520,7 +4739,7 @@ class Actions extends ActionsBase
 
 		if ($oHelpdeskUserFromAttachment && isset($aValues['FilestorageFile'], $aValues['StorageType'], $aValues['Path'], $aValues['Name']))
 		{
-			if (!$bDownload)
+			if ($bCache)
 			{
 				$this->verifyCacheByKey($sRawKey);
 			}
@@ -4529,7 +4748,7 @@ class Actions extends ActionsBase
 			$mResult = $this->oApiFilestorage->GetFile($oHelpdeskUserFromAttachment, $aValues['StorageType'], $aValues['Path'], $aValues['Name']);
 			if (is_resource($mResult))
 			{
-				if (!$bDownload)
+				if ($bCache)
 				{
 					$this->cacheByKey($sRawKey);
 				}
@@ -4538,16 +4757,17 @@ class Actions extends ActionsBase
 				$sFileName = $aValues['Name'];
 				$sContentType = (empty($sFileName)) ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
 				$sFileName = $this->clearFileName($sFileName, $sContentType);
-				$this->RawOutputHeaders($bDownload, $sContentType, $sFileName);
 
-				\MailSo\Base\Utils::FpassthruWithTimeLimitReset($mResult);
+				call_user_func_array($fCallback, array(
+					$oAccount, $sContentType, $sFileName, $mResult
+				));
 			}
 
 			return $bResult;
 		}
 		else if (isset($aValues['TempFile'], $aValues['TempName'], $aValues['Name']) && ($oHelpdeskUserFromAttachment || $oAccount))
 		{
-			if (!$bDownload)
+			if ($bCache)
 			{
 				$this->verifyCacheByKey($sRawKey);
 			}
@@ -4556,7 +4776,7 @@ class Actions extends ActionsBase
 			$mResult = $this->ApiFileCache()->GetFile($oHelpdeskUserFromAttachment ? $oHelpdeskUserFromAttachment : $oAccount, $aValues['TempName']);
 			if (is_resource($mResult))
 			{
-				if (!$bDownload)
+				if ($bCache)
 				{
 					$this->cacheByKey($sRawKey);
 				}
@@ -4565,9 +4785,10 @@ class Actions extends ActionsBase
 				$sFileName = $aValues['Name'];
 				$sContentType = (empty($sFileName)) ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
 				$sFileName = $this->clearFileName($sFileName, $sContentType);
-				$this->RawOutputHeaders($bDownload, $sContentType, $sFileName);
 
-				\MailSo\Base\Utils::FpassthruWithTimeLimitReset($mResult);
+				call_user_func_array($fCallback, array(
+					$oAccount, $sContentType, $sFileName, $mResult
+				));
 			}
 
 			return $bResult;
@@ -4579,7 +4800,7 @@ class Actions extends ActionsBase
 			$sMimeIndex = (string) (isset($aValues['MimeIndex']) ? $aValues['MimeIndex'] : '');
 		}
 
-		if (!$bDownload && 0 < strlen($sFolder) && 0 < $iUid)
+		if ($bCache && 0 < strlen($sFolder) && 0 < $iUid)
 		{
 			$this->verifyCacheByKey($sRawKey);
 		}
@@ -4589,7 +4810,7 @@ class Actions extends ActionsBase
 
 		$self = $this;
 		return $this->oApiMail->MessageMimeStream($oAccount,
-			function($rResource, $sContentType, $sFileName, $sMimeIndex = '') use ($self, $sRawKey, $bDownload, $sContentTypeIn, $sFileNameIn) {
+			function($rResource, $sContentType, $sFileName, $sMimeIndex = '') use ($self, $oAccount, $fCallback, $sRawKey, $bCache, $sContentTypeIn, $sFileNameIn) {
 				if (is_resource($rResource))
 				{
 					$sContentTypeOut = $sContentTypeIn;
@@ -4600,26 +4821,67 @@ class Actions extends ActionsBase
 						{
 							$sContentTypeOut = (empty($sFileName)) ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
 						}
-					}					
+					}
 
 					$sFileNameOut = $sFileNameIn;
-					if (empty($sFileNameOut))
+					if (empty($sFileNameOut) || '.' === $sFileNameOut{0})
 					{
 						$sFileNameOut = $sFileName;
 					}
 
 					$sFileNameOut = $self->clearFileName($sFileNameOut, $sContentType, $sMimeIndex);
 
-					$self->RawOutputHeaders($bDownload, $sContentTypeOut, $sFileNameOut);
-
-					if (!$bDownload)
+					if ($bCache)
 					{
 						$self->cacheByKey($sRawKey);
 					}
 
-					\MailSo\Base\Utils::FpassthruWithTimeLimitReset($rResource);
+					call_user_func_array($fCallback, array(
+						$oAccount, $sContentTypeOut, $sFileNameOut, $rResource
+					));
 				}
 			}, $sFolder, $iUid, $sMimeIndex);
+	}
+
+	/**
+	 * @return bool
+	 */
+	private function raw($bDownload = true, $bThumbnail = false)
+	{
+		$self = $this;
+		return $this->rawCallback((string) $this->getParamValue('RawKey', ''), function ($oAccount, $sContentType, $sFileName, $rResource) use ($self, $bDownload, $bThumbnail) {
+
+			$self->RawOutputHeaders($bDownload, $sContentType, $sFileName);
+
+			if ('text/html' === $sContentType)
+			{
+				$sHtml = stream_get_contents($rResource);
+				if ($sHtml)
+				{
+					include_once PSEVEN_APP_ROOT_PATH.'libraries/other/CssToInlineStyles.php';
+
+					$oCssToInlineStyles = new \TijsVerkoyen\CssToInlineStyles\CssToInlineStyles($sHtml);
+					$oCssToInlineStyles->setEncoding('utf-8');
+					$oCssToInlineStyles->setUseInlineStylesBlock(true);
+
+					echo '<html><head></head><body>'.
+						\MailSo\Base\HtmlUtils::ClearHtmlSimple($oCssToInlineStyles->convert(), true, true).
+						'</body></html>';
+				}
+			}
+			else
+			{
+				if ($bThumbnail)
+				{
+					$self->thumbResource($oAccount, $rResource, $sFileName);
+				}
+				else
+				{
+					\MailSo\Base\Utils::FpassthruWithTimeLimitReset($rResource);
+				}
+			}
+			
+		}, !$bDownload);
 	}
 
 	/**
@@ -4643,80 +4905,7 @@ class Actions extends ActionsBase
 	 */
 	public function RawThumbnail()
 	{
-		$sRawKey = (string) $this->getParamValue('RawKey', '');
-		$aValues = \CApi::DecodeKeyValues($sRawKey);
-
-		if (!is_array($aValues) || 0 === count($aValues))
-		{
-			return false;
-		}
-
-		if (0 < strlen($sRawKey))
-		{
-			$this->verifyCacheByKey($sRawKey);
-		}
-
-		$sFolder = '';
-		$iUid = 0;
-		$sMimeIndex = '';
-
-		$oAccount = null;
-		if (isset($aValues['AccountID']))
-		{
-			$oAccount = $this->getAccountFromParam();
-			if (!$oAccount || $aValues['AccountID'] !== $oAccount->IdAccount)
-			{
-				return false;
-			}
-		}
-
-		$sFolder = (string) (isset($aValues['Folder']) ? $aValues['Folder'] : '');
-		$iUid = (int) (isset($aValues['Uid']) ? $aValues['Uid'] : 0);
-		$sMimeIndex = (string) (isset($aValues['MimeIndex']) ? $aValues['MimeIndex'] : '');
-
-		$sContentTypeIn = (string) (isset($aValues['MimeType']) ? $aValues['MimeType'] : '');
-		$sFileNameIn = (string) (isset($aValues['FileName']) ? $aValues['FileName'] : '');
-
-		$self = $this;
-		$bResult = $this->oApiMail->MessageMimeStream($oAccount,
-			function($rResource, $sContentType, $sFileName, $sMimeIndex = '') use ($self, $oAccount, $sRawKey, $sContentTypeIn, $sFileNameIn) {
-				if (is_resource($rResource))
-				{
-					$sContentTypeOut = $sContentTypeIn;
-					if (empty($sContentTypeOut))
-					{
-						$sContentTypeOut = $sContentType;
-						if (empty($sContentTypeOut))
-						{
-							$sContentTypeOut = (empty($sFileName)) ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
-						}
-					}
-
-					$sFileNameOut = $sFileNameIn;
-					if (empty($sFileNameOut))
-					{
-						$sFileNameOut = $sFileName;
-					}
-
-					$sFileNameOut = $self->clearFileName($sFileNameOut, $sContentType, $sMimeIndex);
-					$sMd5Hash = md5(rand(1000, 9999));
-
-					$self->cacheByKey($sRawKey);
-
-					$self->ApiFileCache()->PutFile($oAccount, 'Raw/Thumbnail/'.$sMd5Hash, $rResource, '_'.$sFileNameOut);
-					
-					$oThumb = new \PHPThumb\GD(
-						$self->ApiFileCache()->GenerateFullFilePath($oAccount, 'Raw/Thumbnail/'.$sMd5Hash, '_'.$sFileNameOut)
-					);
-					
-//					$oThumb->resize(300, 80)->show();
-					$oThumb->adaptiveResize(300, 80)->show();
-
-					$self->ApiFileCache()->Clear($oAccount, 'Raw/Thumbnail/'.$sMd5Hash, $rResource, '_'.$sFileNameOut);
-				}
-			}, $sFolder, $iUid, $sMimeIndex);
-
-		return $bResult;
+		return $this->raw(false, true);
 	}
 
 	/**
@@ -4732,7 +4921,7 @@ class Actions extends ActionsBase
 		$sClearedFileName = preg_replace('/[\s]+/', ' ', preg_replace('/[\.]+/', '.', $sFileName));
 		$sExt = \MailSo\Base\Utils::GetFileExtension($sClearedFileName);
 
-		$iSize = 50;
+		$iSize = 100;
 		if ($iSize < strlen($sClearedFileName) - strlen($sExt))
 		{
 			$sClearedFileName = substr($sClearedFileName, 0, $iSize).(empty($sExt) ? '' : '.'.$sExt);
@@ -5421,6 +5610,23 @@ class Actions extends ActionsBase
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $mResult);
 	}
 
+	public function AjaxHelpdeskThreadPing()
+	{
+		$oAccount = null;
+		$oUser = $this->getHelpdeskAccountFromParam($oAccount);
+
+		$iThreadId = (int) $this->getParamValue('ThreadId', 0);
+
+		if (0 === $iThreadId)
+		{
+			throw new \ProjectSeven\Exceptions\ClientException(\ProjectSeven\Notifications::InvalidInputParameter);
+		}
+
+		$this->ApiHelpdesk()->SetOnline($oUser, $iThreadId);
+
+		return $this->DefaultResponse($oAccount, __FUNCTION__, $this->ApiHelpdesk()->GetOnline($oUser, $iThreadId));
+	}
+
 	public function AjaxHelpdeskThreadSeen()
 	{
 		$oAccount = null;
@@ -5555,6 +5761,90 @@ class Actions extends ActionsBase
 				}
 
 				throw new \ProjectSeven\Exceptions\ClientException($iErrorCode);
+			}
+
+			return $this->DefaultResponse(null, __FUNCTION__, $bResult);
+		}
+
+		return $this->FalseResponse(null, __FUNCTION__);
+	}
+
+	public function AjaxSocialRegister()
+	{
+		$sTenantHash = trim($this->getParamValue('TenantHash', ''));
+		if ($this->oApiCapability->IsHelpdeskSupported())
+		{
+			$sNotificationEmail = trim($this->getParamValue('NotificationEmail', ''));
+			if(isset($_COOKIE["Social"]))
+			{
+				$aSocial = \CApi::DecodeKeyValues($_COOKIE["Social"]);
+			}
+			else
+			{
+				$aSocial = array(
+					'type' => '',
+					'id' => '',
+					'name' => '',
+					'email' => ''
+				);
+			}
+			$sSocialType = $aSocial['type'];
+			$sSocialId = $aSocial['id'];
+			$sSocialName = $aSocial['name'];
+			$sSocialEmail = $aSocial['email'];
+
+			if (0 !== strlen($sSocialEmail))
+			{
+				$sNotificationEmail = $sSocialEmail;
+			}
+
+			if (0 === strlen($sNotificationEmail))
+			{
+				throw new \ProjectSeven\Exceptions\ClientException(\ProjectSeven\Notifications::InvalidInputParameter);
+			}
+
+			$mIdTenant = $this->oApiIntegrator->GetTenantIdByHash($sTenantHash);
+			if (!is_int($mIdTenant))
+			{
+				throw new \ProjectSeven\Exceptions\ClientException(\ProjectSeven\Notifications::InvalidInputParameter);
+			}
+
+			$bResult = false;
+			try
+			{
+				$bResult = $this->oApiIntegrator->RegisterSocialAccount($mIdTenant, $sTenantHash, $sNotificationEmail, $sSocialId, $sSocialType, $sSocialName);
+			}
+			catch (\Exception $oException)
+			{
+				$iErrorCode = \ProjectSeven\Notifications::UnknownError;
+				if ($oException instanceof \CApiManagerException)
+				{
+					switch ($oException->getCode())
+					{
+						case \Errs::HelpdeskManager_UserAlreadyExists:
+							$iErrorCode = \ProjectSeven\Notifications::HelpdeskUserAlreadyExists;
+							break;
+						case \Errs::HelpdeskManager_UserCreateFailed:
+							$iErrorCode = \ProjectSeven\Notifications::CanNotCreateHelpdeskUser;
+							break;
+						case \Errs::Db_ExceptionError:
+							$iErrorCode = \ProjectSeven\Notifications::DataBaseError;
+							break;
+					}
+				}
+
+				throw new \ProjectSeven\Exceptions\ClientException($iErrorCode);
+			}
+
+			if ($bResult)
+			{
+				$bResult = false;
+				$oUser = \CApi::Manager('integrator')->GetAhdSocialUser($sTenantHash, $sSocialId);
+				if ($oUser)
+				{
+					\CApi::Manager('integrator')->SetHelpdeskUserAsLoggedIn($oUser, false);
+					$bResult = true;
+				}
 			}
 
 			return $this->DefaultResponse(null, __FUNCTION__, $bResult);

@@ -59,7 +59,7 @@ class Plugin extends \Sabre\DAV\ServerPlugin
 
 			if ($sAddressBookName === \afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME)
 			{
-				return false;	
+//				return false;	
 			}
 		}		
 		return true;
@@ -76,18 +76,17 @@ class Plugin extends \Sabre\DAV\ServerPlugin
 		{
 			$sAddressBookName = basename(dirname($path));
 
-			if ($sAddressBookName !== \afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME)
+			if (true)//($sAddressBookName !== \afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME)
 			{
 				$oAccount = $this->server->getAccount();
 				if (isset($oAccount))
 				{
 					$iUserId = $oAccount->IdUser;
-					$oContact = null;
 					$oContact = $this->oApiContactsManager->GetContactByStrId($iUserId, basename($path));
 
 					if ($oContact)
 					{
-						if ($sAddressBookName !== \afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME)
+						if (true)//($sAddressBookName !== \afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME)
 						{
 							$this->oApiContactsManager->DeleteContacts($iUserId, array($oContact->IdContact));		
 						}

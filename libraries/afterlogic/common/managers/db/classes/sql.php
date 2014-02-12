@@ -91,6 +91,7 @@ class CDbSchemaHelper
 
 			'awm_identities', 'awm_tenants', 'awm_fetchers', 'awm_system_folders',
 			'awm_channels', 'awm_folders_order', 'awm_min', 'awm_subscriptions',
+			'awm_folders_order_names',
 
 			// quotas
 			'awm_account_quotas', 'awm_domain_quotas', 'awm_tenant_quotas',
@@ -102,7 +103,7 @@ class CDbSchemaHelper
 			'acal_cron_runs', 'acal_awm_fnbl_runs',
 
 			// helpdesk
-			'ahd_users', 'ahd_threads', 'ahd_posts', 'ahd_reads', 'ahd_attachments',
+			'ahd_users', 'ahd_threads', 'ahd_posts', 'ahd_reads', 'ahd_attachments', 'ahd_online',
 
 			// dav
 			'adav_addressbooks', 'adav_calendars', 'adav_cache', 'adav_calendarobjects',
@@ -199,6 +200,7 @@ class CDbSchema
 			new CDbKey(CDbKey::TYPE_PRIMARY_KEY, array('id_acct')),
 			new CDbKey(CDbKey::TYPE_KEY, array('id_user')),
 			new CDbKey(CDbKey::TYPE_KEY, array('id_acct', 'id_user')),
+			new CDbKey(CDbKey::TYPE_INDEX, array('mail_inc_login')),
 			new CDbKey(CDbKey::TYPE_INDEX, array('email'))
 		));
 	}
@@ -238,8 +240,10 @@ class CDbSchema
 
 			new CDbField('sip_impi', CDbField::VAR_CHAR, ''),
 			new CDbField('sip_password', CDbField::VAR_CHAR, ''),
+			new CDbField('twilio_number', CDbField::VAR_CHAR, ''),
 
 			new CDbField('use_threads', CDbField::BIT, 1),
+			new CDbField('save_replied_messages_to_current_folder', CDbField::BIT, 0),
 			new CDbField('allow_helpdesk_notifications', CDbField::BIT, 0),
 
 			new CDbField('capa', CDbField::VAR_CHAR),
@@ -339,6 +343,20 @@ class CDbSchema
 			new CDbField('folders_order', CDbField::TEXT),
 		), array(
 			new CDbKey(CDbKey::TYPE_PRIMARY_KEY, array('id')),
+			new CDbKey(CDbKey::TYPE_KEY, array('id_acct')),
+		));
+	}
+
+	/**
+	 * @return CDbTable
+	 */
+	public static function AwmFoldersOrderNames()
+	{
+		return new CDbTable('awm_folders_order_names', CDbSchemaHelper::Prefix(), array(
+			new CDbField('id_acct', CDbField::INT, 0),
+			new CDbField('real_name', CDbField::VAR_CHAR, ''),
+			new CDbField('order_name', CDbField::VAR_CHAR, '')
+		), array(
 			new CDbKey(CDbKey::TYPE_KEY, array('id_acct')),
 		));
 	}
@@ -484,6 +502,26 @@ class CDbSchema
 			new CDbField('hd_agent_iframe_url', CDbField::VAR_CHAR, ''),
 			new CDbField('hd_site_name', CDbField::VAR_CHAR, ''),
 
+			new CDbField('hd_facebook_allow', CDbField::BIT, 0),
+			new CDbField('hd_facebook_id', CDbField::VAR_CHAR, ''),
+			new CDbField('hd_facebook_secret', CDbField::VAR_CHAR, ''),
+			new CDbField('hd_google_allow', CDbField::BIT, 0),
+			new CDbField('hd_google_id', CDbField::VAR_CHAR, ''),
+			new CDbField('hd_google_secret', CDbField::VAR_CHAR, ''),
+			new CDbField('hd_twitter_allow', CDbField::BIT, 0),
+			new CDbField('hd_twitter_id', CDbField::VAR_CHAR, ''),
+			new CDbField('hd_twitter_secret', CDbField::VAR_CHAR, ''),
+
+			new CDbField('social_facebook_allow', CDbField::BIT, 0),
+			new CDbField('social_facebook_id', CDbField::VAR_CHAR, ''),
+			new CDbField('social_facebook_secret', CDbField::VAR_CHAR, ''),
+			new CDbField('social_google_allow', CDbField::BIT, 0),
+			new CDbField('social_google_id', CDbField::VAR_CHAR, ''),
+			new CDbField('social_google_secret', CDbField::VAR_CHAR, ''),
+			new CDbField('social_twitter_allow', CDbField::BIT, 0),
+			new CDbField('social_twitter_id', CDbField::VAR_CHAR, ''),
+			new CDbField('social_twitter_secret', CDbField::VAR_CHAR, ''),
+
 			new CDbField('sip_allow', CDbField::BIT, 0),
 			new CDbField('sip_allow_configuration', CDbField::BIT, 0),
 			new CDbField('sip_realm', CDbField::VAR_CHAR, ''),
@@ -493,6 +531,7 @@ class CDbSchema
 			
 			new CDbField('twilio_allow', CDbField::BIT, 0),
 			new CDbField('twilio_allow_configuration', CDbField::BIT, 0),
+			new CDbField('twilio_phone_number', CDbField::VAR_CHAR, ''),
 			new CDbField('twilio_account_sid', CDbField::VAR_CHAR, ''),
 			new CDbField('twilio_auth_token', CDbField::VAR_CHAR, ''),
 			new CDbField('twilio_app_sid', CDbField::VAR_CHAR, '')
@@ -535,6 +574,7 @@ class CDbSchema
 			new CDbField('frienly_name', CDbField::VAR_CHAR, ''),
 			new CDbField('email', CDbField::VAR_CHAR, ''),
 			new CDbField('signature', CDbField::TEXT, ''),
+			new CDbField('signature_opt', CDbField::INT_SHORT, 0),
 			new CDbField('inc_host', CDbField::VAR_CHAR, ''),
 			new CDbField('inc_port', CDbField::INT, 110),
 			new CDbField('inc_login', CDbField::VAR_CHAR, ''),
@@ -577,6 +617,7 @@ class CDbSchema
 			new CDbField('id_identity', CDbField::AUTO_INT),
 			new CDbField('id_user', CDbField::INT, 0),
 			new CDbField('id_acct', CDbField::INT, 0),
+			new CDbField('enabled', CDbField::BIT, 1),
 			new CDbField('email', CDbField::VAR_CHAR, ''),
 			new CDbField('friendly_nm', CDbField::VAR_CHAR, ''),
 			new CDbField('signature', CDbField::TEXT),
@@ -1302,7 +1343,10 @@ class CDbSchema
 			new CDbField('activate_hash', CDbField::VAR_CHAR, ''),
 			new CDbField('blocked', CDbField::BIT, 0),
 			new CDbField('email', CDbField::VAR_CHAR, ''),
+			new CDbField('notification_email', CDbField::VAR_CHAR, ''),
 			new CDbField('name', CDbField::VAR_CHAR, ''),
+			new CDbField('social_id', CDbField::VAR_CHAR, ''),
+			new CDbField('social_type', CDbField::VAR_CHAR, ''),
 			new CDbField('language', CDbField::VAR_CHAR, 'English', 100),
 			new CDbField('date_format', CDbField::VAR_CHAR, '', 50),
 			new CDbField('time_format', CDbField::INT_SMALL, 0),
@@ -1388,6 +1432,21 @@ class CDbSchema
 			new CDbField('id_owner', CDbField::INT),
 			new CDbField('id_helpdesk_thread', CDbField::INT),
 			new CDbField('last_post_id', CDbField::INT),
+		));
+	}
+
+	/**
+	 * @return CDbTable
+	 */
+	public static function AhdOnline()
+	{
+		return new CDbTable('ahd_online', CDbSchemaHelper::Prefix(), array(
+			new CDbField('id_helpdesk_thread', CDbField::INT, 0),
+			new CDbField('id_helpdesk_user', CDbField::INT, 0),
+			new CDbField('id_tenant', CDbField::INT, 0),
+			new CDbField('name', CDbField::VAR_CHAR, ''),
+			new CDbField('email', CDbField::VAR_CHAR, ''),
+			new CDbField('ping_time', CDbField::INT, 0)
 		));
 	}
 	

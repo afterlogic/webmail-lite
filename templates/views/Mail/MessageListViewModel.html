@@ -3,11 +3,14 @@
 		<span class="icon"></span>
 		<input type="checkbox" data-bind="checked: checkAll" />
 	</label>
+	<!--<span class="field" contenteditable="true" style="background: #fff; width: 300px; height: 20px; position: absolute; top: -50px; z-index: 2000; display: block" ></span>-->
+	<!--<div class="field" contenteditable="true" style="background: #fff; width: 300px; height: 20px; position: absolute; top: -20px; z-index: 2000; display: inline-block" ></div>-->
 	<span class="search_block custom_select" data-bind="dropdown: {passClick: false, callback: fillAdvancedSearch, close: bAdvancedSearch}">
-		<span class="button" data-i18n="MAILBOX/BUTTON_SEARCH" data-bind="i18n: 'text', click: onSearchClick"></span>
-		<!--<input type="text" data-bind="value: searchInput, onEnter: onSearchClick, hasfocus: isFocused" />-->
-		<input class="search_input" type="text" data-bind="value: searchInput, onEnter: onSearchClick" />
-		<div class="search_span" contenteditable="true" data-bind="highlighter: {valueObserver: searchInput, highlighterValueObserver: searchSpan, highlightTrigger: highlightTrigger}, onEnter: onSearchClick, hasfocus: isFocused" ></div>
+		<span class="input" data-bind="css: {'focus': isFocused}">
+			<span class="button" data-i18n="MAILBOX/BUTTON_SEARCH" data-bind="i18n: 'text', click: onSearchClick"></span>
+			<input class="field hide" type="text" data-bind="value: searchInput, onEnter: onSearchClick" />
+			<div class="field" contenteditable="true" data-bind="highlighter: {valueObserver: searchInput, highlighterValueObserver: searchSpan, highlightTrigger: highlightTrigger}, onEnter: onSearchClick, hasfocus: isFocused" ></div>
+		</span>
 		<span class="control">
 			<span class="icon"></span>
 		</span>
@@ -69,6 +72,10 @@
 			
 			<span class="list_notification" data-bind="visible: visibleInfoMessageListEmpty">
 				<span class="description" data-i18n="MAILBOX/INFO_MESSAGE_LIST_EMPTY" data-bind="i18n: 'text'"></span>
+			</span>
+
+			<span class="list_notification" data-bind="visible: visibleInfoStarredFolderEmpty">
+				<span class="description" data-i18n="MAILBOX/INFO_STARRED_FOLDER_EMPTY" data-bind="i18n: 'text'"></span>
 			</span>
 
 			<span class="list_notification" data-bind="visible: visibleInfoMessageListError">

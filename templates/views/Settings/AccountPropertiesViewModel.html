@@ -49,9 +49,7 @@
 			</span>
 		</div>
 		<div class="hint" data-bind="visible: !isInternal() && allowUsersChangeEmailSettings">
-			<span data-i18n="SETTINGS/ACCOUNTS_DELETE_DEFAULT_HINT" data-bind="visible: !isInternal() && isDefault() && $parent.accounts().length > 1, i18n: 'text'"></span>
-			<span data-i18n="SETTINGS/ACCOUNTS_DELETE_SINGLE_DEFAULT_HINT" data-bind="visible: !isInternal() && isDefault() && $parent.accounts().length === 1, i18n: 'text'"></span>
-			<span data-i18n="SETTINGS/ACCOUNTS_DELETE_HINT" data-bind="visible: !isInternal() && !isDefault(), i18n: 'text'"></span>
+			<span data-bind="text: removeHint"></span>
 		</div>
 		
 		<!--<div class="row" data-bind="visible: useSmtpAuthentication()">

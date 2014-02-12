@@ -8,7 +8,7 @@
 			
 			<!-- ko if: showMovedWithMouseItem() -->
 			<div data-bind="sortable: {data: collection, connectClass: 'first_sortable_container', 
-				 afterMove: $root.folderListOrderUpdateDebounce, options: {axis: 'y', revert: true}}">
+				 afterMove: $root.afterSortableFolderMoveBinded, options: {axis: 'y', revert: true}}">
 				<div class="item canDrag" data-bind="visible: !virtual(), 
 					 template: { name: 'Settings_AccountFolderItemMovedWithMouse'},
 					 css: {'canSubscribe': canSubscribe, 'canRename': canRename, 'canDelete': canDelete}"></div>

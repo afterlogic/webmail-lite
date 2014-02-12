@@ -1,0 +1,181 @@
+/*=== Phone CSS ===*/
+.tabs_panel .phone {
+
+	float: right;
+	display: inline-block;
+    font-size: 0pt;
+	background: #fff;
+	border-radius: 20px;
+	box-shadow: 0px 0px 4px #D6D6D6;
+	margin: 16px 30px 0px 0px;
+	line-height: 10px;
+	position: relative;
+	text-align: right;
+
+	& > * {
+		font-size: 10.5pt;
+	}
+
+	&.online {
+		background: #fff;
+	}
+	
+	&.outgoing,
+	&.connect {
+		background: #FFC939;
+	}
+
+	.call_report,
+	.direction {
+		background: transparent;
+		display: inline-block;
+		max-width: 0px;
+		margin-left: 0px;
+		white-space: nowrap;
+		opacity: 0;
+		cursor: pointer;
+		overflow: hidden;
+
+//		-webkit-transition: all 500ms linear;
+//		-moz-transition: all 500ms linear;
+//		-o-transition: all 500ms linear;
+		.transition(~"max-width 500ms ease 0ms, opacity 400ms ease 0ms, margin-left 300ms ease 0ms ");
+	}
+
+	.input {
+		.box-sizing;
+
+		background: transparent;
+		width: 0px;
+		border: 0px;
+		padding-left: 0px;
+		box-shadow: none;
+		opacity: 0;
+
+//		-webkit-transition: all 500ms linear;
+//		-moz-transition: all 500ms linear;
+//		-o-transition: all 500ms linear;
+		.transition(~"width 500ms ease 0ms, opacity 350ms ease 0ms, padding-left 350ms ease 0ms");
+	}
+
+	.call_report.empty {
+		margin-left: 0px;
+	}
+	
+	.buttons {
+		margin: 0px;
+	}
+	
+	.button {
+		display: inline-block;
+		vertical-align: middle;
+		background: #ccc;
+		border: 2px solid #fff;
+		border-radius: 16px;
+		padding: 0px;
+		width: 30px;
+		height: 30px;
+		text-align: center;
+		line-height: 180%;
+
+		.transition(background-color 400ms ease 0s);
+
+		.icon {
+			display: inline-block;
+			vertical-align: bottom;
+			width: 16px;
+			height: 16px;
+			background: url("images/sprites.png?%VERSION%") no-repeat -440px -200px;
+
+			-webkit-transition: -webkit-transform 300ms ease 0s;
+			-moz-transition: -moz-transform 300ms ease 0s;
+			transition: transform 300ms ease 0s;
+
+			-webkit-transform: rotateZ(0deg);
+			-moz-transform: rotateZ(0deg);
+			transform: rotateZ(0deg);
+		}
+	}
+}
+
+.tabs_panel .phone.online .button {
+	background-color: #87D354;
+	box-shadow: inset 0px 0px 10px #69BE2E;
+}
+.tabs_panel .phone.active.ready .button .icon {
+	-webkit-transform: rotateZ(-118deg);
+	-moz-transform: rotateZ(-118deg);
+	transform: rotateZ(-118deg);
+}
+
+.tabs_panel .phone.active.outgoing .button,
+.tabs_panel .phone.active.connect .button {
+	background-color: #FF6767;
+    box-shadow: 0 0 10px #E75353 inset;
+}
+.tabs_panel .phone.active.outgoing .button .icon {
+	-webkit-transform: rotateZ(0deg);
+	-moz-transform: rotateZ(0deg);
+	transform: rotateZ(0deg);
+}
+
+.tabs_panel .phone .direction {
+	color: #c1b6b6;
+}
+
+.tabs_panel .phone.active .call_report,
+.tabs_panel .phone.active .direction {
+	max-width: 200px;
+	margin-left: 10px;
+	opacity: 1;
+	cursor: default;
+	overflow: visible;
+}
+.tabs_panel .phone.active .input {
+	opacity: 1;
+	width: 160px;
+	display: inline-block;
+	padding-left: 2px;
+
+}
+.tabs_panel .phone input:focus {
+	outline: 0px;
+}
+.tabs_panel .phone .indicator {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+}
+.tabs_panel .phone.offline.active .button {
+  background: #ccc;
+  box-shadow: none;
+}
+.tabs_panel .phone.offline .input,
+.tabs_panel .phone.offline .direction {
+  display: none;
+}
+.tabs_panel .phone .indicator.offline {
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background: #FF6767;
+}
+
+.tabs_panel .button .dropdown.dialer .dropdown_content {
+	min-width: 160px;
+	text-align: center;
+	padding: 10px 4px;
+}
+.tabs_panel .button .dropdown.dialer .item {
+	display: inline-block;
+	width: 16px;
+	color: #777;
+	padding: 10px 12px;
+	margin: 2px 1px;
+	border: 1px solid #eee;
+	text-align: left;
+	box-shadow: 0px 0px 4px #eee;
+	font-size: 11pt;
+	text-shadow: none;
+}
+/*=== END Phone CSS ===*/

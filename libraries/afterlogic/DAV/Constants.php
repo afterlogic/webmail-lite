@@ -14,6 +14,8 @@ class Constants
 	const T_CARDS = 'adav_cards';
 	const T_LOCKS = 'adav_locks';
 	const T_CACHE = 'adav_cache';
+	const T_CALENDARSHARES = 'adav_calendarshares';
+	const T_NOTIFICATIONS = 'adav_notifications';
 	
 	const GLOBAL_CONTACTS = 'Global Contacts';
 	const CALENDAR_DEFAULT_NAME = 'Default';
@@ -26,6 +28,7 @@ class Constants
 	const ADDRESSBOOK_COLLECTED_DISPLAY_NAME = 'Collected Addresses';
 	
 	const DAV_PUBLIC_PRINCIPAL = 'caldav_public_user@localhost';
+	const DAV_TENANT_PRINCIPAL = 'dav_tenant_user@localhost';
 	
 	const DAV_USER_AGENT = 'AfterlogicDAVClient';
 	const DAV_SERVER_NAME = 'AfterlogicDAVServer';
@@ -38,7 +41,7 @@ class Constants
 	const FILESTORAGE_PATH_PRIVATE = '/private';
 	const FILESTORAGE_PATH_CORPORATE = '/corporate';
 	
-	const LOG_BODY = false;
+	const LOG_BODY = true;
 
 	// Langs Constants
 	const CalendarDefaultName = 'My Calendar';

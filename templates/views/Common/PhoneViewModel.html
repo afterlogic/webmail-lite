@@ -1,23 +1,53 @@
 <span class="phone" data-bind="css: {
-		'active': action() === 'active' || action() === 'outgoing' || action() === 'connected_out' || action() === 'connected_in' || action() === 'dial',
-		'standby': action() !== 'offline',
-		'outgoing': action() === 'outgoing',
-		'incoming': action() === 'incoming',
-		'ready': action() === 'ready' && input().length > 0
+		'offline': (action() === 'offline' || action() === 'offline_active'),
+		'online': !(action() === 'offline' || action() === 'offline_active'),
+		'inactive': (action() === 'offline' || action() === 'online'),
+		'active': (action() === 'offline_active' || action() === 'online_active' || action() === 'outgoing' || action() === 'outgoing_connect' || action() === 'incoming' || action() === 'incoming_connect'),
+		'outgoing': (action() === 'outgoing' || action() === 'outgoing_connect'),
+		'incoming': (action() === 'incoming' || action() === 'incoming_connect'),
+		'connect': (action() === 'outgoing_connect' || action() === 'incoming_connect'),
+		'ready': action() === 'online_active' && input().length > 0
+	}, click: phoneClick">
 
-	}">
 	<span class="text call_report empty" data-bind="text: phoneReport, css:{'empty': phoneReport() === ''}"></span>
 	<span class="text direction" data-bind="">To:</span>
-	<input class="input" data-bind="value: input, hasfocus: inputFocus, valueUpdate: 'afterkeydown', onEnter: call" />
+	<input class="input" data-bind="value: input, hasfocus: inputFocus, onEnter: call, valueUpdate: ['blur', 'afterkeydown'], autocompleteSimple: {callback: autocompleteCallback.bind($data), dataAccessor: phoneAutocompleteItem}" />
 	<!--<input class="input" type="text" autocomplete="on" data-bind="value: input, hasfocus: inputFocus, valueUpdate: ['blur', 'afterkeydown'], autocompleteSimple: {callback: autocompleteCallback.bind($data), dataAccessor: phoneAutocompleteItem}" />-->
 
 	<span class="buttons">
-		<span class="button" data-bind="css: {
+		<span class="button" data-bind="title: phoneReport, click: multiAction,
+			css: {
 				'hangup': action() === 'connected_out' || action() === 'connected_in'
-			  },
-			  click: multiAction">
+			  }">
 			<span class="icon"></span>
 		</span>
 	</span>
-	<span class="indicator" data-bind="css: {}"></span>
+
+	<!--<span class="dropdown_helper">-->
+		<!--<span class="dropdown_arrow"><span></span></span>-->
+		<!--<span class="dropdown_content">-->
+			<!--<span data-i18n="1" data-bind="i18n: 'text'" class="item command"></span>-->
+			<!--<span data-i18n="2" data-bind="i18n: 'text'" class="item command"></span>-->
+			<!--<span data-i18n="3" data-bind="i18n: 'text'" class="item command"></span>-->
+			<!--<span data-i18n="4" data-bind="i18n: 'text'" class="item command"></span>-->
+			<!--<span data-i18n="5" data-bind="i18n: 'text'" class="item command"></span>-->
+			<!--<span data-i18n="6" data-bind="i18n: 'text'" class="item command"></span>-->
+			<!--<span data-i18n="7" data-bind="i18n: 'text'" class="item command"></span>-->
+			<!--<span data-i18n="8" data-bind="i18n: 'text'" class="item command"></span>-->
+			<!--<span data-i18n="9" data-bind="i18n: 'text'" class="item command"></span>-->
+			<!--<span data-i18n="*" data-bind="i18n: 'text'" class="item command"></span>-->
+			<!--<span data-i18n="0" data-bind="i18n: 'text'" class="item command"></span>-->
+			<!--<span data-i18n="#" data-bind="i18n: 'text'" class="item command"></span>-->
+		<!--</span>-->
+	<!--</span>-->
+
+	<!--<span class="indicator" data-bind="title: phoneReport, css: {
+			'missed': 'missedCalls()',
+			'offline': action() === 'offline'
+		}">
+	</span>-->
+	<span class="indicator" data-bind="title: phoneReport, css: {
+			'missed': 'missedCalls()'
+		}">
+	</span>
 </span>

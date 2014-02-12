@@ -1,33 +1,31 @@
+<!--
+	Attention!
+	This template is used with view models 
+	CAccountSignatureViewModel, CFetcherSignatureViewModel and CIdentityPropertiesViewModel.
+-->
 <div class="fields">
 	<div class="fieldset">
 		<div class="row">
 			<div>
-				<label class="custom_radio" data-bind="css: {'checked': options() == 0}">
+				<label class="custom_radio" data-bind="css: {'checked': useSignature() == 0}">
 					<span class="icon"></span>
-					<input type="radio" id="noSignature" value="0" data-bind="checked: options" />
+					<input type="radio" value="0" data-bind="checked: useSignature, attr: {'id': 'noSignature' + __name}" />
 				</label>
-				<label for="noSignature" data-i18n="SETTINGS/ACCOUNT_SIGNATURE_NO_SIGNATURE" data-bind="i18n: 'text'"></label>
+				<label data-i18n="SETTINGS/ACCOUNT_SIGNATURE_NO_SIGNATURE" data-bind="i18n: 'text', attr: {'for': 'noSignature' + __name}"></label>
 			</div>
 		</div>
 			
 		<div class="row editor_row">
-			<label class="custom_radio" data-bind="css: {'checked': options() == 1}">
+			<label class="custom_radio" data-bind="css: {'checked': useSignature() == 1}">
 				<span class="icon"></span>
-				<input type="radio" id="useSignature" value="1" data-bind="checked: options, enable: isEnabled" />
+				<input type="radio" id="useSignature" value="1" data-bind="checked: useSignature, enable: enabled" />
 			</label>
 			
 			<div class="editor" data-bind="template: {name: 'Common_HtmlEditorViewModel', data: oHtmlEditor}"></div>
 		</div>
-<!--
-		<div class="input wm_plain_editor_container">
-			<textarea class="wm_plain_editor_text wm_plain_editor_active" style="width: 671px; height: 192px;" data-bind="value: signature, disable: options() == 1 ? false : true"></textarea>
-		</div
-		<span class="link" data-i18n="SETTINGS/ACCOUNT_SIGNATURE_SWITCH_TO_HTML" data-bind="i18n: 'text', visible: !type(), click: function(){type(true);}"></span>
-		<span class="link" data-i18n="SETTINGS/ACCOUNT_SIGNATURE_SWITCH_TO_PLAIN" data-bind="i18n: 'text', visible: type(), click: function(){type(false);}"></span>
--->					
 	</div>
 	<div class="buttons">
-		<span class="button" data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', click: onSaveClick, visible: !loading()"></span>
-		<span class="button" data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', click: onSaveClick, visible: loading()"></span>
+		<span class="button" data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', click: save, visible: !loading()"></span>
+		<span class="button" data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', visible: loading()"></span>
 	</div>
 </div>

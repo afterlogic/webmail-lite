@@ -43,6 +43,11 @@ class CContactListItem
 	public $Email;
 
 	/**
+	 * @var array
+	 */
+	public $Phones;
+
+	/**
 	 * @var int
 	 */
 	public $Frequency;
@@ -65,8 +70,18 @@ class CContactListItem
 	/**
 	 * @var bool
 	 */
-	public $OnlyRead;
+	public $ReadOnly;
 
+	/**
+	 * @var bool
+	 */
+	public $Auto;
+	
+	/**
+	 * @var bool
+	 */
+	public $ForSharedToAll;
+	
 	public function __construct()
 	{
 		$this->Id = null;
@@ -75,11 +90,15 @@ class CContactListItem
 		$this->IsGroup = false;
 		$this->Name = '';
 		$this->Email = '';
+		$this->Emails = array();
+		$this->Phones = array();
 		$this->Frequency = 0;
 		$this->UseFriendlyName = false;
 		$this->Global = false;
 		$this->ItsMe = false;
 		$this->ReadOnly = false;
+		$this->Auto = false;
+		$this->ForSharedToAll = false;
 	}
 
 	/**
@@ -188,7 +207,33 @@ class CContactListItem
 					$this->IsGroup = false;
 					$this->Name = (string) $oRow->fullname;
 					$this->Email = (string) $oRow->view_email;
+					$this->Auto = isset($oRow->auto_create) ? (bool) $oRow->auto_create : false;
 
+					if (!empty($oRow->h_email))
+					{
+						$this->Emails[] = trim($oRow->h_email);
+					}
+					if (!empty($oRow->b_email))
+					{
+						$this->Emails[] = trim($oRow->b_email);
+					}
+					if (!empty($oRow->other_email))
+					{
+						$this->Emails[] = trim($oRow->other_email);
+					}
+
+					if (!empty($oRow->b_phone))
+					{
+						$this->Phones[] = trim($oRow->b_phone);
+					}
+					if (!empty($oRow->h_phone))
+					{
+						$this->Phones[] = trim($oRow->h_phone);
+					}
+					if (!empty($oRow->h_mobile))
+					{
+						$this->Phones[] = trim($oRow->h_mobile);
+					}
 //					if (0 === strlen($this->Name))
 //					{
 //						$this->Name = (string) $oRow->firstname;
@@ -229,6 +274,20 @@ class CContactListItem
 					$this->Global = true;
 					$this->Name = (string) $oRow->fullname;
 					$this->Email = (string) $oRow->view_email;
+
+					if (!empty($oRow->b_phone))
+					{
+						$this->Phones[] = trim($oRow->b_phone);
+					}
+					if (!empty($oRow->h_phone))
+					{
+						$this->Phones[] = trim($oRow->h_phone);
+					}
+					if (!empty($oRow->h_mobile))
+					{
+						$this->Phones[] = trim($oRow->h_mobile);
+					}
+					
 					switch ((int) $oRow->primary_email)
 					{
 						case EPrimaryEmailType::Home:

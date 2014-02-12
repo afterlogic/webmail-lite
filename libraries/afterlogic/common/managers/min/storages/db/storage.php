@@ -161,6 +161,7 @@ class CApiMinDbStorage extends CApiMinStorage
 				$mResult = $aData;
 			}
 		}
+		$this->oConnection->FreeResult();
 
 		return $mResult;
 	}

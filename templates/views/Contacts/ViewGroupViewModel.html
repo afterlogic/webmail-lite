@@ -33,5 +33,9 @@
 				</div>
 			</div>
 		</div>
+
+		<div class="fields_switcher">
+			<span class="link" data-bind="visible: $root.selectedGroupContactsList().length !== 0, i18n: 'text', click: function() { viewAllMails($root.selectedGroupContactsList()); }" data-i18n="CONTACTS/BUTTON_SEE_EMAILS_WITH_THIS_GROUP"></span>
+		</div>
 	</div>
 </div>
