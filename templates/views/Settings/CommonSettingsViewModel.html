@@ -1,0 +1,110 @@
+<div class="panel_top">
+	<h2 class="title" data-i18n="SETTINGS/TITLE_COMMON" data-bind="i18n: 'text'"></h2>
+</div>
+<div class="panel_center">
+	<div class="fields">
+		<div class="fieldset">
+			<div class="row" data-bind="visible: aSkins.length > 1">
+				<span class="label" data-i18n="SETTINGS/COMMON_SKIN" data-bind="i18n: 'text'"></span>
+				<select class="value input" data-bind="value: selectedSkin, options: aSkins"></select>
+			</div>
+<!--			<div class="row">
+				<span class="label" data-i18n="SETTINGS/COMMON_LAYOUT" data-bind="i18n: 'text'"></span>
+				<input type="radio" id="layout_1" name="layout" value="0" data-bind="checked: layout" />
+				<label for="layout_1">
+					<span class="wm_settings_layout_icon_side"></span>
+				</label>
+				<input type="radio" id="layout_0" name="layout" value="1" data-bind="checked: layout" />
+				<label for="layout_0">
+					<span class="wm_settings_layout_icon_bottom"></span>
+				</label>
+			</div>-->
+			<div class="row">
+				<span class="label" data-i18n="SETTINGS/COMMON_LANGUAGE" data-bind="i18n: 'text'"></span>
+				<select class="value input" data-bind="value: selectedLanguage, options: aLanguages, optionsText: 'name', optionsValue: 'value'"></select>
+			</div>
+			<div class="row">
+				<span class="label" data-i18n="SETTINGS/COMMON_MESSAGES_PER_PAGE" data-bind="i18n: 'text'"></span>
+				<!--<input class="value input" type="text" maxlength="2" data-bind="value: messagesPerPage" />-->
+				<select class="value input" data-bind="options: messagesPerPageValues, value: messagesPerPage"></select>
+			</div>
+			<div class="row" data-bind="visible: bAllowContacts">
+				<span class="label" data-i18n="SETTINGS/COMMON_CONTACTS_PER_PAGE" data-bind="i18n: 'text'"></span>
+				<!--<input class="value input" type="text" maxlength="2" data-bind="value: contactsPerPage" />-->
+				<select class="value input" data-bind="options: contactsPerPageValues, value: contactsPerPage"></select>
+			</div>
+			<div class="row">
+				<span class="label" data-i18n="SETTINGS/COMMON_AUTOCHECKMAIL_EVERY" data-bind="i18n: 'text'"></span>
+				<select class="value input" data-bind="value: autocheckmailInterval">
+					<option value="0" data-i18n="SETTINGS/COMMON_AUTOCHECKMAIL_OFF" data-bind="i18n: 'text'"></option>
+					<option value="1" data-i18n="SETTINGS/COMMON_AUTOCHECKMAIL_1" data-bind="i18n: 'text'"></option>
+					<option value="3" data-i18n="SETTINGS/COMMON_AUTOCHECKMAIL_3" data-bind="i18n: 'text'"></option>
+					<option value="5" data-i18n="SETTINGS/COMMON_AUTOCHECKMAIL_5" data-bind="i18n: 'text'"></option>
+					<option value="10" data-i18n="SETTINGS/COMMON_AUTOCHECKMAIL_10" data-bind="i18n: 'text'"></option>
+					<option value="15" data-i18n="SETTINGS/COMMON_AUTOCHECKMAIL_15" data-bind="i18n: 'text'"></option>
+					<option value="20" data-i18n="SETTINGS/COMMON_AUTOCHECKMAIL_20" data-bind="i18n: 'text'"></option>
+					<option value="30" data-i18n="SETTINGS/COMMON_AUTOCHECKMAIL_30" data-bind="i18n: 'text'"></option>
+				</select>
+			</div>
+			<!--<div class="row">
+				<span class="label" data-i18n="SETTINGS/COMMON_DEFAULT_EDITOR" data-bind="i18n: 'text'"></span>
+				<select class="value input" data-bind="value: richText">
+					<option value="0" data-i18n="SETTINGS/COMMON_PLAIN_TEXT" data-bind="i18n: 'text'"></option>
+					<option value="1" data-i18n="SETTINGS/COMMON_RICH_TEXT" data-bind="i18n: 'text'"></option>
+				</select>
+			</div>-->
+			<div class="row">
+				<span class="label" data-i18n="SETTINGS/COMMON_TIME_FORMAT" data-bind="i18n: 'text'"></span>
+				
+				<span class="value">
+					<label class="custom_radio" data-bind="css: {'checked': timeFormat() == Enums.TimeFormat.F12}">
+						<span class="icon"></span>
+						<input type="radio" id="timeformat_12" data-bind="checked: timeFormat, attr: {'value': Enums.TimeFormat.F12}" />
+					</label>
+					<label for="timeformat_12" data-i18n="SETTINGS/COMMON_TIME_FORMAT_12" data-bind="i18n: 'text'"></label>
+
+					<label class="custom_radio" data-bind="css: {'checked': timeFormat() == Enums.TimeFormat.F24}">
+						<span class="icon"></span>
+						<input type="radio" id="timeformat_24" data-bind="checked: timeFormat, attr: {'value': Enums.TimeFormat.F24}" />
+					</label>
+					<label for="timeformat_24" data-i18n="SETTINGS/COMMON_TIME_FORMAT_24" data-bind="i18n: 'text'"></label>
+				</span>
+			</div>
+			<div class="row" data-bind="visible: bAllowCalendar">
+				<span class="label" data-i18n="SETTINGS/COMMON_DATE_FORMAT" data-bind="i18n: 'text'"></span>
+				<select class="value input" data-bind="value: dateFormat, options: aDateFormats, optionsText: 'name', optionsValue: 'value'"></select>
+			</div>
+			<div class="row" data-bind="visible: bAllowThreads">
+				<span class="label"></span>
+				<span class="value">
+					<label class="custom_checkbox" data-bind="css: {'checked': useThreads}">
+						<span class="icon"></span>
+						<input type="checkbox" id="useThreads" data-bind="checked: useThreads" />
+					</label>
+					<label for="useThreads" data-i18n="SETTINGS/COMMON_USE_THREADING" data-bind="i18n: 'text'"></label>
+				</span>
+			</div>
+			<div class="row" style="margin-bottom: 4px;">
+				<span class="label"></span>
+				<span class="value">
+					<label class="custom_checkbox" data-bind="css: {'checked': saveRepliedToCurrFolder}">
+						<span class="icon"></span>
+						<input type="checkbox" id="saveRepliedToCurrFolder" data-bind="checked: saveRepliedToCurrFolder" />
+					</label>
+					<label for="saveRepliedToCurrFolder" data-i18n="SETTINGS/COMMON_SAVE_REPLIED_TO_CURR_FOLDER" data-bind="i18n: 'text'"></label>
+				</span>
+			</div>
+			<div class="hint row">
+				<span class="label"></span>
+				<span class="value" data-bind="i18n: 'text'" data-i18n="SETTINGS/COMMON_SAVE_REPLIED_TO_CURR_FOLDER_HINT"></span>
+			</div>
+		</div>
+
+		<div class="buttons">
+			<span class="button" data-bind="click: onSaveClick">
+				<span data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', visible: !loading()"></span>
+				<span data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', visible: loading()"></span>
+			</span>
+		</div>
+	</div>
+</div>

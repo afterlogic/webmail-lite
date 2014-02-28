@@ -1,0 +1,36 @@
+<div class="panel_top">
+	<h2 class="title" data-bind="visible: isNew(), i18n: 'text'" data-i18n="CONTACTS/LABEL_NEW_GROUP"></h2>
+	<h2 class="title" data-bind="visible: !isNew(), i18n: 'text'" data-i18n="CONTACTS/LABEL_EDIT_GROUP"></h2>
+</div>
+<div class="decor"></div>
+<div class="panel_center" data-bind="customScrollbar: {}">
+	<div class="contact_content scroll-inner">
+		<div class="contact_data_groups edit">
+			<div class="fields clearfix">
+				<div class="row">
+					<span class="label">
+						<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_GROUP_NAME"></span>:
+					</span>
+					<input class="value input" type="text" data-bind="hasfocus: nameFocused, value: name, valueUpdate: 'afterkeydown', onEnter: $root.saveCommand" />
+				</div>
+				<div class="row" data-bind="visible: isNew() && '' !== newContactsInGroupHint()">
+					<span data-bind="text: newContactsInGroupHint"></span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="panel_bottom">
+	<div class="toolbar">
+		<span class="content">
+			<span class="item save" data-bind="command: $root.saveCommand">
+				<span class="icon"></span>
+				<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/BUTTON_SAVE_GROUP"></span>
+			</span>
+			<span class="item cancel" data-bind="click: function () { $root.executeCancel(); }">
+				<span class="icon"></span>
+				<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/BUTTON_CANCEL_GROUP"></span>
+			</span>
+		</span>
+	</div>
+</div>

@@ -1,0 +1,21 @@
+<div class="panels settings">
+	<div class="panel navigation">
+		<div class="panel_content">
+			<div class="middle_bar" data-bind="foreach: aTabs">
+				<div data-bind="attr: {'class': 'item ' + $data.TabName},
+					 css: {'selected': ($parent.tab() === $data.TabName)}">
+					<span class="icon"></span>
+					<span class="link" data-bind="text: $data.TabTitle, 
+						  click: function () {$parent.showTab($data.TabName);}"></span>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="panel">
+		<div class="panel_content" data-bind="foreach: aTabs">
+			<div data-bind="attr: {'class': 'middle_bar ' + $data.TabName},
+				template: {name: $data.TemplateName, data: $data}, 
+				visible: $parent.tab() === $data.TabName"></div>
+		</div>
+	</div>
+</div>

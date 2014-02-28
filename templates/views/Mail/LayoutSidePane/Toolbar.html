@@ -1,0 +1,64 @@
+<div class="toolbar">
+	<span class="resizer_top" data-bind="event: { 'dblclick': resizeDblClick}"></span>
+	<span class="resizer_bottom" data-bind="event: { 'dblclick': resizeDblClick}"></span>
+	<span class="content">
+		<span class="item checkmail" data-bind="command: checkMailCommand, checkmail: {'activeClass': 'process', 'state': checkMailStarted(), 'duration': 800}">
+			<span class="icon" data-bind="i18n: 'title'" data-i18n="MAILBOX/TOOL_CHECK_MAIL"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_CHECK_MAIL"></span>
+		</span>
+		<span class="group mark" data-bind="dropdown: {}, css: {disabled: oMessageList.isEmptyList()}">
+			<span class="item" data-bind="command: markAsReadCommand">
+				<span class="icon" data-bind="i18n: 'title'" data-i18n="MAILBOX/TOOL_MARK_AS_READ"></span>
+				<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_MARK_AS_READ"></span>
+			</span><span class="item control">
+				<span class="arrow"></span>
+			</span>
+			<span class="dropdown">
+				<span class="dropdown_helper">
+					<span class="dropdown_arrow"><span></span></span>
+					<span class="dropdown_content">
+						<span class="item allread" data-bind="command: markAllReadCommand, i18n: 'text'" data-i18n="MAILBOX/TOOL_MARK_ALL_READ"></span>
+						<span class="item unread" data-bind="command: markAsUnreadCommand, i18n: 'text'" data-i18n="MAILBOX/TOOL_MARK_AS_UNREAD"></span>
+					</span>
+				</span>
+			</span>
+		</span>
+		<span class="item move" data-bind="dropdown: {control: false}, command: moveToFolderCommand">
+			<span class="icon" data-bind="i18n: 'title'" data-i18n="MAILBOX/TOOL_MOVE_TO_FOLDER"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_MOVE_TO_FOLDER"></span>
+			<span class="arrow"></span>
+			<span class="dropdown" data-bind="initDom: domFolderList">
+				<span class="dropdown_helper">
+					<span class="dropdown_arrow"><span></span></span>
+					<span class="folders dropdown_content" data-bind="customScrollbar: {x: false}">
+						<span class="scroll-inner">
+							<!-- ko template: {name: 'Mail_MoveToFolderItem', foreach: folderList().collection} --><!-- /ko -->
+						</span>
+					</span>
+				</span>
+			</span>
+		</span>
+		<span class="item delete" data-bind="dropdown: {}, command: deleteCommand">
+			<span class="icon" data-bind="i18n: 'title'" data-i18n="MAILBOX/TOOL_DELETE"></span>
+			<span class="hint" data-bind="text: selectedCount, visible: selectedCount() > 0"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_DELETE"></span>
+		</span>
+
+		<span class="item empty_trash" data-bind="command: emptyTrashCommand, visible: isTrashFolder()">
+			<span class="icon" data-bind="i18n: 'title'" data-i18n="MAILBOX/TOOL_EMPTY_TRASH"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_EMPTY_TRASH"></span>
+		</span>
+		<span class="item empty_spam" data-bind="command: emptySpamCommand, visible: isSpamFolder()">
+			<span class="icon" data-bind="i18n: 'title'" data-i18n="MAILBOX/TOOL_EMPTY_SPAM"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_EMPTY_SPAM"></span>
+		</span>
+		<span class="item spam" data-bind="command: spamCommand, visible: allowedSpamAction">
+			<span class="icon" data-bind="i18n: 'title'" data-i18n="MAILBOX/TOOL_SPAM"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_SPAM"></span>
+		</span>
+		<span class="item notspam" data-bind="command: notSpamCommand, visible: allowedNotSpamAction">
+			<span class="icon" data-bind="i18n: 'title'" data-i18n="MAILBOX/TOOL_NOT_SPAM"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_NOT_SPAM"></span>
+		</span>
+	</span>
+</div>

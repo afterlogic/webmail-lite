@@ -1,0 +1,32 @@
+<span class="item emails" data-bind="dropdown: {}, css: {'current': currentTab() === Enums.Screens.Mailbox}">
+	<span class="helper" data-bind="text: email, css: {'has_control': accounts().length > 1}"></span>
+	<a class="text" href="javascript: void(0);" data-bind="text: email, attr: {href: sMailboxHash}, click: gotoMailbox"></a>
+	<span class="dropdown">
+		<span class="dropdown_helper">
+			<span class="dropdown_arrow"><span></span></span>
+			<span class="dropdown_content" data-bind="foreach: accounts">
+				<span class="item" data-bind="text: email, visible: !isCurrent(), click: changeAccount"></span>
+			</span>
+		</span>
+	</span>
+	<span class="item control emails_control" data-bind="visible: accounts().length > 1"></span>
+</span>
+
+<!-- ko foreach: tabs -->
+<span data-bind="attr: {'class': 'item ' + name}, click: clickHandler,
+		css: {'current': $parent.currentTab() === name, 'recivedAnim': koRecivedAnim}">
+	<span class="helper" data-bind="text: title"></span>
+	<a class="text" href="javascript: void(0);" data-bind="text: title, attr: {href: hash}"></a>
+</span>
+<!-- /ko -->
+
+<span class="item logout">
+	<span class="text" data-i18n="HEADER/LOGOUT" data-bind="i18n: 'text', click: logout"></span>
+</span>
+<span class="item settings" data-bind="css: {'current': currentTab() === Enums.Screens.Settings}">
+	<a class="text" href="javascript: void(0);" data-i18n="HEADER/SETTINGS" data-bind="i18n: 'text', 
+	   attr: {href: sSettingsHash}"></a>
+</span>
+<!-- ko if: allowVoice -->
+	<!-- ko template: {name: 'Common_PhoneViewModel', data: oPhone} --><!-- /ko -->
+<!-- /ko -->

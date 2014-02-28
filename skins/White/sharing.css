@@ -1,0 +1,151 @@
+body {
+	background: #ECE9E0;
+}
+
+.buttons {
+	/* border-top: 1px solid #C4C7DB; */
+    margin-top: 15px;
+    text-align: right;
+}
+html.rtl .buttons {
+    text-align: left;
+}
+.buttons .button {
+	display: inline-block;
+	font: 12pt Helvetica,Tahoma,Arial,sans-serif;
+    padding: 6px 16px;
+	cursor: pointer;
+	
+	background: #6FA8DE;
+	border: 1px solid #5D97CD;
+	border-radius: 4px 4px 4px 4px;
+	color: #FFFFFF;
+	text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+}
+.sharing_panel {
+	display: block;
+    width: 280px;
+	margin: 0px auto;
+	padding: 130px 20px 20px;
+	background: url("images/logo.png?%VERSION%") no-repeat center 20px;
+	text-align: center;
+	color: #555;
+}
+.sharing_panel .item {
+	display: inline-block;
+	padding: 20px 6px;
+	text-align: left;
+	vertical-align: top;
+	
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+.sharing_panel .item .icon {
+	display: inline-block;
+	float: left;
+	width: 70px;
+	width: 55px;
+	height: 65px;
+	margin-right: 10px;
+}
+.sharing_panel .item .size {
+	color: #888888;
+    display: block;
+    font-size: 80%;
+}
+.sharing_panel .buttons {
+	display: block;
+	text-align: center;
+}
+.sharing_panel .buttons .button {
+	text-decoration: none;
+}
+.file .icon {
+	background-image: url("images/sprites.png?%VERSION%");
+	background-repeat: no-repeat;
+	background-position: 0px -360px;
+	display: inline-block;
+	height: 32px;
+	width: 32px;
+}
+.large .file .icon {
+	background-position: 0px -400px;
+	height: 64px;
+	width: 64px;
+}
+.file .icon.xls,
+.file .icon.xlsx {
+	background-position: -80px -360px;
+}
+.large .file .icon.xls,
+.large .file .icon.xlsx {
+	background-position: -160px -400px;
+}
+.file .icon.pdf {
+	background-position: -200px -360px;
+}
+.large .file .icon.pdf {
+	background-position: -400px -400px;
+}
+.file .icon.htm,
+.file .icon.html {
+	background-position: -360px -360px;
+}
+.large .file .icon.htm,
+.large .file .icon.html {
+	background-position: -720px -400px;
+}
+.file .icon.doc,
+.file .icon.docx {
+	background-position: -40px -360px;
+}
+.large .file .icon.doc,
+.large .file .icon.docx {
+	background-position: -80px -400px;
+}
+.file .icon.txt {
+	background-position: -120px -360px;
+}
+.large .file .icon.txt {
+	background-position: -240px -400px;
+}
+.file .icon.ppt,
+.file .icon.pptx {
+	background-position: -400px -360px;
+}
+.large .file .icon.ppt,
+.large .file .icon.pptx {
+	background-position: -800px -400px;
+}
+.file .icon.ics {
+	/*background-position: -120px -360px;*/
+}
+.large .file .icon.ics {
+	/*background-position: -120px -360px;*/
+}
+.file .icon.vcs {
+	/*background-position: -160px -360px;*/
+}
+.large .file .icon.vcs {
+	/*background-position: -160px -360px;*/
+}
+.file .icon.png,
+.file .icon.jpg,
+.file .icon.jpeg {
+	background-position: -320px -360px;
+}
+.large .file .icon.png,
+.large .file .icon.jpeg,
+.large .file .icon.jpg {
+	background-position: -640px -400px;
+}
+.file .icon.zip,
+.file .icon.rar {
+	background-position: -480px -360px;
+}
+.large .file .icon.zip,
+.large .file .icon.rar {
+	background-position: -960px -400px;
+}
+/*=== END Files screen CSS ===*/
