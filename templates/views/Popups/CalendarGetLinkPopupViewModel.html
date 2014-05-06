@@ -1,0 +1,36 @@
+<div class="mask" data-bind="click: onCancelClick"></div>
+<div class="popup_panel">
+	<span class="close" data-bind="click: onCancelClick"></span>
+	<span class="title" data-bind="style: {backgroundColor: selectedColor}, i18n: 'text'" data-i18n="CALENDAR/TITLE_GETLINK_CALENDAR"></span>
+
+	<div class="fields">
+		<div class="fieldset dav_access">
+			<div class="row">
+				<label for="dav_url" class="label" data-i18n="CALENDAR/URL_DAV" data-bind="i18n: 'text'"></label>
+				<input id="dav_url" class="value input" spellcheck="false" type="text" maxlength="200" data-bind="value: calendarUrl(), click: function () {$element.select();}" readonly />
+			</div>
+			<div class="row">
+				<label for="ics_link" class="label" data-i18n="CALENDAR/URL_ICS" data-bind="i18n: 'text'"></label>
+				<input id="ics_link" class="value input" spellcheck="false" type="text" maxlength="200" data-bind="value: icsLink(), click: function () {$element.select();}"  readonly />
+				<a class="control download" data-bind="attr: {href: exportUrl()}"></a>
+			</div>
+		</div>
+		<div class="fieldset web_access">
+			<div class="row web_access_switch">
+				<label class="custom_checkbox" data-bind="css: {'checked': isPublic}">
+					<span class="icon"></span>
+					<input type="checkbox" id="make_public_access" data-bind="checked: isPublic(), click: function (){isPublic(!isPublic());}" />
+				</label>
+				<label for="make_public_access" data-i18n="CALENDAR/LABEL_WEB_ACCESS" data-bind="i18n: 'text'"></label>
+			</div>
+			<div class="row" data-bind="visible: isPublic()">
+				<label for="public_link" class="label" data-i18n="CALENDAR/LABEL_WEB_LINK" data-bind="i18n: 'text'"></label>
+				<input id="public_link" class="value input" spellcheck="false" type="text" maxlength="200" data-bind="value: pubUrl(), click: function () {$element.select();}" readonly />
+			</div>
+		</div>		
+		<div class="buttons">
+			<span class="button save" data-i18n="CALENDAR/BUTTON_CLOSE" data-bind="i18n: 'text', click: onCancelClick"></span>
+		</div>
+	</div>
+</div>
+<span class="helper"></span>

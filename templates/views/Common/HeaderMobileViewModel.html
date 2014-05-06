@@ -1,0 +1,36 @@
+<div class="right" data-bind="dropdown: {control: false}">
+	<span class="control">
+		<span class="icon"></span>
+	</span>
+	<span class="dropdown">
+		<span class="dropdown_helper">
+			<span class="dropdown_arrow"><span></span></span>
+			<span class="dropdown_content">
+				<!-- ko foreach: accounts -->
+				<span class="item emails" data-bind="css: {'current': $parent.currentTab() === Enums.Screens.Mailbox && isCurrent() },
+					 click: function () { if (isCurrent()) { $parent.gotoMailbox(); } else { changeAccount(); } } ">
+					<span class="text"  data-bind="text: email"></span>
+				</span>
+				<!-- /ko -->
+
+				<!-- ko foreach: tabs -->
+				<a data-bind="attr: {'class': 'item ' + name, href: hash}, click: clickHandler,
+						css: {'current': $parent.currentTab() === name, 'recivedAnim': koRecivedAnim}">
+					<span class="text" data-bind="text: title"></span>
+				</a>
+				<!-- /ko -->
+				
+				<span class="item full_version" data-bind="click: swithToFullVersion">
+					<span class="text" data-i18n="HEADER/FULL_VERSION" data-bind="i18n: 'text'"></span>
+				</span>
+				<span class="item logout">
+					<span class="text" data-i18n="HEADER/LOGOUT" data-bind="i18n: 'text', click: logout"></span>
+				</span>
+			</span>
+		</span>
+	</span>
+</div>
+
+<!-- ko if: allowVoice -->
+	<!-- ko template: {name: 'Common_PhoneViewModel', data: oPhone} --><!-- /ko -->
+<!-- /ko -->

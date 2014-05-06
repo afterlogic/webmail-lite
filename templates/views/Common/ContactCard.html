@@ -1,0 +1,156 @@
+<div class="fields">
+	<div class="fieldset">
+		<div class="row" data-bind="visible: displayName()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_DISPLAY_NAME"></span>
+			<span class="value" data-bind="text: displayName"></span>
+		</div>
+		<div class="row" data-bind="visible: email()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_EMAIL"></span>
+			<a class="button" href="javascript: void(0)" data-bind="text: email, attr: {href: sendMailLink}"></a>
+		</div>
+		<div class="row" data-bind="visible: firstName()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_FIRST_NAME"></span>
+			<span class="value" data-bind="text: firstName"></span>
+		</div>
+		<div class="row" data-bind="visible: lastName()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_LAST_NAME"></span>
+			<span class="value" data-bind="text: lastName"></span>
+		</div>
+		<div class="row" data-bind="visible: nickName()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_NICK_NAME"></span>
+			<span class="value" data-bind="text: nickName"></span>
+		</div>
+	</div>
+	<div class="fieldset" data-bind="visible: !personalIsEmpty()">
+		<h2 data-i18n="CONTACTS/HEADER_BASIC_INFO" data-bind="i18n: 'text'"></h2>
+		
+		<div class="row" data-bind="visible: (personalEmail() && personalEmail() !== email())">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_PERSONAL_EMAIL"></span>
+			<a class="button" href="javascript: void(0)"
+				data-bind="text: personalEmail, attr: {href: sendMailToPersonalLink}"></a>
+		</div>
+		<div class="row" data-bind="visible: personalStreetAddress()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_STREET_ADDRESS"></span>
+			<span class="value" data-bind="text: personalStreetAddress"></span>
+		</div>
+		<div class="row" data-bind="visible: personalCity()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_CITY"></span>
+			<span class="value" data-bind="text: personalCity"></span>
+		</div>
+		<div class="row" data-bind="visible: personalState()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_STATE_PROVINCE"></span>
+			<span class="value" data-bind="text: personalState"></span>
+		</div>
+		<div class="row" data-bind="visible: personalZipCode()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_ZIP_CODE"></span>
+			<span class="value" data-bind="text: personalZipCode"></span>
+		</div>
+		<div class="row" data-bind="visible: personalCountry()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_COUNTRY_REGION"></span>
+			<span class="value" data-bind="text: personalCountry"></span>
+		</div>
+		<div class="row" data-bind="visible: personalWeb()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_WEB_PAGE"></span>
+			<span class="value" data-bind="text: personalWeb"></span>
+		</div>
+		<div class="row" data-bind="visible: personalFax()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_FAX"></span>
+			<span class="value" data-bind="text: personalFax"></span>
+		</div>
+		<div class="row" data-bind="visible: personalPhone()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_PHONE"></span>
+			<span class="value">
+				<span data-bind="text: personalPhone"></span>
+				<span class="link call" data-i18n="call" data-bind="i18n: 'text', click: function() {onCallClick(personalPhone())}, visible: voiceApp"></span>
+			</span>
+		</div>
+		<div class="row" data-bind="visible: personalMobile()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_MOBILE"></span>
+			<span class="value">
+				<span data-bind="text: personalMobile"></span>
+				<span class="link call" data-i18n="call" data-bind="i18n: 'text', click: function() {onCallClick(personalMobile())}, visible: voiceApp"></span>
+			</span>
+		</div>
+	</div>
+	<div class="fieldset" data-bind="visible: !businessIsEmpty()">
+		<h2 data-i18n="CONTACTS/HEADER_BUSINESS_INFO" data-bind="i18n: 'text'"></h2>
+		
+		<div class="row" data-bind="visible: (businessEmail() && businessEmail() !== email())">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_BUSINESS_EMAIL"></span>
+			<a class="button" href="javascript: void(0)"
+				data-bind="text: businessEmail, attr: {href: sendMailToBusinessLink}"></a>
+		</div>
+		<div class="row" data-bind="visible: businessCompany()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_COMPANY"></span>
+			<span class="value" data-bind="text: businessCompany"></span>
+		</div>
+		<div class="row" data-bind="visible: businessDepartment()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_DEPARTMENT"></span>
+			<span class="value" data-bind="text: businessDepartment"></span>
+		</div>
+		<div class="row" data-bind="visible: businessJob()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_JOB_TITLE"></span>
+			<span class="value" data-bind="text: businessJob"></span>
+		</div>
+		<div class="row" data-bind="visible: businessOffice()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_OFFICE"></span>
+			<span class="value" data-bind="text: businessOffice"></span>
+		</div>
+		<div class="row" data-bind="visible: businessStreetAddress()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_STREET_ADDRESS"></span>
+			<span class="value" data-bind="text: businessStreetAddress"></span>
+		</div>
+		<div class="row" data-bind="visible: businessCity()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_CITY"></span>
+			<span class="value" data-bind="text: businessCity"></span>
+		</div>
+		<div class="row" data-bind="visible: businessState()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_STATE_PROVINCE"></span>
+			<span class="value" data-bind="text: businessState"></span>
+		</div>
+		<div class="row" data-bind="visible: businessZipCode()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_ZIP_CODE"></span>
+			<span class="value" data-bind="text: businessZipCode"></span>
+		</div>
+		<div class="row" data-bind="visible: businessCountry()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_COUNTRY_REGION"></span>
+			<span class="value" data-bind="text: businessCountry"></span>
+		</div>
+		<div class="row" data-bind="visible: businessWeb()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_WEB_PAGE"></span>
+			<span class="value" data-bind="text: businessWeb"></span>
+		</div>
+		<div class="row" data-bind="visible: businessFax()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_FAX"></span>
+			<span class="value" data-bind="text: businessFax"></span>
+		</div>
+		<div class="row" data-bind="visible: businessPhone()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_PHONE"></span>
+			<span class="value">
+				<span data-bind="text: businessPhone"></span>
+				<span class="link call" data-i18n="call" data-bind="i18n: 'text', click: function() {onCallClick(businessPhone())}, visible: voiceApp"></span>
+			</span>
+		</div>
+	</div>
+	<div class="fieldset" data-bind="visible: !otherIsEmpty()">
+		<h2 data-i18n="CONTACTS/HEADER_OTHER_INFO" data-bind="i18n: 'text'"></h2>
+		<div class="row" data-bind="visible: (otherEmail() && otherEmail() !== email())">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_OTHER_EMAIL"></span>
+			<a class="button" href="javascript: void(0)"
+				data-bind="text: otherEmail, attr: {href: sendMailToOtherLink}"></a>
+		</div>
+		<div class="row" data-bind="visible: otherBirthday()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_BIRTHDAY"></span>
+			<span class="value" data-bind="text: otherBirthday"></span>
+		</div>
+		<div class="row" data-bind="visible: otherNotes()">
+			<span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_NOTES"></span>
+			<span class="value" data-bind="text: otherNotes"></span>
+		</div>
+	</div>
+</div>
+<div class="buttons">
+	<a class="link" href="javascript: void(0)" data-i18n="CONTACTS/LINK_SEND_MAIL" 
+	   data-bind="i18n: 'text', attr: {href: sendMailLink}"></a>
+	<span class="link" data-i18n="CONTACTS/LINK_VIEW_MAILS" data-bind="i18n: 'text', click: viewAllMailsWithContact"></span>
+</div>

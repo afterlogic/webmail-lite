@@ -1,0 +1,423 @@
+/*=== Base CSS ===*/
+html,
+body {
+	height: 100%;
+}
+
+body {
+	.theme-main-background();
+	
+	font: normal 9pt Helvetica, Tahoma, Arial, sans-serif;
+	min-height: 480px;
+    min-width: 640px;
+
+	html.screen-login-helpdesk &,
+	html.screen-login-langblock & {
+		min-height: 580px;
+		
+	}
+	
+	html.screen-login-langblock.screen-login-description & {
+		min-height: 734px;
+	}
+	
+	html.non-adjustable & {
+		min-height: inherit;
+	}
+}
+
+.pSevenMain {
+	height: 100%;
+	overflow: hidden;
+	position: relative;
+	
+	html.non-adjustable & {
+		height: auto;
+		overflow: visible;
+	}
+}
+#pSevenContent {
+	height: 100%;
+}
+.autosize {
+	overflow: hidden;
+	resize: none;
+}
+textarea {
+	resize: vertical;
+}
+label {
+	cursor: pointer;
+}
+a, .link {
+	&, &:link, &:visited {
+		color: @theme-common-link-color;
+		text-decoration: none;
+		cursor: pointer;
+	}
+	
+	&:hover {
+		color: @theme-common-link-hover-color;
+		text-decoration: underline;
+	}
+	
+	.theme-common-link();
+}
+
+*[contenteditable="true"],
+input:focus {
+	 outline: none;
+}
+.ui-autocomplete.ui-front {
+	z-index: 2001;
+}
+.ui-menu .ui-menu-item a {
+	overflow: hidden;
+    white-space: nowrap;
+}
+/*=== Common CSS ===*/
+.panel.folders,
+.panel.groups,
+.panel.storages,
+.UserArea .panel.threads,
+.panel.calendar_manager
+{
+	.panelClear();
+}
+
+.panel.folders,
+.panel.groups,
+.panel.storages,
+.settings .folders
+{
+	.items_list_group_style();
+}
+
+.panel.folders,
+.panel.groups,
+.panel.storages {
+	
+	.items_list .item .title .name {
+		.fadeout_text_init();
+		.fadeout_text(@theme-group-style-item-bg);
+	}
+}
+
+.panels.settings .folders
+{
+	.items_list .item .title .name {
+		.fadeout_text_init();
+		.fadeout_text(#F0F0F0);
+	}
+	
+	.items_list .item.canDrag .title:hover .name {
+		.fadeout_text(#EAEAEA);
+	}
+	
+}
+
+.folders {
+	.title .icon {
+		.iconFontInit();
+		&:before {
+			font-size: 20px;
+			display: inline-block;
+			width: 20px;
+			height: 20px;
+		}
+	}
+	.selected .title .icon {
+		&:before {
+			color: #fff;
+			text-shadow: 0 1px 0 #727272;
+		}
+	}
+	
+	.title .icon.type1 {
+		//background-position: 0px 0px;
+		&:before {
+			content: "\e616";
+		}
+	}
+	//.selected .title .icon.type1 { background-position: 0px -20px; }
+	.title .icon.type2 {
+		//background-position: -40px 0px;
+		&:before {
+			content: "\e615";
+		}
+	}
+	//.selected .title .icon.type2 { background-position: -40px -20px; }
+	.title .icon.type3 {
+		//background-position: -80px 0px;
+		&:before {
+			content: "\e617";
+		}
+	}
+	//.selected .title .icon.type3 { background-position: -80px -20px; }
+	.title .icon.type4 {
+		//background-position: -320px 0px; 
+		&:before {
+			content: "\e614";
+		}
+	}
+	//.selected .title .icon.type4 { background-position: -320px -20px; }
+	.title .icon.type5 {
+		//background-position: -160px 0px;
+		&:before {
+			content: "\e612";
+		}
+	}
+	//.selected .title .icon.type5 { background-position: -160px -20px; }
+	.item .icon.type10 {
+		//background-position: 40px 40px;
+		&:before {
+			//content: "\e602";
+		}
+	}
+
+	.title .icon.type7,
+	.selected .title .icon.type7 {
+		//background-position: -300px 0px;
+		position: relative;
+		text-shadow: 0px 1px 0px #A6A6A6;
+		
+		&:before {
+			color: #ffb736;
+			content: "\e613";
+			
+			 background: -webkit-linear-gradient(#FFE5B3, #E49200);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			@media screen and (-webkit-min-device-pixel-ratio:0) {
+				text-shadow: none;
+				
+			}
+		}
+	}
+	
+	.virtualEmpty .title .icon.type7 {
+		//background-position: -280px 0px;
+		&:before {
+			color: #727272 !important;
+		}
+	}
+	.virtualEmpty.selected .title .icon.type7 {
+		//background-position: -280px -20px; 
+		&:before {
+			color: #fff !important;
+		}
+	}
+	
+}
+
+.groups {
+	.title .icon {
+		.iconFontInit();
+		&:before {
+			font-size: 20px;
+			display: inline-block;
+			width: 20px;
+			height: 20px;
+		}
+	}
+	.selected .title .icon {
+		&:before {
+			color: #fff;
+			text-shadow: 0 1px 0 #727272;
+		}
+	}
+	
+	.title .icon {
+		//background-position: 40px 40px;
+		&:before {
+			content: "\e618";
+		}
+	}
+	//.selected .title .icon { background-position: 40px 40px; }
+	.title .icon.type1 {
+		//background-position: -200px 0px; 
+		&:before {
+			content: "\e618";
+		}
+	}
+	//.selected .title .icon.type1 { background-position: -200px -20px; }
+	.title .icon.type2 {
+		//background-position: -240px 0px;
+		&:before {
+			content: "\e619";
+		}
+	}
+	//.selected .title .icon.type2 { background-position: -240px -20px; }
+	.title .icon.type3 {
+		&:before {
+			content: "\e629";
+		}
+	}
+}
+
+.storages .title .icon.type1 { background-position: 0px 0px; }
+.storages .selected .title .icon.type1 { background-position: 0px -20px; }
+.storages .title .icon.type2 { background-position: -40px 0px; }
+.storages .selected .title .icon.type2 { background-position: -40px -20px; }
+/*=== END Folders CSS ===*/
+
+
+
+.panel.messages .customscroll-scrollbar-vertical,
+.panel.contacts .customscroll-scrollbar-vertical,
+.panel.threads .customscroll-scrollbar-vertical {
+	margin-right: 6px;
+	
+	html.rtl {
+		margin-right: 0px;
+		margin-left: 6px;
+	}
+}
+
+.add_account .popup_panel,
+.add_fetcher .popup_panel,
+.add_folder .popup_panel,
+.folders_setup .popup_panel {
+	background: #F1F1F1 url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAACtJREFUeNo0iIEJACAAwlT8/1GPMAsaKGNMYpskAOPRdq9tWbrifpaOAAMAMvEO3ANCJPYAAAAASUVORK5CYII=") repeat 0 0;
+}
+/*=== END Popup CSS ===*/
+
+
+
+
+/*=== IE hacks ===*/
+.no-boxshadow .panel.messages,
+.no-boxshadow .panel.contacts,
+.no-boxshadow .panel.compose,
+.no-boxshadow .panel.calendar,
+.no-boxshadow .panel.files,
+.no-boxshadow .panel.threads,
+.no-boxshadow .panel.message_viewer,
+.no-boxshadow .panel.contact_viewer,
+.no-boxshadow .panel.thread_viewer,
+.no-boxshadow .panels.settings .panel,
+.no-boxshadow .popup.calendar_popup .popup_panel
+{
+	behavior: url(skins/Default/PIE/PIE.htc);
+}
+html.no-boxshadow {
+	/*heartbeat*/
+	/*-pie-poll: true;*/
+	/*-pie-poll-interval: 50;*/
+}
+/*=== retina displays ===*/
+.spritesX2 {
+	
+	@media only screen and (-webkit-min-device-pixel-ratio: 1.3),
+    only screen and (-moz-min-device-pixel-ratio: 1.3),
+    only screen and (~"-o-min-device-pixel-ratio: 1.3/1"),
+    only screen and (min-resolution: 1.3dppx),
+    only screen and (min-resolution: 125dpi)
+	{
+		background-image: url("images/sprites2x.png?%VERSION%");
+		background-size: 1360px 560px;
+	}
+}
+
+.loginLogoX2() {
+	
+	@media
+	only screen and (-webkit-min-device-pixel-ratio: 1.3),
+    only screen and (-moz-min-device-pixel-ratio: 1.3),
+    only screen and (~"-o-min-device-pixel-ratio: 1.3/1"),
+    only screen and (min-resolution: 1.3dppx),
+    only screen and (min-resolution: 125dpi)
+	{
+		background-image: url("images/logo2x.png?%VERSION%");
+		background-size: 124px 95px;
+	}
+}
+
+@media
+	only screen and (-webkit-min-device-pixel-ratio: 1.3),
+    only screen and (-moz-min-device-pixel-ratio: 1.3),
+    only screen and (~"-o-min-device-pixel-ratio: 1.3 / 1"),
+    only screen and (min-resolution: 1.3dppx),
+    only screen and (min-resolution: 125dpi)
+{
+
+.languages .custom_select .control .icon,
+
+.file .icon,
+
+.thread_viewer .panel_top .title .add_contact,
+.message_viewer .message_header .add_contact,
+
+.item_viewer .attachments .download_all .icon,
+
+.contact_data_groups .address .label.address,
+
+.contact_data_groups .mobile .label,
+.contact_data_groups .phone .label,
+.contact_data_groups .fax .label,
+
+.messages .items_list .item .marker,
+
+.attachments .cancel,
+
+.panels.settings .navigation .icon,
+
+.panels.settings .ios_profile .icon,
+
+.settings .accounts_list .item.fetcher .icon,
+
+.settings .folders.items_list .canDrag .title:hover,
+
+.settings .folders.items_list .controls .button,
+
+.contacts .items_list .group_marker.group,
+.panel.files .items_list .item .cancel,
+
+.panel.files .items_list .item.shared .shared_icon,
+
+.panel.files .items_list .folder .icon,
+
+.sharing_panel .item .icon,
+
+.panel.thread_viewer .new_request .buttons .button.upload .icon,
+
+.panel.thread_viewer .post .header .close,
+
+.panel.thread_viewer .post.internal .content::before,
+
+.panel.thread_viewer .quick_reply .buttons .button.upload .icon,
+
+.HelpdeskLayout .details .product .icon,
+
+.panel.calendar_manager .dropdowns .colors .item.color_pick.selected,
+
+.panel.calendar_manager .calendars .item .icon.public,
+
+.panel.calendar_manager .calendars .item .control,
+
+.panel.calendar_manager .calendars .section_title .control,
+
+.panel.calendar .date_select .item .control,
+
+.colors .color_pick.selected,
+
+.popup.calendar_popup .close,
+
+.popup.calendar_getlink .dav_access .download,
+
+.popup.calendar_share .share_item .control,
+
+.popup.calendar_event .side_panel .attender .link,
+
+.popup.calendar_event .side_panel .attender .icon,
+
+.popup.calendar_event .side_panel .add_attender .link,
+
+.html_editor .toolbar .item .icon
+		{
+			background-image: url("images/sprites2x.png?%VERSION%");
+			background-size: 1360px 560px;
+		}
+    }
+
+/*=== END IE hacks ===*/
