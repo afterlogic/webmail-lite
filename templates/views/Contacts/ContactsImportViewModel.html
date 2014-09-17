@@ -1,0 +1,38 @@
+<div class="panel_top">
+	<h2 class="title" data-i18n="CONTACTS/LABEL_IMPORT_CONTACTS" data-bind="i18n: 'text'"></h2>
+</div>
+<div class="decor"></div>
+<div class="panel_center">
+	<div class="contact_content">
+		<div class="contact_data_groups">
+			<div class="fields clearfix">
+				<div class="hint">
+					<span data-i18n="CONTACTS/IMPORT_DESC" data-bind="i18n: 'text'"></span>
+				</div>
+				<div class="row">
+					<span data-bind="visible: importing, i18n: 'text'" data-i18n="CONTACTS/IMPORTING"></span>
+					<div class="buttons" data-bind="visible: !importing()">
+						<span id="jue_import_button" class="button import" data-i18n="CONTACTS/BUTTON_IMPORT_CONTACTS" data-bind="i18n: 'text'"></span>
+					</div>
+				</div>
+				<div class="row" data-bind="visible: '' !== $root.importingHelpLink">
+					<a class="link" href="#" target="_blank" data-bind="attr: {href: $root.importingHelpLink}">
+						<span data-i18n="CONTACTS/LINK_LEARN_MORE" data-bind="i18n: 'text'"></span>
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- ko if: $root.mobileApp -->
+<div class="panel_bottom">
+	<div class="toolbar">
+		<span class="content">
+			<span class="item close" href="javascript: void(0)" data-bind="click: function () {$root.gotoContactList();}">
+				<span class="icon"></span>
+				<span class="text" data-bind="i18n: 'text'" data-i18n="Close"></span>
+			</span>
+		</span>
+	</div>
+</div>
+<!-- /ko -->

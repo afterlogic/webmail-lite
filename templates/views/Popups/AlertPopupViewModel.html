@@ -1,0 +1,10 @@
+<div class="mask"></div>
+<span class="popup_panel">
+	<span class="close" data-bind="click: close"></span>
+	<span class="title" data-bind="visible: (title() !== ''), ttext: title"></span>
+	<span class="text" data-bind="text: alertDesc"></span>
+	<div class="buttons">
+		<span class="button success" data-bind="click: close, text: okButtonText"></span>
+	</div>
+</span>
+<span class="helper"></span>

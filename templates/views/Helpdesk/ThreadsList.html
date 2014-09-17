@@ -1,0 +1,49 @@
+<div class="panel_top">
+	<div class="toolbar" data-bind="style: {paddingLeft: bRtl ? '' : newThreadButtonWidth()+'px', paddingRight: bRtl ? newThreadButtonWidth()+'px' : ''}">
+		<span class="content">
+			<span class="item new_request" data-bind="click: openNewThread, watchWidth: newThreadButtonWidth, style: {marginLeft: bRtl ? '' : '-' + newThreadButtonWidth()+'px', marginRight: bRtl ? '-' + newThreadButtonWidth()+'px' : ''}">
+				<span class="icon" data-bind="i18n: 'title'" data-i18n="HELPDESK/ACTION_NEW_REQUEST"></span>
+				<span class="text" data-bind="i18n: 'text'" data-i18n="HELPDESK/ACTION_NEW_REQUEST"></span>
+			</span>
+			<span class="search_block">
+				<span class="input" data-bind="css: {'focus': isSearchFocused}">
+					<span class="icon search" data-i18n="HEPLDESK/BUTTON_SEARCH" data-bind="i18n: 'text'"></span>
+					<input class="field" type="text" spellcheck="false" data-bind="value: search, onEnter: searchSubmitCommand, hasfocus: isSearchFocused" />
+				</span>
+			</span>
+			<span class="item checkmail" data-bind="command: checkCommand, checkmail: {'activeClass': 'process', 'state': checkStarted(), 'duration': 800}">
+				<span class="icon" data-bind="i18n: 'title'" data-i18n="HELPDESK/TOOL_CHECK"></span>
+				<span class="text" data-bind="i18n: 'text'" data-i18n="HELPDESK/TOOL_CHECK"></span>
+			</span>
+		</span>
+	</div>
+</div>
+<div class="panel_center unselectable" data-bind="customScrollbar: {x: false}">
+	<div class="threads_scroll scroll-inner">
+		<div class="items_list">
+			<span class="list_notification" data-bind="visible: isSearch() && !isEmptyList()">
+				<span class="link" data-i18n="HELPDESK/LINK_CLEAR_SEARCH" data-bind="i18n: 'text', click: onClearSearchClick"></span>
+				<span class="description" data-bind="text: searchText"></span>
+			</span>
+			
+			<div class="items_sub_list">
+				<!-- ko template: {name: 'Helpdesk_ThreadItem', foreach: threads} --><!-- /ko -->
+				<div class="item helper"></div>
+			</div>
+			
+			<span class="list_notification" data-bind="visible: loadingList() && isEmptyList()">
+				<span class="description" data-i18n="HELPDESK/INFO_LOADING_THREAD_LIST" data-bind="i18n: 'text'" ></span>
+			</span>
+			
+			<span class="list_notification" data-bind="visible: !loadingList() && isEmptyList()">
+				<span class="description" data-bind="text: dynamicEmptyListInfo"></span>
+			</span>
+		</div>
+	</div>
+</div>
+<div class="panel_bottom unselectable">
+	<!-- ko template: {name: 'Common_PageSwitcherViewModel', data: oPageSwitcher} --><!-- /ko -->
+	<a href="javascript: void(0);" data-bind="css: {'selected': listFilter() === Enums.HelpdeskFilters.All}, click: function () { listFilter(Enums.HelpdeskFilters.All); }, i18n: 'text'" data-i18n="HELPDESK/THREADS_LIST_FILTER_ALL"></a>
+	<a href="javascript: void(0);" data-bind="css: {'selected': listFilter() === Enums.HelpdeskFilters.Open}, click: function () { listFilter(Enums.HelpdeskFilters.Open); }, i18n: 'text'" data-i18n="HELPDESK/THREADS_LIST_FILTER_OPEN"></a>
+</div>
+

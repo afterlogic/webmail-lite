@@ -1,0 +1,24 @@
+/*=== Clearfix ===*/
+.clearfix { clear: both; }
+.clearfix:after { /*Opera*/ clear: both; display: block; content: "."; height: 0; visibility: hidden; }
+* html > body .clearfix { width: 100%; display: block; }
+* html .clearfix { /* IE 6 */height: 1%; }
+
+.clearfixHelper() { 
+	clear: both;
+	&:after { /*Opera*/ clear: both; display: block; content: "."; height: 0; visibility: hidden; }
+	* html > body & { width: 100%; display: block; }
+	* html & { /* IE 6 */height: 1%; }
+}
+/*==== END Clearfix ====*/
+/*==== Uselectable CSS ====*/
+.unselectable {
+	.user-select(none);
+}
+.selectable {
+	.user-select(all);
+}
+input, select, textarea {
+	.user-select(text);
+}
+/*==== END Uselectable Clearfix ====*/

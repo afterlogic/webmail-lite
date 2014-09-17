@@ -1,0 +1,61 @@
+
+<form class="form fields" action="#/" onsubmit="return false;" data-bind="visible: visibleEmailForm, command: getQuestionCommand">
+	
+	<div class="fieldset">
+		<div class="row email" data-bind="css: {'focused': emailFocus(), 'filled': email().length > 0}">
+			<label for="forgot_email" class="title placeholder" data-i18n="LOGIN/LABEL_EMAIL" data-bind="i18n: 'text'"></label>
+			<span class="value">
+				<input id="forgot_email" class="input" type="email" spellcheck="false" autocomplete="off" data-bind="value: email, hasfocus: emailFocus, valueUpdate: 'afterkeydown'" />
+			</span>
+		</div>
+	</div>
+	{%INCLUDE-START/Forgot-Before-Submit-Button/INCLUDE-END%}
+	<div class="row buttons">
+		<button type="submit" class="button login" data-bind="text: getQuestionButtonText, command: getQuestionCommand"></button>
+	</div>
+	
+</form>
+<form class="form fields" action="#/" onsubmit="return false;" data-bind="visible: visibleQuestionForm, command: validateAnswerCommand">
+	
+	<div class="fieldset">
+		<div class="subtitle hint" data-bind="text: question"></div>
+		<div class="row answer" data-bind="css: {'focused': answerFocus(), 'filled': answer().length > 0}">
+			<label for="forgot_answer" class="title placeholder" data-i18n="LOGIN/LABEL_ANSWER_QUESTION" data-bind="i18n: 'text'"></label>
+			<span class="value">
+				<input id="forgot_answer" class="input" autocomplete="off" spellcheck="false" type="text" data-bind="value: answer, hasfocus: answerFocus, valueUpdate: 'afterkeydown'" />
+			</span>
+		</div>
+	</div>
+	<div class="row buttons">
+		<button type="submit" class="button login" data-bind="text: validateAnswerButtonText, command: validateAnswerCommand"></button>
+	</div>
+	
+</form>
+<form class="form fields" action="#/" onsubmit="return false;" data-bind="visible: visiblePasswordForm, command: changePasswordCommand">
+	
+	<div class="fieldset">
+		<div class="row password" data-bind="css: {'focused': passwordFocus(), 'filled': password().length > 0}">
+			<label for="forgot_password" class="title placeholder" data-i18n="LOGIN/LABEL_NEW_PASSWORD" data-bind="i18n: 'text'"></label>
+			<span class="value">
+				<input id="forgot_password" class="input" autocomplete="off" spellcheck="false" type="password" data-bind="value: password, hasfocus: passwordFocus, valueUpdate: 'afterkeydown'" />
+			</span>
+		</div>
+		<div class="row password" data-bind="css: {'focused': confirmPasswordFocus(), 'filled': confirmPassword().length > 0}">
+			<label for="forgot_confirm_password" class="title placeholder" data-i18n="LOGIN/LABEL_CONFIRM_PASSWORD" data-bind="i18n: 'text'"></label>
+			<span class="value">
+				<input id="forgot_confirm_password" class="input" autocomplete="off" spellcheck="false" type="password" data-bind="value: confirmPassword, hasfocus: confirmPasswordFocus, valueUpdate: 'afterkeydown'" />
+			</span>
+		</div>
+	</div>
+	<div class="row buttons">
+		<button type="submit" class="button login" data-bind="text: changePasswordButtonText, command: changePasswordCommand"></button>
+	</div>
+	
+</form>
+
+<div class="row links">
+	<div class="forgot">
+		<span class="link" data-bind="click: function () {gotoForgot(false);}, i18n: 'text'"
+			  data-i18n="LOGIN/LINK_BACK"></span>
+	</div>
+</div>

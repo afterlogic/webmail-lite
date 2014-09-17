@@ -1,0 +1,26 @@
+<div class="mask" data-bind="command: closeCommand"></div>
+<div class="popup_panel">
+	<span class="close" data-bind="command: closeCommand"></span>
+	<span class="title" data-i18n="OPENPGP/POPUP_TITLE_GENERATE_NEW_KEY" data-bind="i18n: 'text'"></span>
+	
+	<div class="fields">
+		<div class="row">
+			<span class="label" data-i18n="OPENPGP/LABEL_EMAIL" data-bind="i18n: 'text'"></span>
+			<select class="input" data-bind="options: emails, value: selectedEmail"></select>
+		</div>
+		<div class="row">
+			<span class="label" data-i18n="OPENPGP/LABEL_PASSWORD" data-bind="i18n: 'text'"></span>
+			<input type="password" class="value input" data-bind="value: password" />
+		</div>
+		<div class="row">
+			<span class="label" data-i18n="OPENPGP/LABEL_KEY_LENGTH" data-bind="i18n: 'text'"></span>
+			<select class="value input" data-bind="value: selectedKeyLength, options: keyLengthOptions"></select>
+		</div>
+		<div class="buttons">
+			<span class="button" data-i18n="OPENPGP/BUTTON_GENERATE" data-bind="visible: !process(), i18n: 'text', click: generate"></span>
+			<span class="button" data-i18n="OPENPGP/BUTTON_GENERATING" data-bind="visible: process, i18n: 'text'"></span>
+			<span class="button" data-i18n="MAIN/BUTTON_CANCEL" data-bind="visible: !process(), i18n: 'text', command: closeCommand"></span>
+		</div>
+	</div>
+</div>
+<span class="helper"></span>

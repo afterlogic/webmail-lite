@@ -1,0 +1,59 @@
+<div class="mask" data-bind="click: onCancelClick"></div>
+<div class="popup_panel">
+	<span class="close" data-bind="click: onCancelClick"></span>
+	<span class="title" data-bind="style: {backgroundColor: selectedColor}, i18n: 'text'" data-i18n="CALENDAR/TITLE_SHARE_CALENDAR"></span>
+
+	<div class="fields">
+		<div class="fieldset shares_personal">
+			<!--h2 class="subtitle" data-i18n="CALENDAR/TITLE_SHARE_THIS_CALENDAR" data-bind="i18n: 'text'"></h2-->
+			<div class="shares_list" data-bind="customScrollbar: {x: false}, visible: (shares().length > 0)">
+				<div data-bind="foreach: shares()" class="scroll-inner">
+					<div class="share_item" data-bind="visible: !$parent.itsMe(email)">
+						<span class="control remove" data-bind="click: function (oItem) {$parent.removeShare(oItem);}"></span>
+						<div class="row" data-bind="css: {'focused': focus, 'filled': (name && name.length > 0)}">
+							<span class="label" data-bind="css: {'recivedAnim': $parent.recivedAnim() && email === $parent.whomAnimate()}">
+								<span class="text" data-bind="title: email, text: name, visible: name !== ''"></span>
+								<span class="text" data-bind="text: email, visible: name === ''"></span>
+							</span>
+							<select class="value input" data-bind="value: access, options: $parent.aAccess, optionsText: 'display', optionsValue: 'value'"></select>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="share_item">
+				<span class="control add" data-bind="click: addShare, css: {'disabled': !canAdd()}"></span>
+				<div class="row" data-bind="css: {'focused': newShareFocus(), 'filled': (newShare()) ? newShare().length : false}">
+					<div class="label">
+						<label for="shared_item_input" class="label placeholder" style="top: 5px;" data-i18n="CALENDAR/LABEL_WEB_EMAIL_OR_NAME" data-bind="i18n: 'text'"></label>
+						<input id="shared_item_input" class="value input" spellcheck="false" type="text" autocomplete="off" maxlength="200" data-bind="value: newShare, valueUpdate: ['blur', 'afterkeydown'], autocompleteSimple: {callback: autocompleteCallbackBinded, dataAccessor: shareAutocompleteItem}, hasfocus: newShareFocus" />
+					</div>
+					<select class="value input" data-bind="value: newShareAccess, options: aAccess, optionsText: 'display', optionsValue: 'value'"></select>
+				</div>
+			</div>
+		</div>
+		
+		<div class="fieldset shares_all" data-bind="visible: showGlobalContacts">
+			<div class="row">
+				<div class="label">
+					<label class="custom_checkbox" data-bind="css: {'checked': sharedToAll()}">
+						<span class="icon"></span>
+						<input type="checkbox" id="share_to_all_item_input" data-bind="checked: sharedToAll" />
+					</label>
+					<span>
+						<label for="share_to_all_item_input" data-i18n="CALENDAR/TITLE_SHARE_WITH_ALL_CALENDARS" data-bind="i18n: 'text'"></label>
+					</span>
+				</div>
+				<select class="value input" data-bind="visible: sharedToAll, value: sharedToAllAccess, options: aAccess, optionsText: 'display', optionsValue: 'value'"></select>
+			</div>
+			<div class="row">
+				<span class="hint" data-i18n="CALENDAR/TITLE_DESCRIPTION_SHARED_WITH_ALL_CALENDARS" data-bind="visible: sharedToAll, i18n: 'text'"></span>
+			</div>
+		</div>
+		
+		<div class="buttons">
+			<span class="button save" data-i18n="CALENDAR/BUTTON_SAVE" data-bind="i18n: 'text', click: onSaveClick"></span>
+		</div>
+	</div>
+</div>
+<span class="helper"></span>

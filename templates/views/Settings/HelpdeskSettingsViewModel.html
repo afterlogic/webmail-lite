@@ -1,0 +1,28 @@
+<div class="panel_top">
+	<h2 class="title" data-i18n="SETTINGS/TITLE_HELPDESK" data-bind="i18n: 'text'"></h2>
+</div>
+<div class="panel_center">
+	<div class="fields">
+		<div class="fieldset">
+			<div class="row">
+				<span class="value">
+					<label class="custom_checkbox" data-bind="css: {'checked': allowNotifications}">
+						<span class="icon"></span>
+						<input type="checkbox" id="allowNotifications" data-bind="checked: allowNotifications" />
+					</label>
+					<label for="allowNotifications" data-i18n="SETTINGS/HELPDESK_NOTIFICATIONS_LABEL" data-bind="i18n: 'text'"></label>
+				</span>
+			</div>
+			<div class="hint">
+				<span data-i18n="SETTINGS/HELPDESK_NOTIFICATIONS_HINT" data-bind="i18n: 'text'"></span>
+			</div>
+		</div>
+
+		<div class="buttons">
+			<span class="button" data-bind="click: onSaveClick">
+				<span data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', visible: !loading()"></span>
+				<span data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', visible: loading()"></span>
+			</span>
+		</div>
+	</div>
+</div>

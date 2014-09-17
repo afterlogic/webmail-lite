@@ -1,0 +1,26 @@
+<div class="mask" data-bind="click: onCancelClick"></div>
+<div class="popup_panel">
+	<span class="close" data-bind="click: onCancelClick"></span>
+	<span class="title" data-bind="style: {backgroundColor: color}">
+		<span class="text fadeout">
+			<span data-i18n="CALENDAR/TITLE_IMPORT_CALENDAR" data-bind="i18n: 'text', fade: {color: color}"></span>
+		</span>
+	</span>
+	<div class="fields">
+		<div class="fieldset">
+			<div class="hint" data-bind="visible: allowDragNDrop">
+				<span data-i18n="CALENDAR/HINT_DRAGNDROP_EVENTS" data-bind="i18n: 'text'"></span>
+			</div>
+			<div class="hint">
+				<span data-i18n="CALENDAR/HINT_IMPORT_CALENDAR" data-bind="i18n: 'text'"></span>
+			</div>
+			<div class="row">
+				<span data-bind="visible: importing, i18n: 'text'" data-i18n="CONTACTS/IMPORTING"></span>
+				<div class="buttons without_border_top" data-bind="visible: !importing()">
+					<span id="jue_import_button" class="button import" data-i18n="CONTACTS/BUTTON_IMPORT_CONTACTS" data-bind="i18n: 'text'"></span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<span class="helper"></span>

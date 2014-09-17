@@ -1,0 +1,23 @@
+{%INCLUDE-START/Layout-Top/INCLUDE-END%}
+
+<div data-view-model="Common_InformationViewModel"></div>
+<div class="screens">
+
+	{%INCLUDE-START/Layout-Screens-Top/INCLUDE-END%}
+
+	<div data-view-model="Helpdesk_Login" class="screen LoginLayout HelpdeskLayout" style="display: none;"></div>
+	<div data-view-model="Helpdesk_Header" class="tabs_panel helpdesk" style="display: none;"></div>
+	<div data-view-model="Helpdesk_HelpdeskViewModel" class="screen HelpdeskLayout" style="display: none;"></div>
+	<div data-view-model="Helpdesk_SettingsExt" class="screen HelpdeskLayout" style="display: none;"></div>
+
+	{%INCLUDE-START/Layout-Screens-Middle/INCLUDE-END%}
+	
+	<div data-view-model="Popups_ChangePasswordPopupViewModel" class="popup" style="display: none;"></div>
+	<div data-view-model="Popups_AlertPopupViewModel" class="alert popup" style="display: none;"></div>
+	<div data-view-model="Popups_ConfirmPopupViewModel" class="confirm popup" style="display: none;"></div>
+
+	{%INCLUDE-START/Layout-Screens-Bottom/INCLUDE-END%}
+	
+</div>
+
+{%INCLUDE-START/Layout-Bottom/INCLUDE-END%}

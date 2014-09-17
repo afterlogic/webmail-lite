@@ -1,0 +1,46 @@
+<div class="quick_reply fields" data-bind="initDom: domQuickReply,
+		quickReplyAnim: {
+			'sendAction': replySendingStarted(),
+			'activeAction': isQuickReplyActive()
+		},
+		visible: replyPaneVisible(),
+		css: { 'internal': internalNote(), 'hidden': isQuickReplyHidden() }">
+
+		<div class="status">
+			<div class="text" data-bind="i18n: 'text'" data-i18n="HELPDESK/INFO_SENDING"></div>
+		</div>
+		<div class="row" data-bind="css: {'focused': replyTextFocus(), 'filled': replyText().length > 0}">
+			<label for="reply_text" class="title placeholder" data-bind="i18n: 'text'" data-i18n="HELPDESK/REPLY_FORM_PLACEHOLDER"></label>
+			<textarea id="reply_text" class="input" data-bind="value: replyText,
+				hasfocus: replyTextFocus, onCtrlEnter: postCommand, valueUpdate: 'afterkeydown'"></textarea>
+		</div>
+
+		<div class="row data attachments upload" data-bind="visible: uploadedFiles().length > 0">
+			<div data-bind="css: 'count' + uploadedFiles().length">
+			<!-- ko template: {name: 'Common_FileViewModel', foreach: uploadedFiles} --><!-- /ko -->
+			</div>
+		</div>
+
+	<div class="row data" data-bind="visible: allowInternalNote">
+			<span class="label"></span>
+			<span class="value">
+				<label data-bind="css: {'checked': internalNote}" class="custom_checkbox">
+					<span class="icon"></span>
+					<input type="checkbox" data-bind="checked: internalNote" id="internal" />
+				</label>
+				<label for="internal" data-i18n="HELPDESK/REPLY_FORM_INTERNAL_NOTE" data-bind="i18n: 'text'"></label>
+			</span>
+		</div>
+
+		<div class="buttons">
+			<span class="button upload" data-bind="visible: uploadedFiles().length < 5, i18n: 'text', initDom: uploaderButton, css: {'dragOver': bDragActive}" >
+				<span class="icon"></span>
+				<span class="text" data-bind="i18n: 'text'" data-i18n="HELPDESK/ACTION_ADD_ATTACHMENT"></span>
+			</span>
+			<span class="button send" data-bind="command: postCommand, i18n: 'text'" data-i18n="MAIN/BUTTON_SEND"></span>
+			<span class="text hint" data-i18n="COMPOSE/QUICK_REPLY_HOTKEY" data-bind="i18n: 'text'"></span>
+		</div>
+<!--	<div class="uploader_mask1" data-bind="initDom: uploaderArea, css: {'active': bDragActive}">
+		<div class="inner"></div>
+	</div>-->
+</div>
