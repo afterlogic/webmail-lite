@@ -1,0 +1,12 @@
+<span class="item" data-bind="visible: visible() && !virtual(), css: {'system': isSystem, 'user': !isSystem()}">
+	<span class="folder" data-bind="attr: {'data-folder': fullName}, 
+		  css: {'disabled': selected, 'unselectable': !canBeSelected()}">
+		<span class="title" data-bind="text: displayName"></span>
+	</span>
+	<!-- ko if: !isNamespace() -->
+		<span class="children" data-bind="template: { name: 'Mail_MoveToFolderItem', foreach: subfolders }"></span>
+	<!-- /ko -->
+</span>
+<!-- ko if: isNamespace -->
+	<!-- ko template: {name: 'Mail_MoveToFolderItem', foreach: subfolders} --><!-- /ko -->
+<!-- /ko -->

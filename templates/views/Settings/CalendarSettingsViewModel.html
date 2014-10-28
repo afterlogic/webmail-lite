@@ -1,0 +1,112 @@
+<div class="panel_top">
+	<h2 class="title" data-i18n="SETTINGS/TITLE_CALENDAR" data-bind="i18n: 'text'"></h2>
+</div>
+<div class="panel_center">
+	<div class="fields">
+		<div class="fieldset">
+
+			<div class="row workday">
+				<span class="label" data-i18n="SETTINGS/CALENDAR_WORKDAY_STARTS" data-bind="i18n: 'text'"></span>
+				<span class="value">
+					<select class="input start" data-bind="value: selectedWorkdayStarts, options: availableTimes, optionsText: 'text', optionsValue: 'value'"></select>
+					<span data-i18n="SETTINGS/CALENDAR_WORKDAY_ENDS" data-bind="i18n: 'text'"></span>
+					<select class="input end" data-bind="value: selectedWorkdayEnds, options: availableTimes, optionsText: 'text', optionsValue: 'value'"></select>
+				</span>
+			</div>
+
+			<div class="row">
+				<span class="label"></span>
+				<span class="value">
+					<label class="custom_checkbox" data-bind="css: {'checked': showWorkday}">
+						<span class="icon"></span>
+						<input type="checkbox" id="showWorkday" data-bind="checked: showWorkday" />
+					</label>
+					<label for="showWorkday" data-i18n="SETTINGS/CALENDAR_SHOW_WORKDAY" data-bind="i18n: 'text'"></label>
+				</span>
+			</div>
+
+			<div class="row">
+				<span class="label" data-i18n="SETTINGS/CALENDAR_WEEK_STARTS_ON" data-bind="i18n: 'text'"></span>
+				<span class="value">
+					<select class="input" data-bind="value: weekStartsOn">
+						<option value="6" data-i18n="DATETIME/SATURDAY" data-bind="i18n: 'text'"></option>
+						<option value="0" data-i18n="DATETIME/SUNDAY" data-bind="i18n: 'text'"></option>
+						<option value="1" data-i18n="DATETIME/MONDAY" data-bind="i18n: 'text'"></option>
+					</select>
+				</span>
+			</div>
+
+			<div class="row">
+				<span class="label"></span>
+				<span class="value">
+					<label class="custom_checkbox" data-bind="css: {'checked': showWeekends}">
+						<span class="icon"></span>
+						<input type="checkbox" id="showWeekends" data-bind="checked: showWeekends" />
+					</label>
+					<label for="showWeekends" data-i18n="SETTINGS/CALENDAR_SHOW_WEEKENDS" data-bind="i18n: 'text'"></label>
+				</span>
+			</div>
+
+			<div class="row">
+				<span class="label" data-i18n="SETTINGS/CALENDAR_DEFAULT_TAB" data-bind="i18n: 'text'"></span>
+				<span class="value">
+					<label class="custom_radio" data-bind="css: {'checked': defaultTab() == Enums.CalendarDefaultTab.Day}">
+						<span class="icon"></span>
+						<input type="radio" id="tab_day" data-bind="checked: defaultTab, attr: {'value': Enums.CalendarDefaultTab.Day}" />
+					</label>
+					<label for="tab_day" data-i18n="DATETIME/DAY" data-bind="i18n: 'text'"></label>
+
+					<label class="custom_radio" data-bind="css: {'checked': defaultTab() == Enums.CalendarDefaultTab.Week}">
+						<span class="icon"></span>
+						<input type="radio" id="tab_week" data-bind="checked: defaultTab, attr: {'value': Enums.CalendarDefaultTab.Week}" />
+					</label>
+					<label for="tab_week" data-i18n="DATETIME/WEEK" data-bind="i18n: 'text'"></label>
+
+					<label class="custom_radio" data-bind="css: {'checked': defaultTab() == Enums.CalendarDefaultTab.Month}">
+						<span class="icon"></span>
+						<input type="radio" id="tab_month" data-bind="checked: defaultTab, attr: {'value': Enums.CalendarDefaultTab.Month}" />
+					</label>
+					<label for="tab_month" data-i18n="DATETIME/MONTH" data-bind="i18n: 'text'"></label>
+				</span>
+			</div>
+		</div>
+		<div class="buttons">
+			<span class="button" data-bind="click: onSaveClick">
+				<span data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', visible: !loading()"></span>
+				<span data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', visible: loading()"></span>
+			</span>
+		</div>
+	</div>
+</div>
+
+<!--<table class="">
+	<tbody>
+
+		<tr class="wm_hide">
+			<td data-i18n="SETTINGS/CALENDAR_COUNTRY" data-bind="i18n: 'text'"></td>
+			<td>
+				<select style="width: 300px;"></select>
+			</td>
+		</tr>
+		<tr class="wm_hide">
+			<td data-i18n="SETTINGS/CALENDAR_TIME_ZONE" data-bind="i18n: 'text'"></td>
+			<td></td>
+		</tr>
+		<tr class="wm_hide">
+			<td></td>
+			<td>
+				<input type="checkbox" class="wm_checkbox" name="_AllTimeZones" id="AllTimeZones" value="0" />
+				<label for="AllTimeZones" data-i18n="SETTINGS/CALENDAR_ALL_TIME_ZONES" data-bind="i18n: 'text'"></label>
+			</td>
+		</tr>
+		<tr class="wm_hide">
+			<td></td>
+			<td>
+				<input type="checkbox" class="wm_checkbox" name="autoAddInvitation" id="autoAddInvitation" value="0" />
+				<label for="autoAddInvitation" data-i18n="SETTINGS/CALENDAR_AUTOADD_INVITATIONS" data-bind="i18n: 'text'"></label>
+			</td>
+		</tr>
+	</tbody>
+</table>
+-->
+

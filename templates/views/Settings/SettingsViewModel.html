@@ -1,0 +1,25 @@
+<div class="panels settings">
+	<div class="panel navigation" data-bind="adjustHeightToContent: {}">
+		<div class="panel_content">
+			<div class="middle_bar">
+				<div class="panel_center">
+					<div class="items_list" data-bind="foreach: aTabs">
+						<div class="item canSelect" data-bind="attr: {'class': 'item canSelect ' + $data.TabName}, css: {'selected': ($parent.tab() === $data.TabName)}, click: function () {$parent.showTab($data.TabName);}">
+							<span class="title">
+								<span class="icon"></span>
+								<span class="text" data-bind="text: $data.TabTitle"></span>
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="panel data">
+		<div class="panel_content" data-bind="foreach: aTabs">
+			<div data-bind="attr: {'class': 'middle_bar ' + $data.TabName}, visible: $parent.tab() === $data.TabName">
+				<!-- ko template: {name: $data.TemplateName, data: $data} --><!-- /ko -->
+			</div>
+		</div>
+	</div>
+</div>
