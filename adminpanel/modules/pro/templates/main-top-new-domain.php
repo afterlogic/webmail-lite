@@ -1,0 +1,1 @@
+<h1><?php echo CApi::I18N('ADMIN_PANEL/DOMAINS_CREATE'); ?></h1>

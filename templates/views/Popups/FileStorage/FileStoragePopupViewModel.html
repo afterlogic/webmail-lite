@@ -1,0 +1,23 @@
+<div class="mask" data-bind="click: onCancelClick"></div>
+<div class="popup_panel">
+	<span class="close" data-bind="click: onCancelClick"></span>
+
+	<div class="panels">
+		<div class="panel storages">
+			<div class="panel_content">
+				<div class="middle_bar" data-bind="template: {name: 'FileStorage_StorageList', data: fileStorageViewModel}"></div>
+			</div>
+		</div>
+		<div class="panel files">
+			<div class="panel_content">
+				<div class="middle_bar" data-bind="template: {name: 'FileStorage_FileList', data: fileStorageViewModel}"></div>
+			</div>
+		</div>
+	</div>
+
+	<div class="buttons">
+		<span class="button save" data-i18n="FILESTORAGE/BUTTON_SELECT" data-bind="i18n: 'text', click: onSelectClick"></span>
+		<span class="button save" data-i18n="FILESTORAGE/BUTTON_CLOSE" data-bind="i18n: 'text', click: onCancelClick"></span>
+	</div>
+</div>
+<span class="helper"></span>	

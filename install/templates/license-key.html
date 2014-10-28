@@ -1,0 +1,27 @@
+<input type="submit" name="next_btn" style="position: absolute; visibility: hidden;" value="Next" />
+
+<h1>
+	Enter The License Key
+</h1>
+
+<div class="field_list">
+	<label class="field_label_tiny">License Key:</label>
+	<span class="field_value_limit">
+		<input name="txtLicenseKey" class="wm_input" type="text" style="width: 398px;" value="{{Key}}" />
+		<br />
+		<span class="field_error_text">
+			{{LicenseKeyText}}
+		</span>
+		<br />
+		<span class="field_description{{TrialClass}}">
+			This is a trial version. You can purchase a license and get your permanent key at 
+			<a href="{{LicenseKeyUrl}}" target="_black">{{LicenseKeyUrl}}</a>
+		</span>
+	</span>
+</div>
+
+<div class="buttons">
+	<hr />
+	<input class="wm_button" type="submit" name="back_btn" value="Back" />
+	<input class="wm_button right" type="submit" name="next_btn" value="Next" />
+</div>

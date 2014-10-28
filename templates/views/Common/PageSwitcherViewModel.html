@@ -1,0 +1,9 @@
+<span class="pagination" data-bind="visible: pages().length > 0">
+	<span class="item first" data-i18n="MAIN/FIRST_PAGE" data-bind="i18n: 'title', visible: visibleFirst, click: clickFirstPage"></span>
+	<span class="item prev" data-i18n="MAIN/PREV_PAGE" data-bind="i18n: 'title', visible: visibleFirst, click: clickPreviousPage"></span>
+	<span class="pages" data-bind="foreach: pages">
+		<span class="item" data-bind="text: number, css: {'current': current}, click: clickFunc"></span>
+	</span>
+	<span class="item next" data-i18n="MAIN/NEXT_PAGE" data-bind="i18n: 'title', visible: visibleLast, click: clickNextPage"></span>
+	<span class="item last" data-i18n="MAIN/LAST_PAGE" data-bind="i18n: 'title', visible: visibleLast, click: clickLastPage"></span>
+</span>

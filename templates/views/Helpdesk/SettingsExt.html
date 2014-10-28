@@ -1,0 +1,56 @@
+<div class="panels settings">
+	<div class="panel_helper">
+		<div class="panel">
+			<div class="panel_content">
+				<div class="middle_bar common">
+					<div class="panel_top">
+						<h2 class="title" data-i18n="HELPDESK/SETTINGS_TITLE" data-bind="i18n: 'text'"></h2>
+					</div>
+					<div class="panel_center">
+						<div class="fields">
+							<div class="fieldset">
+								<div class="row" data-bind="">
+									<span class="label" data-i18n="HELPDESK/SETTINGS_YOURNAME" data-bind="i18n: 'text'"></span>
+									<input class="value input" spellcheck="false" type="text" data-bind="value: name" />
+								</div>
+								<div class="row">
+									<span class="label" data-i18n="SETTINGS/COMMON_TIME_FORMAT" data-bind="i18n: 'text'"></span>
+
+									<span class="value">
+										<label class="custom_radio" data-bind="css: {'checked': timeFormat() === Enums.TimeFormat.F12}">
+											<span class="icon"></span>
+											<input type="radio" id="timeformat_12" data-bind="checked: timeFormat, attr: {'value': Enums.TimeFormat.F12}" />
+										</label>
+										<label for="timeformat_12" data-i18n="SETTINGS/COMMON_TIME_FORMAT_12" data-bind="i18n: 'text'"></label>
+
+										<label class="custom_radio" data-bind="css: {'checked': timeFormat() === Enums.TimeFormat.F24}">
+											<span class="icon"></span>
+											<input type="radio" id="timeformat_24" data-bind="checked: timeFormat, attr: {'value': Enums.TimeFormat.F24}" />
+										</label>
+										<label for="timeformat_24" data-i18n="SETTINGS/COMMON_TIME_FORMAT_24" data-bind="i18n: 'text'"></label>
+									</span>
+								</div>
+								<div class="row">
+									<span class="label" data-i18n="SETTINGS/COMMON_DATE_FORMAT" data-bind="i18n: 'text'"></span>
+									<select class="value input" data-bind="value: dateFormat, options: aDateFormats, optionsText: 'name', optionsValue: 'value'"></select>
+								</div>
+								<div class="buttons">
+									<span class="button" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_CHANGE_PASSWORD" data-bind="i18n: 'text', click: onChangePasswordClick"></span>
+								</div>
+							</div>
+
+							<div class="buttons">
+								<span class="button" data-bind="click: backToHelpdesk">
+									<span data-i18n="HELPDESK/BUTTON_BACK" data-bind="i18n: 'text'"></span>
+								</span>
+								<span class="button" data-bind="click: save">
+									<span data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text'"></span>
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

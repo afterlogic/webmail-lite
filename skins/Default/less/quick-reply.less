@@ -1,0 +1,185 @@
+/*=== quick_reply CSS ===*/
+.quick_reply {
+	@background: #fcfcfc;
+	@borderTop: 1px solid #e2e2e2;
+	@textAreaBorder: 1px solid #d7d7d7;
+	
+	.box-sizing;
+	
+	border-top: @borderTop;
+	background: @background;
+	padding: 0px 23px 0px 17px;
+	bottom: 0px;
+	position: absolute;
+	width: 100%;
+	max-height: 190px;
+	
+	html.rtl & {
+		padding: 0px 17px 0px 23px;
+	}
+	
+	.no-csstransitions & {
+		max-height: 86px;
+		margin-bottom: -2px;
+	}
+	.csstransitions & {
+		.transition(max-height 500ms ease 50ms);
+		
+		&.saving {
+			max-height: 0 !important;
+		}
+		&.sending {
+			max-height: 30px !important;
+			
+			.status {
+				max-height: 30px;
+				opacity: 1;
+			}
+		}
+	}
+	
+	.status {
+		max-height: 0px;
+		opacity: 0;
+		background: #FBFF89;
+		background: #dac073;
+		overflow: hidden;
+		width: 100%;
+		padding: 0px 17px;
+		margin-left: -17px;
+		
+		.csstransitions & {
+			.transition(~"max-height 300ms ease 50ms, opacity 300ms ease 50ms");
+		}
+		
+		.text {
+			padding: 6px 10px;
+			font-weight: bold;
+			color: #fff;
+
+			font-weight: bold;
+			text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+		}
+	}
+	
+	.row {
+		white-space: nowrap;
+		margin-top: 20px;
+		
+		.placeholder {
+			font-size: 11pt;
+			padding-top: 6px;
+			text-indent: 9px;
+		}
+		
+		textarea {
+			.box-sizing;
+
+			border: @textAreaBorder;
+			border-radius: 4px;
+			height: 50px;
+			width: 100%;
+			color: #000;
+			font-size: 11pt;
+			padding: 6px 8px;
+			resize: none;
+			box-shadow: none;
+			
+			.csstransitions & {
+				.transition(height 300ms ease);
+			}
+			
+			.active& {
+				height: 101px;
+				font-family: Tahoma, sans-serif;
+				font-size: 16px;
+			}
+		}
+	}
+	
+	.buttons {
+		margin-top: 15px;
+		margin-bottom: 0px;
+		padding-bottom: 20px;
+		text-align: left;
+		
+		html.rtl & {
+			text-align: right;
+		}
+		
+		.button {
+			margin-right: 6px;
+			//padding: 5px 12px;
+			
+			html.rtl & {
+				margin-right: 0px;
+				margin-left: 6px;
+			}
+		}
+
+		.full_form {
+			float: right;
+			height: 0px;
+			margin-top: 6px;
+
+			html.rtl & {
+				float: left;
+			}
+		}
+	}
+	
+	.theme-quick-reply();
+}
+
+.csstransitions {
+	
+	.quick_reply {
+		
+		.buttons {
+			overflow: hidden;
+			max-height: 0px;
+			padding-bottom: 0px;
+			opacity: 0;
+			/* important: 50ms delay fix click on buttons*/
+			.transition(all 300ms ease 50ms);
+		}
+		
+		&.active .buttons {
+			overflow: visible;
+			max-height: 25px;
+			margin-bottom: 20px;
+			opacity: 1;
+		}
+		
+		&.sending .buttons {
+			max-height: 0px;
+			margin-bottom: 0px;
+			opacity: 0;
+		}
+		
+		.row.data {
+			overflow: hidden;
+			max-height: 0px;
+			margin-top: 0px;
+			margin-bottom: 0px;
+			opacity: 0;
+			/* important: 50ms delay fix click on buttons*/
+			.transition(all 300ms ease 50ms);
+		}
+		
+		&.active .row.data {
+			overflow: visible;
+			max-height: 25px;
+			margin-top: 20px;
+			margin-bottom: 6px;
+			opacity: 1;
+		}
+		
+		&.sending .row.data {
+			max-height: 0px;
+			margin-bottom: 0px;
+			opacity: 0;
+		}
+	}
+}
+/*=== END quick_reply CSS ===*/
