@@ -1,1 +1,0 @@
-<h1><?php echo CApi::I18N('ADMIN_PANEL/TENANTS_CREATE'); ?></h1>
