@@ -329,15 +329,17 @@ class MimeDir extends Parser {
 
                 $value = $this->unescapeParam($value);
 
-                if (is_null($property['parameters'][$lastParam])) {
-                    $property['parameters'][$lastParam] = $value;
-                } elseif (is_array($property['parameters'][$lastParam])) {
-                    $property['parameters'][$lastParam][] = $value;
-                } else {
-                    $property['parameters'][$lastParam] = array(
-                        $property['parameters'][$lastParam],
-                        $value
-                    );
+                if(isset($property['parameters'][$lastParam])) {
+                    if (is_null($property['parameters'][$lastParam])) {
+                        $property['parameters'][$lastParam] = $value;
+                    } elseif (is_array($property['parameters'][$lastParam])) {
+                        $property['parameters'][$lastParam][] = $value;
+                    } else {
+                        $property['parameters'][$lastParam] = array(
+                            $property['parameters'][$lastParam],
+                            $value
+                        );
+                    }
                 }
                 continue;
             }
