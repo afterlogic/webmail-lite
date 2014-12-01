@@ -1,0 +1,13 @@
+<span class="part field" data-bind="visible: $parent.action() !== 1, 
+		moveToFolderFilter: {'options': $parents[1].foldersOptions, value: $parent.folder, optionsText: 'translatedDisplayName', 
+					optionsValue: 'fullName', container: '.scroll-inner'}">
+	<span class="link"></span>
+	<span class="dropdown">
+		<span class="dropdown_helper">
+			<span class="dropdown_arrow"><span></span></span>
+			<span class="dropdown_content" data-bind="customScrollbar: {x: false}">
+				<span class="scroll-inner"></span>
+			</span>
+		</span>
+	</span>
+</span>

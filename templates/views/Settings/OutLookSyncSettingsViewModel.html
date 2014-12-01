@@ -1,0 +1,37 @@
+<div class="panel_top">
+	<h2 class="title" data-i18n="SETTINGS/TITLE_OUTLOOK_SYNC" data-bind="i18n: 'text'"></h2>
+</div>
+
+<div class="panel_center">
+	<div class="fields" data-bind="visible: visibleOutlookSync()">
+		<div class="fieldset">
+			
+			<div class="hint" data-i18n="SETTINGS/OUTLOOKSYNC_HEADING" data-bind="i18n: 'text'"></div>
+			<div class="row">
+				<span class="label" data-i18n="SETTINGS/OUTLOOKSYNC_SERVER" data-bind="i18n: 'text'"></span>
+				<span class="value" data-bind="text: server"></span>
+			</div>
+			<div class="hint" data-bind="text: credentialsHintText"></div>
+			<div class="hint" data-bind="i18n: 'html', visible: isDemo" data-i18n="SETTINGS/DEMO_CREDENTIAL_HINT_HTML"></div>
+
+			<br />
+			<br />
+
+			<div class="hint" data-i18n="SETTINGS/OUTLOOKSYNC_PLUGIN_VERSION_DESC_1" data-bind="i18n: 'text', visible: outlookSyncPlugin32 || outlookSyncPlugin64"></div>
+			<div>
+				- <a class="link" href="#" target="_blank" data-i18n="SETTINGS/OUTLOOKSYNC_PLUGIN_VERSION_32_LINK"
+					data-bind="i18n: 'text', visible: outlookSyncPlugin32, attr: {href: outlookSyncPlugin32}"></a>
+				<br />
+				- <a class="link" href="#" target="_blank" data-i18n="SETTINGS/OUTLOOKSYNC_PLUGIN_VERSION_64_LINK"
+					data-bind="i18n: 'text', visible: outlookSyncPlugin64, attr: {href: outlookSyncPlugin64}"></a>
+			</div>
+			<br />
+			<div class="hint" data-bind="visible: outlookSyncPluginReadMore">
+				<span data-i18n="SETTINGS/OUTLOOKSYNC_PLUGIN_VERSION_DESC_2" data-bind="i18n: 'text'"></span>
+				<a class="link" href="#" target="_blank" data-i18n="SETTINGS/OUTLOOKSYNC_PLUGIN_VERSION_READ_MORE_LINK"
+					data-bind="i18n: 'text', attr: {href: outlookSyncPluginReadMore}"></a>
+			</div>
+
+		</div>
+	</div>
+</div>

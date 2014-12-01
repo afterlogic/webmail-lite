@@ -1,0 +1,53 @@
+<form class="form fields" action="#" autocomplete="on" onsubmit="return false;" data-bind="command: loginCommand">
+	<div class="fieldset">
+		<div class="row email" data-bind="visible: emailVisible, css: {'focused': emailFocus(), 'filled': email().length > 0, shake: shake()}">
+			<label for="email" class="title placeholder"></label>
+			<span class="value">
+				<input id="email" tabindex="1" class="input check_autocomplete_input" name="email" data-i18n="LOGIN/LABEL_EMAIL"
+					type="email" spellcheck="false" data-bind="value: email, hasfocus: emailFocus, valueUpdate: 'afterkeydown', initDom: emailDom, i18n: 'placeholder'" />
+			</span>
+		</div>
+		<!-- ko if: loginVisible --> <!-- for correctly browser save passwords -->
+		<div class="row login" data-bind="visible: loginVisible, css: {'focused': loginFocus(), 'filled': login().length > 0, shake: shake()}">
+			<label for="login" class="title placeholder"></label>
+			<span class="value">
+				<input id="login" tabindex="2" class="input check_autocomplete_input" data-i18n="LOGIN/LABEL_LOGIN"
+					type="text" spellcheck="false" data-bind="value: login, hasfocus: loginFocus, valueUpdate: 'afterkeydown', initDom: loginDom, i18n: 'placeholder'" />
+			</span>
+			<span class="value suffix">
+				<span class="text" data-bind="text: loginAtDomainValueWithAt"></span>
+			</span>
+		</div>
+		<!-- /ko -->
+		<div class="row password" data-bind="css: {'focused': passwordFocus(), 'filled': password().length > 0, shake: shake()}">
+			<label for="password" class="title placeholder"></label>
+			<span class="value">
+				<input id="password" tabindex="3" class="input check_autocomplete_input"  data-i18n="LOGIN/LABEL_PASSWORD"
+					name="password" type="password" spellcheck="false" data-bind="value: password, hasfocus: passwordFocus, valueUpdate: 'afterkeydown', initDom: passwordDom, i18n: 'placeholder'" />
+			</span>
+		</div>
+	</div>
+	{%INCLUDE-START/Login-Before-Submit-Button/INCLUDE-END%}
+	<div class="row buttons">
+		<button type="submit" tabindex="5" class="button login" data-bind="text: signInButtonText, command: loginCommand"></button>
+	</div>
+	<div class="row signme" data-bind="visible: signMeType() !== Enums.LoginSignMeType.Unuse">
+		<span>
+			<label class="custom_checkbox" data-bind="css: {'checked': signMe, 'focus': signMeFocused}">
+				<span class="icon"></span>
+				<input id="signme" tabindex="4" type="checkbox" data-bind="checked: signMe, hasfocus: signMeFocused" />
+			</label>
+			<label class="title" for="signme" data-i18n="LOGIN/LABEL_REMEMBER_ME" data-bind="i18n: 'text'"></label>
+		</span>
+	</div>
+	<div class="row links">
+		<div class="forgot" data-bind="visible: allowPasswordReset">
+			<span class="link" data-bind="click: function () {$parent.gotoForgot(true);}, i18n: 'text'"
+				  data-i18n="LOGIN/LINK_FORGOT"></span>
+		</div>
+		<div class="register" data-bind="visible: allowRegistration">
+			<span class="link" data-bind="click: function () {$parent.gotoRegister(true);}, i18n: 'text'"
+				  data-i18n="LOGIN/LINK_REGISTER"></span>
+		</div>
+	</div>
+</form>

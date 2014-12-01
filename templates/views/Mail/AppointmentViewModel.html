@@ -1,0 +1,43 @@
+<div class="fields">
+	<div class="row">
+		<div class="buttons" data-bind="visible: visibleRequestButtons,
+			  css: {'touched': isAccepted() || isTentative() || isDeclined(), 'animation': animation}">
+			<span class="button" data-i18n="MESSAGE/APPOINTMENT_BUTTON_ACCEPT"
+				  data-bind="i18n: 'text', css: {'state': isAccepted}, click: acceptAppointment"></span>
+			<span class="button" data-i18n="MESSAGE/APPOINTMENT_BUTTON_TENTATIVE"
+				  data-bind="i18n: 'text', css: {'state': isTentative}, click: tentativeAppointment"></span>
+			<span class="button" data-i18n="MESSAGE/APPOINTMENT_BUTTON_DECLINE"
+				  data-bind="i18n: 'text', css: {'state': isDeclined}, click: declineAppointment"></span>
+		</div>
+		<span data-bind="text: cancelDecision, visible: isCancelType"></span>
+		<span data-bind="text: replyDecision, visible: isReplyType"></span>
+		<div class="buttons" data-bind="visible: isSaveType() && !calendarIsChosen()">
+			<span class="button" data-i18n="MESSAGE/ICAL_BUTTON_ADD" data-bind="i18n: 'text', click: addEvent"></span>
+		</div>
+		<span data-bind="visible: isSaveType() && calendarIsChosen()">
+			<span data-i18n="MESSAGE/ICAL_INFO_SAVED" data-bind="i18n: 'text', visible: isJustSaved"></span>
+			<span data-i18n="MESSAGE/ICAL_INFO_EXISTS" data-bind="i18n: 'text', visible: !isJustSaved()"></span>
+		</span>
+	</div>
+	<div class="row fluid calendar" data-bind="visible: visibleCalendarRow">
+		<span class="label" data-i18n="MESSAGE/APPOINTMENT_CALENDAR" data-bind="i18n: 'text'"></span>:
+		<span class="value">
+			<select class="value input" data-bind="visible: visibleCalendarDropdown, options: calendars,
+					optionsValue: 'id', optionsText: 'name', value: selectedCalendarId"></select>
+			<span data-bind="visible: visibleCalendarName, text: chosenCalendarName"></span>
+			<span data-bind="visible: visibleFirstCalendarName, text: firstCalendarName()"></span>
+		</span>
+	</div>
+	<div class="row fluid location" data-bind="visible: location() !== ''">
+		<span class="label" data-i18n="MESSAGE/APPOINTMENT_LOCATION" data-bind="i18n: 'text'"></span>:
+		<span class="value" data-bind="text: location"></span>
+	</div>
+	<div class="row fluid when">
+		<span class="label" data-i18n="MESSAGE/APPOINTMENT_WHEN" data-bind="i18n: 'text'"></span>:
+		<span class="value" data-bind="text: when"></span>
+	</div>
+	<div class="row fluid description" data-bind="visible: description() !== ''">
+		<span class="label" data-i18n="MESSAGE/APPOINTMENT_DESCRIPTION" data-bind="i18n: 'text'"></span>:
+		<span class="value" data-bind="html: description"></span>
+	</div>
+</div>

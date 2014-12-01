@@ -1,0 +1,19 @@
+<div class="fields">
+	<div class="row">
+		<span class="label" data-i18n="MESSAGE/VCARD_NAME" data-bind="i18n: 'text'"></span>:
+		<span data-bind="text: name"></span>
+	</div>
+	<div class="row">
+		<span class="label" data-i18n="MESSAGE/VCARD_EMAIL" data-bind="i18n: 'text'"></span>:
+		<span data-bind="text: email"></span>
+	</div>
+	<div class="row">
+		<div class="buttons" data-bind="visible: !isExists()">
+			<span class="button" data-i18n="MESSAGE/VCARD_BUTTON_ADD" data-bind="i18n: 'text', click: addContact"></span>
+		</div>
+		<span data-bind="visible: isExists">
+			<span data-i18n="MESSAGE/VCARD_INFO_ADDED" data-bind="i18n: 'text', visible: isJustSaved"></span>
+			<span data-i18n="MESSAGE/VCARD_INFO_EXISTS" data-bind="i18n: 'text', visible: !isJustSaved()"></span>
+		</span>
+	</div>
+</div>

@@ -1,0 +1,195 @@
+.border-radius (@radius) {
+	-webkit-border-radius: @radius;
+	-moz-border-radius: @radius;
+	border-radius: @radius;
+}
+
+.box-sizing(@sizing: border-box) {
+	-webkit-box-sizing: @sizing;
+	-moz-box-sizing: @sizing;
+	-ms-box-sizing: @sizing;
+	box-sizing: @sizing;
+}
+
+.user-select(@argument: none) {
+	-webkit-touch-callout: @argument;
+	-webkit-user-select: @argument;
+	-moz-user-select: @argument;
+	-ms-user-select: @argument;
+	user-select: @argument;
+}
+
+.break-word() {
+	-ms-word-break: break-all;
+	word-wrap: break-word;
+}
+
+.transition (@rule) {
+	-webkit-transition: @rule;
+	-moz-transition: @rule;
+	-o-transition: @rule;
+	transition: @rule;
+}
+
+.transform (@rule) {
+	-webkit-transform: @rule;
+	-moz-transform: @rule;
+	-o-transform: @rule;
+	transform: @rule;
+}
+
+.transformOrigin (@rule) {
+	-webkit-transform-origin: @rule;
+	-moz-transform-origin: @rule;
+	-o-transform-origin: @rule;
+	transform-origin: @rule;
+}
+
+.perspective(@rule) {
+	-webkit-perspective: @rule;
+	-moz-perspective: @rule;
+	-o-perspective: @rule;
+	perspective: @rule;
+}
+
+.animation (@rule) {
+	-webkit-animation: @rule;
+	-moz-animation: @rule;
+	animation: @rule;
+}
+
+.opacity(@value) {
+	opacity: @value;
+	filter: e(%("alpha(opacity=%d)", @value*100));
+}
+
+.gradient(@color: transparent, @start: #EEE, @stop: #FFF) {
+	background: @color;
+	background: -webkit-gradient(linear, left bottom, left top, color-stop(0, @start), color-stop(1, @stop));
+	background: -webkit-linear-gradient(bottom, @start 0%, @stop 100%);
+	background: -ms-linear-gradient(bottom, @start, @stop);
+	background: -moz-linear-gradient(center bottom, @start 0%, @stop 100%);
+	background: -o-linear-gradient(@stop, @start);
+	filter: e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d', GradientType=0)",@stop,@start));
+}
+
+.fade_gradient(@color: #F5F5F5) when (@theme-use-text-fade = true) {
+	@start: fade(@color, 0%);
+	@stop: fade(@color, 100%);
+	
+	background: -webkit-gradient(linear, left top, right top, color-stop(0%,@start), color-stop(100%,@stop)); // Chrome,Safari4+
+	background: -webkit-linear-gradient(left, @start 0%, @stop 100%); // Chrome10+,Safari5.1+
+	background: -moz-linear-gradient(left, @start 0%, @stop 100%); // FF3.6+
+	background: -o-linear-gradient(left, @start 0%, @stop 100%); // Opera 11.10+
+	background: -ms-linear-gradient(left, @start 0%, @stop 100%); // IE10+
+	background: linear-gradient(left, @start 0%, @stop 100%); // W3C */
+	filter: e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d',GradientType=1)",argb(@start),argb(@stop))); //* IE6-9 */
+}
+
+.fade_gradient(rtl, @color: #F5F5F5) when (@theme-use-text-fade) {
+	@start: fade(@color, 100%);
+	@stop: fade(@color, 0%);
+		
+	background: -webkit-gradient(linear, left top, right top, color-stop(0%,@start), color-stop(100%,@stop));
+	background: -moz-linear-gradient(left, @start 0%, @stop 100%);
+	background: -webkit-linear-gradient(left, @start 0%, @stop 100%);
+	background: -o-linear-gradient(left, @start 0%, @stop 100%);
+	background: -ms-linear-gradient(left, @start 0%, @stop 100%);
+	background: linear-gradient(left, @start 0%, @stop 100%);
+	filter: e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d',GradientType=1)",argb(@start),argb(@stop)));
+}
+
+.fade_gradient(vertical, @color: #F5F5F5) {
+	@start: fade(@color, 0%);
+	@stop: fade(@color, 100%);
+	
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,@start), color-stop(100%,@stop));
+	background: -moz-linear-gradient(top, @start 0%, @stop 100%);
+	background: -webkit-linear-gradient(top, @start 0%, @stop 100%);
+	background: -o-linear-gradient(top, @start 0%, @stop 100%);
+	background: -ms-linear-gradient(top, @start 0%, @stop 100%);
+	background: linear-gradient(to bottom, @start 0%, @stop 100%);
+	
+	filter: e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d',GradientType=0)",argb(@start),argb(@stop)));
+}
+
+
+.resize_compensation_top (@offset: 0px) {
+	padding-top: @offset;
+	margin-top: -@offset;
+}
+.resize_compensation_bottom (@offset: 0px) {
+	padding-bottom: @offset;
+	margin-bottom: -@offset;
+}
+
+.pass_through() {
+	pointer-events:none;
+	
+	> * {
+		pointer-events:auto;
+	}
+}
+
+.clearfix_helper() {
+	clear: both;
+	
+	&:after { clear: both; display: block; content: "."; height: 0; visibility: hidden; } //*Opera*/
+	* html > body & { width: 100%; display: block; }
+	* html & { height: 1%; } // IE 6 */
+}
+
+.transparent_color_helper(@color, @opacity) {
+	@colorAlpha: fade(@color, @opacity * 100);
+	background-color: @colorAlpha;
+	@aplhaColor: argb(@colorAlpha);
+	filter: e(%("progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='%d', endColorstr='%d')", @aplhaColor, @aplhaColor));
+}
+
+.iconFontInit() {
+	&:before {
+		speak: none;
+		font-style: normal;
+		font-weight: normal;
+		font-variant: normal;
+		text-transform: none;
+		line-height: 1;
+		font-family: 'afterlogic';
+
+		/* Better Font Rendering =========== */
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+}
+
+.iconFontInit(after) {
+	&:after {
+		speak: none;
+		font-style: normal;
+		font-weight: normal;
+		font-variant: normal;
+		text-transform: none;
+		line-height: 1;
+		font-family: 'afterlogic';
+
+		/* Better Font Rendering =========== */
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+}
+
+.makeIconBevel(@color) {
+	color: fade(darken(@color, 50%), 50%);
+	text-shadow: 0 1px 0 lighten(@color, 90%), 0 0 0 darken(@color, 100%)
+}
+
+.filterBlur(@value, @bZoom: 0.01) {
+	filter: blur(@value);
+	-webkit-filter: blur(@value);
+	-moz-filter: blur(@value);
+	-ms-filter: blur(@value);
+	-o-filter: blur(@value);
+	filter: url("images/filters.svg#blur@{value}"); // 1-5 px
+	
+	.transform(scale((unit(@value)*@bZoom)+1)); //need for cuting blured edges
+}
