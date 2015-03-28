@@ -1,0 +1,386 @@
+/*=== Base CSS ===*/
+html {
+	height: 100%;
+	overflow: hidden;
+}
+
+body {
+	.theme-main-background();
+	font: normal 9pt Helvetica, Tahoma, Arial, sans-serif;
+	height: 100%;
+	overflow: auto;
+	position: relative;
+}
+
+.pSevenMain {
+	height: 100%;
+	
+	overflow: hidden;
+	min-height: 480px;
+    min-width: 640px;
+
+	html.non-adjustable & {
+		height: auto;
+		overflow: visible;
+		min-height: inherit;
+		min-width: inherit;
+	}
+	
+	html.non-adjustable-valign & {
+		overflow: visible;
+	}
+}
+
+#pSevenContent {
+	height: 100%;
+	
+	.button_quote{
+		position: absolute;
+		top: 0;
+		left: 0;
+		display: none;
+		z-index: 1;
+		cursor: pointer;
+		background-color: #fafafa;
+//		box-shadow: inset 0px -1px 4px #eeeeee, inset 0px 1px 0px #d5d5d5;
+		border: 1px solid #c5c5c5;
+		border-radius: 4px;
+		font-size: 9pt;
+		text-decoration: none;
+		padding: 4px 6px;
+		color: #626262;
+		font-weight: bold;
+	}
+}
+.autosize {
+	overflow: hidden;
+	resize: none;
+}
+textarea {
+	resize: vertical;
+}
+label {
+	cursor: pointer;
+}
+a, .link {
+	&, &:link, &:visited {
+		color: @theme-common-link-color;
+		text-decoration: none;
+		cursor: pointer;
+	}
+	
+	&:hover {
+		color: @theme-common-link-hover-color;
+		text-decoration: underline;
+	}
+	
+	.theme-common-link();
+}
+
+*[contenteditable="true"],
+input:focus {
+	outline: none;
+}
+/*=== Common CSS ===*/
+.panel.folders,
+.panel.groups,
+.panel.storages,
+.UserArea .panel.threads,
+.panel.calendar_manager,
+.settings .panel.navigation
+{
+	.panelClear();
+}
+
+.panel.folders,
+.panel.groups,
+.panel.storages,
+.panel.calendar_manager,
+.settings .folders,
+.settings .panel.navigation
+{
+	.items_list_group_style();
+}
+
+.panel.folders,
+.panel.groups,
+.panel.storages {
+	
+	.items_list .item .title .name {
+		.fadeout_text_init();
+		.fadeout_text(@theme-group-style-item-bg);
+	}
+}
+
+.panels.settings .folders
+{
+	.items_list .item .title .name {
+		.fadeout_text_init();
+		.fadeout_text(#F0F0F0);
+	}
+	
+	.items_list .item.canDrag .title:hover .name {
+		.fadeout_text(#EAEAEA);
+	}
+	
+}
+
+.folders {
+	.title .icon.type1 {
+		&:before {
+			content: "\e616";
+		}
+	}
+	.title .icon.type2 {
+		&:before {
+			content: "\e615";
+		}
+	}
+	.title .icon.type3 {
+		&:before {
+			content: "\e617";
+		}
+	}
+	.title .icon.type4 {
+		&:before {
+			content: "\e614";
+		}
+	}
+	.title .icon.type5 {
+		&:before {
+			content: "\e612";
+		}
+	}
+	.item .icon.type10 {
+		//color: #aaaaaa;
+		&:before {
+			content: "\e66c";
+		}
+	}
+	/*.item .title.hover .icon.type10 {
+		color: #444 !important;
+	}
+	.item.selected .title .icon.type10 {
+		color: #fff !important;
+	}
+	.item .title.droppableHover .icon.type10 {
+		color: #626262 !important;
+	}*/
+
+	.title .icon.type7,
+	.selected .title .icon.type7 {
+		&:before {
+			color: #ffb736;
+			content: "\e613";
+			margin-top: -0.1ex;
+		}
+	}
+	
+	.item:not(.virtualEmpty) .title .icon.type7 {
+		text-shadow: none;
+	}
+	
+	.virtualEmpty .title .icon.type7 {
+		&:before {
+			color: #727272 !important;
+		}
+	}
+	.virtualEmpty.selected .title .icon.type7 {
+		&:before {
+			color: #fff !important;
+		}
+	}
+}
+
+.groups {
+	.title .icon {
+		&:before {
+			content: "\e667";
+		}
+	}
+	.title .icon.type1 {
+		&:before {
+			content: "\e618";
+		}
+	}
+	.title .icon.type2 {
+		&:before {
+			content: "\e619";
+		}
+	}
+	.title .icon.type3 {
+		&:before {
+			content: "\e629";
+		}
+	}
+	.title .icon.type4 {
+		&:before {
+			content: "\e64f";
+		}
+	}
+}
+
+.storages {
+	.title .icon.typepersonal {
+		&:before {
+			content: "\e618";
+		}
+	}
+	
+	.title .icon.typecorporate {
+		&:before {
+			content: "\e629";
+		}
+	}
+}
+/*=== END Folders CSS ===*/
+
+/*=== Popup CSS ===*/
+.panel.messages,
+.panel.contacts,
+.panel.threads {
+	.customscroll-scrollbar-vertical {
+//		margin-right: 2px;
+		margin-right: @pannels-overlap-offset;
+
+		html.rtl & {
+			margin-right: 0px;
+			margin-left: @pannels-overlap-offset;
+		}
+
+		div {
+			margin: 0px !important;
+		}
+	}
+}
+
+.panel.message_viewer {
+	.customscroll-scrollbar-vertical {
+		/*margin-right: -(@pannels-overlap-offset + @pannels-overlap-offset + @pannels-overlap-offset);*/
+		margin-right: -2px;
+	}
+
+	.has_attachments {
+		.customscroll-scrollbar-vertical {
+			margin-right: -@pannels-overlap-offset;
+		}
+	}
+}
+
+.add_account,
+.add_fetcher,
+.add_folder,
+.folders_setup {
+	.popup_panel {
+		background: #F1F1F1 url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAACtJREFUeNo0iIEJACAAwlT8/1GPMAsaKGNMYpskAOPRdq9tWbrifpaOAAMAMvEO3ANCJPYAAAAASUVORK5CYII=") repeat 0 0;
+	}
+}
+
+//fix position of draggable element
+/*.canDrag.ui-sortable-helper {
+	position: fixed !important;
+}*/
+
+.custom_tooltip {
+    height: auto;
+	margin: 0 6px;
+    opacity: 0.9;
+    position: fixed;
+    width: auto;
+    z-index: 5000;
+
+	.custom_tooltip_arrow {
+		border-left: 6px solid transparent;
+		border-right: 6px solid transparent;
+		display: block;
+		font-size: 0;
+		height: 0;
+		margin: 0 0 0 16px;
+		position: relative;
+		width: 0;
+	}
+
+	.custom_tooltip_arrow.top {
+		border-bottom: 6px solid #424e54;
+	}
+
+	.custom_tooltip_arrow.bottom {
+		border-top: 6px solid #424e54;
+	}
+
+	.custom_tooltip_text {
+		background: #424e54;
+		border: 1px solid #424e54;
+		border-radius: 4px;
+		color: white;
+		display: block;
+		font-size: 12px;
+		font-family: Verdana;
+	    padding: 6px;
+		white-space: nowrap;
+	}
+}
+/*=== END Popup CSS ===*/
+
+/*=== IE hacks ===*/
+.no-boxshadow {
+	
+	.panel.messages,
+	.panel.contacts,
+	.panel.compose,
+	.panel.calendar,
+	.panel.files,
+	.panel.threads,
+	.panel.message_viewer,
+	.panel.contact_viewer,
+	.panel.thread_viewer,
+	.panels.settings .panel,
+	.popup.calendar_popup .popup_panel
+	{
+		behavior: url(skins/Default/PIE/PIE.htc);
+	}
+}
+/*=== retina displays ===*/
+.spritesX2 {
+	@media only screen and (-webkit-min-device-pixel-ratio: 1.3),
+    only screen and (-moz-min-device-pixel-ratio: 1.3),
+    only screen and (~"-o-min-device-pixel-ratio: 1.3/1"),
+    only screen and (min-resolution: 1.3dppx),
+    only screen and (min-resolution: 125dpi)
+	{
+		background-image: url("images/sprites2x.png?%VERSION%");
+		background-size: 1440px 560px;
+	}
+}
+
+.loginLogoX2() {
+	@media
+	only screen and (-webkit-min-device-pixel-ratio: 1.3),
+    only screen and (-moz-min-device-pixel-ratio: 1.3),
+    only screen and (~"-o-min-device-pixel-ratio: 1.3/1"),
+    only screen and (min-resolution: 1.3dppx),
+    only screen and (min-resolution: 125dpi)
+	{
+		background-image: url("images/logo2x.png?%VERSION%");
+		background-size: 124px 95px;
+	}
+}
+
+@media
+	only screen and (-webkit-min-device-pixel-ratio: 1.3),
+    only screen and (-moz-min-device-pixel-ratio: 1.3),
+    only screen and (~"-o-min-device-pixel-ratio: 1.3 / 1"),
+    only screen and (min-resolution: 1.3dppx),
+    only screen and (min-resolution: 125dpi)
+{
+	.file .icon,
+	.messages .items_list .item .marker,
+	.panel.files .items_list .folder .icon,
+	.html_editor .toolbar .item .icon
+	{
+		background-image: url("images/sprites2x.png?%VERSION%");
+		background-size: 1440px 560px;
+	}
+}
+
+/*=== END IE hacks ===*/

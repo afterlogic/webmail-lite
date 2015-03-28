@@ -1,0 +1,86 @@
+<div class="panel_top">
+	<h2 class="title" data-i18n="SETTINGS/TITLE_MOBILE_SYNC" data-bind="i18n: 'text'"></h2>
+</div>
+
+<div class="panel_center">
+	<div class="fields">
+		<div class="fieldset" data-bind="visible: enableDav">
+			<h2 class="subtitle" data-i18n="SETTINGS/MOBILE_DAVSYNC_HEADING" data-bind="i18n: 'text'"></h2>
+			<div class="hint" data-i18n="SETTINGS/MOBILE_DAVSYNC_HINT" data-bind="i18n: 'text'"></div>
+			
+			<div class="row">
+				<span class="label" data-i18n="SETTINGS/MOBILE_DAVSYNC_SERVER" data-bind="i18n: 'text'"></span>
+				<span class="value" data-bind="text: davServer"></span>
+			</div>
+			<div class="hint" data-bind="text: credentialsHintText"></div>
+			<div class="hint" data-bind="i18n: 'html', visible: isDemo" data-i18n="SETTINGS/DEMO_CREDENTIAL_HINT_HTML"></div>
+		</div>
+		
+		<div class="fieldset ios_profile" data-bind="visible: bVisibleIosLink">
+			<div class="row">
+				<span class="label">
+				</span>
+				<span class="value">
+					<a class="link" href="./?Profile">
+						<span class="icon"></span>
+						<span class="text" data-i18n="SETTINGS/MOBILE_IOS_LINK" data-bind="i18n: 'text'"></span>
+					</a>
+				</span>
+			</div>
+		</div>
+			
+		<div class="fieldset" data-bind="visible: visibleDavViaUrls">
+			<h2 class="subtitle" data-i18n="SETTINGS/MOBILE_DAVSYNC_SEPARATE_URLS_HEADING" data-bind="i18n: 'text'"></h2>
+			<div class="hint" data-i18n="SETTINGS/MOBILE_DAVSYNC_HINT_URLS" data-bind="i18n: 'text'"></div>
+		
+			<div class="fieldgroup" data-bind="visible: bVisibleCalendar">
+				<h2 class="subtitle" data-i18n="SETTINGS/MOBILE_DAVSYNC_HEADING_CALENDAR" data-bind="i18n: 'text'"></h2>
+
+				<!-- ko foreach: davCalendars -->
+				<div class="row">
+					<span class="label" data-bind="text: Name"></span>
+					<span class="value" data-bind="text: Url"></span>
+				</div>
+				<!-- /ko -->
+			</div>
+
+			<div class="fieldgroup" data-bind="visible: bVisibleContacts">
+				<h2 class="subtitle" data-i18n="SETTINGS/MOBILE_DAVSYNC_HEADING_CONTACTS" data-bind="i18n: 'text'"></h2>
+
+				<div class="row" data-bind="visible: bVisiblePersonalContacts">
+					<span class="label" data-i18n="SETTINGS/MOBILE_DAVSYNC_PERSONAL_CONTACTS" data-bind="i18n: 'text'"></span>
+					<span class="value" data-bind="text: davPersonalContactsUrl"></span>
+				</div>
+				<div class="row" data-bind="visible: bVisiblePersonalContacts">
+					<span class="label" data-i18n="SETTINGS/MOBILE_DAVSYNC_COLLECTED_ADDRESSES" data-bind="i18n: 'text'"></span>
+					<span class="value" data-bind="text: davCollectedAddressesUrl"></span>
+				</div>
+				<div class="row" data-bind="visible: bVisibleSharedWithAllContacts">
+					<span class="label" data-i18n="SETTINGS/MOBILE_DAVSYNC_SHARED_WITH_ALL" data-bind="i18n: 'text'"></span>
+					<span class="value" data-bind="text: davSharedWithAllUrl"></span>
+				</div>
+				<div class="row" data-bind="visible: bVisibleGlobalContacts">
+					<span class="label" data-i18n="SETTINGS/MOBILE_DAVSYNC_GLOBAL_ADDRESS_BOOK" data-bind="i18n: 'text'"></span>
+					<span class="value" data-bind="text: davGlobalAddressBookUrl"></span>
+				</div>
+			</div>
+			<div class="hint" data-bind="text: credentialsHintText"></div>
+			<div class="hint" data-bind="i18n: 'html', visible: isDemo" data-i18n="SETTINGS/DEMO_CREDENTIAL_HINT_HTML"></div>
+		</div>
+		
+		<div class="fieldset" data-bind="visible: visibleDavViaUrls && bVisibleFiles">
+			<h2 class="subtitle" data-i18n="SETTINGS/MOBILE_DAVSYNC_HEADING_FILES" data-bind="i18n: 'text'"></h2>
+			<div class="hint" data-i18n="SETTINGS/MOBILE_DAVSYNC_HINT_SPECIFY" data-bind="i18n: 'text'"></div>
+		
+			<div class="fieldgroup">
+				<div class="row">
+					<span class="label" data-i18n="SETTINGS/MOBILE_DAVSYNC_FILES" data-bind="i18n: 'text'"></span>
+					<span class="value" data-bind="text: davServer() + '/files'"></span>
+				</div>
+			</div>
+			<div class="hint" data-bind="text: credentialsHintText"></div>
+			<div class="hint" data-bind="i18n: 'html', visible: isDemo" data-i18n="SETTINGS/DEMO_CREDENTIAL_HINT_HTML"></div>
+		</div>
+		
+	</div>
+</div>

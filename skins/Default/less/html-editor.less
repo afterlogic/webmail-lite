@@ -1,0 +1,376 @@
+/*=== Html Editor CSS ===*/
+.html_editor {
+	.box-sizing;
+	
+	height: 100%;
+	margin-bottom: -36px;
+	padding-bottom: 36px;
+	position: relative;
+
+	.workarea {
+		.box-sizing;
+
+		height: 100% !important;
+		width: 100% !important;
+
+		border: 1px solid #CCCCCC;
+		border-top: 0px;
+		border-radius: 0 0 4px 4px;
+		
+		.scroll-inner {
+			background: #fff;
+		}
+		
+		.crea-content-editable {
+			.box-sizing;
+
+			height: 100% !important;
+			width: 100% !important;
+			outline: 0px;
+			cursor: text;
+			padding: 20px 24px;
+			word-wrap: break-word;
+			
+			a {
+				cursor: text;
+			}
+			
+			p {
+				margin: 0;
+			}
+			
+			img {
+				cursor: pointer;
+			}
+		}
+		
+		li {
+			margin-bottom: 0.6em;
+		}
+	}
+	
+	.uploader_mask {
+		.box-sizing;
+
+		background: #FFFDD6;
+		padding: 11px;
+		color: #D3B910;
+		font-size: 18pt;
+		text-align: center;
+		opacity: 0;
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		height: 100%;
+		width: 100%;
+		visibility: hidden;
+
+		.transition(ease 250ms opacity 0s);
+		
+		.inner {
+			.box-sizing;
+
+			height: 100%;
+			border: 3px dashed #E2DA36;
+			border-radius: 5px;
+		}
+		
+		&.progress {
+			background: #ddd url("images/wait.gif") no-repeat center;
+			
+			.inner {
+				border: 3px dashed #bbb;
+			}
+		}
+		
+		&.active,
+		&.progress,
+		&.editorDragOver {
+			visibility: visible;
+			opacity: 0.5;
+		}
+	}
+	
+	.inline_popup {
+		padding: 4px 8px;
+		position: absolute;
+		background-color: #f7f7f7;
+		border: solid 1px #ccc;
+		border-radius: 2px 2px 2px 2px;
+		
+		&.tooltip {
+			.opacity(0.7);
+
+			border: solid 1px #eee;
+			margin: 10px 0px 0px 10px;
+		}
+		
+		.button {
+			color: #4477BB;
+			text-decoration: underline;
+			cursor: pointer;
+			margin: 0px 8px;
+			padding-right: 8px;
+			border-right: 1px solid #ccc;
+			
+			&:last-child {
+				border-right: 0px;
+				margin: 0px;
+				padding-right: 0px;
+			}
+			
+			&:hover {
+				text-decoration: none;
+			}
+		}
+
+		input {
+			width: 300px;
+		}
+	}
+	
+	.toolbar {
+		.user-select(none);
+
+		border: 1px solid #CCCCCC;
+		border-bottom: 1px solid #ddd;
+		border-radius: 4px 4px 0 0;
+		padding: 0px 4px;
+		cursor: default;
+		background: #fdfdfd;
+		
+		.content {
+			padding: 0px;
+
+			.separator {
+				border-right: 1px solid #fff;
+				border-left: 1px solid #ddd;
+				display: inline-block;
+				height: 32px;
+				margin: 0px 4px;
+				vertical-align: middle;
+			}
+
+			.button {
+				display: inline-block;
+				cursor: pointer;
+				background: #ddd;
+				border: 1px solid #ccc;
+				border-radius: 3px;
+				padding: 4px 6px;
+				font-size: 11pt;
+
+				&:hover {
+					background: #e3e3e3;
+				}
+			}
+
+			.item {
+				background: none;
+				border: 1px solid transparent;
+				display: inline-block;
+				vertical-align: middle;
+				padding: 4px;
+				margin: 4px 1px !important;
+				height: 16px;
+				line-height: 16px;
+				cursor: pointer;
+				box-shadow: none;
+				outline: 0px;
+
+				.item:hover {
+					box-shadow: 0px 0px 3px #eee, inset 1px 1px 0px #fff;
+					border: 1px solid #ccc;
+					background: #eee;
+				}
+
+				.inactive &,
+				.inactive &:hover {
+					opacity: 0.2;
+					cursor: default;
+					background: none;
+				}
+
+				&.select {
+					padding: 0px 0px;
+
+					&:hover {
+						background: none;
+					}
+
+					.input {
+						font-size: 10pt;
+						padding: 0px !important;
+						margin-top: -2px;
+						width: auto;
+						max-width: 200px;
+					}
+				}
+
+				/*&.font .input {
+					width: 140px;
+				}
+
+				&.font_size .input {
+					width: 40px;
+				}*/
+
+				.icon {
+					display: inline-block;
+					vertical-align: middle;
+					width: 16px;
+					height: 16px;
+					background-image: url("images/sprites.png?%VERSION%");
+					background-repeat: no-repeat;
+				}
+
+				&.link .icon { 
+					background-position: 0px -320px;
+				}
+
+				&.unlink .icon {
+					background-position: -40px -320px;
+				}
+
+				&.image .icon {
+					background-position: -440px -320px;
+				}
+
+				&.slist .icon {
+					background-position: -40px -320px;
+				}
+
+				&.uslist .icon {
+					background-position: -80px -320px;
+				}
+
+				&.hline .icon {
+					background-position: -160px -320px;
+				}
+
+				&.bold .icon {
+					background-position: -200px -320px;
+				}
+
+				&.italic .icon {
+					background-position: -120px -320px;
+				}
+
+				&.underline .icon {
+					background-position: -160px -320px;
+				}
+
+				&.aleft .icon {
+					background-position: -320px -320px;
+				}
+
+				&.acenter .icon {
+					background-position: -360px -320px;
+				}
+
+				&.aright .icon {
+					background-position: -400px -320px;
+				}
+
+				&.ajustify .icon {
+					background-position: -440px -320px;
+				}
+
+				&.color .icon {
+					background-position: -400px -320px;
+				}
+
+				&.background .icon {
+					background-position: -40px -320px;
+				}
+
+				&.clear .icon {
+					background-position: -480px -320px;
+				}
+
+				&.strike_through .icon {
+					background-position: -520px -320px;
+				}
+
+				&.undo .icon {
+					background-position: -560px -320px;
+				}
+
+				&.redo .icon {
+					background-position: -600px -320px;
+				}
+			}
+		
+			.dropdown {
+				bottom: -4px;
+				color: #000;
+
+				.inactive& {
+					left: -10000px;
+				}
+
+				&.color {
+					white-space: nowrap;
+				}
+
+				.dropdown_content {
+					border: 1px solid #ccc;
+					border-top: 1px solid #FAFAFA;
+					background: #eee;
+					padding: 4px;
+					border-radius: 0px 0px 3px 3px;
+
+					.input {
+						width: auto;
+						padding: 3px 5px 2px;
+						vertical-align: top;
+						margin: 0px;
+						font-size: 11pt;
+					}
+				}
+			}
+		
+			.color_table {
+				display: inline-block;
+				margin-right: 6px;
+				vertical-align: bottom;
+
+				&:last-child{
+					margin-right: 0px;
+				}
+
+				.title {
+					display: inline-block;
+					margin: 2px 0px 4px;
+					padding: 0px;
+				}
+
+				.row {
+					display: block;
+					white-space: nowrap;
+					font-size: 0px;
+					margin: 0px !important;
+				}
+
+				.color-item {
+					display: inline-block;
+					vertical-align: bottom;
+					width: 16px;
+					height: 16px;
+					margin: 2px;
+					cursor: pointer;
+
+					&:hover {
+						width: 18px;
+						height: 18px;
+						margin: 1px;
+						box-shadow: 0px 0px 2px #aaa;
+					}
+				}
+			}
+		}
+	}
+	
+	.theme-html-editor();
+}
+/*=== END Html Editor CSS ===*/

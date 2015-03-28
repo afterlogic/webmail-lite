@@ -1,0 +1,276 @@
+/*=== Toolbar CSS ===*/
+.toolbar {
+	@bottomBorder: 1px solid #cacfd5;
+	@background: #e0e7ef;
+	
+	.theme-item-hover() {
+		box-shadow: inset 0px -1px 4px #eee, inset 0px 1px 0px #d5d5d5;
+	};
+	
+	background: @background;
+	border-bottom: @bottomBorder;
+	border-radius: 4px 4px 0 0;
+	white-space: nowrap;
+
+	.resizer {
+		height: 55px;
+	}
+
+	.content {
+		display: block;
+		font-size: 0.1px;
+		padding: 11px;
+
+		& > .item,
+		.group > .item {
+			@background: #fafafa;
+			
+			display: inline-block;
+			vertical-align: middle;
+			background-color: @background;
+			box-shadow: inset 0px -1px 4px #eee, inset 0px 1px 0px #fff;
+			border: 1px solid #c5c5c5;
+			border-radius: 4px;
+			
+			height: 30px;
+			line-height: 30px;
+			padding: 0 6px;
+			position: relative;
+			cursor: pointer;
+			
+			font-size: 10pt;
+			color: #626262;
+			text-decoration: none;
+			
+			margin-right: 8px;
+			
+			&:last-child {
+				margin-right: 0px;
+
+				html.rtl & {
+					margin-left: 0px;
+				}
+			}
+			
+			html.rtl & {
+				margin-left: 8px;
+				margin-right: 0px;
+			}
+			
+			html.mobile & {
+				position: static;
+			}
+			
+			// don't write in one line because it increase selector priority
+			&:hover:not(.disabled):not(.passive),
+			&.expand {
+				@background: #eee;
+				
+				background: @background;
+				
+				.theme-item-hover();
+				
+				.hint {
+					background-color: darken(@background, 10%);
+				}
+			}
+			
+			& > .icon {
+				display: inline-block;
+				vertical-align: middle;
+				text-align: center;
+				width: 28px;
+				height: 28px;
+				font-size: 27px;
+				color: rgba(0,0,0, 0.5);
+				
+				text-shadow: 0 1px 0 #ffffff, 0 0 0 #505050;
+				
+				.iconFontInit();
+				&:before {
+					display: inline-block;
+					vertical-align: baseline;
+				}
+			}
+
+			& > .text_icon {
+				display: inline-block;
+				vertical-align: middle;
+				text-align: center;
+				width: 30px;
+				height: 30px;
+				font-size: 20px;
+				color: rgba(0,0,0, 0.5);
+			}
+
+			&.checkmail  {
+				float: right;
+				margin-right: 0px;
+
+				html.rtl & {
+					float: left;
+					margin-left: 0px;
+				}
+			}
+
+			&.passive,
+			&.passive:hover {
+				//color: #888888;
+				cursor: default;
+				box-shadow: none;
+				//background: inherit;
+				//border: inherit;
+				
+				.text {
+					color: inherit;
+				}
+				
+				.theme-item();
+			}
+
+			.arrow {
+				height: 14px !important;
+				width: 14px !important;
+				
+				&:before {
+					vertical-align: top;
+					content: "\e66d" !important;
+					font-size: 16px;
+				}
+			}	
+
+			& > .text {
+				display: inline-block;
+				display: none;
+				vertical-align: baseline;
+				font-weight: bold;
+			}
+
+			.hint {
+				background-color: darken(@background, 30%);
+				border-radius: 3px;
+				color: #FFFFFF;
+				padding: 0 5px;
+				vertical-align: middle;
+				display: inline-block;
+				line-height: 22px;
+			}
+			
+			.theme-item();
+		}
+	   
+		.group {
+			display: inline-block;
+			vertical-align: middle;
+			margin-right: 8px;
+			position: relative;
+
+			html.rtl & {
+				margin-left: 8px;
+				margin-right: 0px;
+			}
+			
+			html.mobile & {
+				position: static;
+			}
+
+			& > .item {
+				margin-right: 0px;
+				margin-left: 0px;
+				border-radius: 0px;
+				border-left-width: 0px;
+				border-right-width: 1px;
+
+				html.rtl & {
+					margin-right: 0px;
+					margin-left: 0px;
+					border-radius: 0px;
+					border-left-width: 1px;
+					border-right-width: 0px;
+				}
+
+				&:first-child {
+					border-left-width: 1px;
+					border-radius: 4px 0px 0px 4px;
+
+					html.rtl & {
+						border-right-width: 1px;
+						border-radius: 0px 4px 4px 0px;
+					}
+				}
+
+				&.control,
+				&:last-child {
+					border-radius: 0px 4px 4px 0px;
+
+					html.rtl & {
+						border-radius: 4px 0px 0px 4px;
+					}
+				}
+			}
+
+			&.expand > .item {
+				@background: #eee;
+				
+				background: @background;
+				
+				.theme-item-hover();
+				
+				.hint {
+					background-color: darken(@background, 10%);
+				}
+			}
+		}
+	}
+
+	.disabled .item,
+	.item.disabled {
+		.opacity(0.3);
+		color: #888888;
+		cursor: default;
+		
+		//&:hover {
+			//background: #fafafa;
+			//box-shadow: 0 -1px 4px #EEEEEE inset, 0 1px 0 #FFFFFF inset;
+		//}
+	}
+	
+	.group,
+	.item {
+		@import "_toolbar_icons.less";
+	}
+	
+	.theme-common-panel-toolbar();
+}
+
+.cssanimations .toolbar .item.process .icon:before {
+	.animation(cycle 0.8s linear infinite);
+}
+
+.mobile {
+	.messages .panel_top .search_block {
+		padding-right: 58px;
+	}
+	.messages .panel_top .toolbar {
+		background: none;
+		border: 0;
+		border-radius: 0;
+		display: inline-block;
+		filter: none;
+		float: right;
+		margin-top: -29px;
+		padding: 0;
+
+		.content {
+			padding: 0;
+
+			.item.checkmail {
+				padding: 0 2px;
+				background: none;
+				border: 0;
+				box-shadow: none;
+			}
+		}
+	}
+}
+/*=== END Toolbar CSS ===*/

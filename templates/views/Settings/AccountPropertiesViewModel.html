@@ -1,0 +1,70 @@
+<div class="fields">
+	<div class="fieldset">
+		<div class="row" data-bind="visible: !isAllowIdentities">
+			<span class="label" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_YOUR_NAME" data-bind="i18n: 'text'"></span>
+			<input class="value input" spellcheck="false" type="text" maxlength="65" data-bind="value: friendlyName, onEnter: onSaveClick"/>
+		</div>
+		
+		<div class="row" data-bind="visible: !isDefault() || (!isLinked() && allowUsersChangeEmailSettings)">
+			<span class="label required" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_INCOMING_MAIL" data-bind="i18n: 'text'"></span>
+			<input class="value input" spellcheck="false" type="text" maxlength="255" data-bind="value: incomingMailServer, onEnter: onSaveClick"/>
+
+			<span class="label required" style="width: auto; margin-left: 10px;" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_PORT" data-bind="i18n: 'text'"></span>
+			<input class="value input port" spellcheck="false" type="text" maxlength="5" data-bind="value: incomingMailPort, onEnter: onSaveClick"/>
+		</div>
+		
+		<div class="row" data-bind="visible: !isDefault() || (!isLinked() && allowUsersChangeEmailSettings)">
+			<span class="label required" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_LOGIN" data-bind="i18n: 'text'"></span>
+			<input class="value input" spellcheck="false" type="text" maxlength="255" data-bind="value: incomingMailLogin, hasfocus: incLoginFocused, onEnter: onSaveClick"/>
+		</div>
+		<div class="row" data-bind="visible: !isDefault() || (!isLinked() && allowUsersChangeEmailSettings)">
+			<span class="label required" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_PASSWORD" data-bind="i18n: 'text'"></span>
+			<input class="value input" spellcheck="false" type="password" maxlength="255" data-bind="value: incomingMailPassword, onEnter: onSaveClick"/>
+		</div>
+		<div class="row" data-bind="visible: !isDefault() || (!isLinked() && allowUsersChangeEmailSettings)">
+			<span class="label required" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_OUTGOING_MAIL" data-bind="i18n: 'text'"></span>
+			<input class="value input" spellcheck="false" type="text" maxlength="255"  data-bind="value: outgoingMailServer, hasfocus: outServerFocused, onEnter: onSaveClick"/>
+
+			<span class="label required" style="width: auto; margin-left: 10px;" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_PORT" data-bind="i18n: 'text'"></span>
+			<input  class="value input port" spellcheck="false" type="text" maxlength="5"  data-bind="value: outgoingMailPort, onEnter: onSaveClick"/>
+		</div>
+		
+		<div class="row" data-bind="visible: !isDefault() || (!isLinked() && allowUsersChangeEmailSettings)">
+			<div>
+				<label class="custom_checkbox" data-bind="css: {'checked': useSmtpAuthentication}">
+					<span class="icon"></span>
+					<input type="checkbox" id="mail_out_auth" data-bind="checked: useSmtpAuthentication" />
+				</label>
+				<label for="mail_out_auth" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_USE_SMTP_AUTHENTICATION" data-bind="i18n: 'text'"></label>
+			</div>
+		</div>
+		
+		<div class="buttons" data-bind="visible: allowChangePassword" style="text-align: left;">
+			<span class="button" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_CHANGE_PASSWORD" data-bind="i18n: 'text', click: onChangePasswordClick"></span>
+		</div>
+		
+		<div class="row remove_account" data-bind="visible: !isInternal() && allowUsersChangeEmailSettings">
+			<span class="link" data-i18n="SETTINGS/ACCOUNTS_LINK_DELETE" 
+				   data-bind="i18n: 'text', click: function () { $parent.onEditedAccountDelete(); }">
+			</span>
+		</div>
+		<div class="hint" data-bind="visible: !isInternal() && allowUsersChangeEmailSettings">
+			<span data-bind="text: removeHint"></span>
+		</div>
+		
+		<!--<div class="row" data-bind="visible: useSmtpAuthentication()">
+			<span class="label" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_NEW_PASSWORD" data-bind="i18n: 'text'"></span>
+			<input class="value input" spellcheck="false" type="text" maxlength="255" data-bind="value: outgoingMailLogin"/>
+		</div>
+		
+		<div class="row" data-bind="visible: useSmtpAuthentication()">
+			<span class="label" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_PASSWORD" data-bind="i18n: 'text'"></span>
+			<input class="value input" spellcheck="false" type="password" maxlength="255" />
+		</div>-->
+	</div>
+	
+	<div class="buttons">
+		<span class="button" data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', click: onSaveClick, visible: !loading()"></span>
+		<span class="button" data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', click: onSaveClick, visible: loading()"></span>
+	</div>
+</div>

@@ -1,0 +1,315 @@
+<div class="panels">
+	<div class="panel compose">
+		<div class="panel_content">
+			<div class="toolbar">
+				<span class="content">
+					<!-- ko if: !mobileApp && !singleMode() -->
+					<span class="item save_and_close" data-bind="visible: typeof saveAndClose === 'function', 
+							click: function () { if (saveAndClose) { saveAndClose(); } }, customTooltip: saveAndCloseTooltip">
+						<span class="icon"></span>
+					</span>
+					<span class="item new_window"
+						data-bind="customTooltip: 'COMPOSE/LINK_OPEN_IN_NEW_WINDOW', click: openInNewWindow">
+						<span class="icon"></span>
+					</span>
+					<span class="item minimize" data-bind="visible: typeof minimize === 'function', 
+							click: function () { if (minimize) { minimize(); } }, customTooltip: 'COMPOSE/TOOL_MINIMIZE'">
+						<span class="icon"></span>
+					</span>
+					<!-- /ko -->
+
+					<span class="item back" data-bind="command: backToListCommand, visible: mobileApp, customTooltip: 'MAILBOX/TOOL_BACK_TO_LIST'">
+						<span class="icon"></span>
+						<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_BACK_TO_LIST"></span>
+					</span>
+					<span class="item send" data-bind="command: sendCommand, css: {'disabled': !isEnableSending()}">
+						<span class="icon" data-bind="customTooltip: 'COMPOSE/TOOL_SEND'"></span>
+						<span class="text" data-bind="i18n: 'text'" data-i18n="COMPOSE/TOOL_SEND"></span>
+					</span>
+					<span class="item save" data-bind="command: saveCommand, css: {'disabled': !isEnableSaving()}">
+						<span class="icon" data-bind="customTooltip: 'COMPOSE/TOOL_SAVE'"></span>
+						<span class="text" data-bind="i18n: 'text'" data-i18n="COMPOSE/TOOL_SAVE"></span>
+					</span>
+					<!-- ko if: !mobileApp -->
+					<span class="item importance" data-bind="dropdown: {'control': false}">
+						<span class="icon" data-bind="customTooltip: 'COMPOSE/TOOL_IMPORTANCE'"></span>
+						<span class="text" data-bind="i18n: 'text'" data-i18n="COMPOSE/TOOL_IMPORTANCE"></span>
+						<span class="icon arrow"></span>
+						<span class="dropdown">
+							<span class="dropdown_helper">
+								<span class="dropdown_arrow"><span></span></span>
+								<span class="dropdown_content">
+									<span class="item importance_low" data-bind="click: function () {selectedImportance(Enums.Importance.Low);}, 
+										  i18n: 'text', 
+										  css: {'selected': selectedImportance() === Enums.Importance.Low}"
+										data-i18n="COMPOSE/TOOL_LOW_IMPORTANCE"></span>
+									<span class="item importance_normal" data-bind="click: function () {selectedImportance(Enums.Importance.Normal);}, 
+										  i18n: 'text', 
+										  css: {'selected': selectedImportance() === Enums.Importance.Normal}"
+										data-i18n="COMPOSE/TOOL_NORMAL_IMPORTANCE"></span>
+									<span class="item importance_high" data-bind="click: function () {selectedImportance(Enums.Importance.High);}, 
+										  i18n: 'text', 
+										  css: {'selected': selectedImportance() === Enums.Importance.High}"
+										data-i18n="COMPOSE/TOOL_HIGH_IMPORTANCE"></span>
+								</span>
+							</span>
+						</span>
+					</span>
+					<span class="item sensitivity" data-bind="dropdown: {'control': false}">
+						<span class="icon" data-bind="customTooltip: 'COMPOSE/TOOL_SENSIVITY'"></span>
+						<span class="text" data-bind="i18n: 'text'" data-i18n="COMPOSE/TOOL_SENSIVITY"></span>
+						<span class="icon arrow"></span>
+						<span class="dropdown">
+							<span class="dropdown_helper">
+								<span class="dropdown_arrow"><span></span></span>
+								<span class="dropdown_content">
+									<span class="item sensivity_nothing" data-bind="click: function () {selectedSensitivity(Enums.Sensivity.Nothing);}, 
+										  i18n: 'text', 
+										  css: {'selected': selectedSensitivity() === Enums.Sensivity.Nothing}"
+										data-i18n="COMPOSE/TOOL_NOTHING_SENSIVITY"></span>
+									<span class="item sensivity_confidential" data-bind="click: function () {selectedSensitivity(Enums.Sensivity.Confidential);}, 
+										  i18n: 'text', 
+										  css: {'selected': selectedSensitivity() === Enums.Sensivity.Confidential}"
+										data-i18n="COMPOSE/TOOL_CONFIDENTIAL_SENSIVITY"></span>
+									<span class="item sensivity_private" data-bind="click: function () {selectedSensitivity(Enums.Sensivity.Private);}, 
+										  i18n: 'text', 
+										  css: {'selected': selectedSensitivity() === Enums.Sensivity.Private}"
+										data-i18n="COMPOSE/TOOL_PRIVATE_SENSIVITY"></span>
+									<span class="item sensivity_personal" data-bind="click: function () {selectedSensitivity(Enums.Sensivity.Personal);}, 
+										  i18n: 'text', 
+										  css: {'selected': selectedSensitivity() === Enums.Sensivity.Personal}"
+										data-i18n="COMPOSE/TOOL_PERSONAL_SENSIVITY"></span>
+								</span>
+							</span>
+						</span>
+					</span>
+					
+					<label class="item confirmation">
+						<span class="custom_checkbox" data-bind="css: {'checked': readingConfirmation}">
+							<span class="icon"></span>
+							<input type="checkbox" data-bind="checked: readingConfirmation" />
+						</span>
+						<span class="text" data-bind="i18n: 'text'" data-i18n="COMPOSE/LINK_READING_CONFIRMATION"></span>
+					</label>
+					
+					<span class="item pgp" data-bind="command: openPgpCommand, visible: visibleDoPgpButton">
+						<span class="icon"></span>
+						<span class="text" data-bind="i18n: 'text'" data-i18n="COMPOSE/TOOL_OPENPGP"></span>
+					</span>
+					<span class="item pgp" data-bind="click: undoPgp, visible: visibleUndoPgpButton">
+						<span class="icon"></span>
+						<span class="text" data-bind="i18n: 'text'" data-i18n="COMPOSE/TOOL_UNDOPGP"></span>
+					</span>
+					<!-- /ko -->
+					
+					<!--<span class="item">
+						<label class="custom_checkbox" data-bind="css: {'checked': saveMailInSentItems}">
+							<span class="icon" data-bind="customTooltip: 'COMPOSE/LINK_SAVE_IN_SENT_ITEMS'"></span>
+							<input type="checkbox" id="chSaveMailInSentItems" data-bind="checked: saveMailInSentItems" />
+						</label>
+						<label for="chSaveMailInSentItems" data-bind="i18n: 'text'" data-i18n="COMPOSE/LINK_SAVE_IN_SENT_ITEMS"></label>
+					</span>-->
+				</span>
+			</div>
+
+			<div class="panels" data-bind="splitter: {name: 'compose_attachments', sizeRight: 250, minLeft: 645, minRight: 250, resizeToWidth: true}, initDom: splitterDom">
+				<div class="panel left_panel">
+					<div class="resize_handler"></div>
+					<div class="panel_content">
+						<div class="middle_bar" data-bind="heightAdjust: {'location': 'bottom', 'delay': '0', 'elements': [messageFields, bottomPanel], 'triggers': [visibleBcc(), visibleCc(), toAddr(), toAddr(), bccAddr(), notInlineAttachments(), senderList()]}">
+							<div class="panel_top" data-bind="initDom: messageFields, minHeightAdjust: {'adjustElement': jqContainers, 'minHeight': 450, 'trigger': minHeightAdjustTrigger(), 'removeTrigger': minHeightRemoveTrigger()}">
+								<div class="notice" data-bind="visible: isDemo, i18n: 'text'" data-i18n="DEMO/WARNING_SEND_EMAIL_TO_DEMO_ONLY"></div>
+								<table class="fields">
+									<tr class="first_row from" data-bind="visible: visibleFrom">
+										<td class="label">
+											<span data-bind="i18n: 'text'" data-i18n="COMPOSE/HEADER_FROM"></span>:
+										</td>
+										<td class="value">
+											<select class="input" tabindex="1" data-bind="foreach: senderList, value: selectedSender">
+												<option data-bind="text: fullEmail, value: id"></option>
+											</select>
+										</td>
+									</tr>
+									<tr class="to">
+										<td class="label">
+											<span data-bind="i18n: 'text'" data-i18n="COMPOSE/HEADER_TO"></span>:
+										</td>
+										<td class="value">
+											<table class="fields">
+												<tr>
+													<td class="value" style="width: 100%;">
+														<div class="input inputosaurus">
+															<div class="disable_mask" data-bind="visible: pgpEncrypted"></div>
+															<div data-bind="customScrollbar: {x: false}">
+																<div class="scroll-inner">
+																	<input type="text" spellcheck="false" tabindex="2" data-bind="initDom: toAddrDom" />
+																</div>
+															</div>
+														</div>
+													</td>
+													<td class="value">
+														<!-- ko if: !mobileApp -->
+														<span class="link show_cc" data-bind="i18n: 'text', visible: !visibleCc() && !pgpEncrypted(), click: changeCcVisibility"
+															data-i18n="COMPOSE/LINK_SHOW_CC"></span>
+
+														<span class="link show_bcc" data-bind="i18n: 'text', visible: !visibleBcc() && !pgpEncrypted(), click: changeBccVisibility"
+															data-i18n="COMPOSE/LINK_SHOW_BCC"></span>
+														<!-- /ko -->
+													</td>
+												</tr>
+											</table>
+										</td>
+									</tr>
+									<!-- ko if: mobileApp -->
+									<tr class="cc" data-bind="visible: !visibleCc() || !visibleBcc()">
+										<td class="label"></td>
+										<td class="value">
+											<span class="link show_cc" data-bind="i18n: 'text', visible: !visibleCc(), click: changeCcVisibility"
+												data-i18n="COMPOSE/LINK_SHOW_CC"></span>
+
+											<span class="link show_bcc" data-bind="i18n: 'text', visible: !visibleBcc(), click: changeBccVisibility"
+												data-i18n="COMPOSE/LINK_SHOW_BCC"></span>
+										</td>
+									</tr>
+									<!-- /ko -->
+									<tr class="cc" data-bind="visible: visibleCc">
+										<td class="label">
+											<span data-bind="i18n: 'text'" data-i18n="COMPOSE/HEADER_CC"></span>:
+										</td>
+										<td class="value">
+											<div class="input inputosaurus">
+												<div class="disable_mask" data-bind="visible: pgpEncrypted"></div>
+												<div data-bind="customScrollbar: {x: false}">
+													<div class="scroll-inner">
+														<input type="text" spellcheck="false" tabindex="3" data-bind="initDom: ccAddrDom" />
+													</div>
+												</div>
+											</div>
+											<span class="link hide_cc" data-bind="i18n: 'text', visible: visibleCc, click: changeCcVisibility"
+												data-i18n="COMPOSE/LINK_HIDE_CC"></span>
+										</td>
+									</tr>
+									<tr class="bcc" data-bind="visible: visibleBcc">
+										<td class="label">
+											<span data-bind="i18n: 'text'" data-i18n="COMPOSE/HEADER_BCC"></span>:
+										</td>
+										<td class="value">
+											<div class="input inputosaurus">
+												<div class="disable_mask" data-bind="visible: pgpEncrypted"></div>
+												<div data-bind="customScrollbar: {x: false}">
+													<div class="scroll-inner">
+														<input type="text" spellcheck="false" tabindex="4" data-bind="initDom: bccAddrDom" />
+													</div>
+												</div>
+											</div>
+											<span class="link hide_bcc" data-bind="i18n: 'text', visible: visibleBcc, click: changeBccVisibility"
+												data-i18n="COMPOSE/LINK_HIDE_BCC"></span>
+										</td>
+									</tr>
+									<tr class="last_row subject">
+										<td class="label">
+											<span data-bind="i18n: 'text'" data-i18n="COMPOSE/HEADER_SUBJECT"></span>:
+										</td>
+										<td class="value">
+											<input type="text" class="input" maxlength="255" tabindex="5" data-bind="value: subject, hasfocus: subjectFocused, valueUpdate: 'afterkeydown'"/>
+										</td>
+									</tr>
+									<tr class="counter" data-bind="visible: visibleCounter">
+										<td class="label">
+											<span data-bind="i18n: 'text'" data-i18n="COMPOSE/HEADER_COUNTER"></span>:
+										</td>
+										<td class="value">
+											<input type="text" class="input" size="3" value="600" disabled="" tabindex="6"
+												   data-bind="value: counter"/>
+										</td>
+									</tr>
+								</table>
+								<!-- ko if: mobileApp -->
+								<div class="attachments upload large">
+									<span class="uploader_button" data-bind="initDom: composeUploaderButton">
+										<span data-bind="i18n: 'text'" data-i18n="COMPOSE/ATTACH_CLICK_MOBILE"></span>
+									</span>
+									<div class="items_list" data-bind="customScrollbar: {x: false}">
+										<div class="scroll-inner">
+											<div class="attachments_container" data-bind="template: {name: 'Common_FileViewModel', foreach: notInlineAttachments}"></div>
+										</div>
+									</div>
+								</div>
+								<!-- /ko -->
+							</div>
+							<div class="panel_center">
+								<!-- ko template: { name: 'Common_HtmlEditorViewModel', data: oHtmlEditor} --><!-- /ko -->
+							</div>
+							<div class="panel_bottom" data-bind="initDom: bottomPanel, listWithMoreButton: true">
+								<!-- ko if: showHotkeysHints -->
+								<span class="text hint" data-bind="foreach: aHotkeys">
+									<span class="hotkey">
+										<span class="hotkey_value" data-bind="text: value"></span>
+										<span class="hotkey_action" data-bind="text: action"></span>
+									</span>
+								</span>
+								<span class="more_hints" data-bind="dropdown: {control: false}, customTooltip: 'MAILBOX/TOOL_MORE_ACTIONS'">
+									<span class="icon"></span>
+									<span class="dropdown">
+										<span class="dropdown_helper">
+											<span class="dropdown_content" data-bind="foreach: aHotkeys">
+												<span class="item">
+													<span class="hotkey_value" data-bind="text: value"></span>
+													<span class="hotkey_action" data-bind="text: action"></span>
+												</span>
+											</span>
+											<span class="dropdown_arrow bottom">
+												<span></span>
+											</span>
+										</span>
+									</span>
+								</span>
+								<!-- /ko -->
+							</div>
+
+						</div>
+					</div>
+				</div>
+				<!-- ko if: !mobileApp -->
+				<div class="panel right_panel attachments upload large">
+					<div class="panel_content">
+						<div class="middle_bar">
+							<div class="panel_top">
+								<span class="uploader_button desktop" data-bind="initDom: composeUploaderButton, customTooltip: 'COMPOSE/ATTACH_CLICK'">
+									<span class="icon"></span>
+									<span class="text" data-bind="i18n: 'text'" data-i18n="COMPOSE/ATTACH_CLICK"></span>
+								</span>
+								<span class="uploader_button files" data-bind="visible: allowFiles, click: onShowFilesPopupClick">
+									<span class="icon" data-bind="customTooltip: 'COMPOSE/ATTACH_FROM_FILES_CLICK'"></span>
+									<span class="text" data-bind="i18n: 'text'" data-i18n="COMPOSE/ATTACH_FROM_FILES_CLICK"></span>
+								</span>
+								<span class="uploader_button google_drive" data-bind="visible: allowGoogle, click: onShowGoogleDriveClick">
+									<span class="icon" data-bind="customTooltip: 'COMPOSE/ATTACH_FROM_GOOGLE_DRIVE_CLICK'"></span>
+									<span class="text" data-bind="i18n: 'text'" data-i18n="COMPOSE/ATTACH_FROM_GOOGLE_DRIVE_CLICK"></span>
+								</span>
+								<span class="uploader_button dropbox" data-bind="visible: allowDropbox, click: onShowDropBoxClick">
+									<span class="icon" data-bind="customTooltip: 'COMPOSE/ATTACH_FROM_DROPBOX_CLICK'"></span>
+									<span class="text" data-bind="i18n: 'text'" data-i18n="COMPOSE/ATTACH_FROM_DROPBOX_CLICK"></span>
+								</span>
+							</div>
+							<div class="panel_center" data-bind="customScrollbar: {x: false}">
+								<div class="scroll-inner">
+									<!--<div class="items_list" data-bind="customScrollbar: {x: false}, visible: notInlineAttachments().length > 0">-->
+									<div class="items_list">
+										<span class="list_notification" data-bind="i18n: 'text', visible: allowDragNDrop && notInlineAttachments().length === 0" data-i18n="COMPOSE/ATTACH_HINT"></span>
+										<div class="attachments_container" data-bind="template: {name: 'Common_FileViewModel', foreach: notInlineAttachments}"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="uploader_mask" data-bind="initDom: composeUploaderDropPlace, 
+								css: { 'over': uploaderDragOver, 'active': uploaderBodyDragOver }">
+							<div class="inner"></div>
+						</div>
+					</div>
+				</div>
+				<!-- /ko -->
+			</div>
+		</div>
+	</div>
+</div>

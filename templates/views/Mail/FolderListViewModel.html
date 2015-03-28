@@ -1,0 +1,40 @@
+<div class="panel_center" data-bind="customScrollbar: {x: false}">
+	<div class="scroll-inner">
+		<div class="items_list collapsible">
+			<!-- ko if: mobileApp -->
+			<div class="accounts" data-bind="visible: accounts().length > 1, foreach: accounts">
+				<div class="item" data-bind="css: {'selected': isCurrent()}, click: changeAccount">
+					<label class="custom_radio" data-bind="css: {'checked': isCurrent()}">
+						<span class="icon"></span>
+						<input type="radio" id="account_text" data-bind="checked: isCurrent()" />
+					</label>
+					<label for="account_text" class="text" data-bind="text: email"></label>
+				</div>
+			</div>
+			<!-- /ko -->
+			<div class="folders">
+			<!-- ko template: {name: 'Mail_FolderViewModel', foreach: folderList().collection} --><!-- /ko -->
+			<!-- ko if: mobileApp -->
+			<span class="volumer" data-bind="visible: -1 < quotaProc(), click: $parent.onVolumerClick">
+				<span class="volumer_conteiner">
+					<span class="used" data-bind="style: {'width': '' + (-1 < quotaProc() ? quotaProc() : 0) + '%' }"></span>
+				</span>
+			</span>
+			<!-- /ko -->
+			</div>
+		</div>
+	</div>
+</div>
+<!-- ko if: !mobileApp -->
+<div class="panel_bottom">
+	<div class="manage_folders">
+		<a href="javascript: void(0)" data-i18n="MAILBOX/LINK_MANAGE_FOLDERS" data-bind="i18n: 'text',
+			attr: {href: manageFoldersHash}"></a>
+	</div>
+	<span class="volumer" data-bind="visible: -1 < quotaProc()">
+		<span class="volumer_conteiner" data-bind="customTooltip: quotaDesc">
+			<span class="used" data-bind="style: {'width': '' + (-1 < quotaProc() ? quotaProc() : 0) + '%' }"></span>
+		</span>
+	</span>
+</div>
+<!-- /ko -->

@@ -1,0 +1,76 @@
+/*==== Fade CSS ====*/
+.fadeout {
+	display: block;
+	position: relative;
+	overflow: hidden;
+	white-space: nowrap;
+	
+	&:after {
+		content: "";
+		pointer-events: none;
+		position: absolute;
+		display: block;
+		top: 0;
+		right: 0;
+		width: 10px;
+		height: 100%;
+
+		html.rtl & {
+			left: 0;
+			right: auto;
+		}
+		
+		.recivedAnim & {
+			background: none !important;
+		}
+	}
+	
+	.faded {
+		position: absolute;
+		display: block;
+		top: 0; right: 0;
+		width: 10px;
+		height: 100%;
+		
+		html.rtl & {
+			left: 0;
+			right: auto;
+		}
+	}
+}
+/*==== END Fade CSS ====*/
+.fadeout_text_init() {
+	overflow: hidden;
+
+	&:after {
+		content: "";
+		pointer-events: none;
+		display: block;
+		width: 10px;
+
+		float: right;
+		height: 100px;
+		margin-left: 0;
+		margin-top: -100px;
+		position: relative;
+		
+		html.rtl & {
+			float: left;
+		}
+		
+		.recivedAnim & {
+			background: none !important;
+		}
+	}
+}
+
+.fadeout_text(@color) when (iscolor(@color)) {
+	
+	&:after {
+		.fade_gradient(@color);
+		
+		html.rtl & {
+			.fade_gradient(rtl, @color);
+		}
+	}
+}

@@ -1,0 +1,19 @@
+<div class="item" data-bind="
+	droppable: {valueFunc: function (oEvent, oUi) { $root.dropItem(oEvent, oUi); }},
+	dropdown: {'callback': $parent.calendarDropdownToggle, 'trueValue': id, passClick: false},
+	style: {backgroundColor: color},
+	css: {'inactive': !active(), 'readonly': !isEditable()}">
+	<div class="label-container" data-bind="click: $parent.calendarListClick">
+		<label class="custom_checkbox" data-bind="css: {'checked': active}">
+			<span class="icon"></span>
+			<input type="checkbox" data-bind="checked: active" />
+		</label>
+		<span class="icon public" data-bind="visible: isPublic()"></span>
+		<span>
+			<span class="title" data-bind="text: name() + (isShared() ? ' - ' + owner() : ''), fade: {color: color}"></span>
+		</span>
+	</div>
+	<div class="button-container">
+		<span class="control" data-bind="visible: control"></span>
+	</div>
+</div>

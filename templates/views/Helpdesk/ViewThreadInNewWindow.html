@@ -1,0 +1,8 @@
+<div class="panel item_viewer thread_viewer">
+	<div class="panel_content">
+		<div class="middle_bar" data-bind="heightAdjust: {'elements': [domQuickReply], 'triggers': [uploadedFiles(), isQuickReplyActive(), replySendingStarted(), isQuickReplyHidden()]}">
+			<!-- ko template: { name: simplePreviewPane() ? 'Helpdesk_ViewThreadExt' : 'Helpdesk_ViewThread' } --><!-- /ko -->
+			<!-- ko template: { name: 'Helpdesk_QuickReply' } --><!-- /ko -->
+		</div>
+	</div>
+</div>

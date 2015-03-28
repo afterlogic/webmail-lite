@@ -1,0 +1,106 @@
+<div style="display: none;" data-bind="initDom: domMessageForPrint">
+	<style>
+		blockquote {/*while editing see also style.css*/
+			border-left: solid 2px #000000;
+			margin: 4px 2px;
+			padding-left: 6px;
+		}
+		.wm_print {
+			border-collapse: collapse;
+			width: 96%;
+		}
+		.wm_print_title, .wm_print_value, .wm_print_body {
+			padding: 4px;
+			border: solid #666666;
+			font: normal 11px Tahoma, Arial, Helvetica, sans-serif;
+			text-align: left;
+		}
+		.wm_print_title {
+			border-width: 0px 1px 1px 0px !important;
+		}
+		.wm_print_value {
+			border-width: 0px 0px 1px 1px !important;
+		}
+		.wm_print_body {
+			border-width: 1px 0px 0px 0px !important;
+		}
+		span.comma:first-child
+		{
+			display: none;
+		}
+	</style>
+	<div align="center" style="padding-top: 10px">
+		<table class="wm_print">
+			<tbody>
+				<tr>
+					<td width="60px" class="wm_print_title">
+						<span data-i18n="MESSAGE/HEADER_FROM" data-bind="i18n: 'text'"></span>: 
+					</td>
+					<td class="wm_print_value" data-bind="text: fullFrom"></td>
+				</tr>
+				<tr>
+					<td width="60px" class="wm_print_title">
+						<span data-i18n="MESSAGE/HEADER_TO" data-bind="i18n: 'text'"></span>: 
+					</td>
+					<td class="wm_print_value" data-bind="text: to"></td>
+				</tr>
+				<tr data-bind="visible: cc() !== ''">
+					<td width="60px" class="wm_print_title">
+						<span data-i18n="MESSAGE/HEADER_CC" data-bind="i18n: 'text'"></span>: 
+					</td>
+					<td class="wm_print_value" data-bind="text: cc"></td>
+				</tr>
+				<tr data-bind="visible: bcc() !== ''">
+					<td width="60px" class="wm_print_title">
+						<span data-i18n="MESSAGE/HEADER_BCC" data-bind="i18n: 'text'"></span>: 
+					</td>
+					<td class="wm_print_value" data-bind="text: bcc"></td>
+				</tr>
+				<tr>
+					<td width="60px" class="wm_print_title">
+						<span data-i18n="MESSAGE/HEADER_DATE" data-bind="i18n: 'text'"></span>: 
+					</td>
+					<td class="wm_print_value" data-bind="text: fullDate"></td>
+				</tr>
+				<tr>
+					<td width="60px" class="wm_print_title">
+						<span data-i18n="MESSAGE/HEADER_SUBJECT" data-bind="i18n: 'text'"></span>: 
+					</td>
+					<td class="wm_print_value" data-bind="text: subject"></td>
+				</tr>
+				<tr data-bind="visible: attachments().length > 0">
+					<td width="60px" class="wm_print_title">
+						<span data-i18n="MESSAGE/HEADER_ATTACHMENTS" data-bind="i18n: 'text'"></span>: 
+					</td>
+					<!-- ko if: usesAttachmentString -->
+					<td class="wm_print_value">
+						<span data-bind="text: attachmentsInString"></span>
+					</td>
+					<!-- /ko -->
+					<!-- ko if: !usesAttachmentString -->
+					<td class="wm_print_value">
+						<!-- ko foreach: attachments -->
+							<span class="comma">, </span>
+							<a href="javascript: void(0);" data-bind="text: fileName, 
+							   attr: {'data-hash': 'download-' + hash()}"></a>
+							<span data-bind="visible: visibleViewLink">
+								(<a href="javascript: void(0);" data-bind="i18n: 'text', 
+									attr: {'data-hash': 'view-' + hash()}" 
+									data-i18n="MESSAGE/ATTACHMENT_VIEW"></a>)
+							</span>
+							<!-- ko if: isMessageType() && messagePart() -->
+								<!-- ko template: {name: 'Mail_PrintMessageViewModel', data: messagePart} --><!-- /ko -->
+							<!-- /ko -->
+						<!-- /ko -->
+					</td>
+					<!-- /ko -->
+				</tr>
+				<tr>
+					<td class="wm_print_body" colspan="2">
+						<div style="text-align: left; padding-top: 10px;" data-bind="html: textBodyForNewWindow"></div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

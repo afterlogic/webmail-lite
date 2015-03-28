@@ -1,0 +1,69 @@
+<div class="login_panel" data-bind="css: {'email': emailVisible, 'login': loginVisible, 'flipForgot': gotoForgot(), 'flipRegister': gotoRegister()}">
+	<div class="login_panel_content" style="backface-visibility: inherit;">
+		<div class="header" data-bind="css: {'custom_logo': loginCustomLogo()}">
+			<!-- ko if: loginCustomLogo() === '' --><span class="icon"></span><!-- /ko -->
+			<!-- ko if: loginCustomLogo() !== '' --><img data-bind="attr: {'src': loginCustomLogo()}"/><!-- /ko -->
+			<span class="text" data-i18n="LOGIN/HEADING" data-bind="i18n: 'text'"></span>
+		</div>
+		<div class="content login clearfix">
+			<!-- ko template: {name: 'Login_LoginViewModel', data: oLoginViewModel} --><!-- /ko -->
+			<div class="clear"></div>
+		</div>
+		<!-- ko if: allowRegistration -->
+		<div class="content register clearfix">
+			<!-- ko template: {name: 'Login_RegisterViewModel', data: oRegisterViewModel} --><!-- /ko -->
+			<div class="clear"></div>
+		</div>
+		<!-- /ko -->
+		<!-- ko if: allowPasswordReset -->
+		<div class="content forgot clearfix">
+			<!-- ko template: {name: 'Login_ForgotViewModel', data: oForgotViewModel} --><!-- /ko -->
+			<div class="clear"></div>
+		</div>
+		<!-- /ko -->
+		
+		{%INCLUDE-START/Login-Before-Description/INCLUDE-END%}
+		<div class="description" data-bind="visible: '' !== loginDescription(), html: loginDescription"></div>
+		{%INCLUDE-START/Login-After-Description/INCLUDE-END%}
+		<div class="clear"></div>
+
+		
+		<div class="languages demo" data-bind="visible: allowLanguages() && !viewLanguagesAsDropdown()">
+			<div class="title" data-i18n="LOGIN/LANGUAGE_SELECTOR_TITLE" data-bind="i18n: 'text'"></div>
+			<div data-bind="foreach: aLanguages">
+				<span class="item" data-bind="css: value + ($parent.currentLanguage() === value ? ' selected' : ''), click: function () { $parent.changeLanguage(value); }">
+					<span class="item_content">
+						<span class="icon"></span>
+						<span class="text" data-bind="text: name"></span>
+					</span>
+				</span>
+			</div>
+		</div>
+	</div>
+	
+	<div class="languages" data-bind="visible: allowLanguages() && viewLanguagesAsDropdown()">
+		<span class="custom_selector" data-bind="dropdown: {'control': false}, css: {'right': rtl()}">
+			<span class="name" data-bind="css: currentLanguage">
+				<span class="icon"></span>
+				<span class="text" data-bind="text: currentLanguage"></span>
+			</span>
+			<span class="control">
+				<span class="icon"></span>
+			</span>
+			<span class="dropdown">
+				<span class="dropdown_helper">
+					<span class="dropdown_arrow"><span></span></span>
+					<span class="dropdown_content" data-bind="foreach: aLanguages">
+						<span class="item" data-bind="css: value + ($parent.currentLanguage() === value ? ' selected' : ''), click: function () { $parent.changeLanguage(value); }">
+							<span class="icon"></span>
+							<span class="text" data-bind="text: name"></span>
+						</span>
+					</span>
+				</span>
+			</span>
+		</span>
+	</div>
+</div>
+<div class="vhelper"></div>
+	
+{%INCLUDE-START/Login-Footer/INCLUDE-END%}
