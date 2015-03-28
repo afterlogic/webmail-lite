@@ -1,0 +1,168 @@
+<div class="html_editor" data-bind="css: {'inactive': inactive()}, onEsc: onEscHandler, initDom: htmlEditorDom">
+	<div class="disable_mask" data-bind="visible: disabled"></div>
+	<!-- ko if: !mobileApp -->
+	<div class="toolbar">
+		<div class="content">
+			<a href="javascript:void(0);" class="item undo" data-bind="click: function () { oCrea.undo(); return false; }, customTooltip: 'HTMLEDITOR/UNDO'">
+				<span class="icon"></span>
+			</a>
+
+			<a href="javascript:void(0);" class="item redo" data-bind="click: function () { oCrea.redo(); return false; }, customTooltip: 'HTMLEDITOR/REDO'">
+				<span class="icon"></span>
+			</a>
+
+			<a href="javascript:void(0);" class="item bold" data-bind="click: function () { oCrea.bold(); return false; }, customTooltip: 'HTMLEDITOR/BOLD'">
+				<span class="icon"></span>
+			</a>
+
+			<a href="javascript:void(0);" class="item italic" data-bind="click: function () { oCrea.italic();  return false; }, customTooltip: 'HTMLEDITOR/ITALIC'">
+				<span class="icon"></span>
+			</a>
+
+			<a href="javascript:void(0);" class="item underline" data-bind="click: function () { oCrea.underline(); return false; }, customTooltip: 'HTMLEDITOR/UNDERLINE'">
+				<span class="icon"></span>
+			</a>
+
+			<a href="javascript:void(0);" class="item strike_through" data-bind="click: function () { oCrea.strikeThrough(); return false; }, customTooltip: 'HTMLEDITOR/STRIKETHROUGH'">
+				<span class="icon"></span>
+			</a>
+			
+			<span class="separator"></span>
+
+			<div class="item select font">
+				<select class="input" data-bind="value: selectedFont, foreach: aFonts" style="height: 21px;">
+					<option data-bind="text: $data, value: $data, style: {'fontFamily': $data}"></option>
+				</select>
+			</div>
+
+			<div class="item select font_size">
+				<select class="input" data-bind="value: selectedSize" style="height: 21px;">
+					<option value="2" data-i18n="HTMLEDITOR/TEXTSIZE_SMALL" data-bind="i18n: 'text'" style="font-size: 13px;"></option>
+					<option value="3" data-i18n="HTMLEDITOR/TEXTSIZE_NORMAL" data-bind="i18n: 'text'" style="font-size: 16px;"></option>
+					<option value="5" data-i18n="HTMLEDITOR/TEXTSIZE_LARGE" data-bind="i18n: 'text'" style="font-size: 24px;"></option>
+					<option value="7" data-i18n="HTMLEDITOR/TEXTSIZE_HUGE" data-bind="i18n: 'text'" style="font-size: 48px;"></option>
+				</select>
+			</div>
+
+			<a href="javascript:void(0);" class="item color" data-bind="click: textColor, 
+			   css: {'expand': visibleFontColorPopup}, initDom: colorPickerDropdownDom, customTooltip: 'HTMLEDITOR/TEXT_COLOR'">
+				<span class="icon"></span>
+				<span class="dropdown color">
+					<span class="dropdown_helper">
+						<span class="dropdown_content">
+							<!-- ko template: { name: 'Common_ColorPickerViewModel', data: oFontColorPicker } --><!-- /ko -->
+							<!-- ko template: { name: 'Common_ColorPickerViewModel', data: oBackColorPicker } --><!-- /ko -->
+						</span>
+					</span>
+				</span>
+			</a>
+
+			<span class="separator"></span>
+
+			<a href="javascript:void(0);" class="item slist" data-bind="click: function () { oCrea.numbering(); }, customTooltip: 'HTMLEDITOR/NUMBERING'">
+				<span class="icon"></span>
+			</a>
+
+			<a href="javascript:void(0);" class="item uslist" data-bind="click: function () { oCrea.bullets(); }, customTooltip: 'HTMLEDITOR/BULLETS'">
+				<span class="icon"></span>
+			</a>
+
+			<span class="separator"></span>
+			
+			<a href="javascript:void(0);" class="item link" data-bind="click: insertLink, 
+			   css: {'expand': visibleInsertLinkPopup}, initDom: insertLinkDropdownDom, customTooltip: 'HTMLEDITOR/INSERT_LINK'">
+				<span class="icon"></span>
+
+				<span class="dropdown">
+					<span class="dropdown_helper">
+						<span class="dropdown_content">
+							<span data-i18n="HTMLEDITOR/TITLE_URL" data-bind="i18n: 'text'"></span>:
+							<input class="input" type="text" data-bind="value: linkForInsert, 
+								   hasfocus: linkFocused, onFocusSelect: true, 
+								   onEnter: insertLinkFromPopup" />
+
+							<span class="button" data-bind="click: insertLinkFromPopup, i18n: 'text'" 
+								  data-i18n="HTMLEDITOR/BUTTON_INSERT"></span>
+							<span class="button" data-bind="click: closeInsertLinkPopup, i18n: 'text'" 
+								  data-i18n="HTMLEDITOR/BUTTON_CANCEL"></span>
+						</span>
+					</span>
+				</span>
+			</a>
+
+			<a href="javascript:void(0);" class="item image" data-bind="click: insertImage, 
+					visible: allowInsertImage, css: {'expand': visibleInsertImagePopup}, initDom: insertImageDropdownDom, customTooltip: 'HTMLEDITOR/INSERT_IMAGE'">
+				<span class="icon"></span>
+
+				<span class="dropdown">
+					<span class="dropdown_helper">
+						<span class="dropdown_content">
+							<span data-bind="visible: bAllowFileUpload">
+								<span data-i18n="HTMLEDITOR/UPLOAD_SELECT_IMAGE" data-bind="i18n: 'text'"></span>:
+								<br />
+								<span class="button" data-bind="initDom: imageUploaderButton, i18n: 'text'" 
+									  data-i18n="HTMLEDITOR/UPLOAD_BUTTON_CHOOSE_IMAGE"></span>
+								<br />
+								<span data-i18n="HTMLEDITOR/UPLOAD_ENTER_IMAGE_URL" data-bind="i18n: 'text'"></span>:
+							</span>
+							<span data-bind="visible: !bAllowFileUpload, i18n: 'text'" data-i18n="HTMLEDITOR/UPLOAD_ENTER_IMAGE_URL_ONLY"></span>
+							<br />
+							<input class="input" type="text" data-bind="value: imagePathFromWeb" 
+								   style="width: 200px;" />
+							<span class="button" data-bind="click: insertWebImageFromPopup, i18n: 'text'" 
+								  data-i18n="HTMLEDITOR/BUTTON_INSERT"></span>
+							<span class="button" data-bind="click: closeInsertImagePopup, i18n: 'text'" 
+								  data-i18n="HTMLEDITOR/BUTTON_CANCEL"></span>
+						</span>
+					</span>
+				</span>
+			</a>
+
+			<a href="javascript:void(0);" class="item clear" data-bind="click: function () { oCrea.removeFormat(); }, customTooltip: 'HTMLEDITOR/REMOVE_FORMAT'">
+				<span class="icon"></span>
+			</a>
+			
+			<a href="javascript:void(0);" class="item rtl" data-bind="visible: allowChangeInputDirection, click: function () { oCrea.setRtlDirection(); }, customTooltip: 'HTMLEDITOR/RTL_DIRECTION'">
+				<span class="icon">rtl</span>
+			</a>
+			<a href="javascript:void(0);" class="item ltr" data-bind="visible: allowChangeInputDirection, click: function () { oCrea.setLtrDirection(); }, customTooltip: 'HTMLEDITOR/LTR_DIRECTION'">
+				<span class="icon">ltr</span>
+			</a>
+		</div>
+	</div>
+	<!-- /ko -->
+
+	<div class="workarea" data-bind="customScrollbar: {x: true, y: true}, initDom: workareaDom">
+		<div class="scroll-inner" data-bind="attr: {'id': creaId}"></div>
+		
+		<div data-bind="initDom: uploaderAreaDom, css: {'active': editorUploaderBodyDragOver, 'progress': editorUploaderProgress}" class="uploader_mask">
+			<div class="inner"></div>
+		</div>
+	</div>
+	
+	<div class="inline_popup tooltip" data-bind="visible: imageSelected,
+		 style: {'top': tooltipPopupTop() + 'px', 'left': tooltipPopupLeft() + 'px'},
+		 text: tooltipText"></div>
+	
+	<div class="inline_popup" data-bind="visible: visibleLinkPopup, 
+			style: {'top': linkPopupTop() + 'px', 'left': linkPopupLeft() + 'px'}">
+		<a target="_blank" data-bind="text: linkHref, attr: {'href': linkHref}"></a>
+		<span class="button" data-i18n="HTMLEDITOR/URL_BUTTON_CHANGE" data-bind="i18n: 'text', click: showChangeLink"></span>
+		<span class="button" data-i18n="HTMLEDITOR/URL_BUTTON_REMOVE" data-bind="i18n: 'text', click: function () { oCrea.removeCurrentLink(); }"></span>
+	</div>
+	<div class="inline_popup" data-bind="visible: visibleLinkHref, 
+			style: {'top': linkPopupTop() + 'px', 'left': linkPopupLeft() + 'px'}">
+		<input type="text" spellcheck="false" data-bind="value: linkHref" />
+		<span class="button" data-i18n="HTMLEDITOR/URL_BUTTON_OK" data-bind="i18n: 'text', click: changeLink"></span>
+		<span class="button" data-i18n="HTMLEDITOR/URL_BUTTON_CANCEL" data-bind="i18n: 'text', click: hideChangeLink"></span>
+	</div>
+	<div class="inline_popup" data-bind="visible: visibleImagePopup, 
+			style: {'top': imagePopupTop() + 'px', 'left': imagePopupLeft() + 'px'}">
+		<span class="button" data-i18n="HTMLEDITOR/IMAGE_BUTTON_SMALL" data-bind="i18n: 'text', click: function () { resizeImage(Enums.HtmlEditorImageSizes.Small); }"></span>
+		<span class="button" data-i18n="HTMLEDITOR/IMAGE_BUTTON_MEDIUM" data-bind="i18n: 'text', click: function () { resizeImage(Enums.HtmlEditorImageSizes.Medium); }"></span>
+		<span class="button" data-i18n="HTMLEDITOR/IMAGE_BUTTON_LARGE" data-bind="i18n: 'text', click: function () { resizeImage(Enums.HtmlEditorImageSizes.Large); }"></span>
+		<span class="button" data-i18n="HTMLEDITOR/IMAGE_BUTTON_ORIGINAL" data-bind="i18n: 'text', click: function () { resizeImage(Enums.HtmlEditorImageSizes.Original); }"></span>
+		<span class="button" data-i18n="HTMLEDITOR/IMAGE_BUTTON_DELETE" data-bind="i18n: 'text', click: function () { oCrea.removeCurrentImage(); }"></span>
+	</div>
+	
+</div>

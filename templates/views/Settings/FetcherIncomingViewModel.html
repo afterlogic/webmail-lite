@@ -1,0 +1,69 @@
+<div class="fields">
+	<div class="fieldset">
+		<!--<div class="row name">-->
+			<!--<span class="label" data-i18n="SETTINGS/ACCOUNT_FETCHER_YOUR_NAME" data-bind="i18n: 'text'"></span>-->
+			<!--<input class="value input" spellcheck="false" type="text" maxlength="65" data-bind="value: name, valueUpdate: 'afterkeydown', onEnter: onSaveClick"/> &lt;!&ndash;, hasfocus: nameFocus&ndash;&gt;-->
+		<!--</div>-->
+		<div class="row">
+			<div>
+				<label class="custom_checkbox" data-bind="css: {'checked': isEnabled}">
+					<span class="icon"></span>
+					<input type="checkbox" id="incoming_mail_enabled" data-bind="checked: isEnabled" />
+				</label>
+				<label for="incoming_mail_enabled" data-i18n="SETTINGS/ACCOUNT_FETCHER_INCOMING_ENABLED" data-bind="i18n: 'text'"></label>
+			</div>
+		</div>
+		<div class="row hint">
+			<span class="" data-i18n="SETTINGS/ACCOUNT_FETCHER_FETCHED_HINT" data-bind="i18n: 'text'"></span>
+		</div>
+		<div class="row incoming">
+			<span class="label" data-i18n="SETTINGS/ACCOUNT_FETCHER_POP3_SERVER" data-bind="i18n: 'text'"></span>
+			<input class="value input" spellcheck="false" type="text" maxlength="65" data-bind="value: incomingMailServer, onEnter: onSaveClick, hasFocus: serverIsSelected, enable: isEnabled"/>
+			<!--<span class="value text" data-bind="text: incomingMailServer"></span>-->
+
+			<span class="label" style="width: auto; margin-left: 10px;" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_PORT" data-bind="i18n: 'text'"></span>
+			<input class="value input port" spellcheck="false" type="text" maxlength="5" data-bind="value: incomingMailPort, onEnter: onSaveClick, enable: isEnabled"/>
+			<!--<span class="value port text" data-bind="text: incomingMailPort"></span>-->
+		</div>
+
+		<div class="row login">
+			<span class="label" data-i18n="SETTINGS/ACCOUNT_FETCHER_LOGIN" data-bind="i18n: 'text'"></span>
+			<!--<input class="value input" spellcheck="false" type="text" maxlength="255" data-bind="value: incomingMailLogin, onEnter: onSaveClick, hasFocus: loginIsSelected, enable: isEnabled"/> &lt;!&ndash;, hasfocus: incLoginFocused&ndash;&gt;-->
+			<span class="value text" data-bind="text: incomingMailLogin"></span>
+		</div>
+		<div class="row password">
+			<span class="label required" data-i18n="SETTINGS/ACCOUNT_FETCHER_PASSWORD" data-bind="i18n: 'text'"></span>
+			<input class="value input" spellcheck="false" type="password" maxlength="255" data-bind="value: incomingMailPassword, onEnter: onSaveClick, hasFocus: passwordIsSelected, enable: isEnabled"/>
+		</div>
+
+		<div class="row hint">
+			<span class="" data-i18n="SETTINGS/ACCOUNT_FETCHER_POP3_STORE_TARGET_CLARIFICATION" data-bind="i18n: 'text'"></span>
+		</div>
+
+		<div class="row folder">
+			<span class="label required" data-i18n="SETTINGS/ACCOUNT_FETCHER_POP3_STORE_TARGET_FOLDER" data-bind="i18n: 'text'"></span>
+			<span class="" data-i18n="SETTINGS/ACCOUNT_FETCHER_WAITING_FOLDER_LIST" data-bind="i18n: 'text', visible: options().length === 0"></span>
+			<select class="value input" data-bind="visible: options().length > 1, value: folder, options: options,
+				optionsText: 'translatedDisplayName', optionsValue: 'fullName', optionsAfterRender: defaultOptionsAfterRender, enable: isEnabled">
+			</select>
+		</div>
+		<div class="row">
+			<div>
+				<label class="custom_checkbox" data-bind="css: {'checked': leaveMessagesOnServer}">
+					<span class="icon"></span>
+					<input type="checkbox" id="leave_messages_on_server" data-bind="checked: leaveMessagesOnServer, enable: isEnabled" />
+				</label>
+				<label for="leave_messages_on_server" data-i18n="SETTINGS/ACCOUNT_FETCHER_POP3_LAVE_MESSAGES_ON_SERVER" data-bind="i18n: 'text'"></label>
+			</div>
+		</div>
+		<div class="row">
+			<span class="link" data-i18n="SETTINGS/ACCOUNTS_LINK_REMOVE_FETCHER"
+				  data-bind="i18n: 'text', click: function () { $parent.onFetcherDeleteClick($data) }">
+			</span>
+		</div>
+	</div>
+	<div class="buttons">
+		<span class="button" data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', click: onSaveClick, visible: !loading()"></span>
+		<span class="button" data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', click: onSaveClick, visible: loading()"></span>
+	</div>
+</div>

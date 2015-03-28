@@ -1,0 +1,237 @@
+/*=== Tabsbar CSS ===*/
+.tabs_panel {
+	@fontSize: 10.6pt;
+	@fontColor: #888785;
+	@fontColorHover: darken(@fontColor, 40%);
+	@fontShadow: 0px 1px 0px #fff;
+	@itemTopOffset: 24px;
+    
+	height: @theme-tabs-height;
+	line-height: @theme-tabs-height;
+	position: relative;
+	z-index: 1000;
+	padding: 0px 5px;
+	
+	.item {
+		display: inline-block;
+		vertical-align: middle;
+		font-size: @fontSize;
+		margin: 0px;
+		padding: 4px 10px;
+		line-height: 120%;
+		position: relative;
+		color: @fontColor;
+		text-shadow: @fontShadow;
+		
+		.helper-container{
+			float: left;
+			.transition(width .2s linear);
+			white-space: nowrap;
+			position: relative;
+			width: auto;
+			.link{
+				width: 100%;
+				.box-sizing(border-box);
+				padding-right: 14px;
+				&>span{
+					overflow: hidden;
+				}
+				.one {
+					right: 10px;
+				}
+				.two {
+					right: 7px;
+				}
+				.three {
+					right: 1px;
+				}
+			}
+			.helper{
+				position: absolute;
+				vertical-align: top;
+				overflow: hidden;
+			}
+			.control{
+				position: absolute;
+				right: -2px;
+				top: 1px;
+			}
+		}
+
+		html.rtl & {
+			margin-left: 0px;
+			margin-right: 6px;
+		}
+		
+		.cssanimations &.recivedAnim {
+			border-radius: 4px;
+			.animation(highlight 0.5s linear);
+		}
+		
+		&.emails {
+			cursor: default;
+			.transition(width .2s linear);
+			
+			&.has_control .helper {
+				padding-right: 24px;
+			}
+		}
+
+		.link {
+			display: inline-block;
+			vertical-align: middle;
+			color: inherit;
+			text-decoration: none;
+			position: relative;
+			outline: none;
+			
+		}
+		
+		&:hover {
+			color: @fontColorHover;
+			
+			.text {
+				text-decoration: none;
+			}
+			
+			.theme-tabsbar-item-hover();
+		}
+		&.expand a,
+		.control {
+			z-index: 3003;
+		}
+		
+		.helper {
+			visibility: hidden;
+			position: relative;
+			top: -40px;
+			display: block;
+			height: 0;
+			overflow: hidden;
+		}
+
+		.unseen {
+			position: absolute;
+			top: -7px;
+			height: 11px;
+			font-size: 6.4pt;
+			color: #FFFFFF;
+			background-color: #888785;
+			border-radius: 7px;
+			text-align: center;
+			line-height: 12px;
+			text-shadow: none;
+			
+			&.one {
+				width: 11px;
+				right: -10px;
+			}
+			&.two {
+				width: 16px;
+				right: -15px;
+			}
+			&.three {
+				width: 21px;
+				right: -20px;
+			}
+			
+			.theme-unseen-marker();
+		}
+		
+		.theme-tabsbar-item();
+	}
+	
+	.item .helper {
+		.theme-current();
+		//font-weight: bold;
+	}
+	
+	.current {
+		.theme-current();
+	}
+	
+	.control {
+		display: inline-block;
+		vertical-align: middle;
+		position: relative;
+		height: 16px;
+		width: 14px;
+		//margin: 0px 0px 0px 6px;
+		padding: 0px;
+		cursor: pointer;
+	
+		.iconFontInit();
+		&:before {
+			content: "\e671";
+			content: "\e66d";
+			font-size: 18px;
+		}
+	}
+	
+	.expand .control {
+		&:before {
+			content: "\e66e";
+		}
+	}
+	
+	.settings,
+	.logout {
+		display: block;
+		float: right;
+		font-size: 8pt;
+		height: auto;
+		margin-left: 6px;
+		margin-right: 0px;
+		margin-top: @itemTopOffset;
+		
+		html.rtl & {
+			float: left;
+			margin-left: 0px;
+			margin-right: 6px;
+		}
+	}
+	
+	.logout span {
+		cursor: pointer;
+	}
+	
+	.logo img {
+		max-height: @theme-tabs-height - 8px; //item padding
+	}
+	
+	.dropdown_helper {
+		min-width: 100%;
+	}
+		
+	.dropdown_arrow {
+		display: none;
+	}
+	
+	.dropdown_content {
+		color: #555;
+		background: #fff;
+		border: 1px solid #ccc;
+		padding: 30px 0px 0px 0px;
+		margin: -30px 0px 0px -2px;
+		display: block;
+		min-width: 100%;
+		border-radius: 4px;
+		
+		.item {
+			margin: 0px;
+			display: block;
+			color: inherit;
+			padding: 6px 10px;
+			font-weight: normal;
+			
+			&:hover {
+				background: #eee;
+			}
+		}
+		
+		.theme-dropdown();
+	}
+	
+	.theme-tabsbar();
+}
+/*=== END Acount menu CSS ===*/

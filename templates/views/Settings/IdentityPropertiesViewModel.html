@@ -1,0 +1,41 @@
+<div class="fields">
+	<div class="fieldset">
+		<!--<div class="row" data-bind="visible: !bCreate">
+			<div>
+				<label class="custom_checkbox" data-bind="css: {'checked': enabled}">
+					<span class="icon"></span>
+					<input type="checkbox" data-bind="checked: enabled,
+						   attr: {'id': 'identity_enabled' + bCreate}" />
+				</label>
+				<label data-i18n="SETTINGS/ACCOUNTS_IDENTITY_INCOMING_ENABLED" data-bind="i18n: 'text',
+					   attr: {'for': 'identity_enabled' + bCreate}"></label>
+			</div>
+		</div>-->
+		<div class="row" data-bind="visible: !bCreate ">
+			<div>
+				<label class="custom_checkbox" data-bind="css: {'checked': isDefault, 'disabled': disableCheckbox}">
+					<span class="icon"></span>
+					<input type="checkbox" data-bind="checked: isDefault, enable: !disableCheckbox(), attr: {'id': 'identity_default_' + bCreate}" />
+				</label>
+				<label data-i18n="SETTINGS/ACCOUNTS_IDENTITY_INCOMING_DEFAULT" data-bind="i18n: 'text', attr: {'for': 'identity_default_' + bCreate}"></label>
+			</div>
+		</div>
+		<div class="row">
+			<span class="label" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_YOUR_NAME" data-bind="i18n: 'text'"></span>
+			<input class="value input" spellcheck="false" type="text" data-bind="value: friendlyName, onEnter: onSaveClick, hasFocus: friendlyNameHasFocus"/>
+		</div>
+		<div class="row">
+			<span class="label" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_EMAIL" data-bind="i18n: 'text'"></span>
+			<input class="value input" spellcheck="false" type="text" data-bind="value: email, onEnter: onSaveClick, disable: loyal"/>
+		</div>
+		<div class="row remove_account" data-bind="visible: !bCreate && !loyal()">
+			<span class="link" data-bind="i18n: 'text', click: remove" data-i18n="SETTINGS/ACCOUNTS_IDENTITY_LINK_REMOVE"></span>
+		</div>
+	</div>
+
+	<div class="buttons">
+		<span class="button save" data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', click: onSaveClick, visible: !loading()"></span>
+		<span class="button save" data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', visible: loading()"></span>
+		<span class="button cancel secondary" data-i18n="SETTINGS/BUTTON_CANCEL" data-bind="i18n: 'text', click: cancel, visible: bCreate"></span>
+	</div>
+</div>

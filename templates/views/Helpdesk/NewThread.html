@@ -1,0 +1,26 @@
+<div class="panel_top">
+	<a class="link cancel" data-bind="click: cancelNewThread, i18n: 'text'" data-i18n="HELPDESK/BUTTON_CANCEL"></a>
+	<h2 class="title" data-bind="i18n: 'text'" data-i18n="HELPDESK/TITLE_NEW_THREAD"></h2>
+</div>
+<div class="panel_center">
+	<div class="fields">
+		<div class="row" data-bind="css: { 'filled': newThreadText().length > 0 }">
+			<label class="title placeholder" data-bind="i18n: 'text'" data-i18n="HELPDESK/CREATE_FORM_PLACEHOLDER"></label>
+			<span class="value">
+				<textarea class="input" data-bind="value: newThreadText, valueUpdate: 'afterkeydown', attr: {'disabled': newThreadCreating}"></textarea>
+			</span>
+		</div>
+		
+		<div class="row data attachments upload" data-bind="visible: uploadedFiles().length > 0">
+			<!-- ko template: {name: 'Common_FileViewModel', foreach: uploadedFiles} --><!-- /ko -->
+		</div>
+		
+		<div class="buttons">
+			<span class="button upload" data-bind="visible: uploadedFiles().length < 5, i18n: 'text', initDom: uploaderButtonCompose, css: {'dragOver': bDragActive}" >
+				<span class="icon"></span>
+				<span class="text" data-bind="i18n: 'text'" data-i18n="HELPDESK/ACTION_ADD_ATTACHMENT"></span>
+			</span>
+			<button class="button create" data-bind="command: createThreadCommand, text: createThreadButtonText"></button>
+		</div>
+	</div>
+</div>

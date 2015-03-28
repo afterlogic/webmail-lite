@@ -1,0 +1,62 @@
+<div class="mask" data-bind="click: onCancelClick"></div>
+<div class="popup_panel" data-bind="css: {'step_first': isFirstStep(), 'step_last': !isFirstStep()}">
+	
+	<span class="close" data-bind="click: onCancelClick"></span>
+
+	<span class="title" data-i18n="SETTINGS/ACCOUNTS_ADD_NEW_ACCOUNT_TITLE" data-bind="i18n: 'text', visible: isFirstStep()"></span>
+	<span class="title" data-i18n="SETTINGS/ACCOUNTS_ADD_NEW_ACCOUNT_TITLE_LAST_STEP" data-bind="i18n: 'text', visible: !isFirstStep()"></span>
+
+	<div class="fields">
+		<div class="fieldset">
+			<div class="row name">
+				<span class="label" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_YOUR_NAME" data-bind="i18n: 'text'"></span>
+				<input class="value input" spellcheck="false"  type="text" maxlength="65" data-bind="value: friendlyName, hasfocus: friendlyNameFocus, valueUpdate: 'afterkeydown', onEnter: onSaveClick"/>
+			</div>
+			<div class="row email">
+				<span class="label required" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_EMAIL" data-bind="i18n: 'text'"></span>
+				<input class="value input" spellcheck="false"  type="text" maxlength="65" data-bind="value: email, hasfocus: emailFocus, onEnter: onSaveClick"/>
+			</div>
+			<div class="row login" data-bind="visible: !isFirstStep()">
+				<span class="label required" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_LOGIN" data-bind="i18n: 'text'"></span>
+				<input class="value input" spellcheck="false"  type="text" maxlength="255" data-bind="value: incomingMailLogin, hasfocus: incomingLoginFocused, onEnter: onSaveClick"/>
+			</div>
+			<div class="row password">
+				<span class="label required" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_PASSWORD" data-bind="i18n: 'text'"></span>
+				<input class="value input" spellcheck="false"  type="password" maxlength="255" data-bind="value: incomingMailPassword, hasfocus: incomingPasswordFocus, onEnter: onSaveClick"/>
+			</div>
+			<div class="row incoming" data-bind="visible: !isFirstStep()">
+				<span class="label required" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_INCOMING_MAIL" data-bind="i18n: 'text'"></span>
+				<input class="value input server" spellcheck="false"  type="text" maxlength="255" data-bind="value: incomingMailServer, hasfocus: incomingServerFocused, onEnter: onSaveClick"/>
+
+				<span class="label required" style="width: auto; margin-left: 10px;" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_PORT" data-bind="i18n: 'text'"></span>
+				<input class="value input port" spellcheck="false"  type="text" maxlength="5" data-bind="value: incomingMailPort, onEnter: onSaveClick"/>
+			</div>
+			<div class="row outgoing" data-bind="visible: !isFirstStep()">
+				<span class="label required" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_OUTGOING_MAIL" data-bind="i18n: 'text'"></span>
+				<input class="value input server" spellcheck="false" type="text" maxlength="255"  data-bind="value: outgoingMailServer, hasfocus: outServerFocused, onEnter: onSaveClick"/>
+
+				<span class="label required" style="width: auto; margin-left: 10px;" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_PORT" data-bind="i18n: 'text'"></span>
+				<input  class="value input port" spellcheck="false"  type="text" maxlength="5"  data-bind="value: outgoingMailPort, onEnter: onSaveClick"/>
+			</div>
+
+			<div class="row smtp_authentication" data-bind="visible: !isFirstStep()">
+				<div>
+					<label class="custom_checkbox" data-bind="css: {'checked': useSmtpAuthentication}">
+						<span class="icon"></span>
+						<input type="checkbox" id="add_new_account_mail_out_auth" data-bind="checked: useSmtpAuthentication" />
+					</label>
+					<label for="add_new_account_mail_out_auth" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_USE_SMTP_AUTHENTICATION" data-bind="i18n: 'text'"></label>
+				</div>	
+			</div>
+		</div>
+
+		<div class="buttons">
+			<span class="button save" data-i18n="SETTINGS/BUTTON_ADD" data-bind="i18n: 'text', click: onFirstSaveClick, visible: !loading() && isFirstStep()"></span>
+			<span class="button save" data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', click: onSecondSaveClick, visible: !loading() && !isFirstStep()"></span>
+			<span class="button save" data-i18n="SETTINGS/BUTTON_ADDING" data-bind="i18n: 'text', visible: loading() && isFirstStep()"></span>
+			<span class="button save" data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', visible: loading() && !isFirstStep()"></span>
+			<span class="button cancel secondary" data-i18n="SETTINGS/BUTTON_CANCEL" data-bind="i18n: 'text', click: onCancelClick"></span>
+		</div>
+	</div>
+</div>
+<span class="helper"></span>

@@ -1,0 +1,11 @@
+<div class="mask"></div>
+<div class="popup_panel">
+	<span class="close" data-bind="click: noClick"></span>
+	<span class="title" data-bind="visible: (title() !== ''), text: title"></span>
+	<span class="text" data-bind="text: confirmDesc"></span>
+	<div class="buttons">
+		<span class="button success" data-bind="click: yesClick, text: okButtonText"></span>
+		<span class="button secondary cancel" data-bind="click: noClick, text: cancelButtonText"></span>
+	</div>
+</div>
+<span class="helper"></span>

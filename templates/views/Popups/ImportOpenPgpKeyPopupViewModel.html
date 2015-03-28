@@ -1,0 +1,33 @@
+<div class="mask" data-bind="command: closeCommand"></div>
+<div class="popup_panel">
+	<span class="close" data-bind="command: closeCommand"></span>
+	<span class="title" data-i18n="OPENPGP/POPUP_TITLE_IMPORT_KEY" data-bind="i18n: 'text'"></span>
+	
+	<div class="fields">
+		<div class="row" data-bind="visible: keys().length === 0">
+			<textarea class="input import_pgp_key_area" data-bind="value: keyArmor, hasfocus: keyArmorFocused"></textarea>
+		</div>
+		<div class="row import_pgp_key_area" data-bind="visible: keys().length > 0">
+			<div class="headline" data-bind="text: headlineText"></div>
+			<div data-bind="foreach: keys">
+				<div class="key_item" data-bind="css: {'disabled': disabled}">
+					<label data-bind="css: {'checked': needToImport, 'disabled': disabled}" class="custom_checkbox checked">
+						<span class="icon"></span>
+						<input type="checkbox" data-bind="checked: needToImport, attr: {'id': 'need_to_import_' + id}, disable: disabled">
+					</label>
+					<label data-bind="attr: {'for': 'need_to_import_' + id}">
+						<span class="key_email" data-bind="text: email"></span>
+						<span data-bind="text: addInfo"></span>
+					</label>
+				</div>
+			</div>
+			<div class="hint" data-i18n="OPENPGP/HINT_EXISTING_KEYS_GREYED" data-bind="i18n: 'text', visible: hasExistingKeys"></div>
+		</div>
+		<div class="buttons">
+			<span class="button" data-i18n="OPENPGP/BUTTON_CHECK" data-bind="i18n: 'text', click: checkArmor, visible: keys().length === 0"></span>
+			<span class="button" data-i18n="OPENPGP/BUTTON_IMPORT" data-bind="i18n: 'text', click: importKey, visible: keys().length > 0"></span>
+			<span class="button" data-i18n="MAIN/BUTTON_CANCEL" data-bind="i18n: 'text', command: closeCommand"></span>
+		</div>
+	</div>
+</div>
+<span class="helper"></span>	

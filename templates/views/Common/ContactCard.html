@@ -1,0 +1,150 @@
+<div class="dropdown_container" data-bind="customScrollbar: {x: false}">
+	<div class="scroll-inner">
+		<div class="fields">
+			<div class="fieldset">
+				<div class="row" data-bind="visible: displayName() || nickName()">
+					<span class="value">
+						<span class="stroke" data-bind="visible: displayName(), text: displayName"></span>
+						<span data-bind="visible: nickName()">
+							(<span class="stroke" data-bind="visible: nickName(), text: nickName"></span>)
+						</span>
+					</span>
+				</div>
+				<div class="row" data-bind="visible: email()">
+					<a class="button" href="javascript: void(0)" data-bind="text: email, attr: {href: sendMailLink}, click: sendMail"></a>
+				</div>
+				<div class="row" data-bind="visible: firstName() || lastName()">
+					<span class="value">
+						<span class="stroke" data-bind="visible: firstName(), text: firstName"></span> <span class="stroke" data-bind="visible: lastName(), text: lastName"></span>
+					</span>
+				</div>
+			</div>
+			<div class="fieldset" data-bind="visible: !personalIsEmpty()">
+				<h2 data-i18n="CONTACTS/HEADER_BASIC_INFO" data-bind="i18n: 'text'"></h2>
+				
+				<div class="row" data-bind="visible: personalStreetAddress()">
+					<span class="value">
+						<span class="stroke" data-bind="text: personalStreetAddress"></span>
+					</span>
+				</div>
+				<div class="row" data-bind="visible: personalCity() || personalState() || personalCountry() || personalZipCode()">
+					<span class="value">
+						<span class="stroke" data-bind="visible: personalCity(), text: personalCity"></span>
+						<span data-bind="visible: (personalState() && personalCity())">, </span>
+						<span class="stroke" data-bind="visible: personalState(), text: personalState"></span>
+						<span data-bind="visible: (personalCountry() && personalState())">, </span>
+						<span class="stroke" data-bind="visible: personalCountry(), text: personalCountry"></span>
+						<span data-bind="visible: (personalCountry() && personalZipCode())">, </span>
+						<span class="stroke" data-bind="visible: personalZipCode(), text: personalZipCode"></span>
+					</span>
+				</div>
+				<div class="row" data-bind="visible: (personalEmail() && personalEmail() !== email())">
+					<span class="value">
+						<a class="button" href="javascript: void(0)" data-bind="text: personalEmail, attr: {href: sendMailToPersonalLink}, click: sendMailToPersonal"></a>
+					</span>
+				</div>
+				
+				<div class="row" data-bind="visible: personalWeb()">
+					<a class="button" target="_blank" data-bind="text: personalWeb, attr: {'href': '//' + personalWeb() }"></a>
+				</div>
+				<div class="row" data-bind="visible: (personalFax() || personalPhone())">
+					<span class="value">
+						<span class="stroke" data-bind="visible: personalPhone(), i18n: 'text'" data-i18n="CONTACTS/LABEL_PHONE"></span>
+						<span class="stroke" data-bind="visible: (personalFax() && personalPhone())">/</span>
+						<span class="stroke" data-bind="visible: personalFax(), i18n: 'text'" data-i18n="CONTACTS/LABEL_FAX"></span> <span class="stroke" data-bind="visible: personalPhone(), text: personalPhone"></span>
+						<span class="link call" data-i18n="call" data-bind="i18n: 'text', click: function() {onCallClick(personalPhone())}, visible: voiceApp"></span>
+						<span class="stroke" data-bind="visible: (personalFax() && personalPhone() && (personalFax() !== personalPhone()))">/</span>
+						<span class="stroke" data-bind="visible: (personalFax() && (personalFax() !== personalPhone())), text: personalFax"></span>
+					</span>
+				</div>
+				<div class="row" data-bind="visible: personalMobile()">
+					<span class="value">
+						<span class="stroke" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_MOBILE"></span> <span data-bind="text: personalMobile"></span><span class="link call" data-i18n="call" data-bind="i18n: 'text', click: function() {onCallClick(personalMobile())}, visible: voiceApp"></span>
+					</span>
+				</div>
+			</div>
+			<div class="fieldset" data-bind="visible: !businessIsEmpty()">
+				<h2 data-i18n="CONTACTS/HEADER_BUSINESS_INFO" data-bind="i18n: 'text'"></h2>
+				
+				<div class="row" data-bind="visible: (businessEmail() && businessEmail() !== email())">
+					<span class="value">
+						<a class="button" href="javascript: void(0)"
+							data-bind="text: businessEmail, attr: {href: sendMailToBusinessLink}, click: sendMailToBusiness"></a>
+					</span>
+				</div>
+				<div class="row" data-bind="visible: businessCompany()">
+					<span class="value">
+						<span class="stroke" data-bind="visible: businessDepartment(), i18n: 'text'" data-i18n="CONTACTS/LABEL_WORK_IN"></span>
+						<span class="stroke" data-bind="visible: businessCompany(), text: businessCompany"></span>
+						<span data-bind="visible: (businessDepartment() && businessCompany())">, </span>
+						<span class="stroke" data-bind="visible: businessDepartment(), text: businessDepartment"></span>
+						<span data-bind="visible: (businessCompany() && businessJob())">, </span>
+						<span class="stroke" data-bind="visible: businessJob(), text: businessJob"></span>
+					</span>
+				</div>
+				<div class="row" data-bind="visible: businessStreetAddress() || businessOffice()">
+					<span class="value">
+						<span class="stroke" data-bind="visible: businessStreetAddress(), text: businessStreetAddress"></span>
+						<span data-bind="visible: (businessStreetAddress() && businessOffice())">, </span>
+						<span class="stroke" data-bind="visible: businessOffice(), i18n: 'text'" data-i18n="CONTACTS/LABEL_OFFICE"></span>
+						<span class="stroke" data-bind="visible: businessOffice(), text: businessOffice"></span>
+					</span>
+				</div>
+				<div class="row" data-bind="visible: businessCity() || businessState() || businessCountry() || businessZipCode()">
+					<span class="value">
+						<span class="stroke" data-bind="visible: businessCity(), text: businessCity"></span>
+						<span data-bind="visible: (businessState() && businessCity())">, </span>
+						<span class="stroke" data-bind="visible: businessState(), text: businessState"></span>
+						<span data-bind="visible: (businessCountry() && businessState())">, </span>
+						<span class="stroke" data-bind="visible: businessCountry(), text: businessCountry"></span>
+						<span data-bind="visible: (businessCountry() && businessZipCode())">, </span>
+						<span class="stroke" data-bind="visible: businessZipCode(), text: businessZipCode"></span>
+					</span>
+				</div>
+
+				<div class="row" data-bind="visible: businessWeb()">
+					<span class="value">
+						<a class="button" target="_blank" data-bind="text: businessWeb, attr: {'href': '//' + businessWeb() }"></a>
+					</span>
+				</div>
+
+
+				<div class="row" data-bind="visible: (businessFax() || businessPhone())">
+					<span class="value">
+						<span class="stroke" data-bind="visible: businessPhone(), i18n: 'text'" data-i18n="CONTACTS/LABEL_PHONE"></span>
+						<span class="stroke" data-bind="visible: (businessFax() && businessPhone())">/</span>
+						<span class="stroke" data-bind="visible: businessFax(), i18n: 'text'" data-i18n="CONTACTS/LABEL_FAX"></span> <span class="stroke" data-bind="visible: businessPhone(), text: businessPhone"></span>
+						<span class="link call" data-i18n="call" data-bind="i18n: 'text', click: function() {onCallClick(businessPhone())}, visible: voiceApp"></span>
+						<span class="stroke" data-bind="visible: (businessFax() && businessPhone() && (businessFax() !== businessPhone()))">/</span>
+						<span class="stroke" data-bind="visible: (businessFax() && (businessFax() !== businessPhone())), text: businessFax"></span>
+					</span>
+				</div>
+			</div>
+			<div class="fieldset" data-bind="visible: !otherIsEmpty()">
+				<h2 data-i18n="CONTACTS/HEADER_OTHER_INFO" data-bind="i18n: 'text'"></h2>
+				<div class="row" data-bind="visible: otherBirthday()">
+					<span class="value">
+						<span class="stroke" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_BORN"></span>
+						<span class="stroke" data-bind="text: otherBirthday"></span>
+					</span>
+				</div>
+				<div class="row" data-bind="visible: (otherEmail() && otherEmail() !== email())">
+					<span class="value">
+						<a class="button" href="javascript: void(0)"
+							data-bind="text: otherEmail, attr: {href: sendMailToOtherLink}, click: sendMailToOther"></a>
+					</span>
+				</div>
+				
+				<div class="row" data-bind="visible: otherNotes()">
+					<!-- <span class="label" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_NOTES"></span> -->
+					<span class="stroke" data-bind="text: otherNotes"></span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="buttons buttons_position">
+	<a class="link" href="javascript: void(0)" data-i18n="CONTACTS/LINK_SEND_MAIL" 
+	   data-bind="i18n: 'text', attr: {href: sendMailLink}, click: sendMail"></a>
+	<span class="link" data-i18n="CONTACTS/LINK_VIEW_MAILS" data-bind="i18n: 'text', click: viewAllMailsWithContact"></span>
+</div>

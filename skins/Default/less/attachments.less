@@ -1,0 +1,251 @@
+/*=== Attachments Common CSS ===*/
+.attachments {
+	@levelColor: #e4e4e4;
+	
+	.children {
+		margin: 10px 0px 5px;
+		background: @levelColor;
+		border-radius: 1px;
+		box-shadow: 0 0 0 8px @levelColor;
+			
+		.children {
+			background: darken(@levelColor, 10%);
+			box-shadow: 0 0 0 8px darken(@levelColor, 10%);
+			
+			.children {
+				background: darken(@levelColor, 20%);
+				box-shadow: 0 0 0 8px darken(@levelColor, 20%);
+				.size {
+					color: #777;
+				}
+				
+				.children {
+					background: darken(@levelColor, 30%);
+					box-shadow: 0 0 0 8px darken(@levelColor, 30%);
+					
+					.title {
+						color: #000
+					}
+					.size {
+						color: #555;
+					}
+				}
+			}
+		}
+	}
+		
+	.expanded {
+		box-shadow: 0 0 0 8px #e4e4e4;
+		background: #e4e4e4;
+		
+		.expanded {
+			box-shadow: 0 0 0 8px #C2C2C2;
+			background: #C2C2C2;
+		}
+	}
+	
+	.item {
+		border-radius: 1px;
+		margin: 0 16px 20px 0;
+		display: inline-block;
+		vertical-align: top;
+		width: 200px;
+		width: 136px;
+		max-height: inherit;
+		overflow: visible;
+		
+		&:last-child {
+			margin-bottom: 0px
+		}
+		&.fail {
+			opacity: 0.3;
+			
+			.csstransitions & {
+				.transition(opacity 1000ms ease 1s);
+			}
+		}
+
+		.item_content {
+			display: block;
+			padding: 9px 9px 7px;
+			margin-bottom: 6px;
+			background: #f7f7f7;
+			border-radius: 3px;
+			box-shadow: 0px 1px 2px #cccccc;
+			border: 0px;
+		}
+
+		.cancel {
+			display: none;
+			
+			.upload& {
+				background: #e84d49;
+				border-radius: 2px;
+				display: block;
+				float: right;
+				height: 14px;
+				width: 14px;
+				overflow: hidden;
+				margin-left: -14px;
+				cursor: pointer;
+				position: relative;
+				color: #fff;
+				font-size: 12px;
+				text-align: center;
+				
+				.iconFontInit();
+				&:before {
+					content: "\e63e";
+				}
+			}
+		}
+		
+		.spinner {
+			background: url("images/wait.gif?%VERSION%") no-repeat left top;
+			display:inline-block;
+			width:20px;
+			height:20px;
+		}
+		
+		.progress {
+			display:block;
+			margin-bottom:-3px;
+			height:3px;
+			width:100%;
+			
+			span {
+				display: block;
+				height: 3px;
+				background: #EF4A4A;
+			}
+		}
+
+		.image {
+			display: block;
+			text-align: center;
+			overflow: hidden;
+			min-height: 100px;
+			border-bottom: 1px solid #dedede;
+			white-space: nowrap;
+			
+			&:after {
+				display: inline-block;
+				vertical-align: middle;
+				min-height: inherit;
+				content: "";
+			}
+			
+			img {
+				vertical-align: middle;
+				background: #fff;
+				max-height: 100px;
+			}
+		}
+		
+		&.has_child > .item_content > .image {
+			display: none;
+		}
+		
+		.text {
+			color: #c7c7c7;
+			text-transform: uppercase;
+			font-size: 18pt;
+			margin: 36px 0px 0px;
+			display: inline-block;
+		}
+
+		.icon {
+			vertical-align: top;
+			margin: 15px 0px 0px !important;
+		}
+
+		.download {
+			cursor: pointer;
+		}
+		
+		.title {
+			.box-sizing;
+
+			display: inline-block;
+			max-width: 100%;
+			padding: 0px 50px 0px 8px;
+			word-wrap: break-word;
+			white-space: normal;
+			font-weight: bold;
+			max-height: 2.6em;
+			overflow: hidden;
+		}
+
+		.ext {
+			display: inline-block;
+		}
+
+		.size {
+			color: #929292;
+			float: right;
+			margin: 0px 8px -5em 0px;
+		}
+		
+		.status_text {
+			.transition(~"opacity 500ms ease 0s, visibility 1ms linear 0ms");
+			display: block;
+			overflow: hidden;
+			white-space: normal;
+			margin: 6px 0px -21px;
+			height: 15px;
+			opacity: 1;
+			visibility: visible;
+			
+			&.hide {
+				.transition(~"opacity 500ms ease 0s, visibility 1ms linear 600ms");
+				opacity: 0;
+				visibility: hidden;
+			}
+		}
+		
+		&.fail .status_text {
+			color:#f00;
+		}
+		&.success .status_text {
+			color:#308F00;
+		}
+		
+		.buttons {
+			.clearfix_helper();
+			.transition(~"opacity 500ms ease 0s, visibility 1ms linear 0ms");
+
+			border: 0px;
+			padding: 0px;
+			margin: 6px 0px 0px;
+			display: block;
+			text-align: left;
+			opacity: 1;
+			visibility: visible;
+			
+			&.hide {
+				.transition(~"opacity 500ms ease 0s, visibility 1ms linear 600ms");
+				opacity: 0;
+				visibility: hidden;
+			}
+
+			.button {
+				padding: 0px;
+				font-weight: normal;
+				font-size: 9pt;
+				background: none;
+				color: #4477BB;
+				text-shadow: none;
+				border: 0px;
+
+				&.download {
+					float: right;
+
+					html.rtl & {
+						float: left;
+					}
+				}
+			}
+		}
+	}
+}
+/*=== END Attachments Common CSS ===*/

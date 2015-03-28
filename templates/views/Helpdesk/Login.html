@@ -1,0 +1,210 @@
+<div class="panels">
+	<!-- loginCustomLogo -->
+	<div class="login_panel" data-bind="css: {'flipForgot': gotoForgot(), 'flipRegister': gotoRegister(), 'flipSocialRegister': gotoSocialRegister(), 'flipChangepass': gotoChangepass()}">
+		<div class="login_panel_content">
+			<div class="header" data-bind="css: {'custom_logo': loginCustomLogo()}">
+				<!-- ko if: loginCustomLogo() === '' --><span class="icon"></span><!-- /ko -->
+				<!-- ko if: loginCustomLogo() !== '' --><img data-bind="attr: {'src': loginCustomLogo()}"/><!-- /ko -->
+				<span class="text" data-i18n="LOGIN/HEADING" data-bind="i18n: 'text'"></span>
+			</div>
+			<!--<div class="content clearfix" data-bind="css: {'flipIn': gotoForgot() && forgotAnimation(), 'flipOut': !gotoForgot() && forgotAnimation()}">-->
+
+			<div class="col right">
+				<div class="content login clearfix">
+					<form class="form fields" action="#/" onsubmit="return false;">
+
+						<div class="fieldset">
+							<div class="row email" data-bind="css: {'focused': emailFocus(), 'filled': email().length > 0, shake: shake()}">
+								<label for="email" class="title placeholder"></label>
+								<span class="value">
+									<input id="email" class="input check_autocomplete_input" data-i18n="LOGIN/LABEL_EMAIL"
+										type="email" spellcheck="false" data-bind="value: email, hasfocus: emailFocus, valueUpdate: 'afterkeydown', i18n: 'placeholder'" />
+								</span>
+							</div>
+
+							<div class="row password" data-bind="css: {'focused': passwordFocus(), 'filled': password().length > 0, shake: shake()}">
+								<label for="password" class="title placeholder"></label>
+								<span class="value">
+									<input id="password" class="input check_autocomplete_input" data-i18n="LOGIN/LABEL_PASSWORD"
+										type="password" spellcheck="false" data-bind="value: password, hasfocus: passwordFocus, valueUpdate: 'afterkeydown', i18n: 'placeholder'" />
+								</span>
+							</div>
+						</div>
+
+						<div class="row buttons">
+							<button type="submit" class="button login" data-bind="text: signInButtonText, command: loginCommand"></button>
+						</div>
+
+						<div class="row links">
+							<div class="forgot">
+								<span class="link" data-bind="click: function () {gotoForgot(true);}, i18n: 'text'"
+									  data-i18n="HELPDESK/LINK_FORGOT"></span>
+							</div>
+						</div>
+
+						<div class="row social links">
+							<div class="facebook" data-bind="visible: socialFacebook, click: function () {onSocialClick('facebook');}">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="Log In"></span>
+							</div>
+							<div class="google" data-bind="visible: socialGoogle, click: function () {onSocialClick('google');}">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="Log In"></span>
+							</div>
+							<div class="twitter" data-bind="visible: socialTwitter, click: function () {onSocialClick('twitter');}">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="Log In"></span>
+							</div>
+						</div>
+
+					</form>
+					<div class="description" data-bind="visible: '' !== loginDescription(), html: loginDescription"></div>
+					<div class="clear"></div>
+				</div>
+
+				<div class="content forgot clearfix">
+					<form class="form fields" action="#/" onsubmit="return false;">
+						<div class="fieldset">
+							<div class="row email forgot" data-bind="css: {'focused': forgotEmailFocus(), 'filled': forgotEmail().length > 0}">
+								<label for="forgot_email" class="title placeholder" data-i18n="LOGIN/LABEL_EMAIL" data-bind="i18n: 'text'"></label>
+								<span class="value">
+									<input id="forgot_email" class="input" type="email" spellcheck="false" autocomplete="off" data-bind="value: forgotEmail, hasfocus: forgotEmailFocus, valueUpdate: 'afterkeydown'" />
+								</span>
+							</div>
+						</div>
+						<div class="row buttons">
+							<button type="submit" class="button send" data-bind="command: forgotCommand, text: forgotButtonText()"></button>
+						</div>
+						<div class="row signme forgot">
+							<span class="link" data-bind="click: function () {gotoForgot(false);}, i18n: 'text'"
+								  data-i18n="HELPDESK/BUTTON_BACK"></span>
+						</div>
+					</form>
+					<div class="clear"></div>
+				</div>
+			</div>
+
+			<div class="col left">
+				<div class="content send clearfix">
+					<form class="form fields" action="#/" onsubmit="return false;">
+
+						<!--<span class="question_title" data-i18n="Ask your first question" data-bind="i18n: 'text'"></span>-->
+						<div class="fieldset">
+							<label for="question" class="title placeholder"></label>
+							<textarea id="question" class="question" data-bind="hasfocus: helpdeskQuestionFocus, value: helpdeskQuestion, valueUpdate: 'afterkeydown', i18n: 'placeholder'" data-i18n="HELPDESK/PLACEHOLDER_QUESTION"></textarea>
+						</div>
+
+						<div class="row buttons">
+							<button type="submit" class="button send" data-i18n= 'MAIN/BUTTON_SEND' data-bind="i18n: 'text', command: sendCommand"></button>
+						</div>
+
+						<div class="row links">
+							<div class="register">
+									<span class="link" data-bind="click: function () {gotoRegister(true); gotoSignin(false);}, i18n: 'text'"
+										  data-i18n="HELPDESK/LINK_REGISTER"></span>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+
+			<div class="content register clearfix">
+				<form class="form fields" action="#/" onsubmit="return false;">
+
+					<div class="fieldset">
+
+						<div class="row name" data-bind="css: {'focused': regNameFocus(), 'filled': regName().length > 0}">
+							<label for="name" class="title placeholder" data-i18n="LOGIN/LABEL_NAME" data-bind="i18n: 'text'"></label>
+							<span class="value">
+								<input id="name" class="input" type="text" autocomplete="off" spellcheck="false" data-bind="value: regName, hasfocus: regNameFocus, valueUpdate: 'afterkeydown'" />
+							</span>
+						</div>
+						<div class="row email" data-bind="css: {'focused': regEmailFocus(), 'filled': regEmail().length > 0}">
+							<label for="reg_email" class="title placeholder" data-i18n="LOGIN/LABEL_EMAIL" data-bind="i18n: 'text'"></label>
+							<span class="value">
+								<input id="reg_email" class="input" type="text" autocomplete="off" spellcheck="false" data-bind="value: regEmail, hasfocus: regEmailFocus, valueUpdate: 'afterkeydown'" />
+							</span>
+						</div>
+						<div class="row password" data-bind="css: {'focused': regPasswordFocus(), 'filled': regPassword().length > 0}">
+							<label for="reg_password" class="title placeholder" data-i18n="LOGIN/LABEL_PASSWORD" data-bind="i18n: 'text'"></label>
+							<span class="value">
+								<input id="reg_password" class="input" type="password" autocomplete="off" spellcheck="false" data-bind="value: regPassword, hasfocus: regPasswordFocus, valueUpdate: 'afterkeydown'" />
+							</span>
+						</div>
+						<div class="row password" data-bind="css: {'focused': regConfirmPasswordFocus(), 'filled': regConfirmPassword().length > 0}">
+							<label for="reg_confirm_password" class="title placeholder" data-i18n="HELPDESK/LABEL_CONFIRM_PASSWORD" data-bind="i18n: 'text'"></label>
+							<span class="value">
+								<input id="reg_confirm_password" class="input" type="password" autocomplete="off" spellcheck="false" data-bind="value: regConfirmPassword, hasfocus: regConfirmPasswordFocus, valueUpdate: 'afterkeydown'" />
+							</span>
+						</div>
+					</div>
+					<div class="row buttons">
+						<button type="submit" class="button send" data-bind="command: registerCommand, text: regButtonText()"></button>
+					</div>
+					<div class="row signme forgot">
+						<span class="link" data-bind="click: function () {gotoRegister(false);}, i18n: 'text'"
+							  data-i18n="HELPDESK/BUTTON_BACK"></span>
+					</div>
+					<div class="row social links">
+						<div class="facebook" data-bind="visible: socialFacebook, click: function () {onSocialClick('facebook');}">
+							<span class="text" data-bind="i18n: 'text'" data-i18n="Log In"></span>
+						</div>
+						<div class="google" data-bind="visible: socialGoogle, click: function () {onSocialClick('google');}">
+							<span class="text" data-bind="i18n: 'text'" data-i18n="Log In"></span>
+						</div>
+						<div class="twitter" data-bind="visible: socialTwitter, click: function () {onSocialClick('twitter');}">
+							<span class="text" data-bind="i18n: 'text'" data-i18n="Log In"></span>
+						</div>
+					</div>
+
+				</form>
+				<div class="clear"></div>
+			</div>
+
+			<div class="content social_register clearfix">
+				<form class="form fields" action="#/" onsubmit="return false;">
+					<div class="fieldset">
+						<div class="row email" data-bind="css: {'focused': regSocialEmailFocus(), 'filled': regSocialEmail().length > 0}">
+							<label for="social_reg_email" class="title placeholder" data-i18n="Email" data-bind="i18n: 'text'"></label>
+								<span class="value">
+									<input id="social_reg_email" class="input" type="text" spellcheck="false" autocomplete="off" data-bind="value: regSocialEmail, hasfocus: regSocialEmailFocus, valueUpdate: 'afterkeydown'" />
+								</span>
+						</div>
+					</div>
+					<div class="row buttons">
+						<button type="submit" class="button send" data-bind="click: actionSocialRegister, text: regButtonText()"></button>
+					</div>
+					<div class="row signme forgot">
+						<span class="link" data-bind="click: function () {gotoSocialRegister(false);}, i18n: 'text'"
+							  data-i18n="HELPDESK/BUTTON_BACK"></span>
+					</div>
+				</form>
+			</div>
+
+			<div class="content changepass clearfix">
+				<form class="form fields" action="#/" onsubmit="return false;">
+					<div class="fieldset">
+						<div class="row password" data-bind="css: {'focused': changepassNewpassFocus(), 'filled': changepassNewpass().length > 0}">
+							<label for="changepass_newpass" class="title placeholder" data-i18n="HELPDESK/LABEL_NEW_PASSWORD" data-bind="i18n: 'text'"></label>
+							<span class="value">
+								<input id="changepass_newpass" class="input" type="password" spellcheck="false" autocomplete="off" data-bind="value: changepassNewpass, hasfocus: changepassNewpassFocus, valueUpdate: 'afterkeydown'" />
+							</span>
+						</div>
+						<div class="row password" data-bind="css: {'focused': changepassConfirmpassFocus(), 'filled': changepassConfirmpass().length > 0}">
+							<label for="changepass_confirmpass" class="title placeholder" data-i18n="HELPDESK/LABEL_CONFIRM_PASSWORD" data-bind="i18n: 'text'"></label>
+							<span class="value">
+								<input id="changepass_confirmpass" class="input" type="password" spellcheck="false" autocomplete="off" data-bind="value: changepassConfirmpass, hasfocus: changepassConfirmpassFocus, valueUpdate: 'afterkeydown'" />
+							</span>
+						</div>
+					</div>
+					<div class="row buttons">
+						<button type="submit" class="button send" data-bind="click: actionChangepass, text: changepassButtonText()"></button>
+					</div>
+					<div class="row signme forgot">
+						<span class="link" data-bind="click: backToLogin, i18n: 'text'"
+							  data-i18n="HELPDESK/LINK_BACK_TO_LOGIN"></span>
+					</div>
+				</form>
+				<div class="clear"></div>
+			</div>
+		</div>
+	</div>
+	<div class="vhelper"></div>
+</div>

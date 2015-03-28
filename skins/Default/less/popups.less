@@ -1,0 +1,122 @@
+/*=== Popup CSS ===*/
+.popup {
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	z-index: 2000;
+	text-align: center;
+	display: none;
+	
+	&.visible {
+		display: block;
+		
+		.mask {
+			opacity: 0.2;
+		}
+	}
+	
+	.mask {
+		background: #000;
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=20);
+		opacity: 0;
+
+		.transition(opacity 200ms linear);
+	}
+	
+	.helper {
+		height: 100%;
+		width: 1px;
+		display: inline-block;
+		vertical-align: middle;
+	}
+}
+
+.popup_panel {
+	display: inline-block;
+	vertical-align: middle;
+	position: relative;
+	background: #fff;
+	padding: 20px;
+	border-radius: 4px;
+	box-shadow: 0px 10px 20px fade(#000, 40%);
+	min-width: 270px;
+	max-width: 50%;
+	text-align: left;
+	
+	html.rtl & {
+		text-align: right;
+	}
+	
+	.close {
+		display: inline-block;
+		width: 30px;
+		height: 30px;
+		float: right;
+		margin: -30px -30px 0 0;
+		cursor: pointer;
+		display: none;
+		
+		html.rtl & {
+			float: left;
+		}
+	}
+	
+	.title {
+		display: block;
+		font-weight: bold;
+		font-size: 12pt;
+		margin-bottom: 20px;
+	}
+
+	.attachment .title {
+		font-size: 9pt;
+	}
+	
+	.text {
+		display: block;
+	}
+	
+	.label {
+		width: 150px;
+	}
+
+	.label.pgp_password {
+		text-align: right;
+	}
+	
+	.import_pgp_key_area {
+		height: 300px;
+		width: 530px;
+
+		.headline {
+			margin: 20px 0;
+		}
+
+		.key_item {
+			margin: 0 0 10px 0;
+
+			&.disabled {
+				color: #929292;
+			}
+
+			.key_email {
+				font-weight: bold;
+			}
+		}
+
+		.hint {
+			margin-top: 22px;
+		}
+	}
+
+	.view_pgp_key_area {
+		height: 400px;
+		width: 530px;
+	}
+}
+/*=== END Popup CSS ===*/

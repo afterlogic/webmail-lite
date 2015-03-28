@@ -1,0 +1,70 @@
+{%INCLUDE-START/Layout-Top/INCLUDE-END%}
+
+<!--<video id="video_local" class="video" style="display: none"></video>-->
+<!--<video id="video_remote" class="video" style="display: none"></video>-->
+<audio id="audio_remote" class="audio" style="display: none"></audio>
+<!--<div class="flash_wrapper">-->
+	<div id="flash">
+		<!--<p><a href="http://www.adobe.com/go/getflashplayer"><img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" /></a></p>-->
+		<!--<p><a href="http://www.adobe.com/go/getflashplayer"></a></p>-->
+	</div>
+<!--</div>-->
+<div data-view-model="Common_InformationViewModel"></div>
+<div class="screens">
+	
+	{%INCLUDE-START/Layout-Screens-Top/INCLUDE-END%}
+	
+	<div data-view-model="Login_WrapLoginViewModel" class="screen LoginLayout" style="display: none;"></div>
+	<div data-view-model="Common_HeaderViewModel" class="tabs_panel" style="display: none;"></div>
+	<div data-view-model="Common_HeaderMobileViewModel" class="tabs_panel" style="display: none;"></div>
+	<div data-view-model="Mail_LayoutSidePane_MailViewModel" class="screen MailLayout" style="display: none;"></div>
+	<div data-view-model="Mail_LayoutBottomPane_MailViewModel" class="screen MailBottomLayout" style="display: none;"></div>
+	<div data-view-model="Mail_ComposeViewModel" class="screen MailComposeLayout" style="display: none;"></div>
+	<div data-view-model="Settings_SettingsViewModel" class="screen SettingsLayout" style="display: none;"></div>
+	<div data-view-model="Contacts_ContactsViewModel" class="screen ContactsLayout" style="display: none;"></div>
+	<div data-view-model="Calendar_CalendarViewModel" class="screen CalendarLayout" style="display: none;"></div>
+	<div data-view-model="FileStorage_FileStorageViewModel" class="screen FileStorageLayout" style="display: none;"></div>
+	<div data-view-model="Helpdesk_HelpdeskViewModel" class="screen HelpdeskLayout" style="display: none;"></div>
+	<div data-view-model="Helpdesk_ViewThreadInNewWindow" class="screen HelpdeskLayout" style="display: none;"></div>
+	<div data-view-model="Mail_LayoutSidePane_MessagePaneViewModel" class="panel item_viewer message_viewer" style="display: none;"></div>
+
+	{%INCLUDE-START/Layout-Screens-Middle/INCLUDE-END%}
+
+	<div data-view-model="Popups_ComposePopupViewModel" class="popup compose_popup" style="display: none;"></div>
+	<div data-view-model="Popups_ConfirmAnotherMessageComposedPopupViewModel" class="popup" style="display: none;"></div>
+
+	<div data-view-model="Popups_Calendar_CalendarPopupViewModel" class="popup calendar_popup calendar_create" style="display: none;"></div>
+	<div data-view-model="Popups_Calendar_SharePopupViewModel" class="popup calendar_popup calendar_share" style="display: none;"></div>
+	<div data-view-model="Popups_Calendar_GetLinkPopupViewModel" class="popup calendar_popup calendar_getlink" style="display: none;"></div>
+	<div data-view-model="Popups_Calendar_EventPopupViewModel" class="popup calendar_popup calendar_event" style="display: none;"></div>
+	<div data-view-model="Popups_Calendar_ImportPopupViewModel" class="popup calendar_popup calendar_create" style="display: none;"></div>
+	<div data-view-model="Popups_Calendar_EditRecurrenceEventPopupViewModel" class="popup calendar_recurrence" style="display: none;"></div>
+	<div data-view-model="Popups_Calendar_CalendarSelectCalendarsPopupViewModel" class="popup calendar_popup calendar_select" style="display: none;"></div>
+	
+	<div data-view-model="Popups_FileStorage_FolderCreatePopupViewModel" class="popup" style="display: none;"></div>
+	<div data-view-model="Popups_FileStorage_LinkCreatePopupViewModel" class="files_create_link popup" style="display: none;"></div>
+	<div data-view-model="Popups_FileStorage_RenamePopupViewModel" class="popup" style="display: none;"></div>
+	<div data-view-model="Popups_FileStorage_SharePopupViewModel" class="popup" style="display: none;"></div>
+	<div data-view-model="Popups_FileStorage_FileStoragePopupViewModel" class="popup files" style="display: none;"></div>
+
+	<div data-view-model="Popups_AlertPopupViewModel" class="alert popup" style="display: none;"></div>
+	<div data-view-model="Popups_ConfirmPopupViewModel" class="confirm popup" style="display: none;"></div>
+	<div data-view-model="Popups_AccountCreatePopupViewModel" class="add_account popup" style="display: none;"></div>
+	<div data-view-model="Popups_AccountCreateIdentityPopupViewModel" class="add_account popup" style="display: none;"></div>
+	<div data-view-model="Popups_FetcherAddPopupViewModel" class="add_fetcher popup" style="display: none;"></div>
+	<div data-view-model="Popups_FolderSystemPopupViewModel" class="folders_setup popup" style="display: none;"></div>
+	<div data-view-model="Popups_FolderCreatePopupViewModel" class="add_folder popup" style="display: none;"></div>
+	<div data-view-model="Popups_ChangePasswordPopupViewModel" class="popup" style="display: none;"></div>
+	
+	<div data-view-model="Popups_PhonePopupViewModel" class="popup phone_popup" style="display: none;"></div>
+	<div data-view-model="Popups_GenerateOpenPgpKeyPopupViewModel" class="popup" style="display: none;"></div>
+	<div data-view-model="Popups_ShowOpenPgpKeyArmorPopupViewModel" class="popup" style="display: none;"></div>
+	<div data-view-model="Popups_ImportOpenPgpKeyPopupViewModel" class="popup" style="display: none;"></div>
+	<div data-view-model="Popups_OpenPgpEncryptPopupViewModel" class="popup" style="display: none;"></div>
+	<div data-view-model="Popups_GooglePickerPopupViewModel" class="popup" style="display: none;"></div>
+
+	{%INCLUDE-START/Layout-Screens-Bottom/INCLUDE-END%}
+	
+</div>
+
+{%INCLUDE-START/Layout-Bottom/INCLUDE-END%}

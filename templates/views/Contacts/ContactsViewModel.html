@@ -1,0 +1,58 @@
+<div class="panels" data-bind="splitter: {name: 'groups', sizeLeft: 200, minLeft: 20, minRight: 40, resizeToWidth: true},
+	css: {'groups': selectedPanel() === Enums.MobilePanel.Groups, 
+			'list_active': selectedPanel() === Enums.MobilePanel.Items, 
+			'viewer_active': selectedPanel() === Enums.MobilePanel.View}">
+	<div class="panel groups" data-splitter="groups">
+		<div class="resize_handler"></div>
+		<div class="panel_content">
+			<div class="toolbar">
+				<span class="content">
+					<!-- ko if: !mobileApp -->
+					<span class="item" data-i18n="CONTACTS/TOOL_NEW_CONTACT" data-bind="i18n: 'text', command: newContactCommand, css: {'disabled': selectedGroupType() === Enums.ContactsGroupListType.Global}"></span>
+					<!-- /ko -->
+					<!-- ko if: mobileApp -->
+					<span class="item new_group" data-bind="visible: showPersonalContacts, command: newGroupCommand">
+						<span class="icon"></span>
+						<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_NEW_GROUP"></span>
+					</span>
+					<!-- /ko -->
+				</span>
+			</div>
+			<div class="middle_bar">
+				<!-- ko template: { name: 'Contacts_GroupList', data: $data} --><!-- /ko -->
+			</div>
+		</div>
+	</div>
+	<div class="panel_helper" data-bind="splitter: {name: 'contacts', sizeLeft: 450, minLeft: (allowContactsSharing ? 418 : 368), minRight: 10}">
+		<div class="panel contacts">
+			<div class="resize_handler"></div>
+			<div class="panel_content">
+				<div class="toolbar" data-bind="template: { name: 'Contacts_Toolbar'}"></div>
+				<div class="middle_bar" data-bind="template: {name: 'Contacts_ContactList'}"></div>
+			</div>
+		</div>
+		<div class="panel item_viewer contact_viewer">
+			<div class="panel_content">
+				<div class="middle_bar contact" data-bind="visible: selectedContact() && !selectedContact().edited(), with: selectedContact">
+					<!-- ko template: { name: 'Contacts_ViewContactViewModel', data: $data} --><!-- /ko -->
+				</div>
+
+				<div class="middle_bar edit_contact" data-bind="visible: selectedContact() && selectedContact().edited(), with: selectedContact">
+					<!-- ko template: { name: 'Contacts_EditContactViewModel', data: $data } --><!-- /ko -->
+				</div>
+
+				<div class="middle_bar group" data-bind="visible: selectedGroup() && !selectedGroup().edited(), with: selectedGroup">
+					<!-- ko template: { name: 'Contacts_ViewGroupViewModel', data: $data } --><!-- /ko -->
+				</div>
+
+				<div class="middle_bar edit_group" data-bind="visible: selectedGroup() && selectedGroup().edited(), with: selectedGroup">
+					<!-- ko template: { name: 'Contacts_EditGroupViewModel', data: $data } --><!-- /ko -->
+				</div>
+
+				<div class="middle_bar import" data-bind="visible: oContactImportViewModel.visibility()">
+					<!-- ko template: { name: 'Contacts_ContactsImportViewModel', data: oContactImportViewModel } --><!-- /ko -->
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,71 @@
+<div class="panel_top">
+	<label class="custom_checkbox" data-bind="css: {'checked': checkAll, 'incomplete': checkAllIncomplite}">
+		<span class="icon"></span>
+		<input type="checkbox" data-bind="checked: checkAll" />
+	</label>
+	<span class="search_block">
+		<span class="input" data-bind="css: {'focus': isSearchFocused}">
+			<span class="icon search" data-i18n="CONTACTS/BUTTON_SEARCH" data-bind="i18n: 'text', click: searchSubmitCommand"></span>
+			<input class="field" type="text" data-bind="value: searchInput, onEnter: searchSubmitCommand, hasfocus: isSearchFocused" />
+		</span>
+	</span>
+</div>
+<div class="panel_center unselectable" data-bind="customScrollbar: {x: false}">
+	<div class="contact_list_scroll scroll-inner">
+		<div class="items_list contact_list">
+			<div data-bind="visible: isEmptyList() && !preLoadingList()">
+				<span class="list_notification" data-bind="visible: !isSearch() && !inGroup()">
+					<span class="description" data-i18n="CONTACTS/LABEL_NO_CONTACTS" data-bind="i18n: 'text'"></span>
+					<span class="description" data-i18n="CONTACTS/LABEL_NO_CONTACTS_DESC" data-bind="i18n: 'text'"></span>
+				</span>
+				<span class="list_notification" data-bind="visible: !isSearch() && inGroup()">
+					<span class="description" data-i18n="CONTACTS/LABEL_NO_CONTACTS_IN_GROUP" data-bind="i18n: 'text'"></span>
+					<!-- ko if: !$root.mobileApp -->
+					<span class="description" data-i18n="CONTACTS/LABEL_NO_CONTACTS_IN_GROUP_DESC" data-bind="i18n: 'text'"></span>
+					<!-- /ko -->
+				</span>
+				<span class="list_notification" data-bind="visible: isSearch()">
+					<span class="link" data-i18n="MAILBOX/LINK_CLEAR_SEARCH" data-bind="i18n: 'text', click: onClearSearchClick"></span>
+					<span class="description" data-i18n="CONTACTS/LABEL_NO_CONTACTS_FOUND" data-bind="i18n: 'text'"></span>
+				</span>
+			</div>
+
+			<span class="list_notification" data-bind="visible: isEmptyList() && preLoadingList()">
+				<span class="description" data-i18n="CONTACTS/LABEL_LOADING_CONTACT_LIST" data-bind="i18n: 'text'"></span>
+			</span>
+
+			<span class="list_notification" data-bind="visible: isSearch() && !isEmptyList()">
+				<span class="link" data-i18n="MAILBOX/LINK_CLEAR_SEARCH" data-bind="i18n: 'text', click: onClearSearchClick"></span>
+				<span class="description" data-bind="text: searchText"></span>
+			</span>
+
+			<div class="items_sub_list contact_sub_list" data-bind="foreach: collection, draggablePlace: dragAndDropHelper">
+				<div class="item dragHandle nosubject" data-bind="css: {'checked': checked, 'selected': selected, 'deleted': deleted, 'noname': !Name(), 'noemail': !Email()}">
+					<div class="item_content">
+						<span class="me" data-i18n="CONTACTS/LABEL_ITS_ME" data-bind="visible: ItsMe(), i18n: 'text'"></span>
+						<span class="controls">
+							<!--<label class="custom_checkbox" data-bind="css: {'checked': checked}">
+								<span class="icon"></span>
+								<input type="checkbox" data-bind="checked: checked" />
+							</label>-->
+							<span class="custom_checkbox" data-bind="click: function () { checked(!checked()); }, css: {'checked': checked()}">
+								<span class="icon"></span>
+							</span>
+						</span>
+						<span class="data fadeout">
+							<span class="name" data-bind="text: Name(), visible: !!Name()"></span>
+							<span class="name" data-i18n="CONTACTS/NO_NAME" data-bind="i18n: 'text', visible: Name() === ''"></span>
+							<span class="email" data-bind="text: Email(), visible: !!Email()"></span>
+							<span class="email" data-i18n="CONTACTS/NO_EMAIL" data-bind="i18n: 'text', visible: Email() === ''"></span>
+						</span>
+						<div class="separator"></div>
+					</div>
+				</div>
+			</div>
+			<div class="uploader_mask" data-bind="initDom: uploaderArea, css: {'active': bDragActiveComp}, visible: selectedGroupType() !== Enums.ContactsGroupListType.Global">
+				<div class="inner"></div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="panel_bottom unselectable" data-bind="template: {name: 'Common_PageSwitcherViewModel', data: oPageSwitcher}"></div>

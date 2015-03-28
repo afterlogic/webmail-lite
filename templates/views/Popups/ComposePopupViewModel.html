@@ -1,0 +1,22 @@
+<div class="mask" data-bind="click: onCancelClick, visible: !minimized()"></div>
+<div class="popup_panel" data-bind="visible: !minimized()">
+	<span class="close" data-bind="click: onCancelClick"></span>
+	<!-- ko template: {name: 'Mail_ComposeViewModel'} --><!-- /ko -->
+</div>
+<span class="helper" data-bind="visible: !minimized()"></span>
+
+<div class="minimized_compose" data-bind="visible: minimized() && !singleMode()">
+	<div class="toolbar" data-bind="click: maximize">
+		<span class="content">
+			<span class="item minimized_title">
+				<span data-bind="text: minimizedTitle" class="text"></span>
+			</span>
+			<span data-bind="customTooltip: 'COMPOSE/TOOL_MAXIMIZE'" class="item maximize">
+				<span class="icon"></span>
+			</span>
+			<span data-bind="click: saveAndClose, customTooltip: saveAndCloseTooltip" class="item save_and_close">
+				<span class="icon"></span>
+			</span>
+		</span>
+	</div>
+</div>

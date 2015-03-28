@@ -1,0 +1,82 @@
+<div class="panel_top">
+	<div class="toolbar">
+		<span class="content">
+			<!-- ko foreach: watchers -->
+				<!-- ko if: $index() < 5 -->
+				<span class="item watcher" data-bind="customTooltip: $data.text">
+					<span class="icon" data-bind="visible: $data.icon"></span>
+					<span class="text_icon" data-bind="text: $data.initial, visible: !$data.icon"></span>
+					<span class="text" data-bind="text: $data.text"></span>
+				</span>
+				<!-- /ko -->
+			<!-- /ko -->
+			
+			<!-- ko if: watchers().length > 5 -->
+			<span class="item control" data-bind="dropdown: {control: false}">
+				<span class="icon arrow"></span>
+				<span class="dropdown">
+					<span class="dropdown_helper">
+						<span class="dropdown_arrow"><span></span></span>
+						<span class="dropdown_content">
+							<!-- ko foreach: watchers -->
+								<!-- ko if: $index() >= 5 -->
+								<span class="item" data-bind="text: $data"></span>
+								<!-- /ko -->
+							<!-- /ko -->
+						</span>
+					</span>
+				</span>
+			</span>
+			<!-- /ko -->
+			
+			<span class="item delete" data-bind="command: deleteCommand, customTooltip: 'HELPDESK/TOOL_DELETE'">
+				<span class="icon"></span>
+				<span class="text" data-bind="i18n: 'text'" data-i18n="HELPDESK/TOOL_DELETE"></span>
+			</span>
+			<span class="item resolve" data-bind="command: closeCommand, customTooltip: 'HELPDESK/THREAD_BUTTON_CLOSE_ISSUE', visible: state() !== Enums.HelpdeskThreadStates.Resolved">
+				<span class="icon"></span>
+				<span class="text" data-i18n="HELPDESK/THREAD_BUTTON_CLOSE_ISSUE" 
+					  data-bind="i18n: 'text'"></span>
+			</span>
+		</span>
+	</div>
+	
+	<h2 class="title" data-bind="text: subject()"></h2>
+</div>
+<div class="panel_center" data-bind="customScrollbar: {'scrollToBottomTrigger': scrollToBottomTrigger, 
+	 'scrollToTopTrigger': scrollToTopTrigger}">
+	<div class="thread_content scroll-inner">
+		<div class="notification" data-bind="visible: loadingViewPane, i18n: 'text'" 
+			 data-i18n="HELPDESK/INFO_LOADING"></div>
+		<div class="link more" data-bind="visible: hasMorePosts() && !loadingMoreMessages() && !loadingViewPane(), 
+			 click: commandGetOlderPosts, i18n: 'text'" data-i18n="HELPDESK/THREAD_MORE_MESSAGES"></div>
+		<div class="link more" data-bind="visible: loadingMoreMessages() && !loadingViewPane(), i18n: 'text'"
+			 data-i18n="HELPDESK/THREAD_LOADING_MESSAGES"></div>
+		<div class="posts" data-bind="foreach: posts(), quoteText: {actionHandler: quoteText}">
+			<div class="post request" data-bind="css: {
+					'request': bThreadOwner,
+					'response': !bThreadOwner
+				}">
+				<div class="header">
+					<span class="close" data-bind="css: {'canBeDeleted': canBeDeleted}, click: function (oPost) { $root.deletePost(oPost); }"></span>
+					<span class="date" data-bind="text: sDate"></span>
+					<span class="icon"></span>
+					<span class="name" data-bind="text: sFrom"></span>
+				</div>
+				<div class="content" data-bind="html: sText, visible: !collapsed()"></div>
+				<div class="attachments large" data-bind="visible: attachments().length > 0 && !collapsed()">
+					<!-- ko template: {name: 'Common_FileViewModel', foreach: attachments} --><!-- /ko -->
+				</div>
+			</div>
+		</div>
+		<!--<div class="buttons" data-bind="visible: posts().length > 0">-->
+		<div class="buttons" data-bind="css: {'no_posts': posts().length === 0}">
+			<!--<span class="button new_post" data-bind="click: function () { iHaveMoreToSay(); },
+				  visible: isQuickReplyHidden(), i18n: 'text'" data-i18n="HELPDESK/THREAD_BUTTON_SAY_MORE"></span>-->
+			<span class="button new_post" data-bind="click: function () { iHaveMoreToSay(); },
+				  visible: !isQuickReplyActive(), i18n: 'text'" data-i18n="HELPDESK/THREAD_BUTTON_SAY_MORE"></span>
+			<span class="button resolve" data-bind="command: closeCommand, i18n: 'text', visible: state() !== Enums.HelpdeskThreadStates.Resolved"
+				  data-i18n="HELPDESK/THREAD_BUTTON_CLOSE_ISSUE"></span>
+		</div>
+	</div>
+</div>

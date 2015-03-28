@@ -1,0 +1,45 @@
+<h1>
+	Check Connection with E-mail Server
+</h1>
+
+<p class="description">
+	Here you can test the connectivity with your e-mail server (optional).
+</p>
+
+<div class="field_list">
+	<div class="row">
+		<label class="field_label_tiny">E-mail server host:</label>
+		<span class="field_value">
+			<input name="txtHost" class="wm_input" type="text" id="txtHost" tabindex="1" value="{{Host}}" />
+		</span>
+	</div>
+
+	<div class="row">
+		<label class="field_label_tiny">&nbsp;</label>
+		<span class="field_value">
+			<input type="checkbox" class="wm_checkbox" name="chSMTP" id="chSMTP" value="1" {{chSMTP}} />
+			<label for="chSMTP">SMTP</label>
+			<input type="checkbox" class="wm_checkbox" name="chIMAP4" id="chIMAP4" value="1" {{chIMAP}} />
+			<label for="chIMAP4">IMAP4</label>
+		</span>
+	</div>
+	
+	<div class="row">
+		<label class="field_label_tiny">&nbsp;</label>
+		<span class="field_value">
+			<input type="submit" name="test_btn" id="test_btn" value="Test connection" />
+		</span>
+	</div>
+</div>
+
+<div>
+	{{FootMessage}}
+</div>
+
+<div class="buttons">
+	<hr />
+	<input class="wm_button" class="wm_button" type="submit" name="back_btn" value="Back" />
+	<input id="next-btn-server-check" class="wm_button right" class="wm_button" type="submit" name="next_btn" value="Next" />
+</div>
+
+<script>{{LiteScript}}</script>

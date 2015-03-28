@@ -1,0 +1,75 @@
+<form class="form fields" action="#/" onsubmit="return false;" data-bind="command: registerCommand">
+	<div class="fieldset">
+		<div class="row name" data-bind="css: {'focused': nameFocus(), 'filled': name().length > 0}">
+			<label for="name" class="title placeholder" data-i18n="LOGIN/LABEL_NAME" data-bind="i18n: 'text'"></label>
+			<span class="value">
+				<input id="name" class="input" type="text" spellcheck="false" autocomplete="off" data-bind="value: name, hasfocus: nameFocus, valueUpdate: 'afterkeydown'" />
+			</span>
+		</div>
+		<div class="row login" data-bind="css: {'focused': loginFocus(), 'filled': login().length > 0}">
+			<label for="reg_login" class="title placeholder" data-i18n="LOGIN/LABEL_LOGIN" data-bind="i18n: 'text'"></label>
+			<span class="value">
+				<input id="reg_login" class="input" autocomplete="off" spellcheck="false" type="text" data-bind="value: login, hasfocus: loginFocus, valueUpdate: 'afterkeydown'" />
+			</span>
+			<span class="value suffix" data-bind="visible: domains().length > 0">
+				<span class="text">@</span>
+				<span class="text" data-bind="text: domain, visible: domains().length === 1"></span>
+				<select data-bind="visible: domains().length > 1, options: domains, value: selectedDomain"></select>
+			</span>
+		</div>
+		<div class="row password" data-bind="css: {'focused': passwordFocus(), 'filled': password().length > 0}">
+			<label for="reg_password" class="title placeholder" data-i18n="LOGIN/LABEL_NEW_PASSWORD" data-bind="i18n: 'text'"></label>
+			<span class="value">
+				<input id="reg_password" class="input" autocomplete="off" spellcheck="false" type="password" data-bind="value: password, hasfocus: passwordFocus, valueUpdate: 'afterkeydown'" />
+			</span>
+		</div>
+		<div class="row password" data-bind="css: {'focused': confirmPasswordFocus(), 'filled': confirmPassword().length > 0}">
+			<label for="reg_confirm_password" class="title placeholder" data-i18n="LOGIN/LABEL_CONFIRM_PASSWORD" data-bind="i18n: 'text'"></label>
+			<span class="value">
+				<input id="reg_confirm_password" class="input" autocomplete="off" spellcheck="false" type="password" data-bind="value: confirmPassword, hasfocus: confirmPasswordFocus, valueUpdate: 'afterkeydown'" />
+			</span>
+		</div>
+		<!-- ko if: allowQuestionPart -->
+		<div class="row question" data-bind="css: {'focused': questionFocus(), 'filled': question().length > 0}">
+			<label class="title placeholder" data-i18n="LOGIN/LABEL_SELECT_QUESTION" data-bind="i18n: 'text'"></label>
+			<span class="value">
+				<span class="custom_selector input" data-bind="customSelect: {'control': false, 'expand': 'expand', 'expandState': questionFocus, 'options': registrationQuestions, value: question, optionsText: 'text', optionsValue: 'value'}">
+					<span class="name" data-bind="text: question"></span>
+					<span class="control">
+						<span class="icon"></span>
+					</span>
+					<span class="dropdown">
+						<span class="dropdown_helper">
+							<span class="dropdown_arrow"><span></span></span>
+							<span class="dropdown_content">
+							</span>
+						</span>
+					</span>
+				</span>
+			</span>
+		</div>
+		<div class="row answer" data-bind="visible: visibleYourQuestion, css: {'focused': yourQuestionFocus(), 'filled': yourQuestion().length > 0}">
+			<label for="reg_your_question" class="title placeholder" data-i18n="LOGIN/LABEL_YOUR_QUESTION" data-bind="i18n: 'text'"></label>
+			<span class="value">
+				<input id="reg_your_question" class="input" autocomplete="off" spellcheck="false" type="text" data-bind="value: yourQuestion, hasfocus: yourQuestionFocus, valueUpdate: 'afterkeydown'" />
+			</span>
+		</div>
+		<div class="row answer" data-bind="css: {'focused': answerFocus(), 'filled': answer().length > 0}">
+			<label for="reg_answer" class="title placeholder" data-i18n="LOGIN/LABEL_ANSWER_QUESTION" data-bind="i18n: 'text'"></label>
+			<span class="value">
+				<input id="reg_answer" class="input" autocomplete="off" spellcheck="false" type="text" data-bind="value: answer, hasfocus: answerFocus, valueUpdate: 'afterkeydown'" />
+			</span>
+		</div>
+		<!-- /ko -->
+	</div>
+	{%INCLUDE-START/Register-Before-Submit-Button/INCLUDE-END%}
+	<div class="row buttons">
+		<button type="submit" class="button login" data-bind="text: registerButtonText, command: registerCommand"></button>
+	</div>
+	<div class="row links">
+		<div class="forgot">
+			<span class="link" data-bind="click: function () {$parent.gotoRegister(false);}, i18n: 'text'"
+				  data-i18n="LOGIN/LINK_BACK"></span>
+		</div>
+	</div>
+</form>
