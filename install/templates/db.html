@@ -1,0 +1,100 @@
+<input type="submit" name="next_btn" style="position: absolute; visibility: hidden;" value="Next" />
+
+<h1>
+	Specify Database Settings
+</h1>
+<ol>
+	<li>
+		<h3>Enter connection settings</h3>
+		<div class="field_list">
+			
+			<div class="row">
+				<label class="field_label_tiny">SQL type:</label>
+				<span class="field_value">
+					<input type="radio" name="chSqlType" id="chSqlTypeMySQL" value="MySQL" {{SqlTypeMySQLCheched}} />
+					<label for="chSqlTypeMySQL">MySQL</label>
+					&nbsp;&nbsp;&nbsp;
+					<input type="radio" name="chSqlType" id="chSqlTypePostgreSQL" value="PostgreSQL" {{SqlTypePostgreSQLCheched}} />
+					<label for="chSqlTypePostgreSQL">PostgreSQL (experimental)</label>
+				</span>
+			</div>
+
+			<div class="row">
+				<label class="field_label_tiny">SQL login:</label>
+				<span class="field_value">
+					<input type="text" class="wm_input" name="txtSqlLogin" value="{{Login}}" size="45" />
+				</span>
+			</div>
+
+			<div class="row">
+				<label class="field_label_tiny">SQL password:</label>
+				<span class="field_value">
+					<input type="password" class="wm_input" name="txtSqlPassword" value="{{Password}}" size="45" />
+				</span>
+			</div>
+
+			<div class="row">
+				<label class="field_label_tiny">Database name:</label>
+				<span class="field_value">
+					<input type="text" class="wm_input" name="txtSqlName" value="{{DbName}}" size="45" />
+					<input type="submit" name="create_db_btn" id="create_db_btn" value="Create" /><br />
+					<span class="field_description">
+					{{CreateDBNameText}}
+					</span>
+				</span>
+			</div>
+
+			<div class="row">
+				<label class="field_label_tiny">Host:</label>
+				<span class="field_value">
+					<input type="text" class="wm_input" name="txtSqlSrc" value="{{Host}}" size="45" />
+				</span>
+			</div>
+		</div>
+		<br />
+	</li>
+	<li>
+		<h3>Test database connectivity to check if the specified settings are correct (recommended)</h3>
+		<div class="field_list">
+			<span class="field_value">
+				<input type="submit" name="test_btn" value="Test database" />
+				<span class="field_description">
+				{{TestDBText}}
+				</span>
+			</span>
+		</div>
+		<br />
+	</li>
+	<li>
+		<h3>Specify prefix for table names (optional)</h3>
+		<p>
+			For instance, if you specify prefix as "my_", awm_accounts table will be created as "my_awm_accounts". You can leave it empty.
+		</p>
+		<input type="text" class="wm_input" name="prefixString" value="{{Prefix}}" size="15" />
+		<br />
+		<br />
+	</li>
+	<li>
+		<h3>Create Database Tables</h3>
+		<p>
+			If enabled, this installer will create required tables. Disable it if you've already created the tables.
+		</p>
+		<div class="field_list">
+			<span class="field_value">
+				<input type="checkbox" name="chNotCreate" id="chNotCreate" value="1" {{CreateDbCheched}} />
+				<label for="chNotCreate">Create Database Tables</label>
+				<br />
+				<span class="field_description">{{MainFootText}}</span>
+			</span>
+		</div>
+		<br />
+	</li>
+</ol>
+
+<div class="note" style="text-align:center;">Click <b>Next</b> to apply the settings and proceed.</div>
+
+<div class="buttons">
+	<hr />
+	<input class="wm_button" type="submit" name="back_btn" value="Back" />
+	<input class="wm_button right" type="submit" name="next_btn" value="Next" />
+</div>

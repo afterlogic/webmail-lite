@@ -1,0 +1,82 @@
+	<span class="content">
+		<!-- ko if: !mobileApp -->
+		<span class="item checkmail command" data-bind="click: reload, checkmail: {'activeClass': 'process', 'state': preLoadingList(), 'duration': 800}">
+			<span class="icon"></span>
+		</span>
+		<!-- /ko -->
+		<!-- ko if: mobileApp -->
+		<span data-bind="click: function () {$root.gotoGroupList();}, customTooltip: 'MAILBOX/TOOL_BACK_TO_LIST'" class="item back">
+			<span class="icon"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_BACK_TO_LIST"></span>
+		</span>
+		<!-- /ko -->
+		<!--<span class="item new_contact" data-bind="visible: showPersonalContacts() &&
+			selectedGroupType() !== Enums.ContactsGroupListType.Global && selectedGroupType() !== Enums.ContactsGroupListType.All, command: newContactCommand, customTooltip: 'CONTACTS/TOOL_NEW_CONTACT'">
+			<span class="icon"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_NEW_CONTACT"></span>
+		</span>-->
+		<!-- ko if: !mobileApp -->
+		<span class="item new_group" data-bind="visible: showPersonalContacts() &&
+			selectedGroupType() !== Enums.ContactsGroupListType.Global &&
+			selectedGroupType() !== Enums.ContactsGroupListType.SharedToAll,
+			command: newGroupCommand, customTooltip: 'CONTACTS/TOOL_NEW_GROUP'">
+			<span class="icon"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_NEW_GROUP"></span>
+		</span>
+		<!-- /ko -->
+		<span class="item new_message" data-bind="visible: allowWebMail, command: newMessageCommand, customTooltip: 'CONTACTS/TOOL_NEW_MESSAGE'">
+			<span class="icon"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_NEW_MESSAGE"></span>
+		</span>
+		<span class="item add_to" data-bind="visible: showPersonalContacts, dropdown: {control: false}, command: addContactsCommand, customTooltip: 'CONTACTS/TOOL_ADD_CONTACT_TO'">
+			<span class="icon"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_ADD_CONTACT_TO"></span>
+			<span class="icon arrow"></span>
+			<span class="dropdown">
+				<span class="dropdown_helper">
+					<span class="dropdown_arrow"><span></span></span>
+					<span class="dropdown_content" data-bind="customScrollbar: {x: false}">
+						<span class="scroll-inner">
+							<!-- ko foreach: $root.groupFullCollection() -->
+							<span class="item" data-bind="text: Name()"></span>
+							<!-- /ko -->
+							<span class="item new-group" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_DROPDOWN_NEW_GROUP"></span>
+						</span>
+					</span>
+				</span>
+			</span>
+		</span>
+		<span class="item delete" data-bind="visible: (showPersonalContacts() && selectedGroupType() === Enums.ContactsGroupListType.Personal || showSharedToAllContacts() && selectedGroupType() === Enums.ContactsGroupListType.SharedToAll), command: deleteCommand, customTooltip: 'CONTACTS/TOOL_DELETE'">
+			<span class="icon"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_DELETE"></span>
+		</span>
+		<span class="item remove_from" data-bind="visible: showPersonalContacts() && selectedGroupType() === Enums.ContactsGroupListType.SubGroup, command: removeFromGroupCommand, customTooltip: 'CONTACTS/TOOL_REMOVE'">
+			<span class="icon"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_REMOVE"></span>
+		</span>
+		
+		<!-- ko if: !mobileApp -->
+		<span class="item share-all" data-bind="visible: visibleShareCommand, command: shareCommand, customTooltip: 'CONTACTS/TOOL_SHARE'">
+			<span class="icon"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_SHARE"></span>
+		</span>
+		<span class="item unshare-all" data-bind="visible: visibleUnshareCommand, command: shareCommand, customTooltip: 'CONTACTS/TOOL_UNSHARE'">
+			<span class="icon"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_UNSHARE"></span>
+		</span>
+		
+		<span class="item control" data-bind="visible: showPersonalContacts() && selectedGroupType() === Enums.ContactsGroupListType.Personal, dropdown: {control: false}">
+			<span class="icon arrow"></span>
+			<span class="dropdown">
+				<span class="dropdown_helper">
+					<span class="dropdown_arrow"><span></span></span>
+					<span class="dropdown_content">
+						<span class="item export" data-bind="i18n: 'text', command: exportCSVCommand" data-i18n="CONTACTS/TOOL_EXPORT_CSV"></span>
+						<span class="item export" data-bind="i18n: 'text', command: exportVCFCommand" data-i18n="CONTACTS/TOOL_EXPORT_VCF"></span>
+						<span class="item import" data-bind="i18n: 'text', command: importCommand" data-i18n="CONTACTS/TOOL_IMPORT"></span>
+					</span>
+				</span>
+			</span>
+		</span>
+		<!-- /ko -->
+	</span>

@@ -1,0 +1,133 @@
+<div class="panel_top clearfix">
+	<div class="toolbar">
+		<span class="content">
+			<!-- ko foreach: watchers -->
+				<!-- ko if: $index() < 5 -->
+				<span class="item watcher" data-bind="customTooltip: $data.text">
+					<span class="icon" data-bind="visible: $data.icon"></span>
+					<span class="text_icon" data-bind="text: $data.initial, visible: !$data.icon"></span>
+					<span class="text" data-bind="text: $data.text"></span>
+				</span>
+				<!-- /ko -->
+			<!-- /ko -->
+			
+			<!-- ko if: watchers().length > 5 -->
+			<span class="item control" data-bind="dropdown: {control: false}">
+				<span class="icon arrow"></span>
+				<span class="dropdown">
+					<span class="dropdown_helper">
+						<span class="dropdown_arrow"><span></span></span>
+						<span class="dropdown_content">
+							<!-- ko foreach: watchers -->
+								<!-- ko if: $index() >= 5 -->
+								<span class="item" data-bind="text: $data"></span>
+								<!-- /ko -->
+							<!-- /ko -->
+						</span>
+					</span>
+				</span>
+			</span>
+			<!-- /ko -->
+			
+			<span class="group resolve" data-bind="dropdown: {}">
+				<span class="item" data-bind="command: closeCommand, customTooltip: 'HELPDESK/TOOL_CLOSE', visible: state() !== Enums.HelpdeskThreadStates.Resolved">
+					<span class="icon"></span>
+					<span class="text" data-bind="i18n: 'text'" data-i18n="HELPDESK/TOOL_CLOSE"></span>
+				</span>
+				<span class="item control">
+					<span class="icon arrow"></span>
+				</span>
+				<span class="dropdown">
+					<span class="dropdown_helper">
+						<span class="dropdown_arrow"><span></span></span>
+						<span class="dropdown_content">
+							<span class="item allread" data-bind="command: pendingCommand, i18n: 'text'"
+								  data-i18n="HELPDESK/THREAD_STATE_PENDING"></span>
+							<span class="item unread" data-bind="command: deferCommand, i18n: 'text'"
+								  data-i18n="HELPDESK/THREAD_STATE_DEFERRED"></span>
+							<span class="item unread" data-bind="command: answerCommand, i18n: 'text'"
+								  data-i18n="HELPDESK/THREAD_STATE_ANSWERED"></span>
+						</span>
+					</span>
+				</span>
+			</span>
+			<span class="item wait_client" data-bind="command: waitCommand, customTooltip: 'HELPDESK/TOOL_WAITING'">
+				<span class="icon"></span>
+				<span class="text" data-bind="i18n: 'text'" data-i18n="HELPDESK/TOOL_WAITING"></span>
+			</span>
+			<span class="item delete" data-bind="command: deleteCommand, visible: !singleMode, customTooltip: 'HELPDESK/TOOL_DELETE'">
+				<span class="icon"></span>
+				<span class="text" data-bind="i18n: 'text'" data-i18n="HELPDESK/TOOL_DELETE"></span>
+			</span>
+			<span class="item new_window" data-bind="command: openNewWindowCommand, visible: !singleMode, customTooltip: 'HELPDESK/TOOL_NEW_WINDOW'">
+				<span class="icon"></span>
+				<span class="text" data-bind="i18n: 'text'" data-i18n="HELPDESK/TOOL_NEW_WINDOW"></span>
+			</span>
+		</span>
+	</div>
+	
+	<div class="title" data-bind="contactcard: {'trigger': hasOwnerContact, 'controlWidth': contactCardWidth}, css: {'has_contactcard': hasOwnerContact}">
+		<span class="text">
+			<span class="owner control" data-bind="text: subject(), css: {'founded': hasOwnerContact}"></span>
+			<span class="add_contact"
+				data-bind="customTooltip: 'MESSAGE/ACTION_ADD_TO_CONTACTS', click: addToContacts, visible: visibleAddToContacts()"></span>
+		</span>
+		<span class="dropdown control contact_card helpdesk" data-bind="visible: hasOwnerContact, if: hasOwnerContact">
+			<span class="dropdown_helper">
+				<span class="dropdown_arrow"><span></span></span>
+				<span class="dropdown_content dropdown_content_mail" data-bind="template: {name: 'Common_ContactCard', data: ownerContact}, style: {'width': contactCardWidth()+'px'}"></span>
+			</span>
+		</span>
+	</div>
+	<a class="link" href="javascript:void(0);" data-bind="i18n: 'text', click: onShowThreadsByOwner,
+	   visible: !singleMode" data-i18n="HELPDESK/SHOW_ALL_THREADS"></a>
+</div>
+<div class="panel_center" data-bind="customScrollbar: {'scrollToBottomTrigger': scrollToBottomTrigger,
+	 'scrollToTopTrigger': scrollToTopTrigger}">
+	<div class="thread_content scroll-inner">
+		<div class="details" data-bind="visible: !clientDetailsVisible() && '' !== externalContentUrl()">
+			<div class="details_content">
+				<span class="link details_show" data-i18n="HELPDESK/ACTION_SHOW_DETAILS"
+					data-bind="i18n: 'text', click: showClientDetails"></span>
+			</div>
+		</div>
+		<div class="details" data-bind="visible: clientDetailsVisible() && '' !== externalContentUrl()">
+			<div class="details_content">
+				<span class="link details_hide" data-i18n="HELPDESK/ACTION_HIDE_DETAILS"
+					data-bind="i18n: 'text', click: hideClientDetails"></span>
+				<!-- ko if: '' !== externalContentUrl() -->
+					<iframe class="external_content" src="javascript:void(0);"
+						data-bind="attr: { 'src': externalContentUrl }"></iframe>
+				<!-- /ko -->
+			</div>
+		</div>
+
+		<div class="notification" data-bind="visible: loadingViewPane, i18n: 'text'"
+			 data-i18n="HELPDESK/INFO_LOADING"></div>
+		
+		<div class="link more" data-bind="visible: hasMorePosts() && !loadingMoreMessages() && !loadingViewPane(), 
+			 click: commandGetOlderPosts, i18n: 'text'" data-i18n="HELPDESK/THREAD_MORE_MESSAGES"></div>
+
+		<div class="link more" data-bind="visible: loadingMoreMessages() && !loadingViewPane(), i18n: 'text'"
+			 data-i18n="HELPDESK/THREAD_LOADING_MESSAGES"></div>
+		
+		<div class="posts" data-bind="foreach: posts(), quoteText: {actionHandler: quoteText}">
+			<div class="post request" data-bind="css: {
+					'request': bThreadOwner,
+					'response': !bThreadOwner,
+					'internal': iType === 1
+				}">
+				<div class="header">
+					<span class="close" data-bind="css: {'canBeDeleted': canBeDeleted}, click: function (oPost) { $root.deletePost(oPost); }"></span>
+					<span class="date" data-bind="text: sDate"></span>
+					<span class="icon"></span>
+					<span class="name" data-bind="text: sFrom"></span>
+				</div>
+				<div class="content" data-bind="html: sText, visible: !collapsed()"></div>
+				<div class="attachments large" data-bind="visible: attachments().length > 0 && !collapsed()">
+					<!-- ko template: {name: 'Common_FileViewModel', foreach: attachments} --><!-- /ko -->
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

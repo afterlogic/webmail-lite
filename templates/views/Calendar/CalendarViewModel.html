@@ -1,0 +1,112 @@
+<div class="tabs_panel" data-bind="visible: isPublic">
+	<span class="item calendar current">
+		<span class="" data-bind="text: publicCalendarName"></span>
+	</span>
+</div>
+<div class="panels" data-bind="splitter: {name: 'calendar', sizeLeft: 200, minLeft: 200, minRight: 40, resizeToWidth: true, resizeFunc: dayNamesResizeBinding}">
+	<div class="panel calendar_manager">
+		<div class="resize_handler"></div>
+		<div class="panel_content">
+			<div class="toolbar">
+				<span class="content" data-bind="visible: !isPublic">
+					<span class="item" data-i18n="CALENDAR/BUTTON_NEW_EVENT" data-bind="i18n: 'text', click: createEventInCurrentCalendar"></span>
+				</span>
+			</div>
+			<div class="middle_bar">
+				<div class="panel_center" data-bind="visible: !isPublic">
+					<div class="panel_center" data-bind="customScrollbar: {x: false, 'onStart': _.throttle(function () { calendarDropdownToggle(false); }, 500) }">
+						<div class="scroll-inner">
+							<div class="items_list calendars">
+								<span class="section_title">
+									<span class="control" data-bind="click: openCreateCalendarForm, customTooltip: 'CALENDAR/TOOLTIP_CREATE_CALENDAR'"></span>
+									<span class="title personal" data-bind="i18n: 'text', visible: (calendars.ownCount() > 0)">
+										<span class="icon"></span>
+										<span class="text" data-i18n="CALENDAR/TITLE_CALENDARS" data-bind="i18n: 'text'"></span>
+									</span>
+								</span>
+								<!-- ko foreach: calendars.own() -->
+									<!-- ko template: {name: 'Calendar_CalendarListItem'} --><!-- /ko -->
+								<!-- /ko -->
+							</div>
+							<div class="items_list calendars" data-bind="visible: (calendars.sharedCount() > 0 && calendarSharing)">
+								<span class="section_title">
+									<span class="title shared">
+										<span class="icon"></span>
+										<span class="text" data-i18n="CALENDAR/TITLE_SHARED_CALENDARS" data-bind="i18n: 'text'"></span>
+									</span>
+								</span>
+								<!-- ko foreach: calendars.shared() -->
+									<!-- ko template: {name: 'Calendar_CalendarListItem'} --><!-- /ko -->
+								<!-- /ko -->						
+							</div>
+							<div class="items_list calendars" data-bind="visible: (calendars.sharedToAllCount() > 0 && calendarSharing)">
+								<span class="section_title">
+									<span class="title shared-all">
+										<span class="icon"></span>
+										<span class="text" data-i18n="CALENDAR/TITLE_SHARED_WITH_ALL_CALENDARS" data-bind="i18n: 'text'"></span>
+									</span>
+								</span>
+								<!-- ko foreach: calendars.sharedToAll() -->
+									<!-- ko template: {name: 'Calendar_CalendarListItem'} --><!-- /ko -->
+								<!-- /ko -->						
+							</div>
+						</div>
+					</div>
+					<div class="dropdowns" data-bind="style: {'top': currentCalendarDropdownOffset() + 'px'}">
+						<!-- ko template: {name: 'Calendar_CalendarListItemMenu', foreach: calendars.collection()} --><!-- /ko -->
+					</div>
+				</div>
+				<div class="panel_bottom" data-bind="initDom: datePickerDom">
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="panel calendar">
+		<div class="panel_content">
+			<div class="toolbar unselectable">
+				<span class="content">
+					<span class="item checkmail command" data-bind="click: getCalendars, checkmail: {'activeClass': 'process', 'state': checkStarted(), 'duration': 800}">
+						<span class="icon"></span>
+					</span>
+					<span class="group range_select">
+						<span class="item" data-bind="click: displayToday">
+							<span class="text" data-i18n="CALENDAR/BUTTON_TODAY" data-bind="i18n: 'text'"></span>
+						</span>
+						<span class="item" data-bind="click: function(){changeView('agendaDay');}, css: {'selected passive': selectedView() === 'agendaDay'}">
+							<span class="text" data-i18n="CALENDAR/BUTTON_DAY_VIEW" data-bind="i18n: 'text'"></span>
+						</span>
+						<span class="item" data-bind="click: function(){changeView('agendaWeek');}, css: {'selected passive': selectedView() === 'agendaWeek'}">
+							<span class="text" data-i18n="CALENDAR/BUTTON_WEEK_VIEW" data-bind="i18n: 'text'"></span>
+						</span>
+						<span class="item" data-bind="click: function(){changeView('month');}, css: {'selected passive': selectedView() === 'month'}">
+							<span class="text" data-i18n="CALENDAR/BUTTON_MONTH_VIEW" data-bind="i18n: 'text'"></span>
+						</span>
+					</span>
+					
+					<span class="group date_select">
+						<span class="item prev" data-bind="click: displayPrev">
+							<span class="icon"></span>
+						</span>
+						<span class="item current passive">
+							<span class="helper" data-bind="foreach: dateTitleHelper, css: {'week': selectedView() === 'agendaWeek', 'day': selectedView() === 'agendaDay'}">
+								<span class="text" data-bind="text: $parent.selectedView() === 'agendaWeek' ? '' + $data + $data : $data"></span><br />
+							</span>
+							<span class="text" data-bind="text: dateTitle"></span>
+						</span>
+						<span class="item next" data-bind="click: displayNext">
+							<span class="icon"></span>
+						</span>
+					</span>
+				</span>
+			</div>
+			<div class="middle_bar" data-bind="css: {'view_month': visibleWeekdayHeader}">
+				<div class="panel_center">
+					<div data-bind="initDom: calendarGridDom" style="visibility: hidden;"></div>
+					<div class="uploader_mask" data-bind="initDom: uploaderArea, css: {'active': bDragActiveComp}">
+						<div class="inner"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

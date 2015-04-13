@@ -1,0 +1,29 @@
+<div class="panel_top">
+	<h2 class="title" data-i18n="SETTINGS/TITLE_SERVICES" data-bind="i18n: 'text'"></h2>
+</div>
+<div class="panel_center">
+	<div class="fields">
+		<div class="fieldset" data-bind="visible: allowFiles">
+			<h2 class="subtitle" data-i18n="SETTINGS/SERVICES_FILES_MODULE" data-bind="i18n: 'text'"></h2>
+			<div class="row"> 
+				<div> 
+					<label class="custom_checkbox" data-bind="css: {'checked': enableFiles}"> 
+						<span class="icon"></span> 
+						<input type="checkbox" id="enableFiles" data-bind="checked: enableFiles"> 
+					</label> 
+					<label for="enableFiles" data-i18n="SETTINGS/SERVICES_FILES_MODULE_ENABLE" data-bind="i18n: 'text'"></label> 
+				</div> 
+			</div>			
+			<div class="hint" data-i18n="SETTINGS/SERVICES_FILES_MODULE_HINT" data-bind="i18n: 'text'"></div>
+		</div>		
+		
+		{%INCLUDE-START/ServicesSettings-Before-Buttons/INCLUDE-END%}
+
+		<div class="buttons">
+			<span class="button" data-bind="click: onSaveClick">
+				<span data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', visible: !loading()"></span>
+				<span data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', visible: loading()"></span>
+			</span>
+		</div>
+	</div>
+</div>

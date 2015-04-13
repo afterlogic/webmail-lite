@@ -1,0 +1,65 @@
+<!-- ko if: appCustomLogo() !== '' --><span class="item logo"><img class="img_logo" data-bind="attr: {'src': appCustomLogo()}"/></span><!-- /ko -->
+<span class="item emails first-child" data-bind="visible: !isMailboxTab() && allowWebMail, dropdown: {}, css: {'current': isMailboxTab(), 'disabled': accounts().length <= 1, 'has_control': accounts().length > 1}, style: {'width': mailHelperwidth() + 'px' }">
+	<span class="helper-container" data-bind="style: {'width': accounts().length > 1 ? mailHelperwidth() - 20 + 'px' : mailHelperwidth() + 'px'}">
+		<span class="helper" data-bind="text: email, initDom: domMailHelperSmall"></span>
+		<a class="link" href="javascript: void(0);" data-bind="attr: {href: '#' + mailboxHash()}">
+			<span class="text" data-bind="text: email"></span>
+			<span class="unseen" data-bind="text: mailUnseenCount, visible: mailUnseenVisible(), css: {one: mailUnseenCount() < 10, two: mailUnseenCount() > 9, three: mailUnseenCount() === '99+'}"></span> <!--TODO customTooltip with plural-->
+		</a>
+		<span class="control" data-bind="visible: accounts().length > 1"></span>
+	</span>
+	<span class="dropdown">
+		<span class="dropdown_helper">
+			<span class="dropdown_arrow"><span></span></span>
+			<span class="dropdown_content" data-bind="foreach: accounts">
+				<span class="item" data-bind="text: email, visible: !isCurrent(), click: changeAccount"></span>
+			</span>
+		</span>
+	</span>
+</span>
+<span class="item emails" data-bind="visible: isMailboxTab() && allowWebMail, dropdown: {control: false}, css: {'current': isMailboxTab(), 'disabled': accounts().length <= 1, 'has_control': accounts().length > 1}, style: {'width': mailHelperwidth() + 'px' }">
+	<span class="helper-container" data-bind="style: {'width': accounts().length > 1 ? mailHelperwidth() - 6 + 'px' : mailHelperwidth() + 'px' }">
+		<span class="helper" data-bind="text: email, css: {'has_control': accounts().length > 1}, initDom: domMailHelper"></span>
+		<a class="link" href="javascript: void(0);">
+			<span class="text" data-bind="text: email"></span>
+		</a>
+		<span class="control" data-bind="visible: accounts().length > 1"></span>
+	</span>
+	
+	<span class="dropdown">
+		<span class="dropdown_helper">
+			<span class="dropdown_arrow"><span></span></span>
+			<span class="dropdown_content" data-bind="foreach: accounts">
+				<span class="item" data-bind="text: email, visible: !isCurrent(), click: changeAccount"></span>
+			</span>
+		</span>
+	</span>
+</span>
+
+<!-- ko foreach: tabs -->
+<span data-bind="attr: {'class': 'item ' + name},
+		css: {'current': $parent.currentTab() === name, 'recivedAnim': koRecivedAnim},
+		visible: koVisibleTab">
+	<span class="helper" data-bind="text: title"></span>
+	<a class="link" href="javascript: void(0);" data-bind="attr: {href: hash}">
+		<span class="text" data-bind="text: title"></span>
+		<!-- ko if: name === 'helpdesk' -->
+			<span class="unseen" data-bind="text: $parent.helpdeskUnseenCount, visible: $parent.helpdeskUnseenVisible(), css: {one: $parent.helpdeskUnseenCount() < 10, two: $parent.helpdeskUnseenCount() > 9, three: $parent.helpdeskUnseenCount() > 99}"></span> <!--TODO customTooltip with plural-->
+		<!-- /ko -->
+	</a>
+</span>
+<!-- /ko -->
+
+<span class="item logout">
+	<span class="link" data-i18n="HEADER/LOGOUT" data-bind="i18n: 'text', click: logout"></span>
+</span>
+<span class="item settings" data-bind="css: {'current': currentTab() === Enums.Screens.Settings}">
+	<a class="link" href="javascript: void(0);" data-i18n="HEADER/SETTINGS" data-bind="i18n: 'text', 
+	   attr: {href: '#' + settingsHash()}"></a>
+</span>
+<span class="item settings" data-bind="visible: mobileDevice">
+	<a class="link" href="?mobile" data-i18n="HEADER/MOBILE_VERSION" data-bind="i18n: 'text'"></a>
+</span>
+<!-- ko if: !!App.Phone -->
+	<!-- ko template: {name: 'Common_PhoneViewModel', data: oPhone} --><!-- /ko -->
+<!-- /ko -->

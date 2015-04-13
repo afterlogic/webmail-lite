@@ -1,0 +1,101 @@
+<div class="item file attachment" data-bind="
+	css: {
+		'dragHandle': allowDrag(),
+		'selected': allowSelect() && selected(),
+		'checked': allowCheck() && checked(),
+		'deleted': allowDelete() && deleted(),
+		'incomplete': allowUpload() && !uploaded(),
+		'shared': allowSharing() && shared() && !$root.isPublic,
+		'fail': uploadError(), 
+		'success': !uploadError(),
+		'aslink': isLink()
+	},
+	event: isPopupItem() ? null : { 'dragstart': eventDragStart },
+	draggable: !isPopupItem() && allowDrag(),
+	draggablePlace: !isPopupItem() && allowDrag() ? $parent.dragAndDropHelperBinded : null,
+	draggableDragStartCallback: function() {if (!isPopupItem() && allowDrag()) {$root.dragover(true);}},
+	draggableDragStopCallback: function() {if (!isPopupItem() && allowDrag()) {$root.dragover(false);}}
+">
+
+	<!-- ko if: (allowHeader()) -->
+	<span class="header">
+		<span class="author" data-bind="text: ownerHeaderText"></span>
+		<span class="date" data-bind="text: lastModifiedHeaderText"></span>
+	</span>
+	<!-- /ko -->
+
+	<span class="item_content ui-droppable">
+
+		<span class="cancel" data-bind="click: function () { $parent.onFileRemove( uploadUid() ); }, customTooltip: 'COMPOSE/UPLOAD_CANCEL'"></span>
+
+		<span class="image">
+			<!-- ko if: thumb() -->
+			<img class="thumb download" data-bind="attr: {'src': thumbnailSrc()}, event: { load: onImageLoad },
+				customTooltip: downloadTitle(), click: function () { if (!allowSelect()) {downloadFile(App);} },
+				visible: thumbnailLoaded()" />
+			<!-- /ko -->
+			<span class="icon download" data-bind="css: extension().toLowerCase(),
+				customTooltip: downloadTitle(), click: function () { if (!allowSelect()) {downloadFile(App);} },
+				visible: !thumbnailLoaded()"></span>
+		</span>
+
+		<!-- ko if: (allowSharing()) -->
+		<span class="shared_icon" data-bind="css: {'with_thumb': thumbnailLoaded()}, click: function (oItem) { $root.onShareIconClick(oItem); }"></span>
+		<!-- /ko -->
+		<span class="progress" data-bind="visible: visibleProgress()">
+			<span data-bind="style: {'width': progressPercent() + '%'}"></span>
+		</span>
+		<span class="status_text" data-bind="text: statusText(), css: {'hide': !(statusText().length > 0), 'error': uploadError()}, customTooltip: statusTooltip"></span>
+		<div class="buttons" data-bind="visible: !isPopupItem(), css: {'hide': statusText().length > 0 || !uploaded()}">
+			<!--ko if: isIosDevice -->
+			<a class="button view" href="javascript: void(0)"
+			   data-bind="i18n: 'text', click: function () {downloadFile(App);}"
+			   data-i18n="MESSAGE/ATTACHMENT_VIEW"></a>
+			<!-- /ko -->
+			<!--ko if: !isIosDevice -->
+			<a class="button download" href="javascript: void(0)"
+			   data-bind="
+					visible: visibleDownloadLink(),
+					click: function () { downloadFile(App); }, 
+					i18n: 'text'
+			   "
+			   data-i18n="MESSAGE/ATTACHMENT_DOWNLOAD"></a>
+			<a class="button view" href="javascript: void(0)"
+			   data-bind="
+					visible: (visibleViewLink() && !visibleImportLink()), 
+					i18n: 'text', 
+					click: viewFile"
+			   data-i18n="MESSAGE/ATTACHMENT_VIEW"></a>
+			<a class="button view" href="javascript: void(0)"
+			   data-bind="
+					visible: visibleImportLink(), 
+					i18n: 'text', 
+					click: importFile"
+			   data-i18n="MESSAGE/ATTACHMENT_IMPORT"></a>
+			<!-- /ko -->
+			<a class="button view" href="javascript: void(0)"
+			   data-bind="visible: visibleExpandLink(), i18n: 'text', click: expandFile"
+			   data-i18n="MESSAGE/ATTACHMENT_EXPAND"></a>
+			<span data-bind="visible: visibleExpandingText(), i18n: 'text'"
+			   data-i18n="MESSAGE/ATTACHMENT_EXPANDING"></span>
+			<a class="button view" href="javascript: void(0)"
+			   data-bind="visible: subFilesCollapsed(), i18n: 'text', click: collapseFile"
+			   data-i18n="MESSAGE/ATTACHMENT_COLLAPSE"></a>
+			
+		</div>
+	</span>
+
+	<span class="size" data-bind="text: 0 < size() ? friendlySize() : ''"></span>
+
+	<span class="title" data-bind="customTooltip: fileName()">
+		<span class="name" data-bind="text: displayName()"></span><span class="ext" data-bind="text: '.' + extension(), visible: extension().length > 0"></span>
+	</span>
+	
+	<div class="children" data-bind="visible: subFilesCollapsed()">
+		<!-- ko template: {name: 'Common_FileViewModel', foreach: subFiles} --><!-- /ko -->
+	</div>
+</div>
+
+<!-- ko if: isMessageType() && messagePart() -->
+	<!-- ko template: {name: 'Mail_PrintMessageViewModel', data: messagePart} --><!-- /ko -->
+<!-- /ko -->

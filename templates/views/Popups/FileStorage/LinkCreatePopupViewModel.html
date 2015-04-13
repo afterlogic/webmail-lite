@@ -1,0 +1,26 @@
+<div class="mask" data-bind="click: onCancelClick"></div>
+<div class="popup_panel">
+	<span class="close" data-bind="click: onCancelClick"></span>
+
+	<div class="large attachments" data-bind="visible: urlChecked()" style="text-align: center;">
+		<!-- ko template: {name: 'Common_FileViewModel', data: fileItem} --><!-- /ko -->					
+	</div>
+	
+	<div class="fields">
+		<div class="fieldset">
+			<div class="row">
+				<span class="label" data-i18n="FILESTORAGE/LABEL_UPLOAD_FILE_AS_LINK" data-bind="i18n: 'text'"></span>
+				<input class="value input" spellcheck="false" type="text" maxlength="200" data-bind="valueUpdate: 'afterkeydown', hasfocus: linkFocus, value: link" />
+			</div>
+			<div class="hint row">
+				<span class="info" data-i18n="FILESTORAGE/INFO_UPLOAD_FILE_AS_LINK" data-bind="i18n: 'text'"></span>
+			</div>
+		</div>
+
+		<div class="buttons">
+			<span class="button save" data-i18n="SETTINGS/BUTTON_ADD_SHORTCUT" data-bind="css: {'disabled': !urlChecked()}, i18n: 'text', command: saveCommand"></span>
+			<span class="button cancel secondary" data-i18n="SETTINGS/BUTTON_CANCEL" data-bind="i18n: 'text', click: onCancelClick"></span>
+		</div>
+	</div>
+</div>
+<span class="helper"></span>	

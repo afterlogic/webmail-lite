@@ -1,0 +1,80 @@
+<div class="toolbar">
+	<span class="resizer" data-bind="event: { 'dblclick': resizeDblClick}"></span>
+	<span class="content">
+		<!-- ko if: mobileApp -->
+		<span data-bind="click: gotoFolderList" class="item back">
+			<span class="icon"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_BACK_TO_LIST"></span>
+		</span>
+		<a href="javascript: void(0)" class="item new_message" data-bind="attr: {href: composeLink}, visible: bVisibleComposeMessage">
+			<span class="icon"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_NEW_MESSAGE"></span>
+		</a>
+		<!-- /ko -->
+		<!-- ko if: !mobileApp -->
+		<span class="item checkmail" data-bind="command: checkMailCommand, checkmail: {'activeClass': 'process', 'state': checkMailIndicator(), 'duration': 800}, 
+				customTooltip: 'MAILBOX/TOOL_CHECK_MAIL'">
+			<span class="icon"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_CHECK_MAIL"></span>
+		</span>
+		<!-- /ko -->
+		<span class="group mark" data-bind="dropdown: {}, css: {disabled: oMessageList.isEmptyList()}">
+			<span class="item" data-bind="command: markAsReadCommand, customTooltip: 'MAILBOX/TOOL_MARK_AS_READ'">
+				<span class="icon"></span>
+				<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_MARK_AS_READ"></span>
+			</span><span class="item control">
+				<span class="icon arrow"></span>
+				<span class="dropdown">
+					<span class="dropdown_helper">
+						<span class="dropdown_arrow"><span></span></span>
+						<span class="dropdown_content">
+							<span class="item allread" data-bind="command: markAllReadCommand, i18n: 'text'" data-i18n="MAILBOX/TOOL_MARK_ALL_READ"></span>
+							<span class="item unread" data-bind="command: markAsUnreadCommand, i18n: 'text'" data-i18n="MAILBOX/TOOL_MARK_AS_UNREAD"></span>
+						</span>
+					</span>
+				</span>
+			</span>
+		</span>
+		<!-- ko if: !mobileApp -->
+		<span class="item move" data-bind="dropdown: {control: false, scrollToTopContainer: '.scroll-inner'}, command: moveToFolderCommand, customTooltip: 'MAILBOX/TOOL_MOVE_TO_FOLDER'">
+			<span class="icon"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_MOVE_TO_FOLDER"></span>
+			<span class="icon arrow"></span>
+			<span class="dropdown" data-bind="initDom: domFolderList">
+				<span class="dropdown_helper">
+					<span class="dropdown_arrow"><span></span></span>
+					<span class="folders dropdown_content" data-bind="customScrollbar: {x: false}">
+						<span class="scroll-inner">
+							<!-- ko template: {name: 'Mail_MoveToFolderItem', foreach: folderList().collection} --><!-- /ko -->
+						</span>
+					</span>
+				</span>
+			</span>
+		</span>
+		<!-- /ko -->
+		<span class="item delete" data-bind="dropdown: {}, command: deleteCommand, customTooltip: 'MAILBOX/TOOL_DELETE'">
+			<span class="icon"></span>
+			<span class="hint" data-bind="text: selectedCount, visible: selectedCount() > 0"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_DELETE"></span>
+		</span>
+		
+		<!-- ko if: !mobileApp -->
+		<span class="item empty_trash" data-bind="command: emptyTrashCommand, visible: isTrashFolder(), customTooltip: 'MAILBOX/TOOL_EMPTY_TRASH'">
+			<span class="icon"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_EMPTY_TRASH"></span>
+		</span>
+		<span class="item empty_spam" data-bind="command: emptySpamCommand, visible: isSpamFolder(), customTooltip: 'MAILBOX/TOOL_EMPTY_SPAM'">
+			<span class="icon"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_EMPTY_SPAM"></span>
+		</span>
+		<!-- /ko -->
+		<span class="item spam" data-bind="command: spamCommand, visible: allowedSpamAction, customTooltip: 'MAILBOX/TOOL_SPAM'">
+			<span class="icon"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_SPAM"></span>
+		</span>
+		<span class="item notspam" data-bind="command: notSpamCommand, visible: allowedNotSpamAction, customTooltip: 'MAILBOX/TOOL_NOT_SPAM'">
+			<span class="icon"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_NOT_SPAM"></span>
+		</span>
+	</span>
+</div>

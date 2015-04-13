@@ -1,0 +1,344 @@
+<!-- ko if: mobileApp -->
+<div class="toolbar">
+	<span class="content">
+		<span class="item close" data-bind="click: function () {$parent.gotoMessageList(); return true;}">
+			<span class="icon" data-bind="customTooltip: 'MAILBOX/TOOL_BACK_TO_LIST'"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_BACK_TO_LIST"></span>
+		</span>
+		<span class="item reply" data-bind="command: replyCommand, visible: isVisibleReplyTool">
+			<span class="icon" data-bind="customTooltip: 'MAILBOX/TOOL_REPLY'"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_REPLY"></span>
+		</span>
+		<span class="item replyall" data-bind="command: replyAllCommand, visible: isVisibleReplyTool">
+			<span class="icon" data-bind="customTooltip: 'MAILBOX/TOOL_REPLY_TO_ALL'"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_REPLY_TO_ALL"></span>
+		</span>
+		<span class="item forward" data-bind="command: forwardCommand, visible: isVisibleForwardTool">
+			<span class="icon" data-bind="customTooltip: 'MAILBOX/TOOL_FORWARD'"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_FORWARD"></span>
+		</span>
+		<span class="item delete" data-bind="command: deleteCommand">
+			<span class="icon" data-bind="customTooltip: 'MAILBOX/TOOL_DELETE'"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_DELETE"></span>
+		</span>
+	</span>
+</div>
+<!-- /ko -->
+
+<div class="panel_center" data-bind="heightAdjust: {'elements': [domMessageHeader, domQuickReply], 'triggers': [detailsVisible(), currentMessage(), replyPaneVisible(), replyTextFocusThrottled()]}">
+	<div class="message_header" data-bind="initDom: domMessageHeader, visible: isCurrentMessage, event: {'dblclick': resizeDblClick}">
+		<!--<span class="resizer" data-bind="event: {'dblclick': resizeDblClick}, css: {large: detailsVisible()}, visible: fakeHeader"></span>-->
+		<div class="notice" data-bind="visible: visiblePicturesControl">
+			<span class="item">
+				<span data-i18n="MESSAGE/INFO_MESSAGE_BLOCKED" data-bind="i18n: 'text'"></span>
+				<span class="link" data-i18n="MESSAGE/ACTION_SHOW_PICTURES" 
+				   data-bind="i18n: 'text', click: showPictures, visible: visibleShowPicturesLink"></span>
+			</span>
+			<span class="item">
+				<span class="link" data-i18n="MESSAGE/ACTION_ALWAYS_SHOW_PICTURE_THIS_SENDER" 
+				   data-bind="i18n: 'text', click: alwaysShowPictures"></span>
+			</span>
+		</div>
+
+		<div class="notice" data-bind="visible: visibleConfirmationControl">
+			<span data-i18n="MESSAGE/INFO_SENDER_ASKED_NOTIFY" data-bind="i18n: 'text'"></span>
+			<span class="link" data-i18n="MESSAGE/ACTION_NOTIFY_SENDER" data-bind="i18n: 'text', click: notifySender"></span>
+		</div>
+
+		<div class="notice" data-bind="visible: visibleDecryptControl">
+			<span data-i18n="OPENPGP/INFO_ENCRYPTED_MESSAGE" data-bind="i18n: 'text'"></span>
+			<span data-i18n="OPENPGP/INFO_ENTER_YOUR_PASSWORD" data-bind="i18n: 'text'"></span>
+			<input type="password" data-bind="value: decryptPassword, onEnter: onDecryptMessageClick" />
+			<span class="link" data-i18n="OPENPGP/ACTION_DECRYPT" data-bind="i18n: 'text', click: onDecryptMessageClick"></span>
+		</div>
+		
+		<div class="notice" data-bind="visible: visibleVerifyControl">
+			<span data-i18n="OPENPGP/INFO_SIGNED_MESSAGE" data-bind="i18n: 'text'"></span>
+			<span class="link" data-i18n="OPENPGP/ACTION_VERIFY" data-bind="i18n: 'text', click: onVerifyMessageClick"></span>
+		</div>
+		
+		<div class="notice" data-bind="visible: sensitivityText() !== ''">
+			<span data-bind="text: sensitivityText"></span>
+		</div>
+
+		<div class="header_content clearfix">
+			<div class="header_row">
+				<!-- ko if: !mobileApp -->
+				<div class="toolbar">
+					<span class="content">
+
+						<span class="item delete" data-bind="command: deleteCommand, visible: singleMode, customTooltip: 'MAILBOX/TOOL_DELETE'">
+							<span class="icon"></span>
+							<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_DELETE"></span>
+						</span>
+						<span class="item prev" data-bind="command: nextMessageCommand, visible: singleMode">
+							<span class="icon" data-bind="customTooltip: 'MAILBOX/TOOL_NEXT_MESSAGE'"></span>
+							<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_NEXT_MESSAGE"></span>
+						</span>
+						<span class="item next" data-bind="command: prevMessageCommand, visible: singleMode">
+							<span class="icon" data-bind="customTooltip: 'MAILBOX/TOOL_PREV_MESSAGE'"></span>
+							<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_PREV_MESSAGE"></span>
+						</span>
+						<span class="item reply" data-bind="command: replyCommand, visible: isVisibleReplyTool">
+							<span class="icon" data-bind="customTooltip: 'MAILBOX/TOOL_REPLY'"></span>
+							<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_REPLY"></span>
+						</span>
+						<span class="item replyall" data-bind="command: replyAllCommand, visible: isVisibleReplyTool">
+							<span class="icon" data-bind="customTooltip: 'MAILBOX/TOOL_REPLY_TO_ALL'"></span>
+							<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_REPLY_TO_ALL"></span>
+						</span>
+						<span class="item resend" data-bind="command: resendCommand, visible: isVisibleResendTool">
+							<span class="icon" data-bind="customTooltip: 'MAILBOX/TOOL_RESEND'"></span>
+							<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_RESEND"></span>
+						</span>
+						<span class="item forward" data-bind="command: forwardCommand, visible: isVisibleForwardTool">
+							<span class="icon" data-bind="customTooltip: 'MAILBOX/TOOL_FORWARD'"></span>
+							<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_FORWARD"></span>
+						</span>
+						
+						<a class="item new_window" href="javascript: void(0);" 
+							data-bind="click: openInNewWindow, visible: !singleMode()">
+							<span class="icon" data-bind="customTooltip: 'MESSAGE/ACTION_OPEN_IN_NEW_WINDOW'"></span>
+							<span class="text" data-bind="i18n: 'text'" data-i18n="MESSAGE/ACTION_OPEN_IN_NEW_WINDOW"></span>
+						</a>
+						
+						<span class="item more" data-bind="dropdown: {control: false}, command: moreCommand, customTooltip: 'MAILBOX/TOOL_MORE_ACTIONS'">
+							<span class="icon"></span>
+							<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_MORE_ACTIONS"></span>
+							<span class="dropdown">
+								<span class="dropdown_helper">
+									<span class="dropdown_arrow">
+										<span></span>
+									</span>
+									<span class="dropdown_content">
+										<span class="item print" data-bind="command: printCommand">
+											<span class="icon"></span>
+											<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_PRINT"></span>
+										</span>
+
+										<span class="item save" data-bind="command: saveCommand">
+											<span class="icon"></span>
+											<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_SAVE"></span>
+										</span>
+
+										<span class="item save_as_pdf" data-bind="visible: allowSaveAsPdf, command: saveAsPdfCommand">
+											<span class="icon"></span>
+											<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_SAVE_AS_PDF"></span>
+										</span>
+
+										<span class="item headers" data-bind="visible: currentMessage() && currentMessage().completelyFilled(), click: showSourceHeaders">
+											<span class="icon"></span>
+											<span class="text" data-i18n="MESSAGE/LINK_VIEW_MESSAGE_HEADERS" data-bind="i18n: 'text'"></span>
+										</span>
+										
+										<span class="item" data-bind="visible: false && currentMessage() && currentMessage().completelyFilled(), click: testFunction">
+											<span class="icon"></span>
+											Custom menu item (for tests)
+										</span>
+
+									</span>
+								</span>
+							</span>
+						</span>
+
+					</span>
+				</div>
+				<!-- /ko -->
+				
+				<span class="link" data-bind="css: {'details_show': !detailsVisible(), 'details_hide': detailsVisible()}, 
+					customTooltip: detailsTooltip, click: function () { detailsVisible(!detailsVisible()); }"></span>
+				
+				<div class="message_info" data-bind="visible: !detailsVisible()">
+					<div class="message_info_line">
+						<span class="from control" data-bind="text: currentAccountEmail() === fromEmail() ? meSender : from,
+							contactCardInMessage: {'address': fromEmail(), 'trigger': recipientsContacts()},
+							css: {'link founded': oFromAddr() && oFromAddr().founded()}">
+						</span><span class="add_contact" data-bind="customTooltip: 'MESSAGE/ACTION_ADD_TO_CONTACTS', 
+									click: function () { addToContacts(oFromAddr().sEmail, oFromAddr().sName); },
+									visible: isCurrentNotDraftOrSent() && oFromAddr() && oFromAddr().loaded() && !oFromAddr().founded()"></span>
+						<span data-i18n="MESSAGE/SHORT_LINE_TO" data-bind="i18n: 'text', visible: aAllRecipients().length > 0"></span>
+						<span data-bind="foreach: aAllRecipients">
+							<span data-bind="text: $parent.currentAccountEmail() === sEmail ? $parent.meRecipient : sDisplay,
+								contactCardInMessage: {'address': sEmail, 'trigger': $parent.recipientsContacts()},
+								css: {'link founded': founded}">
+							</span><span class="add_contact" data-bind="customTooltip: 'MESSAGE/ACTION_ADD_TO_CONTACTS', 
+									click: function () { $parent.addToContacts(sEmail, sName); },
+									visible: loaded() && !founded() && $parent.currentAccountEmail() !== sEmail">
+							</span><span data-bind="visible: $parent.aAllRecipients().length > $index() + 1">, </span>
+							
+						</span>
+					</div>
+				</div>
+				
+				<div class="message_info message_detail_info" data-bind="visible: detailsVisible()">
+					<div class="message_info_line">
+						<span class="title" data-i18n="MESSAGE/HEADER_FROM" data-bind="i18n: 'text'"></span>: 
+						<span class="from control" data-bind="text: fullFrom, 
+							contactCardInMessage: {'address': fromEmail(), 'trigger': recipientsContacts()},
+							css: {'link founded': oFromAddr() && oFromAddr().founded()}">
+						</span><span class="add_contact" data-bind="customTooltip: 'MESSAGE/ACTION_ADD_TO_CONTACTS', 
+									click: function () {addToContacts(oFromAddr().sEmail, oFromAddr().sName);},
+									visible: isCurrentNotDraftOrSent() && oFromAddr() && oFromAddr().loaded() && !oFromAddr().founded()"></span>
+					</div>
+				
+					<div class="message_info_line" data-bind="visible: aToAddr().length > 0">
+						<span class="title" data-i18n="MESSAGE/HEADER_TO" data-bind="i18n: 'text'"></span>: 
+						<!-- ko foreach: aToAddr -->
+						<span data-bind="text: sFull, contactCardInMessage: {'address': sEmail, 'trigger': $parent.recipientsContacts()},
+							  css: {'link founded': founded}">
+						</span><span class="add_contact" data-bind="customTooltip: 'MESSAGE/ACTION_ADD_TO_CONTACTS', 
+									click: function () {$parent.addToContacts(sEmail, sName);},
+									visible: loaded() && !founded()">
+						</span><span data-bind="visible: $parent.aToAddr().length > $index() + 1">, </span>
+						<!-- /ko -->
+					</div>
+					<div class="message_info_line" data-bind="visible: aCcAddr().length > 0">
+						<span class="title" data-i18n="MESSAGE/HEADER_CC" data-bind="i18n: 'text'"></span>: 
+						<!-- ko foreach: aCcAddr -->
+						<span data-bind="text: sFull, contactCardInMessage: {'address': sEmail, 'trigger': $parent.recipientsContacts()},
+							  css: {'link founded': founded}">
+						</span><span class="add_contact" data-bind="customTooltip: 'MESSAGE/ACTION_ADD_TO_CONTACTS', 
+									click: function () {$parent.addToContacts(sEmail, sName);},
+									visible: loaded() && !founded()">
+						</span><span data-bind="visible: $parent.aCcAddr().length > $index() + 1">, </span>
+						<!-- /ko -->
+					</div>
+					<div class="message_info_line" data-bind="visible: aBccAddr().length > 0">
+						<span class="title" data-i18n="MESSAGE/HEADER_BCC" data-bind="i18n: 'text'"></span>: 
+						<!-- ko foreach: aBccAddr -->
+						<span data-bind="text: sFull, contactCardInMessage: {'address': sEmail, 'trigger': $parent.recipientsContacts()},
+							  css: {'link founded': founded}">
+						</span><span class="add_contact" data-bind="customTooltip: 'MESSAGE/ACTION_ADD_TO_CONTACTS', 
+									click: function () {$parent.addToContacts(sEmail, sName);},
+									visible: loaded() && !founded()">
+						</span><span data-bind="visible: $parent.aBccAddr().length > $index() + 1">, </span>
+						<!-- /ko -->
+					</div>
+					<div class="message_info_line">
+						<span class="title" data-i18n="MESSAGE/HEADER_DATE" data-bind="i18n: 'text'"></span>: 
+						<span data-bind="text: fullDate"></span>
+					</div>
+					<!--<div class="message_info_line" data-bind="visible: currentMessage() && currentMessage().completelyFilled()">
+						<span class="link" data-i18n="MESSAGE/LINK_VIEW_MESSAGE_HEADERS" data-bind="i18n: 'text', click: showSourceHeaders"></span>
+					</div>-->
+				</div>
+			</div>
+
+			<div class="header_row" data-bind="css: {'nosubject': emptySubject()}">
+				<span class="date" data-bind="text: midDate, visible: !detailsVisible()"></span>
+				<span class="icon importance" data-bind="visible: importance() === Enums.Importance.High"></span>
+				<h2 class="subject" data-bind="text: subjectForDisplay"></h2>
+			</div>
+		</div>
+		<!-- ko if: mobileApp -->
+		<div class="body_parts_switcher" data-bind="visible: hasNotInlineAttachments, css: {'view_attachments': visibleAttachments}">
+			<span class="item show_message" data-i18n="MESSAGE/VIEW_BODY" data-bind="i18n: 'text', click: showMessage"></span>
+			<span class="item show_attachments" data-bind="click: showAttachments">
+				<span data-i18n="MESSAGE/VIEW_ATTACHMENTS" data-bind="i18n: 'text'"></span>
+				<span data-bind="text: notInlineAttachments().length"></span>
+			</span>
+		</div>
+		<!-- /ko -->
+	</div>
+	<div class="panels" data-bind="css: {'has_attachments': hasNotInlineAttachments, 'view_attachments': visibleAttachments}">
+	
+		<div class="panel right_panel" data-bind="visible: hasNotInlineAttachments, customScrollbar: {x: false, 'reset': currentMessage()}">
+			<div class="scroll-inner">
+				<div class="attachments large">
+					<div class="download_menu">
+						<span class="link hover" data-bind="visible: visibleExtendedDownload">
+							<span class="icon"></span>
+							<span class="text" data-i18n="MESSAGE/ATTACHMENT_DOWNLOAD_ALL" data-bind="i18n: 'text'"></span>
+						</span>
+						
+						<div class="content">
+							<span class="link all" data-bind="click: downloadAllAttachments, visible: visibleDownloadAllAttachments">
+								<span class="icon"></span>
+								<span class="text" data-i18n="MESSAGE/ATTACHMENT_DOWNLOAD_AS_ZIP" data-bind="i18n: 'text'"></span>
+							</span>
+							<span class="link separately"
+							   data-bind="click: downloadAllAttachmentsSeparately, visible: visibleDownloadAllAttachmentsSeparately">
+								<span class="icon"></span>
+								<span class="text" data-i18n="MESSAGE/ATTACHMENT_DOWNLOAD_ALL_SEPARATELY" data-bind="i18n: 'text'"></span>
+							</span>
+							<span class="link to_filestorage" data-bind="click: saveAttachmentsToFiles, visible: visibleSaveAttachmentsToFiles">
+								<span class="icon"></span>
+								<span class="text" data-i18n="MESSAGE/ATTACHMENT_SAVE_TO_FILES" data-bind="i18n: 'text'"></span>
+							</span>
+						</div>
+					</div>
+					<div data-bind="template: {name: 'Common_FileViewModel', foreach: notInlineAttachments}"></div>
+				</div>
+			</div>
+		</div>
+		<div class="panel left_panel">
+			<div class="message" data-bind="customScrollbar: {x: true, y: true, 'reset': displayedMessageUid()}, css: {'has_bodytext': hasBodyText, 'has_attachments': hasNotInlineAttachments}">
+				<div class="message_content scroll-inner" data-bind="hasfocus: contentHasFocus">
+
+					<!-- ko if: visibleAppointmentInfo -->
+						<div class="appointment" data-bind="template: {name: 'Mail_AppointmentViewModel', data: ical}"></div>
+					<!-- /ko -->
+
+					<!-- ko if: visibleVcardInfo -->
+						<div class="appointment" data-bind="template: {name: 'Mail_VcardAttachmentViewModel', data: vcard}"></div>
+					<!-- /ko -->
+
+					<div class="message_body_info" data-bind="visible: visibleNoMessageSelectedText">
+						<div data-i18n="MESSAGE/INFO_NO_MESSAGE_SELECTED" 
+							 data-bind="i18n: 'text'"></div>
+						<div class="message_body_secondary_info" data-i18n="MESSAGE/INFO_SINGLE_DOUBLE_CLICK" 
+							 data-bind="i18n: 'text'"></div>
+					</div>
+					<div class="message_body_info" data-i18n="MESSAGE/INFO_LOADING" 
+						 data-bind="visible: isLoading, i18n: 'text'"></div>
+					<div class="message_body html" data-bind="initDom: domTextBody, attr: {'dir': rtlMessage() ? 'rtl' : 'ltr'}"></div>
+					<!--<div class="bodyparts_separator"></div>-->
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- ko if: !mobileApp -->
+	<div class="quick_reply fields" data-bind="initDom: domQuickReply, 
+		quickReplyAnim: {
+			'sendAction': replySendingStarted(), 
+			'saveAction': replySavingStarted(), 
+			'activeAction': isQuickReplyActive()
+		},
+		visible: replyPaneVisible() && isVisibleReplyTool()">
+		<div class="status">
+			<div class="text" data-bind="text: replyLoadingText"></div>
+		</div>
+		<div class="row" data-bind="css: {'focused': replyTextFocus(),
+			 'filled': replyText().length > 0}">
+			<label for="reply_text" class="title placeholder" 
+				   data-i18n="COMPOSE/QUICK_REPLY_PLACEHOLDER" data-bind="i18n: 'text'"></label>
+			<textarea id="reply_text" class="input" data-bind="value: replyText, 
+				hasfocus: replyTextFocus, onCtrlEnter: executeSendQuickReplyCommand, 
+				valueUpdate: 'afterkeydown', style: {'fontFamily': defaultFontName}"></textarea>
+		</div>
+		<div class="buttons">
+			<span class="button send" data-bind="i18n: 'text', command: sendQuickReplyCommand" data-i18n="COMPOSE/TOOL_SEND"></span>
+			<span class="button save" data-bind="text: saveButtonText, command: saveQuickReplyCommand"></span>
+			<span class="text hint" data-i18n="COMPOSE/QUICK_REPLY_HOTKEY" data-bind="i18n: 'text'"></span>
+			<a class="link full_form" href="javascript: void(0);" 
+			   data-bind="i18n: 'text', command: replyAllCommand" 
+			   data-i18n="COMPOSE/QUICK_REPLY_OPEN_FULL"></a>
+		</div>
+	</div>
+	<!-- /ko -->
+</div>
+
+<!-- ko foreach: recipientsContacts -->
+	<div class="item_viewer" style="position: absolute;" data-bind="attr: {'data-email': email}">
+		<span class="dropdown control contact_card">
+			<span class="dropdown_helper">
+				<span class="dropdown_arrow"><span></span></span>
+				<span class="dropdown_content dropdown_content_mail" data-bind="template: {name: 'Common_ContactCard', data: $data}">
+				</span>
+			</span>
+		</span>
+	</div>
+<!-- /ko -->
+
+<!-- ko template: {name: 'Mail_PrintMessageViewModel'} --><!-- /ko -->

@@ -1,0 +1,25 @@
+<div class="item canSelect" data-bind="css: {'canSubscribe': canSubscribe, 'canRename': canRename, 'canDelete': canDelete},
+	 visible: !virtual()">
+	<span class="title">
+		<span class="controls">
+			<span class="button subscribe" data-bind="customTooltip: subscribeButtonHint(), css: {'subscribed': subscribed(), 'disabled': !canSubscribe()}, click: function(oFolder) { $root.onSubscribeFolderClick(oFolder); }"></span>
+			<span class="button disabled"  data-bind="customTooltip: deleteButtonHint(), css: {'delete': !isSystem() && selectable(), 'disabled': !canDelete()}, click: function(oFolder) { $root.onDeleteFolderClick(oFolder, $parent); }"></span>
+			<span class="button up" data-bind="
+				  visible: $root.allowFolderListOrder(),
+				  css: {'disabled': !$root.canMoveFolderUp($data, $index(), $parent)}, 
+				  click: function (oFolder) { $root.moveFolderUp(oFolder, $index(), $parent); }"></span>
+			<span class="button down" data-bind="
+				  visible: $root.allowFolderListOrder(),
+				  css: {'disabled': !$root.canMoveFolderDown($data, $index(), $parent)}, 
+				  click: function (oFolder) { $root.moveFolderDown(oFolder, $index(), $parent); }"></span>
+		</span>
+		<span class="count" data-bind="text: messageCount"></span>
+		<span class="name">
+			<span class="icon" data-bind="css: 'type' + type()"></span>
+			<span class="text" data-bind="css: {'link': canRename}, text: name, visible: !edited(), click: function(){if (canRename()) edited(true);}"></span>
+			<input type="text" spellcheck="false" class="input" maxlength="30" data-bind="value: nameForEdit, visible: edited, hasfocus: edited, onEnter: function (oFolder) { $root.folderEditOnEnter(oFolder); }, onEsc: function (oFolder) { $root.folderEditOnEsc(oFolder); }">
+			<span class="text" data-bind="text: usedAs()"></span>
+		</span>
+	</span>
+	<div class="children" data-bind="template: { name: 'Settings_AccountFolderItem', foreach: subfolders }"></div>
+</div>

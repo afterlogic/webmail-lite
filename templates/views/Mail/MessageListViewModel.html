@@ -1,0 +1,169 @@
+<div class="middle_bar" data-bind="css: {'advanced_search': bAdvancedSearch}">
+	<div class="panel_top" data-bind="initDom: panelTopDom">
+		<label class="custom_checkbox" data-bind="css: {'checked': checkAll, 'incomplete': checkAllIncomplite}">
+			<span class="icon"></span>
+			<input type="checkbox" data-bind="checked: checkAll" />
+		</label>
+		<!-- ko if: $parent.mobileApp -->
+		<span class="search_block">
+			<span class="input" data-bind="css: {'focus': isFocused}">
+				<span class="icon search" data-i18n="MAILBOX/BUTTON_SEARCH" data-bind="i18n: 'text'"></span>
+				<input class="field" spellcheck="false"  type="text" data-bind="value: searchInput, onEnter: onSearchClick" />
+			</span>
+		</span>
+		<div class="toolbar">
+			<span class="content">
+				<span class="item checkmail" data-bind="command: $parent.checkMailCommand, 
+						checkmail: {'activeClass': 'process', 'state': $parent.checkMailIndicator(), 'duration': 800}, 
+						customTooltip: 'MAILBOX/TOOL_CHECK_MAIL'">
+					<span class="icon"></span>
+					<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_CHECK_MAIL"></span>
+				</span>
+			</span>
+		</div>
+		<!-- /ko -->
+		<!-- ko if: !$parent.mobileApp -->
+		<span class="search_block">
+			<span class="input" data-bind="css: {'focus': isFocused, 'expand': bAdvancedSearch}">
+				<span class="icon search"></span>
+				<input class="field hide" spellcheck="false" type="text" data-bind="value: searchInput" />
+				<div class="field" contenteditable="true" spellcheck="false" data-bind="highlighter: {valueObserver: searchInput, highlighterValueObserver: searchSpan, highlightTrigger: highlightTrigger}, onEnter: onSearchClick, hasfocus: isFocused" ></div>
+				<div class="fields extended" data-bind="initDom: extendedDom">
+					<span class="search_fieldset">
+						<span class="section">
+							<span class="row text" data-bind="css: {'focused': searchFromFocus(), 'filled': searchInputFrom().length > 0}">
+								<label for="search_from" class="label placeholder" data-i18n="MAILBOX/SEARCH_FIELD_FROM" data-bind="i18n: 'text'"></label>
+								<input id="search_from" class="value input" spellcheck="false"  type="text" data-bind="hasfocus: searchFromFocus, value: searchInputFrom, valueUpdate: 'afterkeydown', onEnter: onSearchClick" />
+							</span>
+							<span class="row text" data-bind="css: {'focused': searchSubjectFocus(), 'filled': searchInputSubject().length > 0}">
+								<label for="search_subject" class="label placeholder" data-i18n="MAILBOX/SEARCH_FIELD_SUBJECT" data-bind="i18n: 'text'"></label>
+								<input id="search_subject" class="value input" spellcheck="false"  type="text" data-bind="hasfocus: searchSubjectFocus, value: searchInputSubject, valueUpdate: 'afterkeydown', onEnter: onSearchClick" />
+							</span>
+							<span class="row text">
+								<span class="row date since" data-bind="css: {'focused': searchDateStartFocus(), 'filled': searchDateStart().length > 0}">
+									<label for="search_date_start" class="label placeholder" data-i18n="MAILBOX/SEARCH_FIELD_SINCE" data-bind="i18n: 'text'"></label>
+									<input id="search_date_start" class="date input" spellcheck="false" type="text" data-bind="initDom: searchDateStartDom, value: searchDateStart, hasfocus: searchDateStartFocus, valueUpdate: 'afterkeydown', onEnter: onSearchClick" />
+								</span>
+							</span>
+							<!--<span class="row attachments" data-bind="css: {'focused': searchAttachmentsFocus(), 'filled': searchAttachments().length > 0}">
+								<label class="custom_checkbox" data-bind="css: {'checked': searchAttachmentsCheckbox}">
+									<span class="icon"></span>
+									<input id="attachments" type="checkbox" data-bind="checked: searchAttachmentsCheckbox">
+								</label>
+								<span class="attachment_name">
+									<label for="search_attachments" class="label placeholder" data-bind="text: attachmentsPlaceholder"></label>
+									<input id="search_attachments" disabled class="value input" type="text" data-bind="hasfocus: searchAttachmentsFocus, value: searchAttachments, valueUpdate: 'afterkeydown', onEnter: onSearchClick" />
+								</span>
+							</span>-->
+						</span>
+						<span class="section">
+							<span class="row text" data-bind="css: {'focused': searchToFocus(), 'filled': searchInputTo().length > 0}">
+								<label for="search_to" class="label placeholder" data-i18n="MAILBOX/SEARCH_FIELD_TO" data-bind="i18n: 'text'"></label>
+								<input id="search_to" class="value input" spellcheck="false"  type="text" data-bind="hasfocus: searchToFocus, value: searchInputTo, valueUpdate: 'afterkeydown', onEnter: onSearchClick" />
+							</span>
+							<span class="row text" data-bind="css: {'focused': searchTextFocus(), 'filled': searchInputText().length > 0}">
+								<label for="search_text" class="label placeholder" data-i18n="MAILBOX/SEARCH_FIELD_TEXT" data-bind="i18n: 'text'"></label>
+								<input id="search_text" class="value input" spellcheck="false"  type="text" data-bind="hasfocus: searchTextFocus, value: searchInputText, valueUpdate: 'afterkeydown', onEnter: onSearchClick" />
+							</span>
+							<span class="row text">
+								<span class="row date till" data-bind="css: {'focused': searchDateEndFocus(), 'filled': searchDateEnd().length > 0}">
+									<label for="search_date_end" class="label placeholder" data-i18n="MAILBOX/SEARCH_FIELD_TILL" data-bind="i18n: 'text'"></label>
+									<input id="search_date_end" class="date input" spellcheck="false"  type="text" data-bind="initDom: searchDateEndDom, value: searchDateEnd, hasfocus: searchDateEndFocus, valueUpdate: 'afterkeydown', onEnter: onSearchClick" />
+								</span>
+							</span>
+						</span>
+						<span class="section attachments">
+							<span class="row attachments" data-bind="css: {'focused': searchAttachmentsFocus(), 'filled': searchAttachments().length > 0}">
+								<label class="custom_checkbox" data-bind="css: {'checked': searchAttachmentsCheckbox}">
+									<span class="icon"></span>
+									<input id="attachments" type="checkbox" data-bind="checked: searchAttachmentsCheckbox">
+								</label>
+								<span class="attachment_name">
+									<!--<label for="search_attachments" class="label placeholder" data-bind="text: attachmentsPlaceholder"></label>-->
+									<!--<input id="search_attachments" class="value input" type="text" data-bind="hasfocus: searchAttachmentsFocus, value: searchAttachments, valueUpdate: 'afterkeydown', onEnter: onSearchClick" />-->
+									<label for="search_attachments" style="cursor: pointer" class="label placeholder" data-bind="text: attachmentsPlaceholder, click: function() { searchAttachmentsCheckbox(!searchAttachmentsCheckbox()); }"></label>
+									<input id="search_attachments" disabled class="value input" spellcheck="false" type="text" data-bind="hasfocus: searchAttachmentsFocus, value: searchAttachments, valueUpdate: 'afterkeydown', onEnter: onSearchClick" />
+								</span>
+							</span>
+						</span>
+						<div class="section buttons">
+							<span class="button" data-i18n="MAILBOX/BUTTON_SEARCH" data-bind="i18n: 'text', click: onSearchClick"></span>
+						</div>
+					</span>
+				</div>
+			</span>
+			<span class="control">
+				<span class="icon" data-bind="click: onAdvancedSearchClick, css: {'expand': bAdvancedSearch()}, 
+					customTooltip: 'MAILBOX/TOOLTIP_ADVANCED_SEARCH'"></span>
+			</span>
+		</span>
+		<!-- /ko -->
+	</div>
+	<div class="panel_center unselectable" data-bind="customScrollbar: {'reset': listChangedThrottle(), x: false}">
+		<div class="scroll-inner message_list_scroll">
+			<div class="items_list message_list" data-bind="initDom: messagesContainer">
+				<span class="list_notification" data-bind="visible: visibleInfoSearchLoading">
+					<span class="link" data-i18n="MAILBOX/LINK_STOP_SEARCH" data-bind="i18n: 'text', click: onStopSearchClick"></span>
+					<span class="description" data-bind="html: searchText"></span>
+				</span>
+
+				<span class="list_notification search_results" data-bind="visible: visibleInfoSearchList">
+					<span class="link" data-i18n="MAILBOX/LINK_CLEAR_SEARCH" data-bind="i18n: 'text', click: onClearSearchClick"></span>
+					<span class="description" data-bind="html: searchText"></span>
+				</span>
+
+				<span class="list_notification" data-bind="visible: visibleInfoSearchEmpty">
+					<span class="link" data-i18n="MAILBOX/LINK_CLEAR_SEARCH" data-bind="i18n: 'text', click: onClearSearchClick"></span>
+					<span class="description" data-i18n="MAILBOX/INFO_SEARCH_EMPTY" data-bind="i18n: 'text'"></span>
+				</span>
+
+				<span class="list_notification" data-bind="visible: visibleInfoSearchError">
+					<span class="link" data-i18n="MAILBOX/LINK_RETRY" data-bind="i18n: 'text', click: onRetryClick"></span>
+					<span class="link" data-i18n="MAILBOX/LINK_SWITCH_TO_MESSAGE_LIST" data-bind="i18n: 'text', click: onClearSearchClick"></span>
+					<span class="description" data-i18n="MAILBOX/INFO_SEARCH_ERROR" data-bind="i18n: 'text'"></span>
+				</span>
+
+				<span class="list_notification" data-bind="visible: visibleInfoUnseenFilterList">
+					<span class="link" data-i18n="MAILBOX/LINK_CLEAR_FILTER" data-bind="i18n: 'text', click: onClearFilterClick"></span>
+					<span class="description" data-bind="html: unseenFilterText"></span>
+				</span>
+
+				<span class="list_notification" data-bind="visible: visibleInfoUnseenFilterEmpty">
+					<span class="link" data-i18n="MAILBOX/LINK_CLEAR_FILTER" data-bind="i18n: 'text', click: onClearFilterClick"></span>
+					<span class="description" data-bind="text: unseenFilterEmptyText"></span>
+				</span>
+
+				<span class="list_notification" data-bind="visible: visibleInfoMessageListEmpty">
+					<span class="description" data-i18n="MAILBOX/INFO_MESSAGE_LIST_EMPTY" data-bind="i18n: 'text'"></span>
+				</span>
+
+				<span class="list_notification" data-bind="visible: visibleInfoStarredFolderEmpty">
+					<span class="description" data-i18n="MAILBOX/INFO_STARRED_FOLDER_EMPTY" data-bind="i18n: 'text'"></span>
+				</span>
+
+				<span class="list_notification" data-bind="visible: visibleInfoMessageListError">
+					<span class="link" data-i18n="MAILBOX/LINK_RETRY" data-bind="i18n: 'text', click: onRetryClick"></span>
+					<span class="description" data-i18n="MAILBOX/INFO_MESSAGE_LIST_ERROR" data-bind="i18n: 'text'"></span>
+				</span>
+
+				<div class="items_sub_list message_sub_list" data-bind="foreach: collection, 
+					 draggablePlace: function (oMessage, bCtrl) {return $root.dragAndDropHelper(oMessage, bCtrl);},
+					 css: {'not_use_threads': !useThreads(), 'use_threads': useThreads}">
+					<!-- ko template: {name: 'Mail_MessageListItemViewModel'} --><!-- /ko -->
+				</div>
+
+				<span class="list_notification" data-bind="visible: visibleInfoLoading()">
+					<span class="description" data-i18n="MAILBOX/INFO_LOADING_MESSAGE_LIST" data-bind="i18n: 'text'"></span>
+				</span>
+				<span class="list_notification" data-bind="visible: visibleInfoSearchLoading()">
+					<span class="description" data-i18n="MAILBOX/INFO_SEARCHING_FOR_MESSAGES" data-bind="i18n: 'text'"></span>
+				</span>
+				<div class="uploader_mask" data-bind="initDom: uploaderArea, css: {'active': bDragActiveComp}, visible: folderType() !== Enums.FolderTypes.Spam">
+					<div class="inner"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="panel_bottom unselectable" data-bind="template: {name: 'Common_PageSwitcherViewModel', data: oPageSwitcher}"></div>
+</div>

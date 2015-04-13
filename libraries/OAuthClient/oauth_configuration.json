@@ -1,0 +1,401 @@
+{
+	"version": "$Id: oauth_configuration.json,v 1.24 2015/01/17 05:54:10 mlemos Exp $",
+	"comments": [
+		"The servers entry should be an object with a list of object",
+		"entries, one for each server type. The server object entry name is",
+		"the name of the server type. Each server entry is an object with",
+		"some mandatory properties: oauth_version, dialog_url,",
+		"access_token_url and request_token_url (just for Oauth 1.0 and",
+		"1.0a). Check the OAuth client class for the complete list of server",
+		"properties."
+	],
+	"servers":
+	{
+		"37Signals":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://launchpad.37signals.com/authorization/new?type=web_server&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&state={STATE}&scope={SCOPE}",
+			"access_token_url": "https://launchpad.37signals.com/authorization/token?type=web_server"
+		},
+
+		"Amazon":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://www.amazon.com/ap/oa?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&response_type=code&state={STATE}",
+			"access_token_url": "https://api.amazon.com/auth/o2/token"
+		},
+
+		"Bitbucket":
+		{
+			"oauth_version": "1.0a",
+			"request_token_url": "https://bitbucket.org/!api/1.0/oauth/request_token",
+			"dialog_url": "https://bitbucket.org/!api/1.0/oauth/authenticate",
+			"access_token_url": "https://bitbucket.org/!api/1.0/oauth/access_token",
+			"url_parameters": false
+		},
+
+		"Bitly":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://bitly.com/oauth/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&state={STATE}&scope={SCOPE}",
+			"access_token_url": "https://api-ssl.bitly.com/oauth/access_token"
+		},
+
+		"Box":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://www.box.com/api/oauth2/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&state={STATE}&scope={SCOPE}",
+			"offline_dialog_url": "https://www.box.com/api/oauth2/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&state={STATE}&access_type=offline&approval_prompt=force",
+			"access_token_url": "https://www.box.com/api/oauth2/token"
+		},
+
+		"Buffer":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://bufferapp.com/oauth2/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&state={STATE}&scope={SCOPE}",
+			"access_token_url": "https://api.bufferapp.com/1/oauth2/token.json"
+		},
+
+		"Copy":
+		{
+			"oauth_version": "1.0a",
+			"request_token_url": "https://api.copy.com/oauth/request",
+			"dialog_url": "https://www.copy.com/applications/authorize",
+			"access_token_url": "https://api.copy.com/oauth/access"
+		},
+
+		"Dailymotion":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://api.dailymotion.com/oauth/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&state={STATE}&scope={SCOPE}",
+			"access_token_url": "https://api.dailymotion.com/oauth/token"
+		},
+
+		"Discogs":
+		{
+			"oauth_version": "1.0a",
+			"request_token_url": "https://api.discogs.com/oauth/request_token",
+			"dialog_url": "https://www.discogs.com/oauth/authorize",
+			"access_token_url": "https://api.discogs.com/oauth/access_token"
+		},
+
+		"Disqus":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://disqus.com/api/oauth/2.0/authorize/?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}",
+			"access_token_url": "https://disqus.com/api/oauth/2.0/access_token/"
+		},
+
+		"Dropbox":
+		{
+			"oauth_version": "1.0",
+			"request_token_url": "https://api.dropbox.com/1/oauth/request_token",
+			"dialog_url": "https://www.dropbox.com/1/oauth/authorize",
+			"access_token_url": "https://api.dropbox.com/1/oauth/access_token",
+			"authorization_header": false
+		},
+
+		"Dropbox2":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://www.dropbox.com/1/oauth2/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}",
+			"access_token_url": "https://www.dropbox.com/1/oauth2/token"
+		},
+
+		"Etsy":
+		{
+			"oauth_version": "1.0a",
+			"request_token_url": "https://openapi.etsy.com/v2/oauth/request_token?scope={SCOPE}",
+			"dialog_url": "automatic",
+			"access_token_url": "https://openapi.etsy.com/v2/oauth/access_token"
+		},
+
+		"Eventful":
+		{
+			"oauth_version": "1.0a",
+			"request_token_url": "http://eventful.com/oauth/request_token",
+			"dialog_url": "http://eventful.com/oauth/authorize",
+			"access_token_url": "http://eventful.com/oauth/access_token",
+			"authorization_header": false,
+			"url_parameters": true,
+			"token_request_method": "POST"
+		},
+
+		"Evernote":
+		{
+			"oauth_version": "1.0a",
+			"request_token_url": "https://sandbox.evernote.com/oauth",
+			"dialog_url": "https://sandbox.evernote.com/OAuth.action",
+			"access_token_url": "https://sandbox.evernote.com/oauth",
+			"url_parameters": true,
+			"authorization_header": false
+		},
+
+		"Fitbit":
+		{
+			"oauth_version": "1.0a",
+			"request_token_url": "https://api.fitbit.com/oauth/request_token",
+			"dialog_url": "https://api.fitbit.com/oauth/authorize",
+			"access_token_url": "https://api.fitbit.com/oauth/access_token"
+		},
+
+		"Flickr":
+		{
+			"oauth_version": "1.0a",
+			"request_token_url": "http://www.flickr.com/services/oauth/request_token",
+			"dialog_url": "http://www.flickr.com/services/oauth/authorize?perms={SCOPE}",
+			"access_token_url": "http://www.flickr.com/services/oauth/access_token",
+			"authorization_header": false
+		},
+
+		"Foursquare":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://foursquare.com/oauth2/authorize?client_id={CLIENT_ID}&scope={SCOPE}&response_type=code&redirect_uri={REDIRECT_URI}&state={STATE}",
+			"access_token_url": "https://foursquare.com/oauth2/access_token",
+			"access_token_parameter": "oauth_token"
+		},
+
+		"Google1":
+		{
+			"oauth_version": "1.0a",
+			"dialog_url": "https://www.google.com/accounts/OAuthAuthorizeToken",
+			"access_token_url": "https://www.google.com/accounts/OAuthGetAccessToken",
+			"request_token_url": "https://www.google.com/accounts/OAuthGetRequestToken?scope={SCOPE}"
+		},
+
+		"imgur":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://api.imgur.com/oauth2/authorize?client_id={CLIENT_ID}&response_type=code&state={STATE}&redirect_uri={REDIRECT_URI}&scope={SCOPE}",
+			"pin_dialog_url": "https://api.imgur.com/oauth2/authorize?client_id={CLIENT_ID}&response_type=pin&state={STATE}&scope={SCOPE}",
+			"access_token_url": "https://api.imgur.com/oauth2/token"
+		},
+
+		"Instagram":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://api.instagram.com/oauth/authorize/?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&response_type=code&state={STATE}",
+			"access_token_url": "https://api.instagram.com/oauth/access_token"
+		},
+
+		"Intuit":
+		{
+			"oauth_version": "1.0a",
+			"request_token_url": "https://oauth.intuit.com/oauth/v1/get_request_token",
+			"dialog_url": "https://appcenter.intuit.com/Connect/Begin",
+			"access_token_url": "https://oauth.intuit.com/oauth/v1/get_access_token"
+		},
+
+		"Jawbone":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://jawbone.com/auth/oauth2/auth?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&state={STATE}&scope={SCOPE}",
+			"access_token_url": "https://jawbone.com/auth/oauth2/token"
+		},
+
+		"LinkedIn2":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://www.linkedin.com/uas/oauth2/authorization?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&response_type=code&state={STATE}",
+			"access_token_url": "https://www.linkedin.com/uas/oauth2/accessToken",
+			"default_access_token_type": "Bearer"
+		},
+
+		"MailChimp":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://login.mailchimp.com/oauth2/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&response_type=code&state={STATE}",
+			"access_token_url": "https://login.mailchimp.com/oauth2/token"
+		},
+
+		"Mavenlink":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://api.mavenlink.com/oauth/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&response_type=code&state={STATE}",
+			"access_token_url": "https://api.mavenlink.com/oauth/token"
+		},
+
+		"mail.ru":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://connect.mail.ru/oauth/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&response_type=code&state={STATE}",
+			"access_token_url": "https://connect.mail.ru/oauth/token",
+			"store_access_token_response": true
+		},
+
+		"Meetup":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://secure.meetup.com/oauth2/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}",
+			"access_token_url": "https://secure.meetup.com/oauth2/access"
+		},
+
+		"oDesk":
+		{
+			"oauth_version": "1.0a",
+			"request_token_url": "https://www.odesk.com/api/auth/v1/oauth/token/request",
+			"dialog_url": "https://www.odesk.com/services/api/auth",
+			"access_token_url": "https://www.odesk.com/api/auth/v1/oauth/token/access",
+			"token_request_method": "POST"
+		},
+
+		"Paypal":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&state={STATE}&scope={SCOPE}",
+			"access_token_url": "https://api.paypal.com/v1/oauth2/token",
+			"access_token_authentication": "basic"
+		},
+
+		"PaypalApplication":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "use Paypal OAuth 2.0 for accessing its API on behalf of a given user",
+			"access_token_url": "https://api.paypal.com/v1/oauth2/token",
+			"access_token_authentication": "basic"
+		},
+
+		"Rdio":
+		{
+			"oauth_version": "1.0a",
+			"request_token_url": "http://api.rdio.com/oauth/request_token",
+			"dialog_url": "https://www.rdio.com/oauth/authorize",
+			"access_token_url": "http://api.rdio.com/oauth/access_token"
+		},
+
+		"Reddit":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://ssl.reddit.com/api/v1/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}",
+			"offline_dialog_url": "https://ssl.reddit.com/api/v1/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}&duration=permanent",
+			"access_token_url": "https://ssl.reddit.com/api/v1/access_token",
+			"access_token_authentication": "basic"
+		},
+
+		"RightSignature":
+		{
+			"oauth_version": "1.0a",
+			"request_token_url": "https://rightsignature.com/oauth/request_token",
+			"dialog_url": "https://rightsignature.com/oauth/authorize",
+			"access_token_url": "https://rightsignature.com/oauth/access_token",
+			"authorization_header": false
+		},
+
+		"RunKeeper":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://runkeeper.com/apps/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&state={STATE}&scope={SCOPE}",
+			"access_token_url": "https://runkeeper.com/apps/token"
+		},
+
+		"Salesforce":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://login.salesforce.com/services/oauth2/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}",
+			"access_token_url": "https://login.salesforce.com/services/oauth2/token",
+			"default_access_token_type": "Bearer",
+			"store_access_token_response": true
+		},
+
+		"Scoop.it":
+		{
+			"oauth_version": "1.0a",
+			"request_token_url": "https://www.scoop.it/oauth/request",
+			"dialog_url": "https://www.scoop.it/oauth/authorize",
+			"access_token_url": "https://www.scoop.it/oauth/access",
+			"authorization_header": false
+		},
+
+		"StockTwits":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://api.stocktwits.com/api/2/oauth/authorize?client_id={CLIENT_ID}&response_type=code&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}",
+			"access_token_url": "https://api.stocktwits.com/api/2/oauth/token"
+		},
+
+		"SurveyMonkey":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://api.surveymonkey.net/oauth/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&state={STATE}&api_key={API_KEY}&scope={SCOPE}",
+			"access_token_url": "https://api.surveymonkey.net/oauth/token?api_key={API_KEY}"
+		},
+
+		"TeamViewer":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://webapi.teamviewer.com/api/v1/oauth2/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&state={STATE}&api_key={API_KEY}&scope={SCOPE}",
+			"access_token_url": "https://webapi.teamviewer.com/api/v1/oauth2/token"
+		},
+
+		"Tumblr":
+		{
+			"oauth_version": "1.0a",
+			"request_token_url": "http://www.tumblr.com/oauth/request_token",
+			"dialog_url": "http://www.tumblr.com/oauth/authorize",
+			"access_token_url": "http://www.tumblr.com/oauth/access_token"
+		},
+
+		"Twitter2":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "use Twitter OAuth 1.0a for accessing its API on behalf of a given user",
+			"access_token_url": "https://api.twitter.com/oauth2/token"
+		},
+
+		"Vimeo":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://api.vimeo.com/oauth/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&state={STATE}&scope={SCOPE}",
+			"access_token_url": "https://api.vimeo.com/oauth/access_token"
+		},
+
+		"VK":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://oauth.vk.com/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}",
+			"access_token_url": "https://oauth.vk.com/access_token",
+			"store_access_token_response": true
+		},
+
+		"Withings":
+		{
+			"oauth_version": "1.0",
+			"request_token_url": "https://oauth.withings.com/account/request_token",
+			"dialog_url": "https://oauth.withings.com/account/authorize",
+			"access_token_url": "https://oauth.withings.com/account/access_token",
+			"authorization_header": false
+		},
+
+		"Wordpress":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://public-api.wordpress.com/oauth2/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&state={STATE}&scope={SCOPE}",
+			"access_token_url": "https://public-api.wordpress.com/oauth2/token"
+		},
+
+		"Xero":
+		{
+			"oauth_version": "1.0a",
+			"request_token_url": "https://api.xero.com/oauth/RequestToken",
+			"dialog_url": "https://api.xero.com/oauth/Authorize",
+			"access_token_url": "https://api.xero.com/oauth/AccessToken"
+		},
+
+		"XING":
+		{
+			"oauth_version": "1.0a",
+			"request_token_url": "https://api.xing.com/v1/request_token",
+			"dialog_url": "https://api.xing.com/v1/authorize",
+			"access_token_url": "https://api.xing.com/v1/access_token",
+			"authorization_header": false
+		},
+
+		"Yandex":
+		{
+			"oauth_version": "2.0",
+			"dialog_url": "https://oauth.yandex.com/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&state={STATE}&scope={SCOPE}",
+			"access_token_url": "https://oauth.yandex.com/token"
+		}
+	}
+}

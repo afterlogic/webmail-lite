@@ -1,0 +1,114 @@
+<div class="panel_top">
+	<div class="toolbar">
+		<span class="content">
+			<span class="item delete" data-bind="">
+				<span class="icon"></span>
+				<span class="text" data-i18n="CONTACTS/BUTTON_DELETE_GROUP"
+					data-bind="i18n: 'text', click: function() { $root.deleteGroup(idGroup()); }"></span>
+			</span>
+			<span class="item edit" data-bind="">
+				<span class="icon"></span>
+				<span class="text" data-i18n="CONTACTS/BUTTON_EDIT_GROUP"
+					data-bind="i18n: 'text', click: function (oItem) { $root.editGroup(oItem); }"></span>
+			</span>
+			<span class="item mail_to" data-bind="visible: $root.allowWebMail">
+				<span class="icon"></span>
+				<span class="text" data-i18n="CONTACTS/BUTTON_EMAIL_TO_THIS_GROUP"
+					data-bind="i18n: 'text', click: function() { $root.mailGroup($data); }"></span>
+			</span>
+		</span>
+	</div>
+	<h2 class="title" data-bind="i18n: 'text', visible: !isNew()" data-i18n="CONTACTS/LABEL_VIEW_GROUP"></h2>
+</div>
+<div class="decor"></div>
+<div class="panel_center" data-bind="customScrollbar: {}">
+	<div class="contact_content scroll-inner">
+		<div class="contact_data_groups">
+			<div class="fields clearfix">
+				<div class="row" data-bind="visible: '' !== name()">
+					<span class="label">
+						<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_GROUP_NAME"></span>:
+					</span>
+					<span class="value" data-bind="text: name"></span>
+				</div>
+				
+				<div data-bind="visible: '' !== isOrganization()">
+					<div class="row" data-bind="visible: '' !== email()">
+						<span class="label">
+							<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_GROUP_EMAIL"></span>:
+						</span>
+						<span class="value" data-bind="text: email"></span>
+					</div>
+					<div class="row" data-bind="visible: '' !== company()">
+						<span class="label">
+							<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_GROUP_COMPANY"></span>:
+						</span>
+						<span class="value" data-bind="text: company"></span>
+					</div>
+					<div class="row" data-bind="visible: '' !== country()">
+						<span class="label">
+							<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_GROUP_COUNTRY"></span>:
+						</span>
+						<span class="value" data-bind="text: country"></span>
+					</div>
+					<div class="row" data-bind="visible: '' !== state()">
+						<span class="label">
+							<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_GROUP_STATE"></span>:
+						</span>
+						<span class="value" data-bind="text: state"></span>
+					</div>
+					<div class="row" data-bind="visible: '' !== city()">
+						<span class="label">
+							<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_GROUP_CITY"></span>:
+						</span>
+						<span class="value" data-bind="text: city"></span>
+					</div>
+					<div class="row" data-bind="visible: '' !== street()">
+						<span class="label">
+							<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_GROUP_STREET"></span>:
+						</span>
+						<span class="value" data-bind="text: street"></span>
+					</div>
+					<div class="row" data-bind="visible: '' !== zip()">
+						<span class="label">
+							<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_GROUP_ZIP"></span>:
+						</span>
+						<span class="value" data-bind="text: zip"></span>
+					</div>
+					<div class="row" data-bind="visible: '' !== phone()">
+						<span class="label">
+							<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_GROUP_PHONE"></span>:
+						</span>
+						<span class="value" data-bind="text: phone"></span>
+					</div>
+					<div class="row" data-bind="visible: '' !== fax()">
+						<span class="label">
+							<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_GROUP_FAX"></span>:
+						</span>
+						<span class="value" data-bind="text: fax"></span>
+					</div>
+					<div class="row" data-bind="visible: '' !== web()">
+						<span class="label">
+							<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_GROUP_WEB"></span>:
+						</span>
+						<span class="value" data-bind="text: web"></span>
+					</div>
+				</div>
+
+			</div>
+			<div class="fields">
+				<div class="items_section" data-bind="foreach: events">
+					<div>
+						<span class="value" data-bind="text: subject"></span>
+						<br/>
+						<span class="value" data-bind="text: '(' + start + ' - ' + end + ')'"></span>
+						<br/><br/>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="fields_switcher">
+			<span class="link" data-bind="visible: $root.selectedGroupContactsList().length !== 0, i18n: 'text', click: function() { $root.viewAllMails(); }" data-i18n="CONTACTS/BUTTON_SEE_EMAILS_WITH_THIS_GROUP"></span>
+		</div>
+	</div>
+</div>

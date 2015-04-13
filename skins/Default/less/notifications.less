@@ -1,0 +1,120 @@
+/*=== Report panels CSS ===*/
+.report_panel {
+	width: 100%;
+	text-align: center;
+	height: 0px;
+	overflow: visible;
+	top: 0px;
+	position: fixed;
+	z-index: 3000;
+	visibility: visible;
+
+	&.error {
+		z-index: 2999;
+	}
+	
+	&.hide {
+		visibility: hidden;
+	}
+	
+	.csstransitions & {
+		.perspective(200px);
+		
+		.transition(~"visibility 0ms linear 0ms");
+		
+		&.hide {
+			.transition(~"visibility 0ms linear 500ms");
+		}
+	}
+	
+	.content {
+		display: inline-block;
+		font-weight: bold;
+		text-align: left;
+		background: #f9f9f9;
+		border: 1px solid #c3c3c3;
+		border-top: 0px;
+		padding: 15px 30px 10px;
+		border-radius: 0px 0px 4px 4px;
+		box-shadow: 0px 1px 2px 0px #bbb;
+		text-shadow: 0px 1px 2px rgba(0,0,0,0.4);
+		.opacity(1);
+		max-width: 20%;
+		
+		@media screen and (max-width: 768px) {
+			max-width: 80%;
+		}
+
+		.csstransitions & {
+			.transform(rotateX(0deg));
+
+			-webkit-transform-origin: 0px 0px;
+			-moz-transform-origin: 0px 0px;
+			-o-transform-origin: 0px 0px;
+			transform-origin: 0px 0px;
+
+			.transition(all 200ms ease 0s);
+		}
+		
+		.hide& {
+			.opacity(0);
+
+			.csstransitions & {
+				.transform(rotateX(-90deg));
+				.transition(all 200ms ease 0s);
+			}
+		}
+		
+		.loading& {
+			background: #dac073;
+			border-color: #c5ac60;
+			color: #fff;
+		}
+		
+		.report& {
+			background: #96c671;
+			border-color: #82b35d;
+			color: #fff;
+		}
+		.error& {
+			background: #f47474;
+			border-color: #e26464;
+			color: #fff;
+		}
+		.report&, .error& {
+			.close {
+				position: absolute;
+				cursor: pointer;
+				right: 2px;
+				top: 2px;
+				height: 16px;
+				width: 16px;
+				
+				.iconFontInit();
+				&:before {
+					font-size: 16px;
+					display: inline-block;
+					content: "\e63e";
+				}
+			}
+		}
+
+		.gray& {
+			background: #ccc;
+			border-color: #a9a9a9;
+		}
+
+		.icon {
+			width: 16px;
+			height: 17px;
+			margin-left: -23px;
+			float: left;
+			display: none;
+		}
+		
+		.theme-content();
+	}
+	
+	.theme-notifications();
+}
+/*=== END Report panels CSS ===*/

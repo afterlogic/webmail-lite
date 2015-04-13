@@ -1,0 +1,20 @@
+<div class="mask" data-bind="command: closeCommand"></div>
+<div class="popup_panel">
+	<span class="close" data-bind="command: closeCommand"></span>
+	<span class="title" data-bind="text: titleText"></span>
+	
+	<div class="fields">
+		<div class="row view_pgp_key_area" data-bind="customScrollbar: {x: false, 'reset': htmlArmor()}">
+			<div class="scroll-inner">
+				<pre data-bind="text: htmlArmor, initDom: domKey"></pre>
+			</div>
+		</div>
+		<div class="buttons">
+			<span class="button" data-i18n="MAIN/BUTTON_SEND" data-bind="i18n: 'text', click: send"></span>
+			<a class="button" data-i18n="OPENPGP/BUTTON_DOWNLOAD" data-bind="i18n: 'text', attr: {'href': downloadLinkHref, 'download': downloadLinkFilename}, visible: downloadLinkHref() !== '#'"></a>
+			<span class="button" data-i18n="OPENPGP/BUTTON_SELECT" data-bind="i18n: 'text', click: select"></span>
+			<span class="button" data-i18n="MAIN/BUTTON_CLOSE" data-bind="i18n: 'text', command: closeCommand"></span>
+		</div>
+	</div>
+</div>
+<span class="helper"></span>	

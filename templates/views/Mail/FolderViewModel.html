@@ -1,0 +1,33 @@
+<div class="item" data-bind="visible: visible(),
+	 css: { 'selected': selected, 'canSelect': selectable, 'canNotSelect': !selectable(), 'existen': existen, 'subscribed': subscribed,
+		'system': isSystem, 'user': !isSystem(), 'virtualEmpty': virtualEmpty, 'accordion': subfolders().length !== 0, 'expanded': expanded(), 'collapsed': !expanded()}">
+	<a class="title" href="javascript: void(0);" data-bind="
+		css: {'recivedAnim': recivedAnim()},
+		attr: {href: routingHash},
+		visible: canBeSelected,
+		droppable: {valueFunc: virtual() ? false : function (oEvent, oUi) { $root.messagesDrop($data, oEvent, oUi); }, switchObserv: selected}
+	">
+		<span class="count" data-bind="visible: messageCountToShow() > 0, text: messageCountToShow(),
+			  css: {'unseen': showUnseenMessages}, click: executeUnseenFilter, customTooltip: unseenMessagesTitle()"></span>
+		<span class="name">
+			<span class="icon" data-bind="css: 'type' + type()"></span>
+			<span class="collapse_handler" data-bind="visible: isCollapseHandler, css: {'expanded': expanded(), 'collapsed': !expanded()}, click: onAccordion"></span>
+			<span class="text animGoal" data-bind="text: displayName"></span>
+		</span>
+	</a>
+	<span class="title" data-bind="visible: !canBeSelected()">
+		<span class="count" data-bind="visible: messageCountToShow() > 0, text: messageCountToShow(),
+		  css: {'unseen': showUnseenMessages}"></span>
+		<span class="name">
+			<span class="icon" data-bind="css: 'type' + type()"></span>
+			<span class="collapse_handler" data-bind="visible: isCollapseHandler, css: {'expanded': expanded(), 'collapsed': !expanded()}, click: onAccordion"></span>
+			<span class="text animGoal" data-bind="text: displayName"></span>
+		</span>
+	</span>
+	<!-- ko if: !isNamespace() -->
+	<div class="children" data-bind="template: { name: 'Mail_FolderViewModel', foreach: subfolders }"></div>
+	<!-- /ko -->
+</div>
+<!-- ko if: isNamespace -->
+	<!-- ko template: {name: 'Mail_FolderViewModel', foreach: subfolders} --><!-- /ko -->
+<!-- /ko -->

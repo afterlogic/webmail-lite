@@ -1,0 +1,266 @@
+<div class="mask clear" data-bind="visible: dateEdit(), click: onMainPanelClick"></div>
+<div class="mask" data-bind="click: closePopup"></div>
+<div class="popup_panel" data-bind="css: {'show_side_panel': calendarAppointments && (guestsEdit() || attendees().length > 0), 'editable': isEditable, 'offset': dateEdit()}">
+
+	<div class="panel_wrap clearfix">
+		<div class="side_panel fields">
+			<div class="fieldset">
+				<div class="row owner">
+					<span class="label" data-i18n="CALENDAR/LABEL_EVENT_HOST" data-bind="i18n: 'text'"></span>
+					<span class="value" data-bind="customTooltip: owner, text: ownerName, visible: ownerName !== '', css: {'recivedAnim': recivedAnim() && owner() === whomAnimate()}"></span>
+					<span class="value" data-bind="text: owner, visible: ownerName() === '', css: {'recivedAnim': recivedAnim() && owner() === whomAnimate()}"></span>
+				</div>
+				<div class="row attendees" data-bind="foreach: attendees">
+					<div class="attender" data-bind="css: {
+							'pending': status === 0,
+							'accepted': status === 1,
+							'declined': status === 2,
+							'tentative': status === 3
+						 }">
+						<span class="control remove" data-bind="visible: $parent.isEditable(), click: $parent.removeGuest.bind($parent), customTooltip: 'CALENDAR/EVENT_GUESTS_REMOVE'"></span>
+						<!--<span class="name" data-bind="css: {'recivedAnim': $parent.recivedAnim}">-->
+						<span class="name" data-bind="css: {'recivedAnim': $parent.recivedAnim() && email === $parent.whomAnimate()}">
+							<span class="icon status" data-bind="customTooltip: function () { return $parent.getAttenderTextStatus(status); }"></span>
+							<span class="text" data-bind="customTooltip: email, text: name, visible: name !== ''"></span>
+							<span class="text" data-bind="text: email, visible: name === ''"></span>
+						</span>
+					</div>
+				</div>
+				<div class="row add_attender" data-bind="visible: isEditable(), css: {'focused': guestEmailFocus()}">
+					<span class="control add" data-bind="customTooltip: 'CALENDAR/EVENT_ADD_GUEST', click: onAddGuestClick"></span>
+					<label for="add_attender_input" class="label placeholder" data-i18n="CALENDAR/LABEL_WEB_EMAIL_OR_NAME" data-bind="i18n: 'text', visible: guestAutocomplete() === ''"></label>
+					<input id="add_attender_input" class="value input" spellcheck="false"  type="text" autocomplete="on" data-bind="value: guestAutocomplete, hasfocus: guestEmailFocus, valueUpdate: ['blur', 'afterkeydown'], autocompleteSimple: {callback: autocompleteCallback.bind($data), dataAccessor: guestAutocompleteItem}" />
+				</div>
+				<div class="row" data-bind="visible: isAppointmentButtonsVisible">
+					<div class="buttons">
+						<span class="button" data-i18n="MESSAGE/APPOINTMENT_BUTTON_ACCEPT"
+						  data-bind="i18n: 'text', css: {'state': attenderStatus() === Enums.IcalConfigInt.Accepted}, click: function(){ doAppointmentAction(Enums.IcalConfig.Accepted); }"></span>
+						<span class="button" data-i18n="MESSAGE/APPOINTMENT_BUTTON_TENTATIVE"
+						  data-bind="i18n: 'text', css: {'state': attenderStatus() === Enums.IcalConfigInt.Tentative}, click: function(){ doAppointmentAction(Enums.IcalConfig.Tentative); }"></span>
+						<span class="button" data-i18n="MESSAGE/APPOINTMENT_BUTTON_DECLINE"
+						  data-bind="i18n: 'text', css: {'state': attenderStatus() === Enums.IcalConfigInt.Declined}, click: function(){ doAppointmentAction(Enums.IcalConfig.Declined); }"></span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="main_panel">
+			<!--<span class="icon repeat" data-bind="visible: repeatPeriod() !== Enums.CalendarRepeatPeriod.None"></span>-->
+			<span class="icon appointment" data-bind="visible: attendees().length !== 0"></span>
+			<span class="close" data-bind="click: closePopup"></span>
+			<span class="title" data-bind="dropdown: {'control': false}, style: {backgroundColor: calendarColor}, css: {'calendar_selector': calendarsList().length > 1 && selectedCalendarIsEditable()}">
+				<span class="current">
+					<span data-bind="text: selectedCalendarName, fade: {color: calendarColor}"></span>
+				</span>
+				<span class="dropdown" data-bind="visible: calendarsList().length > 1 && selectedCalendarIsEditable()">
+					<span class="dropdown_helper">
+						<span class="dropdown_arrow"><span></span></span>
+						<span class="dropdown_content" data-bind="foreach: calendarsList()">
+							<span class="item" data-bind="visible: $parent.selectedCalendarId() !== id, text: name, style: { backgroundColor: color }, click: function () { $parent.selectedCalendarId(id); }"></span>
+						</span>
+					</span>
+				</span>
+			</span>
+
+			<div class="fields">
+				<div class="fieldset">
+					<div class="row dates" data-bind="click: isEditable() ? showDates : '', css: {'editable': isEditable()}">
+						<span class="value" data-bind="text: startDate()"></span>,
+						<span class="value" data-bind="text: !allDay() ? ', ' : ' '"></span>
+						<span class="value" data-bind="text: startTime, visible: !allDay()"></span>
+						<span data-bind="visible: allDay() && !isEvOneDay() || !allDay() && (!isEvOneDay() || !isEvOneTime())">&nbsp;&ndash;&nbsp;</span>
+						<span class="value" data-bind="text: endDate(), visible: !isEvOneDay()"></span>
+						<span class="value" data-bind="text: !allDay() ? ', ' : ' ', visible: !isEvOneDay()"></span>
+						<span class="value" data-bind="text: endTime, visible: !allDay() && (!isEvOneDay() || !isEvOneTime())"></span>
+					</div>
+
+					<span data-bind="css: {'repeat': isRepeat()}, customTooltip: 'CALENDAR/RECURRING'"></span>
+
+					<div class="subforms" data-bind="visible: dateEdit()">
+						<div class="dates_form">
+							<div class="form_content">
+								<div class="row" data-bind="css: {'ampm_time': ampmTimeFormat()}">
+									<input class="date input" type="text"  spellcheck="false" readonly="readonly" data-bind="initDom: startDom" />
+									<!--<input class="time input" type="text" spellcheck="false"  data-bind="value: startTime, visible: !allDay()" />-->
+									<span class="custom_selector" data-bind="visible: !allDay(), customSelect: {'control': false, 'selected': 'selected', 'input': true, 'options': timeOptions(), 'timeOptions': timeOptions, value: startTime, optionsText: 'text', optionsValue: 'value'}">
+										<input class="value time input"  spellcheck="false" type="text" data-bind="value: startTime" />
+										<span class="dropdown">
+											<span class="dropdown_helper">
+												<span class="dropdown_arrow"><span></span></span>
+												<span class="dropdown_content">
+												<!--<span class="dropdown_content" data-bind="customScrollbar: {x: false}">-->
+													<!--<span class="scroll-inner"></span>-->
+												</span>
+											</span>
+										</span>
+									</span>
+									<input class="date input" type="text" spellcheck="false"  readonly="readonly" data-bind="initDom: endDom" />
+									<!--<input class="time input" type="text" spellcheck="false"  data-bind="value: endTime, visible: !allDay()" />-->
+									<span class="custom_selector" data-bind="visible: !allDay(), customSelect: {'control': false, 'selected': 'selected', 'input': true, 'options': timeOptions(), 'timeOptions': timeOptions, value: endTime, optionsText: 'text', optionsValue: 'value'}">
+										<input class="value time input" spellcheck="false"  type="text" data-bind="value: endTime" />
+										<span class="dropdown">
+											<span class="dropdown_helper">
+												<span class="dropdown_arrow"><span></span></span>
+												<span class="dropdown_content"></span>
+											</span>
+										</span>
+									</span>
+								</div>
+
+								<div class="row allday">
+									<label data-bind="css: {'checked': allDay}" class="custom_checkbox">
+										<span class="icon"></span>
+										<input type="checkbox" data-bind="checked: allDay" id="allday">
+									</label>
+									<label for="allday" data-i18n="CALENDAR/EVENT_ALLDAY" data-bind="i18n: 'text'"></label>
+								</div>
+
+								<div class="repeat_panel" data-bind="visible: allEvents() === Enums.CalendarEditRecurrenceEvent.AllEvents">
+									<div class="row" data-bind="visible: true">
+										<span class="label" data-i18n="CALENDAR/EVENT_REPEAT_REPEATS" data-bind="i18n: 'text'"></span>
+										<select class="value input" data-bind="options: repeatPeriodOptions, optionsText: 'label', optionsValue: 'value', value: repeatPeriod"></select>
+
+										<span class="" data-bind="visible: repeatPeriod() === Enums.CalendarRepeatPeriod.Weekly">
+											<span class="label" data-i18n="CALENDAR/EVENT_REPEAT_WEEKLY_DAYS" data-bind="i18n: 'text'"></span>
+											
+											<span class="custom_switcher">
+												<label data-bind="css: {'checked': weekMO}">
+													<span class="text" data-i18n="CALENDAR/EVENT_REPEAT_MON" data-bind="i18n: 'text'"></span>
+													<input type="checkbox" data-bind="checked: weekMO" />
+												</label>
+
+												<label data-bind="css: {'checked': weekTU}">
+													<span class="text" data-i18n="CALENDAR/EVENT_REPEAT_TUE" data-bind="i18n: 'text'"></span>
+													<input type="checkbox" data-bind="checked: weekTU" />
+												</label>
+
+												<label data-bind="css: {'checked': weekWE}">
+													<span class="text" data-i18n="CALENDAR/EVENT_REPEAT_WED" data-bind="i18n: 'text'"></span>
+													<input type="checkbox" data-bind="checked: weekWE" />
+												</label>
+												
+												<label data-bind="css: {'checked': weekTH}">
+													<span class="text" data-i18n="CALENDAR/EVENT_REPEAT_THU" data-bind="i18n: 'text'"></span>
+													<input type="checkbox" data-bind="checked: weekTH" />
+												</label>
+
+												<label data-bind="css: {'checked': weekFR}">
+													<span class="text" data-i18n="CALENDAR/EVENT_REPEAT_FRI" data-bind="i18n: 'text'"></span>
+													<input type="checkbox" data-bind="checked: weekFR" />
+												</label>
+
+												<label data-bind="css: {'checked': weekSA}">
+													<span class="text" data-i18n="CALENDAR/EVENT_REPEAT_SAT" data-bind="i18n: 'text'"></span>
+													<input type="checkbox" data-bind="checked: weekSA" />
+												</label>
+
+												<label data-bind="css: {'checked': weekSU}">
+													<span class="text" data-i18n="CALENDAR/EVENT_REPEAT_SUN" data-bind="i18n: 'text'"></span>
+													<input type="checkbox" data-bind="checked: weekSU" />
+												</label>
+											</span>
+										</span>
+
+										<span data-bind="visible: repeatPeriod() === Enums.CalendarRepeatPeriod.Monthly && !allDay()">
+											<span class="value" data-bind="text: monthlyDayText()"></span>
+										</span>
+
+										<span data-bind="visible: repeatPeriod() === Enums.CalendarRepeatPeriod.Yearly && !allDay()">
+											<span class="value" data-bind="text: yearlyDayText()"></span>
+										</span>
+
+										<span data-bind="css: {'row_weeks': repeatPeriod() === Enums.CalendarRepeatPeriod.Weekly}">
+											<span data-bind="visible: repeatPeriod() === Enums.CalendarRepeatPeriod.Weekly">
+												<span class="label" data-i18n="CALENDAR/EVENT_REPEAT_EVERY" data-bind="i18n: 'text'"></span>
+												<select class="value input" data-bind="options: repeatWeekIntervalOptions, value: repeatInterval"></select>
+												<span class="label" data-i18n="CALENDAR/EVENT_REPEAT_WEEK" data-bind="i18n: 'text'"></span>
+											</span>
+											<span data-bind="visible: repeatPeriod() === Enums.CalendarRepeatPeriod.Daily || repeatPeriod() === Enums.CalendarRepeatPeriod.Weekly">
+												<span class="label" data-i18n="CALENDAR/EVENT_REPEAT_UNTIL" data-bind="i18n: 'text'"></span>
+												<input class="date input" spellcheck="false" type="text" readonly="readonly" data-bind="initDom: repeatEndDom, value: repeatEndDate" />
+											</span>
+										</span>
+									</div>
+								</div>
+							</div>
+							<span class="form_arrow"></span>
+						</div>
+					</div>
+				</div>
+
+				<div class="fieldset main">
+					<div class="row name" data-bind="css: {'focused': subjectFocus(), 'filled': subject().length > 0}">
+						<label for="event_subject" class="label placeholder" data-i18n="CALENDAR/EVENT_SUBJECT" data-bind="i18n: 'text'"></label>
+						<div class="value scrollable_field" data-bind="customScrollbar: {x: false}">
+							<div class="scroll-inner">
+								<span class="input" data-bind="text: subject, visible: !isEditable()"></span>
+								<textarea id="event_subject" class="input autosize" data-bind="autosize: {minHeight: 40, autosizeTrigger: autosizeTrigger, scrollableHeight: 110}, customBind: {onKeydown: onKeydown, onKeyup: onKeyup, onPaste: onPaste, valueObserver: subject}, value: subject, valueUpdate: 'afterkeydown', hasfocus: subjectFocus, visible: isEditable()"></textarea>
+							</div>
+						</div>
+					</div>
+					<div class="row description" data-bind="css: {'focused': descriptionFocus(), 'filled': description().length > 0}">
+						<div class="value scrollable_field" data-bind="customScrollbar: {x: false}">
+							<div class="scroll-inner">
+								<label for="event_description" class="label placeholder" data-i18n="CALENDAR/EVENT_DESCRIPTION" data-bind="i18n: 'text'"></label>
+								<span class="input" data-bind="text: description, visible: !isEditable()"></span>
+								<textarea id="event_description" class="input autosize" data-bind="autosize: {minHeight: 26, autosizeTrigger: autosizeTrigger, scrollableHeight: 150}, value: description, valueUpdate: 'afterkeydown', hasfocus: descriptionFocus, visible: isEditable()"></textarea>
+							</div>
+						</div>
+					</div>
+					<div class="row location" data-bind="css: {'focused': locationFocus(), 'filled': (location()) ? location().length : false}">
+						<div class="value scrollable_field" data-bind="customScrollbar: {x: false}">
+							<div class="scroll-inner">
+								<label for="event_location" class="label placeholder" data-i18n="CALENDAR/EVENT_LOCATION" data-bind="i18n: 'text'"></label>
+								<span class="input" data-bind="text: location, visible: !isEditable()"></span>
+								<textarea id="event_location" class="input autosize" data-bind="autosize: {minHeight: 26, autosizeTrigger: autosizeTrigger, scrollableHeight: 74}, customBind: {onKeydown: onKeydown, onKeyup: onKeyup, onPaste: onPaste, valueObserver: location}, value: location, valueUpdate: 'afterkeydown', hasfocus: locationFocus, visible: isEditable()"></textarea>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="alarms_helper" data-bind="foreach: displayedAlarms()">
+					<div></div>
+				</div>
+
+				<div class="buttons clearfix">
+					<div class="subforms">
+						<div class="alarm_form" data-bind="visible: displayedAlarms().length > 0">
+							<div class="form_content">
+								<div class="alarms" data-bind="foreach: displayedAlarms()">
+									<span class="item alarm">
+										<span class="link remove" data-i18n="CALENDAR/EVENT_REMINDER_REMOVE" data-bind="i18n: 'text', visible: $parent.isEditableReminders(), click: function(oItem) {$parent.removeAlarm(oItem);}"></span>
+										<!-- ko foreach: $parent.phaseArray -->
+											<!-- ko template: {name: function () { return $parents[1].displayReminderPart($data, 'Calendar_CalendarReminderPart'); } } --><!-- /ko -->
+										<!-- /ko -->
+									</span>
+								</div>
+								<span class="link" data-i18n="CALENDAR/EVENT_REMINDER_NEW_ALARM" data-bind="i18n: 'text', click: addAlarm, visible: isEditableReminders() && (displayedAlarms().length < 5)"></span>
+							</div>
+							<span class="form_arrow"></span>
+						</div>
+					</div>
+
+					<div class="additional_buttons">
+						<span class="item alarm" data-bind="click: isEditableReminders() ? addFirstAlarm : '', 
+								css: {'selected': displayedAlarms().length > 0, 'readonly': !isEditableReminders()},
+								customTooltip: 'CALENDAR/EVENT_REMINDER', visible: isEditableReminders()">
+							<span class="icon"></span>
+							<span class="text" data-i18n="CALENDAR/EVENT_REMINDER" data-bind="i18n: 'text'"></span>
+						</span>
+						<span class="item guests" data-bind="visible: calendarAppointments, click: isEditable() ? showGuests : '', 
+								css: {'selected': guestsEdit() || attendees().length > 0, 'readonly': !isEditable()},
+								customTooltip: 'CALENDAR/EVENT_GUESTS', visible: isEditableReminders()">
+							<span class="icon"></span>
+							<span class="text" data-i18n="CALENDAR/EVENT_GUESTS" data-bind="i18n: 'text'"></span>
+							<span class="arrow"></span>
+						</span>
+					</div>
+					<span class="button save" data-i18n="CALENDAR/BUTTON_SAVE" data-bind="i18n: 'text', click: onSaveClick, visible: isEditable() || isEditableReminders()"></span>
+					<span class="link remove" data-i18n="CALENDAR/LINK_REMOVE" data-bind="i18n: 'text', click: onDeleteClick, visible: isEditForm() && isEditable()"></span>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+</div>
+<span class="helper"></span>

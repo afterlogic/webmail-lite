@@ -1,0 +1,290 @@
+<!-- ko if: $root.mobileApp -->
+<div class="toolbar">
+	<span class="content">
+		<span class="item close" data-bind="click: function () {$root.backToContactList();}">
+			<span class="icon"></span>
+			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_BACK_TO_LIST"></span>
+		</span>
+		<span class="item send_files command" data-bind="visible: hasEmails, click: sendThisContact">
+			<span class="icon"></span>
+			<span class="text" data-i18n="CONTACTS/BUTTON_SEND_THIS_CONTACT" data-bind="i18n: 'text'"></span>
+		</span>
+		<a class="item new_message command" href="javascript: void(0)" data-bind="visible: hasEmails, attr: {href: sendMailLink}, click: sendMail">
+			<span class="icon"></span>
+			<span class="text" data-i18n="CONTACTS/BUTTON_EMAIL_TO_THIS_CONTACT" data-bind="i18n: 'text'"></span>
+		</a>
+	</span>
+</div>
+<!-- /ko -->
+
+<div class="panel_top">
+	<!-- ko if: !$root.mobileApp -->
+	<div class="toolbar">
+		<span class="content">
+			<a class="item mail_to" href="javascript: void(0)" data-bind="visible: hasEmails, click: sendThisContact">
+				<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/BUTTON_SEND_THIS_CONTACT"></span>
+			</a>
+			<a class="item mail_to" href="javascript: void(0)" data-bind="visible: hasEmails, attr: {href: sendMailLink}, click: sendMail">
+				<span class="icon"></span>
+				<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/BUTTON_EMAIL_TO_THIS_CONTACT"></span>
+			</a>
+		</span>
+	</div>
+	<!-- /ko -->
+	<h2 class="title" data-bind="visibility: '' !== displayName(), text: displayName()"></h2>
+	<a class="item mail_to_title" href="javascript: void(0)" data-bind="attr: {href: sendMailLink}, click: sendMail, customTooltip: 'CONTACTS/BUTTON_EMAIL_TO_THIS_CONTACT'">
+		<span class="title email" data-bind="text: email()"></span>
+	</a>
+</div>
+<div class="decor"></div>
+<div class="panel_center">
+	<div class="buttons" data-bind="visible: !readOnly()">
+		<span class="button edit" data-bind="click: function () { edited(true); }">
+			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/BUTTON_EDIT_CONTACT"></span>
+		</span>
+	</div>
+	<div data-bind="customScrollbar: {}">
+		<div class="contact_content scroll-inner">
+			<div class="contact_data_groups">
+				<div class="fields">
+					<div class="fieldset">
+						<div class="row" data-bind="visible: '' !== firstName()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_FIRST_NAME"></span>:
+							</span>
+							<span class="value" data-bind="text: firstName"></span>
+						</div>
+						<div class="row" data-bind="visible: '' !== lastName()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_LAST_NAME"></span>:
+							</span>
+							<span class="value" data-bind="text: lastName"></span>
+						</div>
+						<div class="row" data-bind="visible: '' !== skype()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_SKYPE"></span>:
+							</span>
+							<a href="javascript: void(0)" data-bind="attr: {href: 'skype:' + skype()}">
+								<span class="value" data-bind="text: skype"></span>
+							</a>
+						</div>
+						<div class="row" data-bind="visible: '' !== facebook()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_FACEBOOK"></span>:
+							</span>
+
+							<a href="javascript: void(0)" target="_blank" data-bind="visible: isStrLink(facebook()), attr: {href: facebook}">
+								<span class="value" data-bind="text: facebook"></span>
+							</a>
+							<span class="value" data-bind="visible: !isStrLink(facebook()), text: facebook"></span>
+
+						</div>
+					</div>
+				</div>
+
+				<div class="fields basic" data-bind="visible: !personalIsEmpty()">
+					<h2 class="subtitle" data-bind="i18n: 'text'" data-i18n="CONTACTS/HEADER_BASIC_INFO"></h2>
+
+					<div class="fieldset">
+						<div class="row email" data-bind="visible: '' !== personalEmail()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_PERSONAL_EMAIL"></span>:
+							</span>
+							<span class="value" data-bind="text: personalEmail"></span>
+						</div>
+					</div>
+
+					<div class="fieldset address"
+						data-bind="visible: personalStreetAddress() || personalCity() || personalState() || personalCountry() || personalZipCode()">
+						<span class="label address" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_ADDRESS"></span>
+
+						<div class="row street" data-bind="visible: '' !== personalStreetAddress()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_STREET_ADDRESS"></span>:
+							</span>
+							<span class="value" data-bind="text: personalStreetAddress"></span>
+						</div>
+						<div class="row city" data-bind="visible: '' !== personalCity()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_CITY"></span>:
+							</span>
+							<span class="value" data-bind="text: personalCity"></span>
+						</div>
+						<div class="row state" data-bind="visible: '' !== personalState()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_STATE_PROVINCE"></span>:
+							</span>
+							<span class="value" data-bind="text: personalState"></span>
+						</div>
+						<div class="row country" data-bind="visible: '' !== personalCountry()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_COUNTRY_REGION"></span>:
+							</span>
+							<span class="value" data-bind="text: personalCountry"></span>
+						</div>
+						<div class="row zipcode" data-bind="visible: '' !== personalZipCode()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_ZIP_CODE"></span>:
+							</span>
+							<span class="value" data-bind="text: personalZipCode"></span>
+						</div>
+					</div>
+
+					<div class="fieldset">
+						<div class="row webpage" data-bind="visible: '' !== personalWeb()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_WEB_PAGE"></span>:
+							</span>
+							<span class="value" data-bind="text: personalWeb"></span>
+						</div>
+						<div class="row fax" data-bind="visible: '' !== personalFax()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_FAX"></span>:
+							</span>
+							<span class="value" data-bind="text: personalFax"></span>
+						</div>
+						<div class="row phone" data-bind="visible: '' !== personalPhone()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_PHONE"></span>:
+							</span>
+							<span class="value" data-bind="text: personalPhone"></span>
+							<span class="link call" data-i18n="call" data-bind="i18n: 'text', click: function() { onCallClick(personalPhone()); }, visible: voiceApp"></span>
+						</div>
+						<div class="row mobile" data-bind="visible: '' !== personalMobile()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_MOBILE"></span>:
+							</span>
+							<span class="value" data-bind="text: personalMobile"></span>
+							<span class="link call" data-i18n="call" data-bind="i18n: 'text', click: function() { onCallClick(personalMobile()); }, visible: voiceApp"></span>
+						</div>
+					</div>
+				</div>
+
+				<div class="fields business" data-bind="visible: !businessIsEmpty()">
+					<h2 class="subtitle" data-bind="i18n: 'text'" data-i18n="CONTACTS/HEADER_BUSINESS_INFO"></h2>
+
+					<div class="fieldset">
+						<div class="row email" data-bind="visible: '' !== businessEmail()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_BUSINESS_EMAIL"></span>:
+							</span>
+							<span class="value" data-bind="text: businessEmail"></span>
+						</div>
+						<div class="row company" data-bind="visible: '' !== businessCompany()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_COMPANY"></span>:
+							</span>
+							<span class="value" data-bind="text: businessCompany"></span>
+						</div>
+						<div class="row department" data-bind="visible: '' !== businessDepartment()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_DEPARTMENT"></span>:
+							</span>
+							<span class="value" data-bind="text: businessDepartment"></span>
+						</div>
+						<div class="row job" data-bind="visible: '' !== businessJob()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_JOB_TITLE"></span>:
+							</span>
+							<span class="value" data-bind="text: businessJob"></span>
+						</div>
+						<div class="row office" data-bind="visible: '' !== businessOffice()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_OFFICE"></span>:
+							</span>
+							<span class="value" data-bind="text: businessOffice"></span>
+						</div>
+						<div class="row street" data-bind="visible: '' !== businessStreetAddress()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_STREET_ADDRESS"></span>:
+							</span>
+							<span class="value" data-bind="text: businessStreetAddress"></span>
+						</div>
+						<div class="row city" data-bind="visible: '' !== businessCity()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_CITY"></span>:
+							</span>
+							<span class="value" data-bind="text: businessCity"></span>
+						</div>
+						<div class="row state" data-bind="visible: '' !== businessState()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_STATE_PROVINCE"></span>:
+							</span>
+							<span class="value" data-bind="text: businessState"></span>
+						</div>
+						<div class="row zipcode" data-bind="visible: '' !== businessZipCode()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_ZIP_CODE"></span>:
+							</span>
+							<span class="value" data-bind="text: businessZipCode"></span>
+						</div>
+						<div class="row country" data-bind="visible: '' !== businessCountry()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_COUNTRY_REGION"></span>:
+							</span>
+							<span class="value" data-bind="text: businessCountry"></span>
+						</div>
+						<div class="row webpage" data-bind="visible: '' !== businessWeb()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_WEB_PAGE"></span>:
+							</span>
+							<span class="value" data-bind="text: businessWeb"></span>
+						</div>
+						<div class="row fax" data-bind="visible: '' !== businessFax()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_FAX"></span>:
+							</span>
+							<span class="value" data-bind="text: businessFax"></span>
+						</div>
+						<div class="row phone" data-bind="visible: '' !== businessPhone()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_PHONE"></span>:
+							</span>
+							<span class="value" data-bind="text: businessPhone"></span>
+							<span class="link call" data-i18n="call" data-bind="i18n: 'text', click: function() { onCallClick(businessPhone()); }, visible: voiceApp"></span>
+						</div>
+					</div>
+				</div>
+
+				<div class="fields other" data-bind="visible: !otherIsEmpty()">
+					<h2 class="subtitle" data-bind="i18n: 'text'" data-i18n="CONTACTS/HEADER_OTHER_INFO"></h2>
+
+					<div class="fieldset">
+						<div class="row birthday" data-bind="visible: !birthdayIsEmpty()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_BIRTHDAY"></span>:
+							</span>
+							<span class="value">
+								<span data-bind="text: otherBirthday"></span>
+							</span>
+						</div>
+						<div class="row email" data-bind="visible: '' !== otherEmail()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_OTHER_EMAIL"></span>:
+							</span>
+							<span class="value" data-bind="text: otherEmail"></span>
+						</div>
+						<div class="row notes" data-bind="visible: '' !== otherNotes()">
+							<span class="label">
+								<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_NOTES"></span>:
+							</span>
+							<span class="value" data-bind="text: otherNotes"></span>
+						</div>
+					</div>
+				</div>
+
+				<div class="fields groups" data-bind="visible: !global() && 0 < $root.groupsInContactView($data).length">
+					<h2 class="subtitle" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_CONTACTS_GROUPS"></h2>
+					<div class="fieldset">
+						<div class="row" data-bind="foreach: $root.groupsInContactView($data)"><span
+							data-bind="visible: $index() !== 0">,</span>
+						<span class="link" data-bind="text: Name(), click: function () { $root.onViewGroupClick($data); }"></span></div>
+					</div>
+				</div>
+			</div>
+			<div class="fields_switcher">
+				<span class="link" data-bind="visible: hasEmails, i18n: 'text', click: viewAllMails" data-i18n="CONTACTS/BUTTON_SEE_EMAILS_WITH_THIS_CONTACTS"></span>
+			</div>
+		</div>
+	</div>
+</div>

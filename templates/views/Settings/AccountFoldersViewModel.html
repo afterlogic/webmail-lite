@@ -1,0 +1,36 @@
+<div class="fields">
+	<div class="fieldset">
+		<div class="folders items_list">
+			
+			<!-- ko if: !showMovedWithMouseItem() -->
+				<!-- ko template: {name: 'Settings_AccountFolderItem', foreach: collection} --><!-- /ko -->
+			<!-- /ko -->
+			
+			<!-- ko if: showMovedWithMouseItem() -->
+			<div data-bind="sortable: {data: collection, connectClass: 'first_sortable_container', 
+				 afterMove: $root.afterSortableFolderMoveBinded, options: {axis: 'y', revert: true}}">
+				<div class="item canSelect canDrag" data-bind="visible: !virtual(), 
+					 template: { name: 'Settings_AccountFolderItemMovedWithMouse'},
+					 css: {'canSubscribe': canSubscribe, 'canRename': canRename, 'canDelete': canDelete}"></div>
+			</div>
+			<!-- /ko -->
+			
+			<div class="item canSelect total">
+				<span class="title">
+					<span class="count" data-bind="text: totalMessageCount"></span>
+					<span class="name">
+						<span class="text" data-i18n="SETTINGS/ACCOUNT_FOLDERS_TOTAL" data-bind="i18n: 'text'"></span>
+					</span>
+				</span>
+			</div>
+		</div>
+
+		<div class="hint" data-i18n="SETTINGS/ACCOUNT_FOLDERS_INFO_DELETING_NONEMPTY_FOLDERS" data-bind="i18n: 'text', css: {'highlight': highlighted}"></div>
+		<div class="hint" data-i18n="SETTINGS/ACCOUNT_FOLDERS_INFO_SETUP_SPECIAL_FOLDERS" data-bind="i18n: 'text'"></div>
+		<div class="buttons">
+			<span class="button" data-i18n="SETTINGS/ACCOUNT_FOLDERS_BUTTON_ADD_NEW_FOLDER" data-bind="i18n: 'text', command: addNewFolderCommand"></span>
+			<span class="button" data-i18n="SETTINGS/ACCOUNT_FOLDERS_BUTTON_SETUP_SPECIAL_FOLDERS" data-bind="i18n: 'text', command: systemFoldersCommand"></span>
+		</div>
+		{%INCLUDE-START/Account-Folders-After-Buttons/INCLUDE-END%}
+	</div>
+</div>

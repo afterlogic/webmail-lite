@@ -1,0 +1,27 @@
+<div class="item dragHandle folder" draggable="true" 
+	data-bind="
+		event: ($parent.isPopup) ? null : { 'dragstart': eventDragStart },
+		draggablePlace: $parent.dragAndDropHelperBinded,
+		draggableDragStartCallback: function() {if (!$parent.isPopup) $root.dragover(true);},
+		draggableDragStopCallback: function() {if (!$parent.isPopup) $root.dragover(false);},
+		css: {'selected': selected(), 
+			  'checked': checked(),
+			  'deleted': deleted(),
+			  'incomplete': !uploaded(),
+			  'shared': shared() && !$root.isPublic
+		}"
+>
+	<div class="item_content ui-droppable" data-bind="css: {'recivedAnim': recivedAnim()}, droppable: {valueFunc: function (oEvent, oUi) {$root.filesDrop($data, oEvent, oUi);}}">
+		<div class="image">
+			<span class="icon animGoal"></span>
+		</div>
+		<span class="shared_icon" data-bind="click: function (oItem) { $root.onShareIconClick(oItem); }"></span>						
+		<span class="name" data-bind="text: fileName(), visible: !edited()"></span>
+		<input type="text" class="input" maxlength="30" data-bind="value: nameForEdit(), visible: edited, hasfocus: edited" />
+		<span class="progress" data-bind="visible: !uploaded()">
+			<span data-bind="style: {'width': progressPercent() + '%'}"></span>
+			<span class="percent" data-bind="text: progressPercent() + '%'"></span>
+		</span>
+		<div class="separator"></div>
+	</div>
+</div>

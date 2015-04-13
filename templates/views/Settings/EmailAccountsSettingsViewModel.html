@@ -1,0 +1,138 @@
+<div class="panel_top">
+	<div class="buttons" data-bind="visible: allowUsersAddNewAccounts">
+		<span class="button special add_new_account" data-i18n="SETTINGS/ACCOUNTS_BUTTON_ADD_NEW_ACCOUNT" data-bind="i18n: 'text', click: onAccountAdd"></span>
+	</div>
+	<h2 class="title" data-bind="text: title"></h2>
+</div>
+
+<div class="panel_center">
+	<div>
+		<div class="items_list accounts_list">
+			<div data-bind="foreach: accounts">
+				<div class="item account" data-bind="css: {'selected': id() === $parent.editedAccountId() && !$parent.editedFetcherId() && !$parent.editedIdentityId()},  click: function () {$parent.onChangeAccount(id());}">
+					<span class="link fetcher" data-i18n="SETTINGS/ACCOUNTS_LINK_ADD_IDENTITY" data-bind="i18n: 'text', visible: $parent.isAllowIdentities, click: function (oModel, oEv) {$parent.onIdentityAdd(id(), oEv);}"></span>
+					<span class="link fetcher" data-i18n="SETTINGS/ACCOUNTS_LINK_ADD_FETCHER" data-bind="i18n: 'text', visible: (isDefault() && $parent.isAllowFetcher), click: $parent.onFetcherAdd"></span>
+					<span class="title" data-bind="text: email()"></span>
+				</div>
+
+				<!-- ko foreach: identities -->
+				<div class="item fetcher" data-bind="css: {'selected': id() === $parents[1].editedIdentityId()}, click: function () {$parents[1].onChangeIdentity($data);}">
+					<span class="icon fetcher"></span>
+					<span class="label" data-i18n="SETTINGS/ACCOUNTS_IDENTITY_TEXT" data-bind="i18n: 'text'"></span>
+					<span class="title" data-bind="text: fullEmail"></span>
+					<span class="icon loyal" data-bind="visible: isDefault() && $parent.identities().length > 1">√</span>
+				</div>
+				<!-- /ko -->
+				
+				<!-- ko if: fetchers() -->
+				<!-- ko foreach: fetchers().collection -->
+					<div class="item fetcher" data-bind="css: {'selected': id() === $parents[1].editedFetcherId()}, click: function () {$parents[1].onChangeFetcher($data.id());}">
+						<span class="icon fetcher"></span>
+						<span class="label" data-i18n="SETTINGS/ACCOUNT_FETCHER_FETCH_FROM" data-bind="i18n: 'text'"></span>
+						<span class="title" data-bind="text: incomingMailServer() + ' / ' + incomingMailLogin()"></span>
+						<span class="info" data-i18n="SETTINGS/ACCOUNT_FETCHER_FETCHING" data-bind="i18n: 'text', visible: isLocked()"></span>
+					</div>
+				<!-- /ko -->
+				<!-- /ko -->
+
+			</div>
+		</div>
+
+		<div class="tabs">
+
+			<div class="shortcuts">
+				<div data-bind="visible: !editedFetcherId() && !editedIdentityId()">
+					<span class="item properties" data-bind="css: {'selected': tab() === Enums.AccountSettingsTab.Properties}">
+						<a href="javascript: void(0);" data-i18n="SETTINGS/ACCOUNTS_TAB_PROPERTIES"
+						   data-bind="i18n: 'text', click: function () {onTabClick(Enums.AccountSettingsTab.Properties);}"></a>
+					</span>
+					<span class="item folders" data-bind="css: {'selected': tab() === Enums.AccountSettingsTab.Folders}">
+						<a href="javascript: void(0);" data-i18n="SETTINGS/ACCOUNTS_TAB_MANAGE_FOLDERS"
+						   data-bind="i18n: 'text', click: function () {onTabClick(Enums.AccountSettingsTab.Folders);}"></a>
+					</span>
+					<span class="item forward" data-bind="visible: allowForwardExtension, css: {'selected': tab() === Enums.AccountSettingsTab.Forward}">
+						<a href="javascript: void(0);" data-i18n="SETTINGS/ACCOUNTS_TAB_FORWARD"
+						   data-bind="i18n: 'text', click: function () {onTabClick(Enums.AccountSettingsTab.Forward);}"></a>
+					</span>
+					<span class="item autoresponder" data-bind="visible: allowAutoresponderExtension, css: {'selected': tab() === Enums.AccountSettingsTab.Autoresponder}">
+						<a href="javascript: void(0);" data-i18n="SETTINGS/ACCOUNTS_TAB_AUTORESPONDER"
+						   data-bind="i18n: 'text', click: function () {onTabClick(Enums.AccountSettingsTab.Autoresponder);}"></a>
+					</span>
+					<span class="item filters" data-bind="visible: allowSieveFiltersExtension, css: {'selected': tab() === Enums.AccountSettingsTab.Filters}">
+						<a href="javascript: void(0);" data-i18n="SETTINGS/ACCOUNTS_TAB_FILTERS"
+						   data-bind="i18n: 'text', click: function () {onTabClick(Enums.AccountSettingsTab.Filters);}"></a>
+					</span>
+					<span class="item signature" data-bind="css: {'selected': tab() === Enums.AccountSettingsTab.Signature}, visible: !isAllowIdentities">
+						<a href="javascript: void(0);" data-i18n="SETTINGS/ACCOUNTS_TAB_SIGNATURE"
+						   data-bind="i18n: 'text', click: function () {onTabClick(Enums.AccountSettingsTab.Signature);}"></a>
+					</span>
+				</div>
+
+				<div data-bind="visible: editedFetcherId()">
+					<span class="item pop3" data-bind="css: {'selected': tab() === Enums.AccountSettingsTab.FetcherInc}">
+						<a href="javascript: void(0);" data-i18n="SETTINGS/ACCOUNT_FETCHER_INCOMING_SETTINGS"
+						   data-bind="i18n: 'text', click: function () {onTabClick(Enums.AccountSettingsTab.FetcherInc);}"></a>
+					</span>
+					<span class="item smtp" data-bind="css: {'selected': tab() === Enums.AccountSettingsTab.FetcherOut}">
+						<a href="javascript: void(0);" data-i18n="SETTINGS/ACCOUNT_FETCHER_OUTGOING_SETTINGS"
+						   data-bind="i18n: 'text', click: function () {onTabClick(Enums.AccountSettingsTab.FetcherOut);}"></a>
+					</span>
+					<span class="item signature" data-bind="css: {'selected': tab() === Enums.AccountSettingsTab.FetcherSig}">
+						<a href="javascript: void(0);" data-i18n="SETTINGS/ACCOUNTS_TAB_SIGNATURE"
+						   data-bind="i18n: 'text', click: function () {onTabClick(Enums.AccountSettingsTab.FetcherSig);}"></a>
+					</span>
+				</div>
+				
+				<div data-bind="visible: editedIdentityId()">
+					<span class="item properties" data-bind="css: {'selected': tab() === Enums.AccountSettingsTab.IdentityProperties}">
+						<a href="javascript: void(0);" data-i18n="SETTINGS/ACCOUNTS_TAB_PROPERTIES"
+						   data-bind="i18n: 'text', click: function () {onTabClick(Enums.AccountSettingsTab.IdentityProperties);}"></a>
+					</span>
+					<span class="item signature" data-bind="css: {'selected': tab() === Enums.AccountSettingsTab.IdentitySignature}">
+						<a href="javascript: void(0);" data-i18n="SETTINGS/ACCOUNTS_TAB_SIGNATURE"
+						   data-bind="i18n: 'text', click: function () {onTabClick(Enums.AccountSettingsTab.IdentitySignature);}"></a>
+					</span>
+				</div>
+			</div>
+
+			<div class="tabs_container">
+				<div class="tab properties" data-bind="visible: tab() === Enums.AccountSettingsTab.Properties">
+					<div data-bind="template: {name: 'Settings_AccountPropertiesViewModel', data: oAccountProperties}"></div>
+				</div>
+				<div class="tab signature" data-bind="visible: tab() === Enums.AccountSettingsTab.Signature">
+					<div data-bind="template: {name: 'Settings_AccountSignatureViewModel', data: oAccountSignature}"></div>
+				</div>
+				<div class="tab filters" data-bind="visible: tab() === Enums.AccountSettingsTab.Filters">
+					<div data-bind="template: {name: 'Settings_AccountFiltersViewModel', data: oAccountFilters}"></div>
+				</div>
+				<div class="tab autoresponder" data-bind="visible: tab() === Enums.AccountSettingsTab.Autoresponder">
+					<div data-bind="template: {name: 'Settings_AccountAutoresponderViewModel', data: oAccountAutoresponder}"></div>
+				</div>
+				<div class="tab forward" data-bind="visible: tab() === Enums.AccountSettingsTab.Forward">
+					<div data-bind="template: {name: 'Settings_AccountForwardViewModel', data: oAccountForward}"></div>
+				</div>
+				<div class="tab folders" data-bind="visible: tab() === Enums.AccountSettingsTab.Folders">
+					<div data-bind="template: {name: 'Settings_AccountFoldersViewModel', data: oAccountFolders}"></div>
+				</div>
+
+				<div class="tab pop3" data-bind="visible: tab() === Enums.AccountSettingsTab.FetcherInc">
+					<div data-bind="template: {name: 'Settings_FetcherIncomingViewModel', data: oFetcherIncoming}"></div>
+				</div>
+				<div class="tab smtp" data-bind="visible: tab() === Enums.AccountSettingsTab.FetcherOut">
+					<div data-bind="template: {name: 'Settings_FetcherOutgoingViewModel', data: oFetcherOutgoing}"></div>
+				</div>
+				<div class="tab signature" data-bind="visible: tab() === Enums.AccountSettingsTab.FetcherSig">
+					<div data-bind="template: {name: 'Settings_AccountSignatureViewModel', data: oFetcherSignature}"></div>
+				</div>
+				
+				<div class="tab properties" data-bind="visible: tab() === Enums.AccountSettingsTab.IdentityProperties">
+					<div data-bind="template: {name: 'Settings_IdentityPropertiesViewModel', data: oIdentityProperties}"></div>
+				</div>
+				<div class="tab signature" data-bind="visible: tab() === Enums.AccountSettingsTab.IdentitySignature">
+					<div data-bind="template: {name: 'Settings_AccountSignatureViewModel', data: oIdentityProperties}"></div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>
