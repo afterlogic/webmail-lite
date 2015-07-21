@@ -1,0 +1,49 @@
+<div class="item dragHandle" data-bind="css: {
+		'unseen': !seen(), 'selected': selected(), 'checked': checked(),
+		'forwarded': forwarded(), 'answered': answered(), 'deleted': deleted() || threadHideAnimation(),
+		'nosubject': emptySubject(),
+		'threaded':  threadPart(),
+		'show': threadShowAnimation()
+	}">
+	<div class="item_content">
+		<span class="controls">
+<!--			<label class="custom_checkbox" data-bind="css: {'checked': checked()}">
+				<span class="icon"></span>
+				<input type="checkbox" data-bind="checked: checked" />
+			</label>-->
+			<span class="custom_checkbox" data-bind="click: function () { checked(!checked()); }, css: {'checked': checked()}">
+				<span class="icon"></span>
+			</span>
+			<span class="separator"></span>
+			<span class="flag" data-bind="css: {'flagged': flagged(), 'partial': partialFlagged()}"></span>
+		</span>
+		<span class="data">
+			<span class="size" data-bind="text: friendlySize()"></span>
+			<span class="date" data-bind="text: date"></span>
+			<span class="attachments has_attachments" data-bind="visible: hasAttachments(),
+				css: {'has_ical_attachment': showCalendarIcon(), 'has_vcard_attachment': hasVcardAttachment()}"></span>
+			<span class="marker"></span>
+			<span class="from fadeout">
+				<span data-bind="text: fromOrToText()"></span>
+				<span class="other_senders" data-bind="text: threadSendersText(), visible: threadSendersVisible()"></span>
+				<span class="plus_more_senders" data-bind="text: threadMoreSendersText(), visible: threadMoreSendersVisible()"></span>
+			</span>
+			<span class="separator"></span>
+			<span class="thread" data-bind="text: threadCount(), visible: threadCountVisible(), click: openThread, css: {'unread': threadUnreadCount() > 0}, customTooltip: threadCountHint"></span>
+			<span class="thread loading" data-i18n="MAILBOX/THREAD_LOADING" data-bind="i18n: 'text', visible: threadLoadingVisible()"></span>
+			<span class="subject fadeout">
+				<span class="importance" data-bind="visible: importance() === Enums.Importance.High"></span>
+				<span data-bind="text: subjectForDisplay()"></span>
+			</span>
+		</span>
+		<div class="separator"></div>
+	</div>
+</div>
+<!-- ko if: threadNextLoadingVisible() -->
+<div class="item threaded thread_more_messages" data-bind="css:{'show': threadShowAnimation(), 'deleted': threadHideAnimation()}">
+	<div class="item_content">
+		<span class="link" data-i18n="MAILBOX/LINK_LOAD_NEXT_THREAD_MESSAGES" data-bind="i18n: 'text', click: loadNextMessages, visible: threadNextLoadingLinkVisible()"></span>
+		<span style="color: #999999; font-size: 15px;" data-i18n="MAILBOX/THREAD_LOADING" data-bind="i18n: 'text', visible: !threadNextLoadingLinkVisible()"></span>
+	</div>
+</div>
+<!-- /ko -->

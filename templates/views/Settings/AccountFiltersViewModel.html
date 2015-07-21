@@ -1,0 +1,35 @@
+<div class="fields">
+	<div class="fieldset">
+		<div data-bind="visible: available">
+
+			<div class="hint" data-i18n="SETTINGS/ACCOUNT_FILTERS_NO_SPECIFIED" data-bind="i18n: 'text', visible: (0 === collection().length && !loading())"></div>
+			<div class="hint" data-i18n="SETTINGS/ACCOUNT_FILTERS_LOADING" data-bind="i18n: 'text', visible: (0 === collection().length && loading())"></div>
+			
+			<!-- ko foreach: collection -->
+			<div class="row filter">
+				<div class="value">
+					<span class="buttons"><span class="button" data-i18n="SETTINGS/ACCOUNT_FILTERS_REMOVE" data-bind="i18n: 'text', click: function (oFilter) { $parent.deleteFilter(oFilter); }"></span></span>
+					<div>
+						<label class="custom_checkbox" data-bind="css: {'checked': enable}">
+							<span class="icon"></span>
+							<input type="checkbox" data-bind="checked: enable" />
+						</label>
+						<!-- ko foreach: $parent.phaseArray -->
+							<!-- ko template: {name: function () { return $parents[1].displayFilterPart($data, 'Settings_AccountFilterPart'); } } --><!-- /ko -->
+						<!-- /ko -->
+					</div>
+				</div>
+			</div>
+			<!-- /ko -->
+		</div>
+	</div>
+	<div class="buttons" data-bind="visible: available() && !loading()">
+		<span class="button addlink" data-i18n="SETTINGS/ACCOUNT_FILTERS_ADD" data-bind="i18n: 'text', click: addFilter"></span>
+		<span class="button save" data-bind="click: onSaveClick">
+			<span data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', visible: !saving()"></span>
+			<span data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', visible: saving()"></span>
+		</span>
+	</div>
+</div>
+
+

@@ -1,0 +1,20 @@
+{%INCLUDE-START/Layout-Top/INCLUDE-END%}
+
+<div data-view-model="Common_InformationViewModel"></div>
+<div class="screens pub_view">
+	
+	{%INCLUDE-START/Layout-Screens-Top/INCLUDE-END%}
+
+	<div data-view-model="FileStorage_FileStorageViewModel" class="screen FileStorageLayout" style="display: none;"></div>
+
+	{%INCLUDE-START/Layout-Screens-Middle/INCLUDE-END%}
+
+	<div data-view-model="Popups_FileStorage_FolderCreatePopupViewModel" class="popup" style="display: none;"></div>
+	<div data-view-model="Popups_FileStorage_RenamePopupViewModel" class="popup" style="display: none;"></div>
+	<div data-view-model="Popups_FileStorage_SharePopupViewModel" class="popup" style="display: none;"></div>
+
+	{%INCLUDE-START/Layout-Screens-Bottom/INCLUDE-END%}
+	
+</div>
+
+{%INCLUDE-START/Layout-Bottom/INCLUDE-END%}

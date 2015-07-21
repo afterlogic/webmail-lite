@@ -1,0 +1,61 @@
+<div class="panel_top">
+	<div class="toolbar" data-bind="style: {paddingLeft: bRtl ? '' : newThreadButtonWidth()+'px', paddingRight: bRtl ? newThreadButtonWidth()+'px' : ''}">
+		<span class="content">
+			<span class="item new_request" data-bind="click: openNewThread, watchWidth: newThreadButtonWidth, style: {marginLeft: bRtl ? '' : '-' + newThreadButtonWidth()+'px', marginRight: bRtl ? '-' + newThreadButtonWidth()+'px' : ''}">
+				<span class="icon" data-bind="customTooltip: 'HELPDESK/ACTION_NEW_REQUEST'"></span>
+				<span class="text" data-bind="i18n: 'text'" data-i18n="HELPDESK/ACTION_NEW_REQUEST"></span>
+			</span>
+			<span class="search_block">
+				<span class="input" data-bind="css: {'focus': isSearchFocused}">
+					<span class="icon search" data-i18n="HEPLDESK/BUTTON_SEARCH" data-bind="click: onSearch, i18n: 'text'"></span>
+					<input class="field" type="text" spellcheck="false" data-bind="value: search, onEnter: onSearch, hasfocus: isSearchFocused" />
+				</span>
+			</span>
+			<span class="item checkmail" data-bind="command: checkCommand, checkmail: {'activeClass': 'process', 'state': checkStarted(), 'duration': 800}">
+				<span class="icon" data-bind="customTooltip: 'HELPDESK/TOOL_CHECK'"></span>
+				<span class="text" data-bind="i18n: 'text'" data-i18n="HELPDESK/TOOL_CHECK"></span>
+			</span>
+		</span>
+	</div>
+</div>
+<div class="panel_center unselectable" data-bind="customScrollbar: {x: false}">
+	<div class="threads_scroll scroll-inner">
+		<div class="items_list">
+			<span class="list_notification" data-bind="visible: isSearch()">
+				<span class="link" data-i18n="HELPDESK/LINK_CLEAR_SEARCH" data-bind="i18n: 'text', click: onClearSearch"></span>
+				<span class="description" data-bind="text: searchText"></span>
+			</span>
+			
+			<div class="items_sub_list">
+				<!-- ko template: {name: 'Helpdesk_ThreadItem', foreach: threads} --><!-- /ko -->
+				<div class="item helper"></div>
+			</div>
+			
+			<span class="list_notification" data-bind="visible: loadingList() && isEmptyList()">
+				<span class="description" data-i18n="HELPDESK/INFO_LOADING_THREAD_LIST" data-bind="i18n: 'text'" ></span>
+			</span>
+			
+			<span class="list_notification" data-bind="visible: !loadingList() && isEmptyList()">
+				<span class="description" data-bind="text: dynamicEmptyListInfo"></span>
+				<!--<img src="http://png-2.findicons.com/files/icons/2711/free_icons_for_windows8_metro/512/meditation_guru.png" alt="Mountain View" style="width:100px;height:100px">
+				<img src="http://www.clker.com/cliparts/R/7/i/R/P/3/meditation-women-grey-hi.png" alt="Mountain View" style="width:100px;height:100px">
+				<img src="http://dmc.wisc.edu/media/staff_portfolio/TanaeSwenson/content/Yoga_Meditation_Pos-410px.png" alt="Mountain View" style="width:100px;height:100px">
+				<img src="http://cahouse.org/wp-content/uploads/2013/05/meditator.png" alt="Mountain View" style="width:100px;height:100px">
+				<img src="https://d30y9cdsu7xlg0.cloudfront.net/png/29971-200.png" alt="Mountain View" style="width:100px;height:100px">
+				<img src="http://files.onset.freedom.com/ocregister/multiplier/health_trends_2015/meditation_icon_shutterstock_86172409_CROPPEDA.JPG" alt="Mountain View" style="width:100px;height:100px">
+				<img src="https://cdn1.iconfinder.com/data/icons/fitness-sport/512/yoga-512.png" alt="Mountain View" style="width:100px;height:100px">
+				<img src="http://wiki.stadt-koeln.de/mediawiki/images/schulwiki_koeln/images/3/32/Religion_icon.png" alt="Mountain View" style="width:100px;height:100px">
+				<img src="http://www.encinitas101.com/wp-content/uploads/2011/06/meditation.jpg" alt="Mountain View" style="width:100px;height:100px">
+				<img src="https://thepracticeoflivingawareness.files.wordpress.com/2013/08/meditation-icon.png" alt="Mountain View" style="width:100px;height:100px">
+				<img src="http://www.kishanshah.com/wp-content/themes/bigbangwp/images/icons/Meditation_iconColor.png" alt="Mountain View" style="width:100px;height:100px">-->
+				<span class="icon meditation">
+			</span>
+		</div>
+	</div>
+</div>
+<div class="panel_bottom unselectable">
+	<!-- ko template: {name: 'Common_PageSwitcherViewModel', data: oPageSwitcher} --><!-- /ko -->
+	<a href="javascript: void(0);" data-bind="css: {'selected': listFilter() === Enums.HelpdeskFilters.All}, click: function () { listFilter(Enums.HelpdeskFilters.All); }, i18n: 'text'" data-i18n="HELPDESK/THREADS_LIST_FILTER_ALL"></a>
+	<a href="javascript: void(0);" data-bind="css: {'selected': listFilter() === Enums.HelpdeskFilters.Open}, click: function () { listFilter(Enums.HelpdeskFilters.Open); }, i18n: 'text'" data-i18n="HELPDESK/THREADS_LIST_FILTER_OPEN"></a>
+</div>
+

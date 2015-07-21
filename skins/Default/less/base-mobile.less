@@ -1,0 +1,308 @@
+/*=== Base CSS ===*/
+html {
+	height: 100%;
+	
+	&.non-adjustable {
+		height: auto;
+		min-height: 100%;
+	}
+}
+
+body {
+	.theme-main-background();
+	font: normal 9pt Helvetica, Tahoma, Arial, sans-serif;
+	height: 100%;
+	min-height: 480px;
+    //min-width: 640px;
+	
+	html.screen-login-helpdesk &,
+	html.screen-login-langblock & {
+		min-height: 580px;
+	}
+	
+	html.screen-login-langblock.screen-login-description & {
+		min-height: 734px;
+	}
+	
+	html.non-adjustable & {
+		height: auto;
+		min-height: inherit;
+		min-height: 100%;
+		overflow: visible;
+	}
+	
+	html.non-adjustable-valign & {
+		min-height: inherit;
+	}
+}
+.pSevenMain {
+	html.non-adjustable-valign & {
+		overflow: auto;
+	}
+	height: 100%;
+	overflow: hidden;
+	position: relative;
+}
+
+.pSevenMain {
+	html.non-adjustable-valign & {
+		overflow: auto;
+	}
+	
+	height: 100%;
+	overflow: hidden;
+	position: relative;
+}
+
+//html, body,
+.scroll-inner {
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+#pSevenContent {
+	height: 100%;
+}
+.autosize {
+	overflow: hidden;
+	resize: none;
+}
+textarea {
+	resize: vertical;
+}
+label {
+	cursor: pointer;
+}
+a, .link {
+	&, &:link, &:visited {
+		color: @theme-common-link-color;
+		text-decoration: none;
+		cursor: pointer;
+	}
+	
+	&:hover {
+		color: @theme-common-link-hover-color;
+		text-decoration: underline;
+	}
+	
+	.theme-common-link();
+}
+
+*[contenteditable="true"],
+input:focus {
+	outline: none;
+}
+/*=== Common CSS ===*/
+//.panel.folders,
+//.panel.groups
+//{
+	//.panelClear();
+//}
+
+.panel.folders,
+.panel.groups,
+.panel.storages,
+.settings .folders
+{
+	.items_list_group_style();
+}
+
+.panel.folders,
+.panel.groups,
+.panel.storages {
+	.items_list .item .title .name {
+		.fadeout_text_init();
+		.fadeout_text(@theme-group-style-item-bg);
+	}
+}
+
+.panels.settings .folders
+{
+	.items_list .item .title .name {
+		.fadeout_text_init();
+		.fadeout_text(#F0F0F0);
+	}
+	
+	.items_list .item.canDrag .title:hover .name {
+		.fadeout_text(#EAEAEA);
+	}
+	
+}
+
+.folders {
+	.title .icon {
+		.iconFontInit();
+		&:before {
+			font-size: 30px;
+			display: inline-block;
+			width: 30px;
+			height: 30px;
+		}
+	}
+	.selected .title .icon {
+		&:before {
+			color: #fff;
+			text-shadow: 0 1px 0 #727272;
+		}
+	}
+	
+	.title .icon.type1 {
+		&:before {
+			content: "\e616";
+		}
+	}
+	.title .icon.type2 {
+		&:before {
+			content: "\e615";
+		}
+	}
+	.title .icon.type3 {
+		&:before {
+			content: "\e617";
+		}
+	}
+	.title .icon.type4 {
+		&:before {
+			content: "\e614";
+		}
+	}
+	.title .icon.type5 {
+		&:before {
+			content: "\e612";
+		}
+	}
+	.item .icon.type10 {
+		&:before {
+		}
+	}
+
+	.title .icon.type7,
+	.selected .title .icon.type7 {
+		&:before {
+			color: #ffb736;
+			content: "\e613";
+			margin-top: -0.1ex;
+		}
+	}
+	
+	.virtualEmpty .title .icon.type7 {
+		&:before {
+			color: #727272 !important;
+		}
+	}
+	.virtualEmpty.selected .title .icon.type7 {
+		&:before {
+			color: #fff !important;
+		}
+	}
+}
+
+.groups {
+	.title .icon {
+		.iconFontInit();
+		&:before {
+			font-size: 30px;
+			display: inline-block;
+			width: 30px;
+			height: 30px;
+		}
+	}
+	.selected .title .icon {
+		&:before {
+			color: #fff;
+			text-shadow: 0 1px 0 #727272;
+		}
+	}
+	
+	.title .icon {
+		&:before {
+			content: "\e618";
+		}
+	}
+	.title .icon.type1 {
+		&:before {
+			content: "\e618";
+		}
+	}
+	.title .icon.type2 {
+		&:before {
+			content: "\e619";
+		}
+	}
+	.title .icon.type3 {
+		&:before {
+			content: "\e629";
+		}
+	}
+}
+/*=== END Folders CSS ===*/
+
+.panel.messages,
+.panel.contacts,
+.panel.threads {
+	.customscroll-scrollbar-vertical {
+		margin-right: 6px;
+
+		html.rtl & {
+			margin-right: 0px;
+			margin-left: 6px;
+		}
+	}
+}
+
+.add_account,
+.add_fetcher,
+.add_folder,
+.folders_setup {
+	.popup_panel {
+		background: #F1F1F1 url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAACtJREFUeNo0iIEJACAAwlT8/1GPMAsaKGNMYpskAOPRdq9tWbrifpaOAAMAMvEO3ANCJPYAAAAASUVORK5CYII=") repeat 0 0;
+	}
+}
+/*=== END Popup CSS ===*/
+
+
+/*=== IE hacks ===*/
+/*=== retina displays ===*/
+.spritesX2 {
+	@media
+		only screen and (-webkit-min-device-pixel-ratio: 1.3),
+		only screen and (-moz-min-device-pixel-ratio: 1.3),
+		only screen and (~"-o-min-device-pixel-ratio: 1.3/1"),
+		only screen and (min-resolution: 1.3dppx),
+		only screen and (min-resolution: 125dpi)
+	{
+		background-image: url("images/sprites2x.png?%VERSION%");
+		background-size: 1440px 560px;
+	}
+}
+
+.loginLogoX2() {
+	
+	@media
+		only screen and (-webkit-min-device-pixel-ratio: 1.3),
+		only screen and (-moz-min-device-pixel-ratio: 1.3),
+		only screen and (~"-o-min-device-pixel-ratio: 1.3/1"),
+		only screen and (min-resolution: 1.3dppx),
+		only screen and (min-resolution: 125dpi)
+	{
+		background-image: url("images/logo2x.png?%VERSION%");
+		background-size: 124px 95px;
+	}
+}
+
+@media
+	only screen and (-webkit-min-device-pixel-ratio: 1.3),
+    only screen and (-moz-min-device-pixel-ratio: 1.3),
+    only screen and (~"-o-min-device-pixel-ratio: 1.3/1"),
+    only screen and (min-resolution: 1.3dppx),
+    only screen and (min-resolution: 125dpi)
+{
+	.file .icon,
+	.messages .items_list .item .marker,
+	.html_editor .toolbar .item .icon
+	{
+		background-image: url("images/sprites2x.png?%VERSION%");
+		background-size: 1440px 560px;
+	}
+}
+
+/*=== END IE hacks ===*/

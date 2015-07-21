@@ -1,0 +1,152 @@
+/*=== Tabsbar CSS ===*/
+.tabs_panel {
+	@fontSize: 12pt;
+	@itemTopOffset: 24px;
+    
+	//height: @theme-tabs-height;
+	//position: relative;
+	z-index: 1000;
+	float: right;
+	
+	.control {
+		display: inline-block;
+		padding: 14px;
+		position: relative;
+		z-index: 1000;
+		
+		.icon {
+			display: inline-block;
+			height: 30px;
+			width: 15px;
+		
+			.iconFontInit();
+			&:before {
+				font-size: 30px;
+				display: inline-block;
+				width: 30px;
+				height: 30px;
+				color: rgba(0,0,0, 0.5);
+				text-shadow: 0 1px 0 #FFFFFF, 0 0 0 #505050;
+			}
+			&:before {
+				content: "\e61e";
+			}
+		}
+	}
+	
+	.item {
+		display: block;
+		vertical-align: top;
+		font-size: @fontSize;
+		margin: @itemTopOffset 0px 0px 6px;
+		padding: 4px 10px;
+		line-height: 120%;
+		position: relative;
+		color: #888785;
+		text-shadow: 0px 1px 0px #fff;
+		
+		html.rtl & {
+			margin-left: 0px;
+			margin-right: 6px;
+		}
+		
+		.cssanimations &.recivedAnim {
+			border-radius: 4px;
+			.animation(highlight 0.5s linear);
+		}
+		
+		&.emails {
+			cursor: default;
+			
+			.helper.has_control {
+				padding-right: 24px;
+			}
+		}
+		
+		.text {
+			color: inherit;
+			text-decoration: none;
+			position: relative;
+			outline: none;
+			
+			&:hover {
+				color: #3d3d3d;
+				text-decoration: none;
+			}
+		}
+		
+		&.expand a,
+		&.control {
+			z-index: 1001;
+		}
+		
+		.helper {
+			visibility: hidden;
+			position: relative;
+			top: -40px;
+			display: block;
+			height: 0;
+			overflow: hidden;
+		}
+	}
+	
+	.item .helper,
+	.current {
+		font-weight: bold;
+		color: #3d3d3d;
+	}
+	
+	.settings,
+	.logout {
+		display: block;
+		
+		html.rtl & {
+		}
+	}
+	
+	.logout span {
+		cursor: pointer;
+	}
+	
+	.theme-tabsbar();
+}
+/*=== END Tabsbar CSS ===*/
+/*=== Acount menu CSS ===*/
+.tabs_panel {
+	
+	
+	.emails {
+		
+		.dropdown_helper {
+			min-width: 100%;
+		}
+
+		.dropdown_arrow {
+			display: none;
+		}
+
+		.dropdown_content {
+			color: #555;
+			background: #fff;
+			border: 1px solid #ccc;
+			padding: 30px 0px 0px 0px;
+			margin: -30px 0px 0px -2px;
+			display: block;
+			min-width: 100%;
+			border-radius: 4px;
+
+			.item {
+				margin: 0px;
+				display: block;
+				color: #555555;
+				padding: 6px 10px;
+				font-weight: normal;
+
+				&:hover {
+					background: #eee;
+				}
+			}
+		}
+	}
+}
+/*=== END Acount menu CSS ===*/

@@ -1,0 +1,18 @@
+<div class="panel_center" data-bind="customScrollbar: {x: false}">
+	<div class="scroll-inner">
+		<div class="items_list">
+			<!-- ko foreach: storages -->
+			<div class="item canSelect" data-bind="css: {'selected': storageType() === $parent.storageType()}">
+				<a href="javascript: void(0);" class="title" data-bind="
+					droppable: {valueFunc: function (oEvent, oUi) {$parent.filesDrop($data, oEvent, oUi);}},
+					click: function () { $parent.getFiles(storageType()); }">
+					<span class="name">
+						<span class="icon" data-bind="css: 'type' + storageType()"></span>
+						<span class="text" data-bind="text: displayName()"></span>
+					</span>
+				</a>
+			</div>
+			<!-- /ko -->
+		</div>
+	</div>
+</div>
