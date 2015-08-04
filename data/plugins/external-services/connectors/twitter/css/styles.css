@@ -1,0 +1,23 @@
+.login_panel .social .twitter {
+  display: inline-block;
+  height: 20px;
+  width: 75px;
+  color: #fff;
+  text-align: right;
+  cursor: pointer;
+}
+.login_panel .social .twitter .text {
+  padding: 3px 7px 2px 8px;
+  line-height: 21px;
+  vertical-align: top;
+  color: #fff;
+  text-decoration: none;
+}
+.login_panel .social .twitter {
+  background: #55acee url("?plugins/images/external-services/twitter-icon.png") 4px 3px no-repeat;
+  border: 1px solid #5399cd;
+}
+.login_panel .social .twitter .text {
+  background: #55ACEE;
+  border-left: 1px solid #5399cd;
+}

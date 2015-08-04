@@ -1,0 +1,26 @@
+<div class="mask" data-bind="click: onCancelClick"></div>
+<div class="popup_panel">
+	<span class="close" data-bind="click: onCancelClick"></span>
+	<span class="title" data-bind="style: {backgroundColor: selectedColor}, text: popupTitle()"></span>
+	<div class="fields">
+		<div class="fieldset">
+			<div class="row name" data-bind="css: {'focused': calendarNameFocus(), 'filled': (calendarName()) ? calendarName().length : false}">
+				<label for="calendar_name" class="label placeholder" data-i18n="CALENDAR/TITLE_CALENDAR_NAME" data-bind="i18n: 'text'"></label>
+				<input id="calendar_name" class="value input" type="text" spellcheck="false"  maxlength="200" data-bind="value: calendarName, hasfocus: calendarNameFocus" />
+			</div>
+			<div class="row description" data-bind="css: {'focused': calendarDescriptionFocus(), 'filled': (calendarDescription()) ? calendarDescription().length : false}">
+				<label for="calendar_description" class="label placeholder" data-i18n="CALENDAR/TITLE_CALENDAR_DESCRIPTION" data-bind="i18n: 'text'"></label>
+				<input id="calendar_description" class="value input" spellcheck="false"  type="text" maxlength="200" data-bind="value: calendarDescription, hasfocus: calendarDescriptionFocus" />
+			</div>
+		</div>
+		
+		<div class="buttons">
+			<span class="button save" data-i18n="CALENDAR/BUTTON_SAVE" data-bind="i18n: 'text', click: onSaveClick"></span>
+			<span class="colors" data-bind="foreach: colors">
+				<span class="item color_pick" data-bind="style: {backgroundColor: $data}, css: {'selected': $parent.selectedColor() === $data},
+					 click: function () {$parent.selectedColor($data)}"></span>
+			</span>
+		</div>
+	</div>
+</div>
+<span class="helper"></span>

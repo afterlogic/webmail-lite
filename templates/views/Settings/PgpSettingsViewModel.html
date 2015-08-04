@@ -1,0 +1,94 @@
+<div class="panel_top">
+	<h2 class="title" data-i18n="OPENPGP/SETTINGS_TITLE" data-bind="i18n: 'text'"></h2>
+</div>
+
+<div class="panel_center">
+	<div class="fields">
+		<div class="fieldset">
+			<div class="row">
+				<span class="value offset">
+					<label class="custom_checkbox" data-bind="css: {'checked': enableOpenPgp}">
+						<span class="icon"></span>
+						<input type="checkbox" id="enableOpenPgp" data-bind="checked: enableOpenPgp" />
+					</label>
+					<label for="enableOpenPgp" data-i18n="SETTINGS/COMMON_ENABLE_OPENPGP" data-bind="i18n: 'text'"></label>
+				</span>
+			</div>
+			<div class="row" data-bind="visible: bAllowAutoSave">
+				<span class="value offset">
+					<label class="custom_checkbox" data-bind="css: {'checked': allowAutosaveInDrafts}">
+						<span class="icon"></span>
+						<input type="checkbox" id="allowAutosaveInDrafts" data-bind="checked: allowAutosaveInDrafts" />
+					</label>
+					<label for="allowAutosaveInDrafts" data-i18n="SETTINGS/COMMON_ALLOW_AUTOSAVE" data-bind="i18n: 'text'"></label>
+				</span>
+			</div>
+			<div class="hint row" data-bind="visible: bAllowAutoSave">
+				<span class="value offset" data-bind="i18n: 'text'" data-i18n="SETTINGS/COMMON_ALLOW_AUTOSAVE_HINT"></span>
+			</div>
+			<!--<div class="row">
+				<span class="value offset">
+					<label class="custom_checkbox" data-bind="css: {'checked': autosignOutgoingEmails}">
+						<span class="icon"></span>
+						<input type="checkbox" id="autosignOutgoingEmails" data-bind="checked: autosignOutgoingEmails" />
+					</label>
+					<label for="autosignOutgoingEmails" data-i18n="SETTINGS/COMMON_OPENPGP_AUTOSIGN" data-bind="i18n: 'text'"></label>
+				</span>
+			</div>
+			<div class="hint row">
+				<span class="value offset" data-bind="i18n: 'text'" data-i18n="SETTINGS/COMMON_OPENPGP_AUTOSIGN_HINT"></span>
+			</div>-->
+		</div>
+		<div class="buttons">
+			<span class="button" data-bind="click: onSaveClick">
+				<span data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', visible: !loading()"></span>
+				<span data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', visible: loading()"></span>
+			</span>
+		</div>
+			
+		<div class="fieldset" data-bind="visible: enableOpenPgp">
+			<div class="row keys_label" data-bind="visible: pgpLoaded">
+				<span class="label" data-i18n="OPENPGP/LABEL_PUBLIC_KEYS" data-bind="i18n: 'text'"></span>
+				<span class="value" data-i18n="OPENPGP/INFO_EMPTY_PUBLIC_KEYS" data-bind="i18n: 'text', visible: publicKeys().length === 0"></span>
+			</div>
+			<div class="row folders items_list" data-bind="foreach: publicKeys">
+				<div class="item">
+					<span class="title">
+						<span class="controls">
+							<span class="button subscribe subscribed" data-bind="customTooltip: 'OPENPGP/ACTION_VIEW_KEY', click: function () { $parent.showArmor(key); }"></span>
+							<span class="button delete" data-bind="customTooltip: 'OPENPGP/ACTION_DELETE_KEY', click: function () { $parent.removeOpenPgpKey(key); }"></span>
+						</span>
+						<span class="name">
+							<span class="text" data-bind="text: user"></span>
+						</span>
+					</span>
+				</div>
+			</div>
+			<div class="row keys_label" data-bind="visible: pgpLoaded">
+				<span class="label" data-i18n="OPENPGP/LABEL_PRIVATE_KEYS" data-bind="i18n: 'text'"></span>
+				<span class="value" data-i18n="OPENPGP/INFO_EMPTY_PRIVATE_KEYS" data-bind="i18n: 'text', visible: privateKeys().length === 0"></span>
+			</div>
+			<div class="row folders items_list" data-bind="foreach: privateKeys">
+				<div class="item">
+					<span class="title">
+						<span class="controls">
+							<span class="button subscribe subscribed" data-bind="customTooltip: 'OPENPGP/ACTION_VIEW_KEY', click: function () { $parent.showArmor(key); }"></span>
+							<span class="button delete" data-bind="customTooltip: 'OPENPGP/ACTION_DELETE_KEY', click: function () { $parent.removeOpenPgpKey(key); }"></span>
+						</span>
+						<span class="name">
+							<span class="text" data-bind="text: user"></span>
+						</span>
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="buttons" data-bind="visible: enableOpenPgp">
+			<span data-bind="click: importKey" class="button">
+				<span data-bind="i18n: 'text'" data-i18n="OPENPGP/BUTTON_IMPORT_KEY"></span>
+			</span>
+			<span data-bind="click: generateNewKey" class="button">
+				<span data-bind="i18n: 'text'" data-i18n="OPENPGP/BUTTON_GENERATE_NEW_KEY"></span>
+			</span>
+		</div>
+	</div>
+</div>

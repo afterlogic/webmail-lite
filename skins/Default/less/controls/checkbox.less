@@ -1,0 +1,141 @@
+.custom_radio,
+.custom_checkbox {
+	display: inline-block;
+	vertical-align: text-bottom;
+	overflow: hidden;
+	line-height: 1;
+	margin-right: 4px;
+	cursor: pointer;
+	font-size: 0;
+	
+	html.rtl & {
+		margin-right: 0px;
+		margin-left: 4px;
+	}
+	
+	.toolbar & {
+		vertical-align: middle !important;
+	}
+	
+	&.disabled,
+	&.disabled {
+		cursor: default;
+	}
+	
+	input {
+		.opacity(0);
+
+		float: left;
+		margin-right: -13px; // equals to icon width for fix androud native brauser
+		margin-top: -30px;
+		
+		html.rtl & {
+			float: right;
+		}
+	}
+	
+	.icon {
+		display: inline-block;
+		vertical-align: top;
+		border: 1px solid #b4b5b6;
+		border-radius: 2px;
+		width: 13px !important;
+		height: 13px !important;
+		line-height: 13px !important;
+		background: #fff;
+		text-align: center;
+		
+		color: #5A6269;
+		
+		.iconFontInit();
+		&:before {
+			font-size: 10px;
+			display: inline-block;
+			vertical-align: baseline;
+			line-height: inherit;
+			
+			.toolbar & {
+				font-size: 12px !important;
+				width: 12px !important;
+				height: 12px !important;
+			}
+		}
+		
+		.disabled& {
+			color: #ccc;
+		}
+	}
+}
+
+.custom_checkbox {
+	
+	&.checked .icon {
+		&:before {
+			content: "\e61c";
+		}
+	}
+}
+
+.custom_radio {
+	
+	.icon {
+		border-radius: 50%;
+
+		&:before {
+			margin: 0 0 0 -1px;
+		}
+	}
+	
+	&.checked .icon {
+		&:before {
+			content: "\e61b";
+		}
+	}
+}
+
+.custom_switcher {
+	display: inline-block;
+	background: #fff;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	font-size: 0px;
+	
+	.text {
+		display: inline-block !important;
+		padding: 5px 5px;
+		font-size: 9pt;
+		border-right: 1px solid #ccc;
+	}
+	
+	label {
+		
+		&.checked {
+			background: #6FA8DE;
+			display: inline-block;
+			color: #fff;
+		}
+		
+		&:first-child .text {
+			padding-left: 7px;
+
+			html.rtl & {
+				padding-right: 7px;
+				border: 0px;
+			}
+		}
+		
+		&:last-child .text{
+			padding-right: 7px;
+			border: 0px;
+
+			html.rtl & {
+				padding-right: 5px;
+				border-right: 1px solid #ccc;
+			}
+		}
+	}
+	
+	input {
+		display: none;
+	}
+}

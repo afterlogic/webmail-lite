@@ -1,0 +1,11 @@
+<span class="value" data-bind="text: $parent.text, visible: !$parents[1].isEditableReminders()"></span>
+<span class="custom_selector" data-bind="visible: $parents[1].isEditableReminders(), customSelect: {'control': false, 'alarmOptions': $parents[1].alarmOptions, 'options': $parents[1].alarmOptions(), value: $parent.alarm, optionsText: 'text', optionsValue: 'value'}">
+	<span class="link value" data-bind="text: $parent.text"></span>
+	<span class="dropdown" data-bind="visible: $parents[1].isEditableReminders()">
+		<span class="dropdown_helper">
+			<span class="dropdown_arrow"><span></span></span>
+			<span class="dropdown_content">
+			</span>
+		</span>
+	</span>
+</span>

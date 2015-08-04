@@ -1,0 +1,8 @@
+<br />
+<div class="content social links"> 
+	<!-- ko foreach: servicesConnectors -->
+	<div data-bind="css: LowerName, visible: _.indexOf(Scopes, 'auth') >= 0, click: function () {$parent.externalAuthClick(LowerName);}"> 
+		<span class="text" data-i18n="PLUGIN_EXTERNAL_SERVICES/LOGIN" data-bind="i18n: 'text'"></span> 
+	</div>
+	<!-- /ko -->
+</div>

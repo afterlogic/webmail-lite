@@ -1,0 +1,46 @@
+<div class="panel_top">
+    <h2 class="title" data-i18n="AUTHENTICATION_PLUGIN/TITLE_SERVICES" data-bind="i18n: 'text'"></h2>
+</div>
+<div class="panel_center">
+    <div class="fields">
+        <div class="fieldset">
+
+            <div data-bind="visible: showButton">
+                <div class="buttons left">
+			        <span class="button" data-bind="click: onSaveClick">
+				        <span data-bind="text: enableButton"></span>
+			        </span>
+                </div>
+                <div class="hint" data-bind="text: enableButtonDescription"></div>
+            </div>
+
+            <div data-bind="visible: enableTwoAuth">
+                <div class="hint" data-i18n="AUTHENTICATION_PLUGIN/SETTINGS_DESCRIPTION" data-bind="i18n: 'text'"></div>
+                <div class="fieldgroup">
+                    <div class="subtitle margin-bottom" data-i18n="AUTHENTICATION_PLUGIN/QR_CODE" data-bind="i18n: 'text'"></div>
+                    <span class="QRCode">
+                        <img data-bind="attr: {src: QRcode}" />
+                    </span>
+                </div>
+
+                <div class="fieldgroup">
+                    <div class="subtitle margin-bottom" data-i18n="AUTHENTICATION_PLUGIN/CODE" data-bind="i18n: 'text'"></div>
+                    <span class="code" data-bind="text: code"></span>
+                </div>
+
+                <div class="fieldgroup">
+                    <div class="hint" data-i18n="AUTHENTICATION_PLUGIN/PIN_DESCRIPTION" data-bind="i18n: 'text'"></div>
+                    <span class="label pin_code" data-i18n="AUTHENTICATION_PLUGIN/LABEL" data-bind="i18n: 'text'"></span>
+                    <input id="pin" class="value input" type="text" data-bind="value: pin, onEnter: validatePin"/>
+                    <div class="buttons">
+                        <span class="button" data-bind="click: validatePin">
+				            <span data-bind="text: saveButton"></span>
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>

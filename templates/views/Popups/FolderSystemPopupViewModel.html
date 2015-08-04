@@ -1,0 +1,38 @@
+<div class="mask" data-bind="click: onCancelClick"></div>
+<div class="popup_panel">
+	<span class="close" data-bind="click: onCancelClick"></span>
+	<span class="title" data-i18n="SETTINGS/ACCOUNT_FOLDERS_SETUP_SPECIAL_FOLDERS" data-bind="i18n: 'text'"></span>
+	
+	<div class="fields">
+		<div class="hint" data-i18n="SETTINGS/ACCOUNT_FOLDERS_INFO_PREDEFINED_FOLDERS" data-bind="i18n: 'text'"></div>
+		<div class="row">
+			<span class="label" data-i18n="MAIN/FOLDER_SENT" data-bind="i18n: 'text'"></span>
+			<select class="value input" data-bind="value: sentFolderFullName, options: options,
+				optionsText: 'displayName', optionsValue: 'fullName', optionsAfterRender: defaultOptionsAfterRender">
+			</select>
+		</div>
+		<div class="row">
+			<span class="label" data-i18n="MAIN/FOLDER_DRAFTS" data-bind="i18n: 'text'"></span>
+			<select class="value input" data-bind="value: draftsFolderFullName, options: options,
+				optionsText: 'displayName', optionsValue: 'fullName', optionsAfterRender: defaultOptionsAfterRender">
+			</select>
+		</div>
+		<div class="row">
+			<span class="label" data-i18n="MAIN/FOLDER_TRASH" data-bind="i18n: 'text'"></span>
+			<select class="value input" data-bind="value: trashFolderFullName, options: options,
+				optionsText: 'displayName', optionsValue: 'fullName', optionsAfterRender: defaultOptionsAfterRender">
+			</select>
+		</div>
+		<div class="row" data-bind="visible: allowSpamFolderEditing">
+			<span class="label" data-i18n="MAIN/FOLDER_SPAM" data-bind="i18n: 'text'"></span>
+			<select class="value input" data-bind="value: spamFolderFullName, options: options,
+				optionsText: 'displayName', optionsValue: 'fullName', optionsAfterRender: defaultOptionsAfterRender">
+			</select>
+		</div>
+		<div class="buttons">
+			<span class="button" data-i18n="SETTINGS/ACCOUNT_FOLDERS_BUTTON_OK" data-bind="i18n: 'text', click: onOKClick"></span>
+			<span class="button" data-i18n="MAIN/BUTTON_CANCEL" data-bind="i18n: 'text', click: onCancelClick"></span>
+		</div>
+	</div>
+</div>
+<span class="helper"></span>	

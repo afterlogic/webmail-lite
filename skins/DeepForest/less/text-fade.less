@@ -1,0 +1,16 @@
+.fadeout_text_init() {
+}
+
+.fadeout_text(@color) {
+	mask: url(images/filters.svg#masking);
+	-webkit-mask: url(images/mask.png?%VERSION%) repeat-y top right;
+	-o-mask: url(images/mask.png?%VERSION%) repeat-y top right;
+	-ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
+	
+	html.rtl & {
+		mask: url(images/filters.svg#masking_rtl);
+		-webkit-mask: url(images/mask_rtl.png?%VERSION%) repeat-y top left;
+		-o-mask: url(images/mask_rtl.png?%VERSION%) repeat-y top left;
+		-ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
+	}
+}
