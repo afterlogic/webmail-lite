@@ -1,1 +1,0 @@
-<h1><?php $this->Data->PrintInputValue('strDomainName'); ?></h1>
