@@ -1,0 +1,43 @@
+<!doctype html>
+<html dir="{{IntegratorDir}}" class="{{IntegratorDir}}">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+		<title></title>
+		<link rel="icon" sizes="196x196" type="image/png" href="skins/wm_logo_140x140.png" />
+		<link rel="apple-touch-icon-precomposed" type="image/png" href="skins/wm_logo_140x140.png" />
+		<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+		{{IntegratorLinks}}
+	</head>
+	<body>
+		{{IntegratorBody}}
+		
+		<!-- need for text fade -->
+		<div style="height: 0px; overflow: hidden;">
+			<svg>
+				<defs>
+					<linearGradient id="gradient" x1="90%" y1="0" x2="100%" y2="0">
+						<stop stop-color="white" offset="0"></stop>
+						<stop stop-color="black" offset="1"></stop>
+					</linearGradient>
+					
+					<linearGradient id="gradient_invert" x1="0" y1="0" x2="10%" y2="0">
+						<stop stop-color="black" offset="0"></stop>
+						<stop stop-color="white" offset="1"></stop>
+					</linearGradient>
+
+					<mask id="masking" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox">
+						<rect width="1" height="1" fill="url(#gradient)"></rect>
+					</mask>
+					<mask id="masking_rtl" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox">
+						<rect width="1" height="1" fill="url(#gradient_invert)"></rect>
+					</mask>
+				</defs>
+			</svg>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,114 @@
+<input type="submit" name="next_btn" style="position: absolute; visibility: hidden;" value="{{NextButtonValue}}" />
+
+<h1>
+	Server Compatibility Test and Pre-Installation Check
+</h1>
+
+<p class="description">
+	The installer will now check that all the required server software is installed,
+	has correct versions and configured properly.
+	It will also check if WebMail data folder is specified correctly.
+</p>
+
+<div class="field_list">
+	<div class="row0">
+		<span class="field_label">PHP version:</span>
+		<span class="field_value_limit">{{PhpVersion}}</span>
+	</div>
+	
+	<div class="row1">
+		<span class="field_label">Safe Mode is off:</span>
+		<span class="field_value_limit">{{SafeMode}}</span>
+	</div>
+
+	<div class="row0">
+		<span class="field_label">PDO MySQL Extension:</span>
+		<span class="field_value_limit">{{PDO MySQL}}</span>
+	</div>
+	
+	<div class="row1">
+		<span class="field_label">Iconv Extension:</span>
+		<span class="field_value_limit">{{iconv}}</span>
+	</div>
+
+	<div class="row0">
+		<span class="field_label">Multibyte String Extension:</span>
+		<span class="field_value_limit">{{mb_string}}</span>
+	</div>
+	
+	<div class="row1">
+		<span class="field_label">CURL Extension:</span>
+		<span class="field_value_limit">{{curl}}</span>
+	</div>
+
+	<div class="row0">
+		<span class="field_label">JSON Extension:</span>
+		<span class="field_value_limit">{{json}}</span>
+	</div>
+
+	<div class="row1">
+		<span class="field_label">XML/DOM Extension:</span>
+		<span class="field_value_limit">{{xml}}</span>
+	</div>
+
+	<div class="row0">
+		<span class="field_label">PHP sessions:</span>
+		<span class="field_value_limit">{{Session}}</span>
+	</div>
+	
+	<div class="row1">
+		<span class="field_label">Sockets:</span>
+		<span class="field_value_limit">{{Sockets}}</span>
+	</div>
+
+	<div class="row0">
+		<span class="field_label">SSL (OpenSSL extension):</span>
+		<span class="field_value_limit">{{SSL}}</span>
+	</div>
+
+	<div class="row1">
+		<span class="field_label">Setting memory limits:</span>
+		<span class="field_value_limit">{{MemoryLimits}}</span>
+	</div>
+	
+	<div class="row0">
+		<span class="field_label">Setting script timeout:</span>
+		<span class="field_value_limit">{{ScriptTimeout}}</span>
+	</div>
+
+	<div class="row1">
+		<span class="field_label">WebMail data folder:</span>
+		<span class="field_value_limit">{{WebMailDataFolder}}</span>
+		
+		
+		<div class="sub_row">
+			<span class="field_label">Creating/deleting folders</span>
+			<span class="field_value_limit">{{CreatingDeletingFolders}}</span>
+		</div>
+		
+		<div class="sub_row">
+			<span class="field_label">Creating/deleting files</span>
+			<span class="field_value_limit">{{CreatingDeletingFiles}}</span>
+		</div>
+	</div>
+
+	<div class="row0">
+		<span class="field_label">WebMail Settings File:</span>
+		<span class="field_value_limit">{{WebMailSettingsFile}}</span>
+		
+		<div class="sub_row">
+			<span class="field_label">Read/write settings file:</span>
+			<span class="field_value_limit">{{ReadWriteSettingsFile}}</span>
+		</div>
+	</div>
+	
+</div>
+
+<div class="result_text{{ResultClassSuffix}}">
+	{{Result}}
+</div>
+
+<div class="buttons">
+	<hr />
+	<input class="wm_button right" type="submit" name="{{NextButtonName}}" value="{{NextButtonValue}}" />
+</div>

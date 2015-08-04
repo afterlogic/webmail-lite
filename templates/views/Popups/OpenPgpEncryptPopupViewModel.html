@@ -1,0 +1,33 @@
+<div class="mask" data-bind="click: cancel"></div>
+<div class="popup_panel">
+	<span class="close" data-bind="click: cancel"></span>
+	<span class="title" data-i18n="OPENPGP/POPUP_TITLE_ENCRYPT" data-bind="i18n: 'text'"></span>
+	
+	<div class="fields">
+		<div class="row">
+			<div style="white-space: nowrap;">
+				<label data-bind="css: {'checked': sign}" class="custom_checkbox checked">
+					<span class="icon"></span>
+					<input type="checkbox" data-bind="checked: sign" id="openpgp-sign" />
+				</label>
+				<label data-bind="i18n: 'text'" data-i18n="OPENPGP/LABEL_SIGN" for="openpgp-sign"></label>
+				<span style="width: 100px;" class="label pgp_password" data-i18n="OPENPGP/LABEL_PASSWORD" data-bind="i18n: 'text'"></span>
+				<input style="width: 200px;" type="password" class="value input" data-bind="value: password, hasfocus: passwordFocused" />
+			</div>
+		</div>
+		<div class="row">
+			<div>
+				<label data-bind="css: {'checked': encrypt}" class="custom_checkbox checked">
+					<span class="icon"></span>
+					<input type="checkbox" data-bind="checked: encrypt" id="openpgp-encrypt" />
+				</label>
+				<label data-bind="i18n: 'text'" data-i18n="OPENPGP/LABEL_ENCRYPT" for="openpgp-encrypt"></label>
+			</div>
+		</div>
+		<div class="buttons">
+			<span class="button" data-bind="text: signEncryptButtonText, command: signEncryptCommand, visible: isEnableSignEncrypt"></span>
+			<span class="button" data-i18n="MAIN/BUTTON_CANCEL" data-bind="i18n: 'text', click: cancel"></span>
+		</div>
+	</div>
+</div>
+<span class="helper"></span>

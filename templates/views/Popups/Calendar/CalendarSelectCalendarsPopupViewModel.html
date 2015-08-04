@@ -1,0 +1,34 @@
+<div class="mask" data-bind="click: onCancelClick"></div>
+<div class="popup_panel">
+	<span class="close" data-bind="click: onCancelClick"></span>
+
+	<div class="fields">
+		<div class="fieldset">
+			<div class="row">
+				<span class="label">
+					<span class="text" data-bind="i18n: 'text'" data-i18n="CALENDAR/CALENDAR_FOR_UPLOADED_EVENT"></span>
+				</span>
+			</div>
+			<div class="row">
+				<span class="title" data-bind="dropdown: {'control': false}, style: {backgroundColor: calendarColor}, css: {'calendar_selector': calendarsList().length > 1 && selectedCalendarIsEditable()}">
+					<span class="current">
+						<span data-bind="text: selectedCalendarName, fade: {color: calendarColor}"></span>
+					</span>
+					<span class="dropdown" data-bind="visible: calendarsList().length > 1 && selectedCalendarIsEditable()">
+						<span class="dropdown_helper">
+							<span class="dropdown_arrow"><span></span></span>
+							<span class="dropdown_content" data-bind="foreach: calendarsList()">
+								<span class="item" data-bind="visible: $parent.selectedCalendarId() !== id, text: name, style: { backgroundColor: color }, click: function () { $parent.selectedCalendarId(id) }"></span>
+							</span>
+						</span>
+					</span>
+				</span>
+			</div>
+		</div>
+
+		<div class="buttons">
+			<span class="button save" data-i18n="CALENDAR/BUTTON_SAVE" data-bind="i18n: 'text', click: onSaveClick"></span>
+		</div>
+	</div>
+</div>
+<span class="helper"></span>

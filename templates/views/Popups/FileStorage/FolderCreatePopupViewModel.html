@@ -1,0 +1,20 @@
+<div class="mask" data-bind="click: onCancelClick"></div>
+<div class="popup_panel">
+	<span class="close" data-bind="click: onCancelClick"></span>
+
+	<div class="fields">
+		<div class="fieldset">
+			<div class="row">
+				<span class="label" data-i18n="FILESTORAGE/NEW_FOLDER" data-bind="i18n: 'text'"></span>
+				<input class="value input" spellcheck="false" type="text" maxlength="200"
+					data-bind="hasfocus: folderName.focus, valueUpdate: 'afterkeydown', value: folderName, onEnter: onOKClick, css: {'error': '' !== folderName.error()}" />
+				<div style="color:red;margin-top:10px;margin-left:150px" data-bind="visible: '' !== folderName.error(), text: folderName.error"></div>
+			</div>
+		</div>
+		<div class="buttons">
+			<span class="button save" data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', click: onOKClick"></span>
+			<span class="button cancel secondary" data-i18n="SETTINGS/BUTTON_CANCEL" data-bind="i18n: 'text', click: onCancelClick"></span>
+		</div>
+	</div>
+</div>
+<span class="helper"></span>	

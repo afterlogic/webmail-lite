@@ -1,0 +1,22 @@
+<div class="mask"></div>
+<div class="popup_panel">
+	<span class="close" data-bind="click: onCancelClick"></span>
+	<!--<span class="title" data-i18n="SETTINGS/ACCOUNT_FOLDERS_NEW_FOLDER" data-bind="i18n: 'text'"></span>-->
+
+	<div class="fields">
+		<div class="row" data-bind="visible: action() === Enums.PhoneAction.Settings">
+			<span class="title" data-i18n="Providing access to your microphone" data-bind="i18n: 'text'"></span>
+			<div id="fake_flash" style="margin-bottom: 10px"></div>
+			<span class="hint" data-i18n='Click "Allow" and then "close". We also recommend that you tick the box to "remember" that would further the dialog box does not interfere with your work comfortably.' data-bind="i18n: 'text'"></span>
+		</div>
+		<div class="row" data-bind="visible: action() === Enums.PhoneAction.Incoming">
+			<span class="text call_report" data-bind="text: report"></span>
+		</div>
+		<div class="buttons">
+			<span class="button" data-i18n="SETTINGS/ACCOUNT_FOLDERS_BUTTON_OK" data-bind="i18n: 'text', visible: action() === Enums.PhoneAction.Settings, click: onOKClick"></span>
+			<span class="button answer" data-i18n="PHONE/BUTTON_ANSWER" data-bind="i18n: 'text', visible: action() === Enums.PhoneAction.Incoming, click: answer"></span>
+			<span class="button hangup" data-i18n="PHONE/BUTTON_END_CALL" data-bind="i18n: 'text', visible: action() === Enums.PhoneAction.Incoming, click: hangup"></span>
+		</div>
+	</div>
+</div>
+<span class="helper"></span>

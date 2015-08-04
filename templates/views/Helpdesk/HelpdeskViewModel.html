@@ -1,0 +1,31 @@
+<div class="panels" data-bind="css: {'AgentArea': bAgent, 'UserArea': !bAgent}">
+	<div class="panel_helper" data-bind="splitter: {name: 'helpdesk_sub_screens', sizeLeft: 350, minLeft: 250, minRight: 550, resizeToWidth: true}">
+		<div class="panel threads">
+			<div class="resize_handler"></div>
+			<div class="panel_content">
+				<div class="toolbar" data-bind="if: !bAgent">
+					<span class="content">
+						<span class="item new_request" data-bind="click: openNewThread">
+							<span class="icon" data-bind="customTooltip: 'HELPDESK/ACTION_NEW_REQUEST'"></span>
+							<span class="text" data-bind="i18n: 'text'" data-i18n="HELPDESK/ACTION_NEW_REQUEST"></span>
+						</span>
+					</span>
+				</div>
+				<div class="middle_bar" data-bind="visible: bAgent, template: {name: 'Helpdesk_ThreadsList'}"></div>
+				<div class="middle_bar" data-bind="visible: !bAgent, template: {name: 'Helpdesk_ThreadsListExt'}"></div>
+			</div>
+		</div>
+		<div class="panel item_viewer thread_viewer">
+			<div class="panel_content">
+				<div class="middle_bar" data-bind="visible: !visibleNewThread() && selectedItem(), css: {'own_thread': simplePreviewPane()}, heightAdjust: {'location': 'bottom', 'elements': [domQuickReply], 'triggers': [uploadedFiles(), isQuickReplyActive(), replySendingStarted(), isQuickReplyHidden()]}">
+					<!-- ko template: { name: simplePreviewPane() ? 'Helpdesk_ViewThreadExt' : 'Helpdesk_ViewThread' } --><!-- /ko -->
+					<!-- ko template: { name: 'Helpdesk_QuickReply' } --><!-- /ko -->
+				</div>
+				<div class="middle_bar new_request" data-bind="visible: visibleNewThread()">
+					<!-- ko template: { name: 'Helpdesk_NewThread'} --><!-- /ko -->
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+

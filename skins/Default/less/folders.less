@@ -1,0 +1,35 @@
+/*=== Folder offsets CSS ===*/
+@folderOffset: 16px;
+
+//.folderOffset(@level, @class, @childClass) when (@level < 20) {
+//	.@{class} {
+//		padding-left: @folderOffset * @level !important;
+//		html.rtl & {
+//			padding-left: 0px !important;
+//			padding-right: @folderOffset !important;
+//		}
+//	}
+//
+//	.folderOffset(@level + 1, ~"@{childClass} .@{class}", @childClass);
+//}
+
+.folderOffset(@level, @class, @childClass) when (@level < 20) {
+	(~".@{class}") {
+		padding-left: @folderOffset * @level !important;
+		html.rtl & {
+			padding-left: 0px !important;
+			padding-right: @folderOffset !important;
+		}
+	}
+
+	.folderOffset(@level + 1, (~"@{childClass} .@{class}"), @childClass);
+}
+
+.folders {
+	.folderOffset(1, title, children);
+
+	.ui-droppable-disabled {
+		opacity: 1 !important;
+	}
+}
+/*=== END Folder offsets CSS ===*/

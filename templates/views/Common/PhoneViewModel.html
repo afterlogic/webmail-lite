@@ -1,0 +1,45 @@
+<span class="item phone" data-bind="css: {
+		'init':		(action() === Enums.PhoneAction.OfflineInit),
+		'error':	(action() === Enums.PhoneAction.OfflineError),
+		'offline':	(action() === Enums.PhoneAction.Offline || action() === Enums.PhoneAction.OfflineActive || action() === Enums.PhoneAction.OfflineInit || action() === Enums.PhoneAction.OfflineError),
+		'online':!	(action() === Enums.PhoneAction.Offline || action() === Enums.PhoneAction.OfflineActive || action() === Enums.PhoneAction.OfflineInit || action() === Enums.PhoneAction.OfflineError),
+		'inactive':	(action() === Enums.PhoneAction.Offline || action() === Enums.PhoneAction.Online || action() === Enums.PhoneAction.OfflineInit || action() === Enums.PhoneAction.OfflineError),
+		'active':	(action() === Enums.PhoneAction.OfflineActive || action() === Enums.PhoneAction.OnlineActive || action() === Enums.PhoneAction.Outgoing || action() === Enums.PhoneAction.OutgoingConnect || action() === Enums.PhoneAction.Incoming || action() === Enums.PhoneAction.IncomingConnect),
+		'outgoing':	(action() === Enums.PhoneAction.Outgoing || action() === Enums.PhoneAction.OutgoingConnect),
+		'incoming':	(action() === Enums.PhoneAction.Incoming || action() === Enums.PhoneAction.IncomingConnect),
+		'connect':	(action() === Enums.PhoneAction.OutgoingConnect || action() === Enums.PhoneAction.IncomingConnect),
+		'ready':	(action() === Enums.PhoneAction.OnlineActive && validateNumber())
+	}">
+	<span class="phone_inner">
+		<span class="text call_report empty" data-bind="text: report, css:{'empty': report() === ''}"></span>
+		<span class="text direction" data-bind="">To:</span>
+		<input class="input" spellcheck="false" data-bind="value: input, hasfocus: inputFocus, onEnter: multiAction, valueUpdate: ['blur', 'afterkeydown'], autocompleteSimple: {callback: autocompleteCallback.bind($data), dataAccessor: phoneAutocompleteItem}" />
+
+		<span class="buttons">
+			<span class="button" data-bind="customTooltip: tooltip, click: multiAction, css: {'hangup': action() === 'connected_out' || action() === 'connected_in'}">
+				<span class="icon"></span>
+			</span>
+		</span>
+
+		<span class="indicator" data-bind="customTooltip: indicator, css: {'missed': phone.missedCalls() && (action() === 'offline' || action() === 'online')}"></span>
+
+		<span class="dropdown_helper" data-bind="css: {'expand': dropdownShow}">
+			<span class="dropdown_content" data-bind="customScrollbar: {x: false}">
+				<span class="scroll-inner" data-bind="visible: logsToShow().length">
+					<span data-bind="foreach: logsToShow">
+						<span class="item" data-bind="click: $parent.onLogItem.bind($parent)">
+							<span class="icon log_status" data-bind="css: UserStatus"></span>
+							<span class="log_item" data-bind="text: phoneToShow"></span>
+						</span>
+					</span>
+					<span class="item more" data-i18n="see more" data-bind="i18n: 'text', click: seeMore, visible: logsToShow().length !== logs().length"></span>
+				</span>
+			</span>
+			<span class="spinner" data-bind="visible: spinner">
+				<span class="bounce1"></span>
+				<span class="bounce2"></span>
+				<span class="bounce3"></span>
+			</span>
+		</span>
+	</span>
+</span>

@@ -1,0 +1,15 @@
+<span class="color_table" data-bind="initDom: colorPickerDom">
+	<span class="title" data-bind="text: caption"></span>
+	<span class="row" data-bind="foreach: aGreyColors">
+		<span class="color-item" data-bind="style: {backgroundColor: $data}, attr: {'data-color': $data}"></span>
+	</span>
+	<span class="row" data-bind="foreach: aBrightColors">
+		<span class="color-item" data-bind="style: {backgroundColor: $data}, attr: {'data-color': $data}"></span>
+	</span>
+	<span data-bind="foreach: aColorLines">
+		<span class="row" data-bind="foreach: $data">
+			<span class="color-item" data-bind="style: {backgroundColor: $data}, attr: {'data-color': $data}"></span>
+		</span>
+	</span>
+</span>
+

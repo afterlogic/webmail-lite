@@ -1,0 +1,439 @@
+.ContactsLayout .panels {
+	//position: relative;
+	//left: 0%;
+	
+	-webkit-transition: -webkit-transform 500ms ease 0s;
+	-moz-transition: -moz-transform 500ms ease 0s;
+	transition: transform 500ms ease 0s;
+	//.transition(left 500ms ease 0s);
+	
+	&.list_active {
+		-webkit-transform: translateX(-100%);
+		-moz-transform: translateX(-100%);
+		-o-transform: translateX(-100%);
+		transform: translateX(-100%);
+		//left: -100%;
+	}
+	
+	&.viewer_active {
+		-webkit-transform: translateX(-200%);
+		-moz-transform: translateX(-200%);
+		-o-transform: translateX(-200%);
+		transform: translateX(-200%);
+		//left: -200%;
+	}
+}
+
+.panel.groups {
+	
+
+	.ui-droppable-disabled {
+		opacity: 1 !important;
+	}
+}
+
+/*=== Contacts screen CSS ===*/
+.panel.contacts {
+	
+	.panel_content {
+		margin-right: 0px;
+	}
+	
+	.panel_top .search_block {
+		padding-right: 0px;
+
+		html.rtl & {
+			padding-right: 30px;
+			padding-left: 0px;
+		}
+	}
+	
+	.panel_bottom {
+		.box-sizing();
+		background-color: transparent;
+		border-top: 0 none;
+		bottom: 10px;
+		height: 26px;
+		padding: 0;
+		position: absolute;
+		text-align: center;
+		white-space: nowrap;
+		width: 100%;
+		
+		.pagination {
+			background: #F5F5F5;
+			border: 1px solid #D5D5D5;
+			border-radius: 21px;
+			box-shadow: 0 0 5px #E1E1E1;
+			cursor: default;
+			display: inline-block;
+			padding: 4px 10px;
+			text-align: right;
+		}
+	}
+	
+	.middle_bar {
+		.resize_compensation_top(39px);
+		.resize_compensation_bottom(0px);
+	}
+	
+	.item {
+		
+		.me {
+			background: #F1F1F1;
+			border-radius: 10px 10px 10px 10px;
+			color: #6D6D6D;
+			float: right;
+			padding: 2px 8px;
+		}
+		
+		&.selected .me {
+			color: #519CE2;
+		}
+		
+		.data {
+			.box-sizing;
+			
+			.name {
+				display: block;
+				margin-bottom: 10px;
+				font-size: 10.5pt;
+				font-weight: bold;
+			}
+			
+			.email {
+				color: #519CE2;
+			}
+		}
+		
+		&.selected .data .email {
+			color: #fff;
+		}
+		
+		&.noname .data .name {
+			font-weight: normal;
+			color: #888;
+			.opacity(0.3);
+		}
+		
+		&.selected.noname .data .name {
+			color: #fff;
+		}
+	}
+	
+	.search_form {
+		float: right;
+		margin-top: -25px;
+	}
+	
+	.right_panel {
+		overflow-x: hidden;
+		overflow-y: auto;
+		height: 100%;
+	}
+	
+	.contact_form {
+		border: 3px solid #69A8F5;
+		background: #69A8F5;
+		border-radius: 4px;
+		
+		.contact_content{
+			padding: 20px;
+			background: #fff;
+			border-radius: 2px;
+		}
+		
+		.title{
+			margin-top: 0px;
+			font-weight: normal;
+		}
+		
+		.subtitle {
+			font-size: 11pt;
+			color: #636C78;
+
+		}
+		
+		.buttons {
+			border-top: 0px;
+			margin-top: 0px;
+			padding: 10px 0px 0px;
+		}
+		
+		.value {
+			font-weight: bold;
+			font-size: 12pt;
+		}
+	}
+}
+
+/*=== END Contacts screen CSS ===*/
+
+/*=== Contact viewer CSS ===*/
+.panel.contact_viewer {
+	
+	.panel_content {
+		background: url("images/contacts-bg.png?%VERSION%") repeat 0 0;
+	}
+	
+	.middle_bar {
+		.box-sizing;
+		.resize_compensation_top(100px);
+		
+		&.edit_contact,
+		&.edit_group,
+		&.import,
+		&.contact {
+			.resize_compensation_bottom(69px);
+		}
+	}
+	
+	.panel_top {
+		margin: 0px 20px;
+		padding: 23px 0px;
+		min-height: 50px;
+		background: none;
+		border-bottom: 0px;
+	}
+	
+	.contact_content {
+		height: 100%;
+		
+		.fields_switcher {
+			margin: 10px 20px;
+			text-align: right;
+		}
+	}
+	
+	.title {
+		font-size: 16pt;
+		color: #4d4d4d;
+		padding: 0px;
+		margin: 0 0 6px;
+		overflow: hidden;
+		white-space: normal;
+		.break-word();
+		
+		&.email {
+			color: #3983c8;
+			margin: 0px;
+			font-size: 10.5pt;
+			font-weight: bold;
+		}
+	}
+	
+	.item.mail_to_title {
+		text-decoration: none;
+	}
+	
+	.panel_center {
+		
+		.buttons {
+			position: relative;
+			z-index: 1;
+			margin: 0px;
+			
+			.button {
+				position: absolute;
+				right: 0px;
+				top: 0px;
+				margin: 20px 40px 0px 0px;
+				
+				html.rtl & {
+					right: auto;
+					left: 0px;
+					margin-right: 0px;
+					margin-left: 40px;
+				}
+			}
+		}
+	}
+	
+	//.contact_content .toolbar {
+	//	margin: 20px 30px 0px 0px;
+	//}
+	
+	.panel_top .toolbar {
+		.content {
+			padding: 0;
+			
+			.item.mail_to {
+				background: none repeat 0 0 #88CF50;
+				border-color: #7BBE45;
+				border-radius: 5px 5px 5px 5px;
+				overflow: hidden;
+				padding: 5px 10px 2px;
+				text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+				color: #FFFFFF;
+				box-shadow: none;
+			}
+		}
+		
+		.icon {
+			display: none;
+		}
+		
+		.text {
+			display: inline-block;
+		}
+	}
+	
+	.panel_bottom {
+		border: 0px;
+		border-radius: 0px;
+		background: none;
+		padding: 0px;
+		height: auto;
+		
+		.buttons {
+			text-align: right;
+			margin: 0px 20px;
+			padding: 20px 0px;
+			border-top: 1px solid #D9D9D9;
+			
+			html.rtl & {
+				text-align: left;
+			}
+		}
+	}
+
+	.decor {
+		border: 1px solid #D9D9D9;
+		border-bottom: 0px;
+		border-radius: 4px 4px 0px 0px;
+		padding-top: 3px;
+		margin: 0px 20px;
+	}
+}
+
+
+.contact_data_groups {
+	color: #626262;
+	border: 1px solid #D9D9D9;
+	border-top: 0px;
+	border-radius: 0px 0px 4px 4px;
+	margin: 0px 20px;
+	min-height: 100px;
+	
+	.fields {
+		padding: 12px 20px 1px;
+	}
+	
+	.subtitle,
+	.row {
+		margin-top: 0px;
+		margin-bottom: 22px;
+		padding: 0px;
+	}
+	
+	.subtitle {
+		font-size: 10.5pt;
+	}
+	
+	&.edit {
+		
+		.label {
+			width: 25%;
+		}
+		
+		.value {
+			width: 75%;
+		}
+	}
+	
+	.address {
+		margin-bottom: 12px;
+		
+		.row {
+			margin-bottom: 5px;
+			clear: none;
+			
+			&:after {
+				display: none;
+			}
+		}
+		
+		.label {
+			width: 20px;
+			height: 0px;
+			text-indent: 20px;
+			overflow: hidden;
+			
+			&.address {
+				float: left;
+				width: 20px;
+				height: 20px;
+				text-indent: 0px;
+				overflow: hidden;
+				vertical-align: middle;
+				margin-right: -20px;
+				word-wrap: normal;
+				
+				.iconFontInit();
+				&:before {
+					font-size: 20px;
+					margin-right: 20px;
+					content: "\e662";
+					
+					html.rtl {
+						margin-left: 20px;
+						margin-right: 0px;
+					}
+				}
+			}
+		}
+	}
+	
+	.mobile .label,
+	.phone .label,
+	.fax .label {
+		width: 20px;
+		height: 20px;
+		text-indent: 0px;
+		overflow: hidden;
+		vertical-align: middle;
+		
+		.iconFontInit();
+		&:before {
+			font-size: 20px;
+			margin-right: 20px;
+			content: "\e663";
+
+			html.rtl {
+				margin-left: 20px;
+				margin-right: 0px;
+			}
+		}
+		
+		.text {
+			display: none;
+		}
+	}
+	
+	.link.call {
+		margin-left: 10px;
+		
+		html.rtl & {
+			margin-left: 0px;
+			margin-right: 10px;
+		}
+	}
+	
+}
+
+.contact_card {
+	
+	.link.call {
+		margin-left: 4px;
+	}
+	
+	.groups .row {
+		font-size: 9pt;
+	}
+}
+
+.import .contact_data_groups .buttons {
+	text-align: left;
+	margin-top: 0px;
+}
+/*=== END Contact viewer CSS ===*/

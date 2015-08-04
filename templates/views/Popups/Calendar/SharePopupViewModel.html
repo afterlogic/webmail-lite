@@ -1,0 +1,68 @@
+<div class="mask" data-bind="click: onCancelClick"></div>
+<div class="popup_panel">
+	<span class="close" data-bind="click: onCancelClick"></span>
+	<span class="title" data-bind="style: {backgroundColor: selectedColor}, i18n: 'text'" data-i18n="CALENDAR/TITLE_SHARE_CALENDAR"></span>
+
+	<div class="fields">
+		<div class="fieldset shares_personal">
+			<table>
+				<tbody>
+					<tr class="row guests">
+						<td class="label">
+							<span data-i18n="CALENDAR/LABEL_CAN_SEE" data-bind="i18n: 'text'"></span>
+						</td>
+						<td>
+							<div class="input inputosaurus">
+								<div class="disable_mask"></div>
+								<div data-bind="customScrollbar: {x: false}">
+									<div class="scroll-inner">
+										<input type="text" spellcheck="false" tabindex="2" data-bind="initDom: guestsDom" />
+									</div>
+								</div>
+							</div>
+						</td>
+					</tr>
+					<tr class="row owners">
+						<td class="label">
+							<span data-i18n="CALENDAR/LABEL_CAN_EDIT" data-bind="i18n: 'text'"></span>
+						</td>
+						<td>
+							<div class="input inputosaurus">
+								<div class="disable_mask"></div>
+								<div data-bind="customScrollbar: {x: false}">
+									<div class="scroll-inner">
+										<input type="text" spellcheck="false" tabindex="2" data-bind="initDom: ownersDom" />
+									</div>
+								</div>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+
+		<div class="fieldset shares_all" data-bind="visible: showGlobalContacts">
+			<div class="row">
+				<div class="label">
+					<label class="custom_checkbox" data-bind="css: {'checked': sharedToAll()}">
+						<span class="icon"></span>
+						<input type="checkbox" id="share_to_all_item_input" data-bind="checked: sharedToAll" />
+					</label>
+					<span>
+						<label for="share_to_all_item_input" data-i18n="CALENDAR/TITLE_SHARE_WITH_ALL_CALENDARS" data-bind="i18n: 'text'"></label>
+					</span>
+				</div>
+				<select class="value input" data-bind="visible: sharedToAll, value: sharedToAllAccess, options: aAccess, optionsText: 'display', optionsValue: 'value'"></select>
+			</div>
+			<div class="row">
+				<span class="hint" data-i18n="CALENDAR/TITLE_DESCRIPTION_SHARED_WITH_ALL_CALENDARS" data-bind="visible: sharedToAll, i18n: 'text'"></span>
+			</div>
+		</div>
+		
+		<div class="buttons">
+			<span class="button save" data-i18n="CALENDAR/BUTTON_SAVE" data-bind="i18n: 'text', click: onSaveClick"></span>
+		</div>
+	</div>
+</div>
+<span class="helper"></span>

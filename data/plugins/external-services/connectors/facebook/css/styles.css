@@ -1,0 +1,23 @@
+.login_panel .social .facebook {
+  display: inline-block;
+  height: 20px;
+  width: 75px;
+  color: #fff;
+  text-align: right;
+  cursor: pointer;
+}
+.login_panel .social .facebook .text {
+  padding: 3px 7px 2px 8px;
+  line-height: 21px;
+  vertical-align: top;
+  color: #fff;
+  text-decoration: none;
+}
+.login_panel .social .facebook {
+  background: #5f78ab url("?plugins/images/external-services/facebook-icon.png") 10px 3px no-repeat;
+  border: 1px solid #29447e;
+}
+.login_panel .social .facebook .text {
+  background-color: #5f78ab;
+  border-left: 1px solid #29447e;
+}

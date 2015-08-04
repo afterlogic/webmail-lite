@@ -1,0 +1,11 @@
+<div class="mask" data-bind="click: cancelButtonClick"></div>
+<div class="popup_panel">
+	<span class="close" data-bind="click: cancelButtonClick"></span>
+	<span class="text" data-bind="text: confirmDesc"></span>
+	<div class="buttons">
+		<span class="button success" data-bind="click: onlyThisInstanceButtonClick, text: onlyThisInstanceButtonText"></span>
+		<span class="button success" data-bind="click: allEventsButtonClick, text: allEventsButtonText"></span>
+		<span class="button secondary cancel" data-bind="click: cancelButtonClick, text: cancelButtonText"></span>
+	</div>
+</div>
+<span class="helper"></span>

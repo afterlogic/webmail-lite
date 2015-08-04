@@ -1,0 +1,125 @@
+.buttons {
+    margin-top: 15px;
+    text-align: right;
+	
+	html.rtl & {
+		text-align: left;
+	}
+	
+	.button {
+		display: inline-block;
+		font: bold 10pt Helvetica,Tahoma,Arial,sans-serif;
+		padding: 5px 12px;
+		cursor: pointer;
+		border-radius: 4px;
+		text-align: center;
+		
+		.transition(background 200ms ease 0s);
+		
+		& {
+			//6FA8DE
+			@background: #81C54B; 
+			@border: 1px solid darken(@background, 10%);
+			@textShadow: 0px 1px 0px rgba(0, 0, 0, 0.3);
+			@textColor: #fff;
+			
+			background: @background;
+			border: @border;
+			color: @textColor;
+			text-shadow: @textShadow;
+			
+			&:hover {
+				background: darken(@background, 5%);
+			}
+		
+			&.disabled {
+				color: mix(@background, #fff, 50%);
+				text-shadow: none !important;
+				cursor: default;
+
+				&:hover {
+					background: @background;
+				}
+			}
+			
+			.primaryButton();
+		}
+		
+		&.secondary {
+			@background: #E3B856;
+			@border: 1px solid darken(@background, 10%);
+			@textColor: #fff;
+			@textShadow: 0px 1px 0px rgba(0, 0, 0, 0.3);
+			
+			background: @background;
+			border: @border;
+			color: @textColor;
+			text-shadow: @textShadow;
+			
+			&:hover {
+				background: darken(@background, 5%);
+			}
+			
+			&.disabled {
+				color: mix(@background, #fff, 50%);
+				
+				&:hover {
+					background: @background;
+				}
+			}
+			
+			.secondaryButton();
+		}
+		
+		&.special {
+			@background: #6FA8DE;
+			@border: 1px solid darken(@background, 10%);
+			@textColor: #fff;
+			@textShadow: 0px 1px 0px rgba(0, 0, 0, 0.3);
+			
+			background: @background;
+			border: @border;
+			color: @textColor;
+			text-shadow: @textShadow;
+			
+			&:hover {
+				background: darken(@background, 5%);
+			}
+			
+			&.disabled {
+				color: mix(@background, #fff, 50%);
+				
+				&:hover {
+					background: @background;
+				}
+			}
+			
+			.specialButton();
+		}
+		
+		&.state {
+			@background: #FFFFFF;
+			@border: 1px solid #6FA8DE;
+			@textColor: #4F88BE;
+			
+			text-shadow: none;
+			cursor: default;
+			
+			background: @background;
+			border: @border;
+			color: @textColor;
+			
+			&.disabled {
+				color: mix(@background, #000, 50%);
+				
+				&:hover {
+					background: @background;
+				}
+			}
+			
+			.stateButton();
+		}
+	}
+	
+	.theme-buttons();
+}

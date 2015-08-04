@@ -1,0 +1,36 @@
+<div class="panels" data-bind="splitter: {name: 'folders', sizeLeft: 200, minLeft: 20, minRight: 40, resizeToWidth: true},
+	 css: {'folder_active': selectedPanel() === Enums.MobilePanel.Groups, 
+			'list_active': selectedPanel() === Enums.MobilePanel.Items,
+			'viewer_active': selectedPanel() === Enums.MobilePanel.View}">
+	<div class="panel folders">
+		<div class="resize_handler"></div>
+		<div class="panel_content">
+			<!-- ko if: !mobileApp -->
+			<div class="toolbar">
+				<span class="content">
+					<a href="javascript: void(0)" class="item compose" data-bind="command: composeCommand, visible: bVisibleComposeMessage">
+						<span data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_NEW_MESSAGE"></span>
+					</a>
+				</span>
+			</div>
+			<!-- /ko -->
+			<div class="middle_bar" data-bind="template: {name: 'Mail_FolderListViewModel', data: oFolderList}, 
+				css: {'quota_visible': -1 < oFolderList.quotaProc()},
+				click: gotoMessageList"></div>
+		</div>
+	</div>
+	<div class="panel_helper" data-bind="splitter: {name: 'messages', sizeLeft: 400, minLeft: 396, minRight: 10, collapse: true}">
+		<div class="panel messages">
+			<div class="resize_handler"></div>
+			<div class="panel_content">
+				<!-- ko template: { name: 'Mail_LayoutSidePane_Toolbar'} --><!-- /ko -->
+				<!-- ko template: { name: 'Mail_MessageListViewModel', data: oMessageList} --><!-- /ko -->
+			</div>
+		</div>
+		<div class="panel item_viewer message_viewer">
+			<div class="panel_content">
+				<div class="middle_bar" data-bind="template: {name: 'Mail_LayoutSidePane_MessagePaneViewModel', data: oMessagePane}"></div>
+			</div>
+		</div>
+	</div>
+</div>

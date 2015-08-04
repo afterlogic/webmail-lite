@@ -1,0 +1,30 @@
+@font-face {
+	font-family: 'afterlogic';
+	src:url('fonts/afterlogic.eot');
+	src:url('fonts/afterlogic.eot?#iefix') format('embedded-opentype'),
+		url('fonts/afterlogic.svg#afterlogic') format('svg'),
+		url('fonts/afterlogic.woff') format('woff'),
+		url('fonts/afterlogic.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+/* This font face inherits and overrides the previous font face, but only for chrome */
+//@media screen and (-webkit-min-device-pixel-ratio:0) {}
+
+.not-exist,
+.icon-font {
+	&:before {
+		font-family: 'afterlogic';
+		speak: none;
+		font-style: normal;
+		font-weight: normal;
+		font-variant: normal;
+		text-transform: none;
+		line-height: 1;
+
+		/* Better Font Rendering =========== */
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+}

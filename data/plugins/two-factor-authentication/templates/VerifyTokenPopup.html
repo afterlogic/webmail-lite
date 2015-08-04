@@ -1,0 +1,21 @@
+<div class="mask" data-bind="click: onCancelClick"></div>
+<div class="popup_panel auth_popup">
+	<span class="close" data-bind="click: onCancelClick"></span>
+	<span class="title" data-i18n="AUTHENTICATION_PLUGIN/HEADER" data-bind="i18n: 'text'"></span>
+	
+	<div class="fields">
+		<div class="row">
+			<span class="hint" data-i18n="AUTHENTICATION_PLUGIN/DESCRIPTION" data-bind="i18n: 'html'"></span>
+		</div>
+		<div class="row">
+			<span class="label pin_code" data-i18n="AUTHENTICATION_PLUGIN/LABEL" data-bind="i18n: 'text'"></span>
+            <input id="code" tabindex="2" class="input check_autocomplete_input pin_code" value="value: code" data-i18n="AUTHENTICATION_PLUGIN/TOKEN_INPUT"
+                   type="text" data-bind="value: code, inputFilter: 'numbers', valueUpdate: 'afterkeyup', hasFocus: isFocused" />
+		</div>
+		<div class="buttons">
+			<span class="button" style="overflow: hidden" data-bind="text: verifyButtonText, click: onVerifyClick"></span>
+			<span class="button cancel secondary" style="overflow: hidden" data-i18n="AUTHENTICATION_PLUGIN/BUTTON_CLOSE" data-bind="i18n: 'text', click: onCancelClick"></span>
+		</div>
+	</div>
+</div>
+<span class="helper"></span>

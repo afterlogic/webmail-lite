@@ -1,0 +1,23 @@
+<div class="item"
+	 data-bind="css: {
+			'selected': selected(),
+			'checked': checked(),
+			'deleted': deleted(),
+			'unseen': unseen(),
+			'pending': state() === Enums.HelpdeskThreadStates.Pending,
+			'resolved': state() === Enums.HelpdeskThreadStates.Resolved,
+			'waiting': state() === Enums.HelpdeskThreadStates.Waiting,
+			'deferred': state() === Enums.HelpdeskThreadStates.Deferred,
+			'answered': state() === Enums.HelpdeskThreadStates.Answered
+		 }">
+	<div class="item_content">
+		<span class="data">
+			<span class="state" data-bind="text: printableState()"></span>
+			<span class="title from" data-bind="text: sFrom"></span>
+			<span class="separator"></span>
+			<span class="date moment-date-trigger-fast" data-bind="text: date"></span>
+			<span class="subtitle subject" data-bind="text: sSubject"></span>
+		</span>
+		<div class="separator"></div>
+	</div>
+</div>
