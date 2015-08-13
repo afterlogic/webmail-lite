@@ -1,0 +1,19 @@
+<div class="mask" data-bind="click: onOKClick"></div>
+<div class="popup_panel">
+	<span class="close" data-bind="click: onOKClick"></span>
+
+	<div class="fields">
+		<div class="fieldset">
+			<div class="row">
+				<span class="label" data-i18n="FILESTORAGE/LINK" data-bind="i18n: 'text'"></span>
+				<input readonly="readonly" spellcheck="false" class="value input" type="text" maxlength="255" data-bind="hasfocus: pubFocus, value: pub, click: function () {$element.select();}, onEnter: onOKClick" />
+			</div>
+		</div>
+
+		<div class="buttons">
+			<span class="button remove" data-i18n="FILESTORAGE/BUTTON_CANCEL_SHARING" data-bind="i18n: 'text', click: onCancelSharingClick"></span>
+			<span class="button cancel secondary" data-i18n="FILESTORAGE/BUTTON_CLOSE" data-bind="i18n: 'text', click: onOKClick"></span>
+		</div>
+	</div>
+</div>
+<span class="helper"></span>	

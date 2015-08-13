@@ -1,0 +1,27 @@
+.login_panel .social .google {
+  display: inline-block;
+  height: 20px;
+  width: 75px;
+  color: #fff;
+  text-align: right;
+  cursor: pointer;
+}
+.login_panel .social .google .text {
+  padding: 3px 7px 2px 8px;
+  line-height: 21px;
+  vertical-align: top;
+  color: #fff;
+  text-decoration: none;
+}
+.login_panel .social .google {
+  background: #dd4b39 url("?plugins/images/external-services/google-icon.png") 3px 0px no-repeat;
+  border: 1px solid #bb3f30;
+}
+.login_panel .social .google .text {
+  background-color: #dd4b39;
+  border-left: 1px solid #bb3f30;
+}
+
+.plugin_external_services.popup.google {
+	z-index: 1000;
+}

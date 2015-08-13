@@ -1,0 +1,40 @@
+<div class="panel_top pathway">
+	<!-- ko foreach: pathItems() -->
+		<!-- ko if: $parent.iPathIndex() !== $index() || $index() === 0 || $parent.searchPattern() !== '' -->		
+		<!-- ko if: $index() > 0 -->&raquo;<!-- /ko --> <a data-bind="
+				   text: displayName(), 
+				   click: function () { $parent.getFiles(storageType(), $parent.getPathItemByIndex($index())); },
+				   droppable: {valueFunc: function (oEvent, oUi) {$root.filesDrop($data, oEvent, oUi);}}
+				   "></a>
+		<!-- /ko -->
+		<!-- ko if: $parent.iPathIndex() === $index() && $index() > 0 &&  $parent.searchPattern() === '' -->		
+		&raquo; <b data-bind="text: displayName()"></b>
+		<!-- /ko -->
+	<!-- /ko -->
+	<!-- ko if: searchPattern() !== '' -->		
+	&raquo; <b data-bind="i18n: 'text'" data-i18n="FILESTORAGE/SEARCH_RESULTS"></b> (<a class="text" data-bind="i18n: 'text', click: clearSearch" data-i18n="FILESTORAGE/SEARCH_CLEAR"></a>)
+	<!-- /ko -->
+</div>
+<div class="panel_center unselectable" data-bind="customScrollbar: {x: false}, css: {dragover: dragover()}">
+	<div class="files_scroll scroll-inner">
+		<div class="items_list">
+			<span class="list_notification" data-bind="visible: fileListInfoText()!==''">
+				<span class="description" data-bind="text: fileListInfoText()"></span>
+			</span>
+			<div class="items_sub_list large attachments" data-bind="columnCalc: {'prop': columnCount, 'itemSelector': '.item.helper'}">
+				<!-- ko foreach: collection -->
+					<!-- ko if: isFolder() -->
+						<!-- ko template: {name: 'FileStorage_FolderItem'} --><!-- /ko -->
+					<!-- /ko -->
+					<!-- ko if: !isFolder() -->
+						<!-- ko template: {name: 'Common_FileViewModel'} --><!-- /ko -->
+					<!-- /ko -->
+				<!-- /ko -->
+				<div class="item helper"></div>
+			</div>
+			<div class="uploader_mask" data-bind="initDom: uploaderArea, css: {'active': bDragActiveComp}">
+				<div class="inner"></div>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+	<head>
+		<meta content="width=320; initial-scale=0.8; maximum-scale=1.0; user-scalable=0;" name="viewport" />
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>iOS Profile</title>
+		<link type="image/x-icon" rel="shortcut icon" href="favicon.ico" />
+		<link type="text/css" rel="stylesheet" href="./static/css/libs.css" />
+		<script type="text/javascript">
+			function showNextPage()
+			{
+				document.getElementById('page-1').className = 'hide';
+				document.getElementById('page-2').className = 'content';
+			}
+		</script>
+		<style>
+			html,
+			body {
+				height: 100%;
+			}
+			body {
+				background: #ece9e0;
+				color: #555555;
+			}
+			.content {
+				font-size: 11pt;
+				display: table;
+				height: 100%;
+				margin: 0 auto;
+				padding: 0;
+				text-align: center;
+				width: 320px;
+			}
+			.content div {
+				display: table-cell;
+				vertical-align: middle;
+				padding: 0px 25px;
+			}
+			.content h1 {
+				font-size: 18pt;
+				font-weight: normal;
+			}
+			.button {
+				background: #6FA8DE;
+				border: 1px solid #5D97CD;
+				border-radius: 4px;
+				color: #FFFFFF;
+				display: block;
+				font-size: 12pt;
+				font-weight: bold;
+				padding: 10px;
+				text-align: center;
+				text-shadow: 0 1px 0 #4D759B;
+				margin-top: 20px;
+				cursor: pointer;
+				text-decoration: none;
+			}
+			.button:hover {
+				background: #7FB8EE;
+			}
+			.hide {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="content" id="page-1">
+			<div>
+				<h1>
+					{{IOS/HELLO}} <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAYCAYAAAD6S912AAACxElEQVQ4T6VVW08TQRQ+7UOXty0x6otUNHhfBISIMRqtRmMCMaImVB9aqjzgG/qEP4SANhU1hgdFvCSaaNXGiCQ+4I1VojVGSry0tiX6AC00GWdmd2bPdosX3KTpZubMd77vnG/OuuAfn9n8HCkW5yGXm4aVvhWu0uOOhT/hv3o+Ru7ei0Gl1wtdp7r+DzAei5H4yFOec/vWJjjQ0rp4wFzmO+ntOwfzxSIH7AyHwFe9avGAd27fIs/GXnCwLZs1OHTkaNly/XUNo5EImZmZBW3jevDv27/gOcfGxLv35EMiAal0GioqFKipWQP1dfWQzaTB7XbDl+QkZLMZyOcL8JP+qqp8oGm1sKRS5VgSMDv9g8QfPQRdH+eyiNluFqBQ4GVLl9MkKZgrFOS+y8V2CSgeBdoDx2F1tY+v8OfK4CBJUGZigQH+ThehAXKfwigeD5zt6TEAX74eJzdvDHNWOEjypBuYMWdAAwWoR1Ggre0wbFi31gBk7FjdOJpANRHKMRXgHJdC+P17YNfOHUYNv6UzpL+vVyg3/lkelr70HeUTDL2qCqe7uy1hHz9NksuXLtoAS1k55JrRbN1Hu3zyRNgC1N9OkKFrVw2lZtd4PJZM1wlljCsiGDDb2AAxw7KdNeUbCa1EIqdKJZ/BkkUNpSxJQ7QR1xOVFhWpPXCMd9hsPkB0YIBMJZNWCGqK00oMlMpHtlGobWzGfvxkhN8SIQMbWkiVTbf7QfqTgQYoU37289cUiZzvt9ul5CDqk9E8MwNW0Ny8zboYQ9eHibjHEgv7ESewl1XuBEMdFqBkic1b8i5OlvNpY2MTHGxtsYYDC74fe0BGR+mIX4ABtg4GVen3JRjs4CPMMVCiF2jHp4yO27yH/MjtYdqLxYRCYT66pG1wedhcZJOHgYqrtUnTgBmYPbquwxtzZrK13f690FBXK4n9Ar4SKIt2IgraAAAAAElFTkSuQmCC"/> !
+				</h1>
+				<p>
+					{{IOS/DESC_P1}}
+				</p>
+				<p>
+					{{IOS/DESC_P2}}
+					{{IOS/DESC_P3}}
+				</p>
+				<p>
+					<a class="button" onclick="showNextPage();" href="./?Profile">
+						<span>{{IOS/DESC_BUTTON_YES}}</span>
+					</a>
+					<a class="button" href="./">
+						<span>{{IOS/DESC_BUTTON_SKIP}}</span>
+					</a>
+				</p>
+			</div>
+		</div>
+		<div class="hide" id="page-2">
+			<div>
+				<h1>
+					{{IOS/DESC_P4}}
+				</h1>
+				<p>
+					{{IOS/DESC_P5}}
+				</p>
+				<p>
+					{{IOS/DESC_P6}}
+					<br />
+					{{IOS/DESC_P7}}
+				</p>
+				<p>
+					<a class="button" href="./">
+						<span>{{IOS/DESC_BUTTON_OPEN}}</span>
+					</a>
+				</p>
+			</div>
+		</div>
+	</body>
+	<!--<script type="text/javascript">-->
+		<!--(function()-->
+		<!--{-->
+<!--//			document.cookie="itIsIosCookie";-->
+<!--//			document.cookie="iosProfile=requested; path=/";-->
+<!--//			document.cookie="iosProfileRequested;";-->
+<!--//			window.localStorage.setItem("iosLocalStorage", 'itIsIosLocalStorage');-->
+			<!--document.getElementById('page-1').innerHTML = 'cookie - ' + document.cookie + ' *********** localStorage - ' + localStorage.getItem("iosProfileRequested");-->
+		<!--})();-->
+	<!--</script>-->
+</html>

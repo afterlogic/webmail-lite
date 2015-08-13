@@ -1,0 +1,9 @@
+<span class="pagination" data-bind="visible: pages().length > 0">
+	<span class="item first" data-bind="customTooltip: 'MAIN/FIRST_PAGE', visible: visibleFirst, click: clickFirstPage"></span>
+	<span class="item prev" data-bind="customTooltip: 'MAIN/PREV_PAGE', visible: visibleFirst, click: clickPreviousPage"></span>
+	<span class="pages" data-bind="foreach: pages">
+		<span class="item" data-bind="text: number, css: {'current': current}, click: clickFunc"></span>
+	</span>
+	<span class="item next" data-bind="customTooltip: 'MAIN/NEXT_PAGE', visible: visibleLast, click: clickNextPage"></span>
+	<span class="item last" data-bind="customTooltip: 'MAIN/LAST_PAGE', visible: visibleLast, click: clickLastPage"></span>
+</span>

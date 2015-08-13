@@ -1,0 +1,21 @@
+<div class="report_panel loading" data-bind="visible: loadingVisible(), css: {'hide': loadingHidden()}">
+	<span class="content">
+		<span class="icon"></span>
+		<span class="text" data-bind="text: loadingMessage"></span>
+	</span>
+</div>
+<div class="report_panel report" data-bind="visible: reportVisible(), css: {'hide': reportHidden()}">
+	<span class="content" >
+		<span class="icon"></span>
+		<span class="text" data-bind="text: reportMessage"></span>
+		<span class="close" data-bind="visible: reportVisibleClose, click: selfHideReport"></span>
+	</span>
+</div>
+<div class="report_panel error" data-bind="visible: errorVisible(), css: {'hide': errorHidden(), 'gray': gray()}">
+	<span class="content">
+		<span class="icon"></span>
+		<span class="text" data-bind="html: errorMessage, visible: isHtmlError"></span>
+		<span class="text" data-bind="text: errorMessage, visible: !isHtmlError()"></span>
+		<span class="close" data-bind="click: selfHideError"></span>
+	</span>
+</div>

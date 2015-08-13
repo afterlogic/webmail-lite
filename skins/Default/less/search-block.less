@@ -1,0 +1,274 @@
+/*=== Search Block CSS ===*/
+.search_block {
+	.box-sizing;
+
+	font-size: 0px;
+	vertical-align: middle;
+	padding-right: 20px;
+	display: inline-block;
+	width: 100%;
+	height: 100%;
+
+	html.rtl & {
+		padding-right: 0px;
+		padding-left: 20px;
+	}
+
+	& > .input {
+		.box-sizing;
+
+		position: relative;
+		border: 1px solid #c5c7c8;
+		border-radius:10px;
+		outline: none;
+		width: 100%;
+		height: 100%;
+		display: inline-block;
+		vertical-align: middle;
+		box-shadow: none;
+		overflow: hidden;
+		padding-left: 30px;
+		min-height: 26px;
+		padding-top: 3px;
+
+		html.rtl & {
+			padding-right: 30px;
+			padding-left: 0px;
+		}
+
+		&.focus {
+			border: 1px solid #93B5E3;
+			box-shadow: 0 0 2px 0 #1D67CD;
+		}
+
+		.row {
+			font-size: 11pt;
+			line-height: 160%;
+			display: inline-block;
+			vertical-align: middle;
+			width: 100%;
+//			height: 24px;
+			overflow: hidden;
+			white-space:nowrap;
+			padding: 0px;
+			border: 0px;
+		}
+
+		.field {
+//			position: absolute;
+			font-size: 11pt;
+//			line-height: 160%;
+			display: inline-block;
+			vertical-align: middle;
+			width: 100%;
+			height: 20px;
+			overflow: hidden;
+			white-space:nowrap;
+			padding: 0px;
+			border: 0px;
+			opacity: 1;
+			visibility: visible;
+
+			.transition(~"opacity 500ms ease 0ms, visibility 500ms linear 10ms");
+		}
+
+		.field.hide {
+			display: block;
+			position: absolute;
+			top: -200px;
+		}
+		
+		.icon.search {
+			position: absolute;
+			left: 0px;
+			top: 0px;
+			font-size: 11pt;
+			width: 30px;
+			height: 24px;
+			display: inline-block;
+			vertical-align: top;
+			overflow: hidden;
+
+			html.rtl & {
+				left: initial;
+				right: 0;
+			}
+			
+			.iconFontInit();
+			&:before {
+				color: #CCCCCC;
+				content: "\e628";
+				display: block;
+				font-size: 20px;
+				height: 20px;
+				width: 20px;
+				margin: 3px 0px 0px 5px;
+
+				html.rtl & {
+					margin: 3px 5px 0px 0px;
+				}
+			}
+		}
+	}
+	.expand .field {
+		opacity: 0;
+		visibility: hidden;
+		.transition(~"opacity 500ms ease 0ms, visibility 10ms linear 500ms");
+	}
+
+	.control .icon {
+		display: inline-block;
+		vertical-align: top;
+		width: 20px;
+		cursor: pointer;
+		margin-top: -6px;
+		height: 100%;
+		
+		.iconFontInit();
+		&:before {
+			color: #CCCCCC;
+			content: "\e66d";
+			display: inline-block;
+			font-size: 18px;
+			height: 20px;
+			width: 20px;
+			margin: 10px 2px 0px;
+		}
+
+		&.expand {
+
+
+			&:before {
+				content: "\e66e";
+			}
+		}
+	}
+
+	.search_highlight {
+		color: #ccc;
+	}
+
+	.theme-seach-block();
+
+	.expand .extended {
+//		min-height: 110px;
+		opacity: 1;
+		visibility: visible;
+		.transition(~"opacity 500ms ease 0ms, visibility 10ms linear 0s");
+	}
+
+	.extended {
+		.box-sizing;
+
+		width: 100%;
+		height: 100%;
+//		display: inline-block;
+		display: block;
+		margin-top: -24px;
+		overflow: hidden;
+		opacity: 0;
+		visibility: hidden;
+//		.transition(~"min-height 800ms ease 0ms, opacity 500ms ease 0ms");
+		.transition(~"opacity 500ms ease 0ms, visibility 10ms linear 500ms");
+
+		.search_fieldset {
+			display: block;
+			white-space: normal;
+
+			.section {
+				.box-sizing;
+
+				display: inline-block;
+				width: 50%;
+				overflow: hidden;
+				padding-right: 20px;
+				vertical-align: top;
+
+				html.rtl & {
+					padding-left: 20px;
+					padding-right: 0px;
+				}
+
+				.row {
+					line-height: 230%;
+					height: 28px;
+					display: block;
+					padding-right: 2px;
+					overflow: visible;
+
+					html.rtl & {
+//						padding: 0 2px 0 78px;
+						padding-right: 0px;
+						padding-left: 2px;
+					}
+
+					&.text {
+						border-bottom: 1px dashed #C5C7C8;
+					}
+
+					&.attachments {
+
+						.custom_checkbox {
+							margin: 0;
+							margin-bottom: 1px;
+							vertical-align: middle;
+							line-height: 1;
+						}
+
+						.attachment_name {
+							display: inline-block;
+						}
+					}
+
+					.date {
+						display: inline-block;
+						padding: 0;
+//						width: 50%;
+						margin-left: 0px;
+					}
+
+					.label {
+//						margin-left: -78px;
+
+						html.rtl & {
+							text-align: right;
+						}
+					}
+
+					.input {
+						border-radius: 0px;
+						border: none;
+						box-shadow: none;
+						padding: 0;
+						width: 100%;
+						font: normal 11pt Helvetica, Tahoma, Arial, sans-serif;
+						color: #555566;
+					}
+				}
+			}
+			
+			.section.attachments {
+				display: block;
+				width: 100%;
+			}
+			
+			.buttons {
+				margin: 0px 18px 0px 0px;
+				padding: 10px 0px 0px 0px;
+				border-top: 1px solid #EAE7E7;
+				display: block;
+				width: auto;
+
+				html.rtl & {
+					margin: 0px 0px 0px 18px;
+					padding-left: 0px;
+				}
+			}
+
+			.button {
+				display: inline-block;
+			}
+		}
+	}
+}
+/*=== END Search Block CSS ===*/

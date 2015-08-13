@@ -1,0 +1,13 @@
+<span class="label required" data-bind="text: label, css: {'disabled': !isEnabled()}"></span>
+<input class="value input server" spellcheck="false" type="text" maxlength="255"  data-bind="value: server, hasfocus: focused, onEnter: function () { $parent.onSaveClick(); }, enable: isEnabled, css: {'disabled': !isEnabled()}"/>
+
+<span class="label required" style="width: auto; margin-left: 10px;" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_PORT" data-bind="i18n: 'text', css: {'disabled': !isEnabled()}"></span>
+<input  class="value input port" spellcheck="false"  type="text" maxlength="5"  data-bind="value: port, onEnter: function () { $parent.onSaveClick(); }, enable: isEnabled, css: {'disabled': !isEnabled()}"/>
+
+<span>
+	<label class="custom_checkbox" data-bind="css: {'checked': ssl, 'disabled': !isEnabled()}">
+		<span class="icon"></span>
+		<input type="checkbox" data-bind="checked: ssl, attr: {'id': id + '_ssl'}, enable: isEnabled, css: {'disabled': !isEnabled()}" />
+	</label>
+	<label data-i18n="SETTINGS/ACCOUNT_PROPERTIES_SSL" data-bind="i18n: 'text', attr: {'for': id + '_ssl'}, css: {'disabled': !isEnabled()}"></label>
+</span>	

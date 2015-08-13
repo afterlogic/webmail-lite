@@ -1,0 +1,39 @@
+<div class="panel_top">
+	<h2 class="title" data-i18n="PLUGIN_EXTERNAL_SERVICES/TITLE_SERVICES" data-bind="i18n: 'text'"></h2>
+</div>
+<div class="panel_center">
+	<div class="fields">
+	 <div class="fieldset">
+		<div class="hint" data-i18n="PLUGIN_EXTERNAL_SERVICES/SETTINGS_DESCRIPTION" data-bind="i18n: 'text'"></div>
+	</div>
+	<!-- ko foreach: servicesAccounts -->
+	 <div class="fieldset" data-bind="visible: userScopes().length > 0">
+		<h2 class="subtitle" data-bind="text: ServiceName + ' ' + userName()"></h2>
+		<div class="hint" data-i18n="" data-bind="i18n: 'text'"></div>
+
+		<div data-bind="foreach: userScopes"> 
+			<div class="row"> 
+				<span class="value"> 
+					<label class="custom_checkbox" data-bind="css: {'checked': value}"> 
+						<span class="icon"></span> 
+						<input type="checkbox" data-bind="checked: value, attr: {'id': 'scopes_' + $parent.Type + name}"> 
+					</label> 
+					<label data-bind="text: displayName, attr: {'for': 'scopes_' + $parent.Type + name}"></label> 
+				</span> 
+			</div>
+		</div>
+
+		<div class="row"></div>
+
+		<div class="buttons" style="text-align: left;">
+			<span class="button" data-bind="click: function (oConnector) {$parent.onSaveClick(oConnector);}">
+				<span data-i18n="PLUGIN_EXTERNAL_SERVICES/APPLY_BUTTON" data-bind="i18n: 'text'"></span>
+			</span>
+			<span class="button" data-bind="visible: connected(), click: function (oConnector) {$parent.onSignOutClick(oConnector);}">
+				<span data-i18n="PLUGIN_EXTERNAL_SERVICES/SIGN_OUT_BUTTON" data-bind="i18n: 'text'"></span>
+			</span>
+		</div>
+	</div>
+	<!-- /ko -->
+	</div>
+</div>

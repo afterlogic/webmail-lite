@@ -1,0 +1,36 @@
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<linearGradient id="fade" x1="90%" y1="0" x2="100%" y2="0">
+			<stop stop-color="white" offset="0"/>
+			<stop stop-color="black" offset="1"/>
+		</linearGradient>
+		
+		<linearGradient id="fade_invert" x1="0" y1="0" x2="10%" y2="0">
+			<stop stop-color="black" offset="0"/>
+			<stop stop-color="white" offset="1"/>
+		</linearGradient>
+
+		<mask id="masking" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox">
+			<rect width="1" height="1" fill="url(#fade)" />
+		</mask>
+		<mask id="masking_rtl" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox">
+			<rect width="1" height="1" fill="url(#fade_invert)" />
+		</mask>
+		
+		<filter id="blur1px">
+			<feGaussianBlur stdDeviation="1" />
+		</filter>
+		<filter id="blur2px">
+			<feGaussianBlur stdDeviation="2" />
+		</filter>
+		<filter id="blur3px">
+			<feGaussianBlur stdDeviation="3" />
+		</filter>
+		<filter id="blur4px">
+			<feGaussianBlur stdDeviation="4" />
+		</filter>
+		<filter id="blur5px">
+			<feGaussianBlur stdDeviation="5" />
+		</filter>
+	</defs>
+</svg>

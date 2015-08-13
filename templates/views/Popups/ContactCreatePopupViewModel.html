@@ -1,0 +1,50 @@
+<div class="mask" data-bind="click: onCancelClick"></div>
+<div class="popup_panel">
+	<span class="title" data-i18n="CONTACTS/LABEL_NEW_CONTACT" data-bind="i18n: 'text'"></span>
+	<div class="fields">
+		<div class="row">
+			<span class="label">
+				<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_DISPLAY_NAME"></span>:
+			</span>
+			<input class="value input" type="text" data-bind="value: displayName, hasfocus: focusDisplayName" />
+		</div>
+		<div class="row">
+			<span class="label">
+				<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_EMAIL"></span>:
+			</span>
+			<input class="value input" type="text" data-bind="value: email" />
+		</div>
+		<div class="row">
+			<span class="label">
+				<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_PHONE"></span>:
+			</span>
+			<input class="value input" type="text" data-bind="value: phone" />
+		</div>
+		<div class="row">
+			<span class="label">
+				<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_ADDRESS"></span>:
+			</span>
+			<input class="value input" type="text" data-bind="value: address" />
+		</div>
+		<div class="row">
+			<span class="label">
+				<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_SKYPE"></span>:
+			</span>
+			<input class="value input" type="text" data-bind="value: skype" />
+		</div>
+		<div class="row">
+			<span class="label">
+				<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_FACEBOOK"></span>:
+			</span>
+			<input class="value input" type="text" data-bind="value: facebook" />
+		</div>
+		<div class="clear"></div>
+	</div>
+	<span class="link" data-bind="i18n: 'text', click: goToContacts" data-i18n="CONTACTS/BUTTON_SHOW_ADDITIONAL_FIELDS"></span>
+	<div class="buttons">
+		<span class="button" data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', click: onSaveClick, visible: !loading()"></span>
+		<span class="button" data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', visible: loading()"></span>
+		<span class="button" data-i18n="SETTINGS/BUTTON_CANCEL" data-bind="i18n: 'text', click: onCancelClick, visible: !loading()"></span>
+	</div>
+</div>
+<span class="helper"></span>

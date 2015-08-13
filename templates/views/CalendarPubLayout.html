@@ -1,0 +1,22 @@
+{%INCLUDE-START/Layout-Top/INCLUDE-END%}
+
+<div data-view-model="Common_InformationViewModel"></div>
+<div class="screens pub_view">
+	
+	{%INCLUDE-START/Layout-Screens-Top/INCLUDE-END%}
+
+	<div data-view-model="Calendar_CalendarViewModel" class="screen CalendarLayout" style="display: none;"></div>
+
+	{%INCLUDE-START/Layout-Screens-Middle/INCLUDE-END%}
+
+	<div data-view-model="Popups_Calendar_CalendarPopupViewModel" class="popup calendar_popup calendar_create" style="display: none;"></div>
+	<div data-view-model="Popups_Calendar_SharePopupViewModel" class="popup calendar_popup calendar_share" style="display: none;"></div>
+	<div data-view-model="Popups_Calendar_EventPopupViewModel" class="popup calendar_popup calendar_event" style="display: none;"></div>
+	<div data-view-model="Popups_AlertPopupViewModel" class="alert popup" style="display: none;"></div>
+	<div data-view-model="Popups_ConfirmPopupViewModel" class="confirm popup" style="display: none;"></div>
+
+	{%INCLUDE-START/Layout-Screens-Bottom/INCLUDE-END%}
+	
+</div>
+
+{%INCLUDE-START/Layout-Bottom/INCLUDE-END%}

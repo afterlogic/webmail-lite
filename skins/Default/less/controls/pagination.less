@@ -1,0 +1,88 @@
+.pagination {
+	cursor: default;
+	display: block;
+	text-align: right;
+	
+	html.rtl & {
+		text-align: left;
+	}
+
+	.pages {
+		display: inline-block;
+		vertical-align: middle;
+	}
+	
+	.item {
+		font-size: 12pt;
+		display: inline-block;
+		vertical-align: middle;
+		cursor: pointer;
+		color: #aaa;
+		
+		.csstransitions & {
+			.transition(color 200ms ease 0s);
+		}
+		
+		&:hover {
+			color: #777;
+		}
+		
+		&.current {
+			cursor: default;
+			color: #000;
+		}
+		
+		&.first,
+		&.last,
+		&.prev,
+		&.next
+		{
+			.iconFontInit();
+				display: inline-block;
+				vertical-align: middle;
+				line-height: 18px;
+			
+			&:before {
+				font-size: 18px;
+				display: inline-block;
+				vertical-align: middle;
+			}
+		}
+		
+		&.first:before {
+			content: "\e64e";
+
+			html.rtl & {
+				content: "\e64d";
+			}
+		}
+		
+		&.last:before {
+			content: "\e64d";
+
+			html.rtl & {
+				content: "\e64e";
+			}
+		}
+		
+		&.prev:before {
+			content: "\e64b";
+			
+			html.rtl & {
+				content: "\e64c";
+			}
+		}
+		
+		&.next:before {
+			content: "\e64c";
+			
+			html.rtl & {
+				content: "\e64b";
+			}
+		}
+	}
+	
+	.pages .item {
+		padding: 0px 2px;
+	}
+}

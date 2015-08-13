@@ -1,0 +1,6 @@
+<!-- ko foreach: servicesAccounts -->
+<span class="uploader_button" data-bind="visible: isFilestorage, css: Type">
+	<span class="icon" data-bind="customTooltip: $parent.getAttachFromTooltip(Type), click: function () {$parent.onShowAttachFromClick(Type);}"></span>
+	<span class="text" data-bind="text: $parent.getAttachFromTooltip(Type)"></span>
+</span>
+ <!-- /ko -->

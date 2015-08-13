@@ -1,0 +1,86 @@
+<input type="submit" name="next_btn" style="position: absolute; visibility: hidden;" value="Next" />
+
+<h1>
+	Mobile settings
+</h1>
+
+<div class="field_list">
+
+	<div class="row">
+		<input name="chEnableMobileSync" id="chEnableMobileSync" type="checkbox" value="1" {{MobyleSyncChecked}} />
+		<label id="chEnableMobileSync_label" for="chEnableMobileSync">Enable mobile sync</label>
+	</div>
+
+	<div class="row">
+		<label class="field_label_tiny" id="txtCalDAVUrl_label">DAV server URL:</label>
+		<span class="field_value_limit">
+			<input name="txtCalDAVUrl" id="txtCalDAVUrl" class="wm_input" type="text" style="width: 398px;" value="{{CalDAVUrl}}" />
+		</span>
+	</div>
+
+	<div class="field_description">
+		<span class="error">
+			{{DavError}}
+		</span>
+		<div class="{{AutoClass}} note">
+			This value was autodetected, you can change it if required.
+		</div>
+		<br />
+		<div class="note">
+			Specifies the external URL to the built-in DAV server.
+			The CalDAV and CardDAV clients such as iPhone will access users' calendars via this URL.
+			When "Enable Mobile Sync" is checked, the webmail also displays this URL to users in Settings/Mobile Sync area of their accounts.
+			<br />
+			<br />
+			Specifies the external URL to the built-in DAV server.
+			The CalDAV and CardDAV clients such as iPhone will access users' calendars via this URL.
+			When "Enable Mobile Sync" is checked, the webmail also displays this URL to users in Settings/Mobile Sync area of their accounts.
+			<br />
+			<br />
+			<a href="http://www.afterlogic.com/wiki/DAV_server_configuration_(WebMail_Pro)" target="_target">Learn More</a>
+		</div>
+	</div>
+
+	<br />
+	<br />
+
+	<div class="row">
+		<label class="field_label_tiny" id="txtCalDAVUrl_label">IMAP host name:</label>
+		<span class="field_value_limit">
+			<input name="txtIMAPHostName" id="txtIMAPHostName" class="wm_input" type="text" style="width: 398px;" value="{{IMAPHostName}}" />
+		</span>
+	</div>
+
+	<div class="field_description">
+		<div class="note">
+			Specifies the external host name of the local IMAP server (for iOS profile).
+			When the client like iPhone accesses web interface, it prompts the user to download iOS profile
+			which enables sync of e-mail, contacts and calendars with the device.
+			Therefore, the device needs external host name of your e-mail server
+			(as the device cannot use "localhost" name used to access your local e-mail server).
+		</div>
+	</div>
+
+	<br />
+	<br />
+
+	<div class="row">
+		<label class="field_label_tiny" id="txtSMTPHostName_label">SMTP host name:</label>
+		<span class="field_value_limit">
+			<input name="txtSMTPHostName" id="txtSMTPHostName" class="wm_input" type="text" style="width: 398px;" value="{{SMTPHostName}}" />
+		</span>
+	</div>
+
+	<div class="field_description">
+		<div class="note">
+			Specifies the external URL to the local SMTP server (for iOS profile).
+		</div>
+	</div>
+
+</div>
+
+<div class="buttons">
+	<hr />
+	<input class="wm_button" type="submit" name="back_btn" value="Back" />
+	<input class="wm_button right" type="submit" name="next_btn" value="Next" />
+</div>
