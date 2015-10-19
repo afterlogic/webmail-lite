@@ -10,16 +10,11 @@
 			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_BACK_TO_LIST"></span>
 		</span>
 		<!-- /ko -->
-		<!--<span class="item new_contact" data-bind="visible: showPersonalContacts() &&
-			selectedGroupType() !== Enums.ContactsGroupListType.Global && selectedGroupType() !== Enums.ContactsGroupListType.All, command: newContactCommand, customTooltip: 'CONTACTS/TOOL_NEW_CONTACT'">
-			<span class="icon"></span>
-			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_NEW_CONTACT"></span>
-		</span>-->
 		<!-- ko if: !mobileApp -->
 		<span class="item new_group" data-bind="visible: showPersonalContacts() &&
 			selectedGroupType() !== Enums.ContactsGroupListType.Global &&
 			selectedGroupType() !== Enums.ContactsGroupListType.SharedToAll,
-			command: newGroupCommand, customTooltip: 'CONTACTS/TOOL_NEW_GROUP'">
+			command: newGroupCommand, customTooltip: 'CONTACTS/TOOL_NEW_GROUP'" id="selenium_contacts_new_group_button">
 			<span class="icon"></span>
 			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_NEW_GROUP"></span>
 		</span>
@@ -46,7 +41,8 @@
 				</span>
 			</span>
 		</span>
-		<span class="item delete" data-bind="visible: (showPersonalContacts() && selectedGroupType() === Enums.ContactsGroupListType.Personal || showSharedToAllContacts() && selectedGroupType() === Enums.ContactsGroupListType.SharedToAll), command: deleteCommand, customTooltip: 'CONTACTS/TOOL_DELETE'">
+		<span class="item delete" data-bind="visible: (showPersonalContacts() && selectedGroupType() === Enums.ContactsGroupListType.Personal || showSharedToAllContacts() && selectedGroupType() === Enums.ContactsGroupListType.SharedToAll), 
+				command: deleteCommand, customTooltip: 'CONTACTS/TOOL_DELETE'" id="selenium_contacts_delete_button">
 			<span class="icon"></span>
 			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/TOOL_DELETE"></span>
 		</span>

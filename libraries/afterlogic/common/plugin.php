@@ -667,8 +667,9 @@ class CApiPluginManager
 	 * @param \ProjectCore\Actions $oServer
 	 * @param string $sJsonHookName
 	 */
-	public function RunJsonHook(&$oServer, $sJsonHookName)
+	public function RunJsonHook(&$oServer, $sJsonHookName, $mResult = null)
 	{
+		$mHookResult = null;
 		if ($this->bIsEnabled)
 		{
 			if (isset($this->_aJsonHooks[$sJsonHookName]))
@@ -676,12 +677,12 @@ class CApiPluginManager
 				foreach ($this->_aJsonHooks[$sJsonHookName] as $mHookCallbak)
 				{
 					$this->logCallback('JSONHOOK', $sJsonHookName, $mHookCallbak);
-					return call_user_func_array($mHookCallbak, array(&$oServer));
+					$mHookResult = call_user_func_array($mHookCallbak, array(&$oServer));
 				}
 			}
 		}
 
-		return null;
+		return isset($mResult) ? $mResult : $mHookResult;
 	}
 
 	/**

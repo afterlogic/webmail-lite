@@ -8,7 +8,8 @@
 			<div class="toolbar">
 				<span class="content">
 					<!-- ko if: !mobileApp -->
-					<span class="item" data-i18n="CONTACTS/TOOL_NEW_CONTACT" data-bind="i18n: 'text', command: newContactCommand, css: {'disabled': selectedGroupType() === Enums.ContactsGroupListType.Global}"></span>
+					<span class="item" data-i18n="CONTACTS/TOOL_NEW_CONTACT" id="selenium_contacts_new_button"
+						  data-bind="i18n: 'text', command: newContactCommand, css: {'disabled': selectedGroupType() === Enums.ContactsGroupListType.Global}"></span>
 					<!-- /ko -->
 					<!-- ko if: mobileApp -->
 					<span class="item new_group" data-bind="visible: showPersonalContacts, command: newGroupCommand">
@@ -37,7 +38,7 @@
 					<!-- ko template: { name: 'Contacts_ViewContactViewModel', data: $data} --><!-- /ko -->
 				</div>
 
-				<div class="middle_bar edit_contact" data-bind="visible: selectedContact() && selectedContact().edited(), with: selectedContact">
+				<div class="middle_bar edit_contact" data-bind="visible: selectedContact() && selectedContact().edited(), with: selectedContact" id="selenium_contacts_edit_form">
 					<!-- ko template: { name: 'Contacts_EditContactViewModel', data: $data } --><!-- /ko -->
 				</div>
 
@@ -45,7 +46,7 @@
 					<!-- ko template: { name: 'Contacts_ViewGroupViewModel', data: $data } --><!-- /ko -->
 				</div>
 
-				<div class="middle_bar edit_group" data-bind="visible: selectedGroup() && selectedGroup().edited(), with: selectedGroup">
+				<div class="middle_bar edit_group" data-bind="visible: selectedGroup() && selectedGroup().edited(), with: selectedGroup" id="selenium_contacts_edit_group_form">
 					<!-- ko template: { name: 'Contacts_EditGroupViewModel', data: $data } --><!-- /ko -->
 				</div>
 

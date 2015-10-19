@@ -25,7 +25,7 @@
 		css: {'current': $parent.currentTab() === name, 'recivedAnim': koRecivedAnim},
 		visible: koVisibleTab">
 	<span class="helper" data-bind="text: title"></span>
-	<a class="link" href="javascript: void(0);" data-bind="attr: {href: hash}">
+	<a class="link" href="javascript: void(0);" data-bind="attr: {href: hash, 'id': 'selenium_header_' + name}">
 		<span class="text" data-bind="text: title"></span>
 		<!-- ko if: name === 'helpdesk' -->
 			<span class="unseen" data-bind="text: $parent.helpdeskUnseenCount, visible: $parent.helpdeskUnseenVisible(), css: {one: $parent.helpdeskUnseenCount() < 10, two: $parent.helpdeskUnseenCount() > 9, three: $parent.helpdeskUnseenCount() > 99}"></span> <!--TODO customTooltip with plural-->
@@ -37,11 +37,11 @@
 {%INCLUDE-START/Header-Middle/INCLUDE-END%}
 
 <span class="item logout">
-	<span class="link" data-i18n="HEADER/LOGOUT" data-bind="i18n: 'text', click: logout"></span>
+	<span class="link" data-i18n="HEADER/LOGOUT" data-bind="i18n: 'text', click: logout" id="selenium_logout_button"></span>
 </span>
 <span class="item settings" data-bind="css: {'current': currentTab() === Enums.Screens.Settings}">
 	<a class="link" href="javascript: void(0);" data-i18n="HEADER/SETTINGS" data-bind="i18n: 'text', 
-	   attr: {href: '#' + settingsHash()}"></a>
+	   attr: {href: '#' + settingsHash()}" id="selenium_settings_button"></a>
 </span>
 <span class="item settings" data-bind="visible: mobileDevice">
 	<a class="link" href="?mobile" data-i18n="HEADER/MOBILE_VERSION" data-bind="i18n: 'text'"></a>

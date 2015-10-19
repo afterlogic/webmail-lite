@@ -1,6 +1,7 @@
 <div class="panel_top">
 	<div class="buttons" data-bind="visible: allowUsersAddNewAccounts">
-		<span class="button special add_new_account" data-i18n="SETTINGS/ACCOUNTS_BUTTON_ADD_NEW_ACCOUNT" data-bind="i18n: 'text', click: onAccountAdd"></span>
+		<span class="button special add_new_account" data-i18n="SETTINGS/ACCOUNTS_BUTTON_ADD_NEW_ACCOUNT" 
+			  data-bind="i18n: 'text', click: onAccountAdd" id="selenium_settings_create_account_button"></span>
 	</div>
 	<h2 class="title" data-bind="text: title"></h2>
 </div>
@@ -53,8 +54,8 @@
 			<a class="tabs-links" data-bind="attr: {'name': Enums.Screens.Settings + '/' + Enums.SettingsTab.EmailAccounts + '/' +Enums.AccountSettingsTab.Signature}"></a>
 			<div class="shortcuts">
 				<div data-bind="visible: !editedFetcherId() && !editedIdentityId()">
-					<span class="item properties" data-bind="css: {'selected': tab() === Enums.AccountSettingsTab.Properties}, visible: allowProperties ">
-						<a href="javascript: void(0);" data-i18n="SETTINGS/ACCOUNTS_TAB_PROPERTIES"
+					<span class="item properties" data-bind="css: {'selected': tab() === Enums.AccountSettingsTab.Properties}, visible: allowProperties">
+						<a href="javascript: void(0);" data-i18n="SETTINGS/ACCOUNTS_TAB_PROPERTIES" id="selenium_settings_account_properties_button"
 						   data-bind="i18n: 'text', click: function () {onTabClick(Enums.AccountSettingsTab.Properties);}"></a>
 					</span>
 					<span class="item folders" data-bind="visible: isAllowMail, css: {'selected': tab() === Enums.AccountSettingsTab.Folders}">

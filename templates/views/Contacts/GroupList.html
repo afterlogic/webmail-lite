@@ -15,7 +15,7 @@
 			<div class="item canSelect" data-bind="visible: showPersonalContacts, 
 					css: {'selected': Enums.ContactsGroupListType.Personal === selectedGroupType()},
 					click: $parent.gotoContactList">
-				<a href="javascript: void(0);" class="title" data-bind="
+				<a href="javascript: void(0);" class="title" id="selenium_contacts_personal_button" data-bind="
 						css: {'recivedAnim': recivedAnimUnshare()},
 						droppable: {valueFunc: function (oEvent, oUi) { $root.contactsDropToGroupType(0, oEvent, oUi); }, switchObserv: isAllOrSubOrGlobalGroupSelect},
 						click: function () { changeGroupType(Enums.ContactsGroupListType.Personal); }">

@@ -2973,7 +2973,7 @@ class Actions extends ActionsBase
 
 		try
 		{
-			$oAccount = $this->oApiWebMail->CreateAccountProcess($sEmail, $sPassword, '', array(
+			$oAccount = $this->oApiWebMail->createAccount($sEmail, $sPassword, '', array(
 				'FriendlyName' => $sName,
 				'Question1' => $sQuestion,
 				'Answer1' => $sAnswer
@@ -3254,16 +3254,17 @@ class Actions extends ActionsBase
 	 */
 	public function AjaxFilesUpload()
 	{
-		$oAccount = $this->getDefaultAccountFromParam();
+		$oDefaultAccount = $this->getDefaultAccountFromParam();
+		$oAccount = $this->getAccountFromParam();
 		$oTenant = null;
 		if ($this->oApiTenants)
 		{
-			$oTenant = (0 < $oAccount->IdTenant) ? $this->oApiTenants->getTenantById($oAccount->IdTenant) :
+			$oTenant = (0 < $oDefaultAccount->IdTenant) ? $this->oApiTenants->getTenantById($oDefaultAccount->IdTenant) :
 				$this->oApiTenants->getDefaultGlobalTenant();
 		}
 
 		$mResult = false;
-		if ($this->oApiCapability->isFilesSupported($oAccount) && $oTenant)
+		if ($this->oApiCapability->isFilesSupported($oDefaultAccount) && $oTenant)
 		{
 			$aFiles = $this->getParamValue('Hashes', null);
 			if (is_array($aFiles) && 0 < count($aFiles))
@@ -3274,7 +3275,7 @@ class Actions extends ActionsBase
 					$aData = \CApi::DecodeKeyValues($sHash);
 					if (\is_array($aData) && 0 < \count($aData))
 					{
-						$oFileInfo = $this->oApiFilestorage->getFileInfo($oAccount, $aData['Type'], $aData['Path'], $aData['Name']);
+						$oFileInfo = $this->oApiFilestorage->getFileInfo($oDefaultAccount, $aData['Type'], $aData['Path'], $aData['Name']);
 						$rFile = null;
 						if ($oFileInfo->IsLink)
 						{
@@ -3308,7 +3309,7 @@ class Actions extends ActionsBase
 						}
 						else
 						{
-							$rFile = $this->oApiFilestorage->getFile($oAccount, $aData['Type'], $aData['Path'], $aData['Name']);
+							$rFile = $this->oApiFilestorage->getFile($oDefaultAccount, $aData['Type'], $aData['Path'], $aData['Name']);
 						}
 						
 						$sTempName = md5('Files/Tmp/'.$aData['Type'].$aData['Path'].$aData['Name'].microtime(true).rand(1000, 9999));
@@ -6088,7 +6089,17 @@ class Actions extends ActionsBase
 			if ($bIsCsvVcfExtension)
 			{
 				$sSavedName = 'import-post-' . md5($aFileData['name'] . $aFileData['tmp_name']);
-				if ($this->ApiFileCache()->moveUploadedFile($oAccount, $sSavedName, $aFileData['tmp_name'])) {
+				
+				if (is_resource($aFileData['tmp_name']))
+				{
+					$this->ApiFileCache()->putFile($oAccount, $sSavedName, $aFileData['tmp_name']);
+				}
+				else
+				{
+					$this->ApiFileCache()->moveUploadedFile($oAccount, $sSavedName, $aFileData['tmp_name']);
+				}
+				if ($this->ApiFileCache()->isFileExists($oAccount, $sSavedName))
+				{
 					$oApiContactsManager = $this->ApiContacts();
 					if ($oApiContactsManager)
 					{
@@ -6099,8 +6110,8 @@ class Actions extends ActionsBase
 							$sFileType,
 							$this->ApiFileCache()->generateFullFilePath($oAccount, $sSavedName),
 							$iParsedCount,
-							$iGroupId = $aAdditionalData['GroupId'],
-							$bIsShared= $aAdditionalData['IsShared']
+							$aAdditionalData['GroupId'],
+							$aAdditionalData['IsShared']
 						);
 					}
 
@@ -6164,15 +6175,28 @@ class Actions extends ActionsBase
 			if ($bIsIcsExtension)
 			{
 				$sSavedName = 'import-post-' . md5($aFileData['name'] . $aFileData['tmp_name']);
-				if ($this->ApiFileCache()->moveUploadedFile($oAccount, $sSavedName, $aFileData['tmp_name'])) {
+				if (is_resource($aFileData['tmp_name']))
+				{
+					$this->ApiFileCache()->putFile($oAccount, $sSavedName, $aFileData['tmp_name']);
+				}
+				else
+				{
+					$this->ApiFileCache()->moveUploadedFile($oAccount, $sSavedName, $aFileData['tmp_name']);
+				}
+				if ($this->ApiFileCache()->isFileExists($oAccount, $sSavedName))
+				{
 					$oApiCalendarManager = $this->oApiCalendar;
-					if ($oApiCalendarManager) {
+					if ($oApiCalendarManager) 
+					{
 						$iImportedCount = $oApiCalendarManager->importToCalendarFromIcs($oAccount, $sCalendarId, $this->ApiFileCache()->generateFullFilePath($oAccount, $sSavedName));
 					}
 
-					if (false !== $iImportedCount && -1 !== $iImportedCount) {
+					if (false !== $iImportedCount && -1 !== $iImportedCount) 
+					{
 						$aResponse['ImportedCount'] = $iImportedCount;
-					} else {
+					} 
+					else
+					{
 						$sError = 'unknown';
 					}
 
@@ -6228,7 +6252,15 @@ class Actions extends ActionsBase
 				else
 				{
 					$sSavedName = 'upload-post-'.md5($aFileData['name'].$aFileData['tmp_name']);
-					if ($this->ApiFileCache()->moveUploadedFile($oAccount, $sSavedName, $aFileData['tmp_name']))
+					if (is_resource($aFileData['tmp_name']))
+					{
+						$this->ApiFileCache()->putFile($oAccount, $sSavedName, $aFileData['tmp_name']);
+					}
+					else
+					{
+						$this->ApiFileCache()->moveUploadedFile($oAccount, $sSavedName, $aFileData['tmp_name']);
+					}
+					if ($this->ApiFileCache()->isFileExists($oAccount, $sSavedName))
 					{
 						$sUploadName = $aFileData['name'];
 						$iSize = $aFileData['size'];
@@ -6286,8 +6318,8 @@ class Actions extends ActionsBase
 		}
 
 		$aFileData = $this->getParamValue('FileData', null);
-		$sAdditionalData = $this->getParamValue('AdditionalData', '{}');
-		$aAdditionalData = @json_decode($sAdditionalData, true);
+		$mAdditionalData = $this->getParamValue('AdditionalData', '{}');
+		$mAdditionalData = @json_decode($mAdditionalData, true);
 
 		$sError = '';
 		$aResponse = array();
@@ -6298,15 +6330,22 @@ class Actions extends ActionsBase
 			{
 				$sUploadName = $aFileData['name'];
 				$iSize = (int) $aFileData['size'];
-				$sType = isset($aAdditionalData['Type']) ? $aAdditionalData['Type'] : 'personal';
-				$sPath = isset($aAdditionalData['Path']) ? $aAdditionalData['Path'] : '';
+				$sType = isset($mAdditionalData['Type']) ? $mAdditionalData['Type'] : 'personal';
+				$sPath = isset($mAdditionalData['Path']) ? $mAdditionalData['Path'] : '';
 				$sMimeType = \MailSo\Base\Utils::MimeContentType($sUploadName);
 
 				$sSavedName = 'upload-post-'.md5($aFileData['name'].$aFileData['tmp_name']);
-				if ($this->ApiFileCache()->moveUploadedFile($oAccount, $sSavedName, $aFileData['tmp_name']))
+				$rData = false;
+				if (is_resource($aFileData['tmp_name']))
+				{
+					$rData = $aFileData['tmp_name'];
+				}
+				else if ($this->ApiFileCache()->moveUploadedFile($oAccount, $sSavedName, $aFileData['tmp_name']))
 				{
 					$rData = $this->ApiFileCache()->getFile($oAccount, $sSavedName);
-
+				}
+				if ($rData)
+				{
 					$this->oApiFilestorage->createFile($oAccount, $sType, $sPath, $sUploadName, $rData, false);
 
 					$aResponse['File'] = array(
@@ -6344,7 +6383,7 @@ class Actions extends ActionsBase
 		$sAdditionalData = $this->getParamValue('AdditionalData', '{}');
 		$aAdditionalData = @json_decode($sAdditionalData, true);
 
-		$oAccount = $sAccountId ? $this->getAccount($sAccountId) : $this->getDefaultAccountFromParam();
+		$oAccount = $sAccountId ? $this->getAccount($sAccountId, true, $this->getParamValue('AuthToken', null)) : $this->getDefaultAccountFromParam();
 
 		$sError = '';
 		$aResponse = array();
@@ -6361,12 +6400,21 @@ class Actions extends ActionsBase
 					$sMimeType = \MailSo\Base\Utils::MimeContentType($sUploadName);
 
 					$sSavedName = 'upload-post-' . md5($aFileData['name'] . $aFileData['tmp_name']);
-					if ($this->ApiFileCache()->moveUploadedFile($oAccount, $sSavedName, $aFileData['tmp_name'])) {
+					if (is_resource($aFileData['tmp_name']))
+					{
+						$this->ApiFileCache()->putFile($oAccount, $sSavedName, $aFileData['tmp_name']);
+					}
+					else
+					{
+						$this->ApiFileCache()->moveUploadedFile($oAccount, $sSavedName, $aFileData['tmp_name']);
+					}
+					if ($this->ApiFileCache()->isFileExists($oAccount, $sSavedName))
+					{
 						$sSavedFullName = $this->ApiFileCache()->generateFullFilePath($oAccount, $sSavedName);
 						$this->oApiMail->appendMessageFromFile($oAccount, $sSavedFullName, $sFolder);
-
-						//$aResponse['File'] = $bIsMessage;
-					} else {
+					} 
+					else 
+					{
 						$sError = 'unknown';
 					}
 				}

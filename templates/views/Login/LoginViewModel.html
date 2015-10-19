@@ -1,9 +1,9 @@
 <form class="form fields" action="#" autocomplete="on" onsubmit="return false;" data-bind="command: loginCommand">
 	<div class="fieldset">
 		<div class="row email" data-bind="visible: emailVisible, css: {'focused': emailFocus(), 'filled': email().length > 0, shake: shake()}">
-			<label for="email" class="title placeholder"></label>
+			<label for="selenium_login_email" class="title placeholder"></label>
 			<span class="value">
-				<input id="email" tabindex="1" class="input check_autocomplete_input" name="email" data-i18n="LOGIN/LABEL_EMAIL"
+				<input id="selenium_login_email" tabindex="1" class="input check_autocomplete_input" name="email" data-i18n="LOGIN/LABEL_EMAIL"
 					type="email" spellcheck="false" data-bind="value: email, hasfocus: emailFocus, valueUpdate: 'afterkeydown', initDom: emailDom, i18n: 'placeholder'" />
 			</span>
 		</div>
@@ -20,16 +20,16 @@
 		</div>
 		<!-- /ko -->
 		<div class="row password" data-bind="css: {'focused': passwordFocus(), 'filled': password().length > 0, shake: shake()}">
-			<label for="password" class="title placeholder"></label>
+			<label for="selenium_login_password" class="title placeholder"></label>
 			<span class="value">
-				<input id="password" tabindex="3" class="input check_autocomplete_input"  data-i18n="LOGIN/LABEL_PASSWORD"
+				<input id="selenium_login_password" tabindex="3" class="input check_autocomplete_input"  data-i18n="LOGIN/LABEL_PASSWORD"
 					name="password" type="password" spellcheck="false" data-bind="value: password, hasfocus: passwordFocus, valueUpdate: 'afterkeydown', initDom: passwordDom, i18n: 'placeholder'" />
 			</span>
 		</div>
 	</div>
 	{%INCLUDE-START/Login-Before-Submit-Button/INCLUDE-END%}
 	<div class="row buttons">
-		<button type="submit" tabindex="5" class="button login" data-bind="text: signInButtonText, command: loginCommand"></button>
+		<button type="submit" tabindex="5" class="button login" data-bind="text: signInButtonText, command: loginCommand" id="selenium_login_signin_button"></button>
 	</div>
 	<div class="row signme" data-bind="visible: signMeType() !== Enums.LoginSignMeType.Unuse">
 		<span>

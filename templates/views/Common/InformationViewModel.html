@@ -4,14 +4,14 @@
 		<span class="text" data-bind="text: loadingMessage"></span>
 	</span>
 </div>
-<div class="report_panel report" data-bind="visible: reportVisible(), css: {'hide': reportHidden()}">
+<div class="report_panel report" data-bind="visible: reportVisible(), css: {'hide': reportHidden()}" id="selenium_report">
 	<span class="content" >
 		<span class="icon"></span>
 		<span class="text" data-bind="text: reportMessage"></span>
 		<span class="close" data-bind="visible: reportVisibleClose, click: selfHideReport"></span>
 	</span>
 </div>
-<div class="report_panel error" data-bind="visible: errorVisible(), css: {'hide': errorHidden(), 'gray': gray()}">
+<div class="report_panel error" data-bind="visible: errorVisible(), css: {'hide': errorHidden(), 'gray': gray()}" id="selenium_error_info">
 	<span class="content">
 		<span class="icon"></span>
 		<span class="text" data-bind="html: errorMessage, visible: isHtmlError"></span>

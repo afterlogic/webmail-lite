@@ -90,7 +90,7 @@ class HtmlUtils
 	public static function ClearTags($sHtml)
 	{
 		$aRemoveTags = array(
-			'head', 'link', 'base', 'meta', 'title', 'style', 'script', 'bgsound', 'keygen', 'source',
+			'head', 'link', 'base', /*'meta',*/ 'title', 'style', 'script', 'bgsound', 'keygen', 'source',
 			'object', 'embed', 'applet', 'mocha', 'iframe', 'frame', 'frameset', 'video', 'audio'
 		);
 

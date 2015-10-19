@@ -142,15 +142,17 @@ class SharedAddressBook extends AddressBook {
 			$oApiContactsManager = $this->getContactsManager();
 
 			$aContactListItems = $oApiContactsManager->getContactItems($oAccount->IdUser, \EContactSortField::EMail, \ESortOrder::ASC, 0, 999, '', '', '', $oAccount->IdTenant);
-			foreach ($aContactListItems as $oContactListItem)
+			if (is_array($aContactListItems))
 			{
-				$child = $this->getChildObj($oContactListItem->IdUser, $oContactListItem->IdStr);
-				if ($child)
+				foreach ($aContactListItems as $oContactListItem)
 				{
-					$children[] = $child;
+					$child = $this->getChildObj($oContactListItem->IdUser, $oContactListItem->IdStr);
+					if ($child)
+					{
+						$children[] = $child;
+					}
 				}
 			}
-
 		}
         return $children;
 

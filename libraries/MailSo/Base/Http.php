@@ -208,6 +208,14 @@ class Http
 	}
 
 	/**
+	 * @return bool
+	 */
+	public function IsPut()
+	{
+		return ('PUT' === $this->GetMethod());
+	}
+
+	/**
 	 * @return string
 	 */
 	public function GetQueryString()
@@ -278,6 +286,23 @@ class Http
 		return $sResultHeader;
 	}
 
+	/**
+	 * @param string $sHeader
+	 *
+	 * @return string
+	 */
+	public function GetHeaders()
+	{
+		$aHeaders = array();
+
+		if (\MailSo\Base\Utils::FunctionExistsAndEnabled('apache_request_headers'))
+		{
+			$aHeaders = \apache_request_headers();
+		}
+
+		return $aHeaders;
+	}
+	
 	/**
 	 * @return string
 	 */

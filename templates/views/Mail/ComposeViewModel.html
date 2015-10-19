@@ -22,7 +22,7 @@
 						<span class="icon"></span>
 						<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_BACK_TO_LIST"></span>
 					</span>
-					<span class="item send" data-bind="command: sendCommand, css: {'disabled': !isEnableSending()}">
+					<span class="item send" data-bind="command: sendCommand, css: {'disabled': !isEnableSending()}" id="selenium_compose_send_button">
 						<span class="icon" data-bind="customTooltip: 'COMPOSE/TOOL_SEND'"></span>
 						<span class="text" data-bind="i18n: 'text'" data-i18n="COMPOSE/TOOL_SEND"></span>
 					</span>
@@ -140,7 +140,7 @@
 										<td class="value">
 											<table class="fields">
 												<tr>
-													<td class="value" style="width: 100%;">
+													<td class="value" style="width: 100%;" id="selenium_compose_toaddr">
 														<div class="input inputosaurus">
 															<div class="disable_mask" data-bind="visible: pgpEncrypted"></div>
 															<div data-bind="customScrollbar: {x: false}">
@@ -214,7 +214,8 @@
 											<span data-bind="i18n: 'text'" data-i18n="COMPOSE/HEADER_SUBJECT"></span>:
 										</td>
 										<td class="value">
-											<input type="text" class="input" maxlength="255" tabindex="5" data-bind="value: subject, hasfocus: subjectFocused, valueUpdate: 'afterkeydown'"/>
+											<input type="text" class="input" maxlength="255" tabindex="5" id="selenium_compose_subject"
+												   data-bind="value: subject, hasfocus: subjectFocused, valueUpdate: 'afterkeydown'"/>
 										</td>
 									</tr>
 									<tr class="counter" data-bind="visible: visibleCounter() && !fromToExpandColapssed()">

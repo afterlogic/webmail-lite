@@ -61,19 +61,24 @@ var
 	/**
 	 * @type {boolean}
 	 */
-	bIsIosDevice = -1 < navigator.userAgent.indexOf('iPhone') ||
+	bIsWindowsPhone = -1 < navigator.userAgent.indexOf('Windows Phone'),
+	
+	/**
+	 * @type {boolean}
+	 */
+	bIsIosDevice = !bIsWindowsPhone && (-1 < navigator.userAgent.indexOf('iPhone') ||
 		-1 < navigator.userAgent.indexOf('iPod') ||
-		-1 < navigator.userAgent.indexOf('iPad'),
+		-1 < navigator.userAgent.indexOf('iPad')),
 
 	/**
 	 * @type {boolean}
 	 */
-	bIsAndroidDevice = -1 < navigator.userAgent.toLowerCase().indexOf('android'),
+	bIsAndroidDevice = !bIsWindowsPhone && (-1 < navigator.userAgent.toLowerCase().indexOf('android')),
 
 	/**
 	 * @type {boolean}
 	 */
-	bMobileDevice = bIsIosDevice || bIsAndroidDevice,
+	bMobileDevice = bIsWindowsPhone || bIsIosDevice || bIsAndroidDevice,
 
 	aViewMimeTypes = [
 		'image/jpeg', 'image/png', 'image/gif',
@@ -2813,7 +2818,6 @@ Utils.File.getViewLinkByHash = function (iAccountId, sHash, bIsExt, sTenatHash)
 		sExtPart = (bIsExt === true) ? '/1' : '/0',
 		sTenantPart = (typeof sTenatHash === 'string' && sTenatHash !== '') ? '/' + sTenatHash : ''
 	;
-		
 	return sViewLink + sExtPart + sTenantPart;
 };
 
@@ -9311,6 +9315,11 @@ AfterLogicApi.getPluginSettings = function (sPluginName)
 	}
 	
 	return null;
+};
+
+AfterLogicApi.getAuthToken = function ()
+{
+	return App.Storage.getData('AuthToken');
 };
 
 AfterLogicApi.oPluginHooks = {};
@@ -25564,6 +25573,8 @@ CLoginViewModel.prototype.onSystemLoginResponse = function (oResponse, oRequest)
 	}
 	else
 	{
+		App.Storage.setData('AuthToken', oResponse.Result.AuthToken);
+		
 		if (window.location.search !== '' &&
 			Utils.Common.getRequestParam('reset-pass') === null &&
 			Utils.Common.getRequestParam('invite-auth') === null &&
@@ -28243,6 +28254,13 @@ CMailViewModel.prototype.changeSelectedPanel = function (iPanel)
 		if (this.selectedPanel() !== iPanel)
 		{
 			this.selectedPanel(iPanel);
+			if (bIsWindowsPhone || App.browser.ie)
+			{
+				this.$viewModel.hide();
+				_.defer(_.bind(function () {
+					this.$viewModel.show();
+				}, this));
+			}
 		}
 	}
 };
@@ -31162,7 +31180,17 @@ CContactsViewModel.prototype.changeSelectedPanel = function (iPanel)
 {
 	if (this.mobileApp)
 	{
-		this.selectedPanel(iPanel);
+		if (this.selectedPanel() !== iPanel)
+		{
+			this.selectedPanel(iPanel);
+			if (bIsWindowsPhone || App.browser.ie)
+			{
+				this.$viewModel.hide();
+				_.defer(_.bind(function () {
+					this.$viewModel.show();
+				}, this));
+			}
+		}
 	}
 };
 
@@ -41588,7 +41616,16 @@ CScreens.prototype.initViewModel = function (CViewModel, sTemplateId)
 	oViewModel.bShown = false;
 	oViewModel.showViewModel = function (mParams)
 	{
-		this.$viewModel.show();
+		if (bMobileApp && (bIsWindowsPhone || App.browser.ie))
+		{
+			_.defer(_.bind(function () {
+				this.$viewModel.show();
+			}, this));
+		}
+		else
+		{
+			this.$viewModel.show();
+		}
 		if (typeof this.onRoute === 'function')
 		{
 			this.onRoute(mParams);
@@ -43985,6 +44022,8 @@ AppBase.prototype.init = function ()
 	{
 		$('body').css('overflow', 'hidden');
 	}
+	
+	this.Storage.setData('AuthToken', this.Storage.getData('AuthToken'));
 };
 
 AppBase.prototype.collectScreensData = function () {};
@@ -44032,7 +44071,10 @@ AppBase.prototype.useGoogleAnalytics = function ()
  */
 AppBase.prototype.logout = function (iLastErrorCode)
 {
-	var oParameters = {'Action': 'SystemLogout'};
+	var oParameters = {
+		'Action': 'SystemLogout',
+		'AuthToken': App.Storage.getData('AuthToken')
+	};
 	
 	if (iLastErrorCode)
 	{

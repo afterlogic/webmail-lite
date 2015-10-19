@@ -283,16 +283,15 @@ class Service
 					else if (!empty($sAction))
 					{
 						$sMethodName = 'Ajax'.$sAction;
+						$this->oActions->SetActionParams($this->oHttp->GetPostAsArray());
 						if (method_exists($this->oActions, $sMethodName) &&
 							is_callable(array($this->oActions, $sMethodName)))
 						{
-							$this->oActions->SetActionParams($this->oHttp->GetPostAsArray());
 							$aResponseItem = call_user_func(array($this->oActions, $sMethodName));
 						}
-						else if (\CApi::Plugin()->JsonHookExists($sMethodName))
+						if (\CApi::Plugin()->JsonHookExists($sMethodName))
 						{
-							$this->oActions->SetActionParams($this->oHttp->GetPostAsArray());
-							$aResponseItem = \CApi::Plugin()->RunJsonHook($this->oActions, $sMethodName);
+							$aResponseItem = \CApi::Plugin()->RunJsonHook($this->oActions, $sMethodName, $aResponseItem);
 						}
 					}
 
@@ -335,79 +334,129 @@ class Service
 			{
 				@ob_start();
 				$aResponseItem = null;
+				
 				$sAction = empty($aPaths[1]) ? '' : $aPaths[1];
-				try
+
+				if ($this->oHttp->IsPut())
 				{
-					$sMethodName = 'Upload'.$sAction;
-					if (method_exists($this->oActions, $sMethodName) &&
-						is_callable(array($this->oActions, $sMethodName)))
+					$rPutData = fopen("php://input", "r");
+					$aFilePath = array_slice($aPaths, 3);
+					$sFilePath = implode('/', $aFilePath);
+					
+					$this->oActions->SetActionParams(array(
+						'FileData' => array(
+							'name' => basename($sFilePath),
+							'size' => (int) $this->oHttp->GetHeader('Content-Length'),
+							'tmp_name' => $rPutData
+						),
+						'AdditionalData' => json_encode(array(
+							'Type' => empty($aPaths[2]) ? 'personal' : strtolower($aPaths[2]),
+							'CalendarID' => empty($aPaths[2]) ? '' : strtolower($aPaths[2]),
+							'Folder' => dirname($sFilePath),
+							'Path' => dirname($sFilePath),
+							'GroupId' => '',
+							'IsShared' => false
+							
+						)),
+						'IsExt' => '1' === (string) $this->oHttp->GetQuery('IsExt', '0') ? '1' : '0',
+						'TenantHash' => (string) $this->oHttp->GetQuery('TenantHash', ''),
+						'AuthToken' => $this->oHttp->GetHeader('Auth-Token'),
+						'AccountID' => empty($aPaths[2]) ? '0' : strtolower($aPaths[2])
+					));
+					
+					try
 					{
-						$sError = '';
-						$sInputName = 'jua-uploader';
-
-						$iError = UPLOAD_ERR_OK;
-						$_FILES = isset($_FILES) ? $_FILES : null;
-						if (isset($_FILES, $_FILES[$sInputName], $_FILES[$sInputName]['name'], $_FILES[$sInputName]['tmp_name'], $_FILES[$sInputName]['size'], $_FILES[$sInputName]['type']))
+						$sMethodName = 'Upload'.$sAction;
+						if (method_exists($this->oActions, $sMethodName) &&
+							is_callable(array($this->oActions, $sMethodName)))
 						{
-							$iError = (isset($_FILES[$sInputName]['error'])) ? (int) $_FILES[$sInputName]['error'] : UPLOAD_ERR_OK;
-							if (UPLOAD_ERR_OK === $iError)
+							$aResponseItem = call_user_func(array($this->oActions, $sMethodName));
+						}
+
+						if (!is_array($aResponseItem) && empty($sError))
+						{
+							throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::UnknownError);
+						}
+					}
+					catch (\Exception $oException)
+					{
+						\CApi::LogException($oException);
+						$aResponseItem = $this->oActions->ExceptionResponse(null, 'Upload', $oException);
+						$sError = 'exception';
+					}
+
+					if (0 < strlen($sError))
+					{
+						$aResponseItem['Error'] = $sError;
+					}
+				}
+				else
+				{
+					try
+					{
+						$sMethodName = 'Upload'.$sAction;
+						if (method_exists($this->oActions, $sMethodName) &&
+							is_callable(array($this->oActions, $sMethodName)))
+						{
+							$sError = '';
+							$sInputName = 'jua-uploader';
+
+							$iError = UPLOAD_ERR_OK;
+							$_FILES = isset($_FILES) ? $_FILES : null;
+							if (isset($_FILES, $_FILES[$sInputName], $_FILES[$sInputName]['name'], $_FILES[$sInputName]['tmp_name'], $_FILES[$sInputName]['size'], $_FILES[$sInputName]['type']))
 							{
-								$this->oActions->SetActionParams(array(
-									'AccountID' => $this->oHttp->GetPost('AccountID', ''),
-									'FileData' => $_FILES[$sInputName],
-									'AdditionalData' => $this->oHttp->GetPost('AdditionalData', null),
-									'IsExt' => '1' === (string) $this->oHttp->GetPost('IsExt', '0') ? '1' : '0',
-									'TenantHash' => (string) $this->oHttp->GetPost('TenantHash', ''),
-									'Token' => $this->oHttp->GetPost('Token', ''),
-									'AuthToken' => $this->oHttp->GetPost('AuthToken', '')
-								));
+								$iError = (isset($_FILES[$sInputName]['error'])) ? (int) $_FILES[$sInputName]['error'] : UPLOAD_ERR_OK;
+								if (UPLOAD_ERR_OK === $iError)
+								{
+									$this->oActions->SetActionParams(array(
+										'AccountID' => $this->oHttp->GetPost('AccountID', ''),
+										'FileData' => $_FILES[$sInputName],
+										'AdditionalData' => $this->oHttp->GetPost('AdditionalData', null),
+										'IsExt' => '1' === (string) $this->oHttp->GetPost('IsExt', '0') ? '1' : '0',
+										'TenantHash' => (string) $this->oHttp->GetPost('TenantHash', ''),
+										'Token' => $this->oHttp->GetPost('Token', ''),
+										'AuthToken' => $this->oHttp->GetPost('AuthToken', '')
+									));
 
-								\CApi::LogObject($this->oActions->GetActionParams());
+									\CApi::LogObject($this->oActions->GetActionParams());
 
-								$aResponseItem = call_user_func(array($this->oActions, $sMethodName));
+									$aResponseItem = call_user_func(array($this->oActions, $sMethodName));
+								}
+								else
+								{
+									$sError = $this->oActions->convertUploadErrorToString($iError);
+								}
+							}
+							else if (!isset($_FILES) || !is_array($_FILES) || 0 === count($_FILES))
+							{
+								$sError = 'size';
 							}
 							else
 							{
-								$sError = $this->oActions->convertUploadErrorToString($iError);
+								$sError = 'unknown';
 							}
 						}
-						else if (!isset($_FILES) || !is_array($_FILES) || 0 === count($_FILES))
+
+						if (!is_array($aResponseItem) && empty($sError))
 						{
-							$sError = 'size';
-						}
-						else
-						{
-							$sError = 'unknown';
+							throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::UnknownError);
 						}
 					}
-
-					if (!is_array($aResponseItem) && empty($sError))
+					catch (\Exception $oException)
 					{
-						throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::UnknownError);
+						\CApi::LogException($oException);
+						$aResponseItem = $this->oActions->ExceptionResponse(null, 'Upload', $oException);
+						$sError = 'exception';
 					}
-				}
-				catch (\Exception $oException)
-				{
-					\CApi::LogException($oException);
-					$aResponseItem = $this->oActions->ExceptionResponse(null, 'Upload', $oException);
-					$sError = 'exception';
-				}
 
-				if (0 < strlen($sError))
-				{
-					$aResponseItem['Error'] = $sError;
-				}
+					if (0 < strlen($sError))
+					{
+						$aResponseItem['Error'] = $sError;
+					}
+				}				
 
 				@ob_get_clean();
 				@header('Content-Type: text/html; charset=utf-8');
-//				if ('iframe' === $this->oHttp->GetPost('jua-post-type', ''))
-//				{
-//					@header('Content-Type: text/html; charset=utf-8');
-//				}
-//				else
-//				{
-//					@header('Content-Type: application/json; charset=utf-8');
-//				}
 
 				$sResult = \MailSo\Base\Utils::Php2js($aResponseItem);
 			}

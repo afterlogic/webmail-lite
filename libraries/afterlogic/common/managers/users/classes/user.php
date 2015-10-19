@@ -45,9 +45,11 @@
  * @property bool $SipEnable
  * @property string $SipImpi
  * @property string $SipPassword
+ * 
  * @property string $TwilioNumber
  * @property bool $TwilioEnable
  * @property bool $TwilioDefaultNumber
+ * 
  * @property string $HelpdeskSignature
  * @property bool $HelpdeskSignatureEnable
  * @property bool $FilesEnable

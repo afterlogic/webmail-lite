@@ -4,7 +4,10 @@
 			<div class="middle_bar">
 				<div class="panel_center">
 					<div class="items_list" data-bind="foreach: aTabs()">
-						<div class="item canSelect" data-bind="visible: typeof(visible) !== 'undefined' ? visible() : true, attr: {'class': 'item canSelect ' + $data.TabName}, css: {'selected': ($parent.tab() === $data.TabName)}, click: function () {$parent.showTab($data.TabName);}">
+						<div class="item canSelect" data-bind="visible: typeof(visible) !== 'undefined' ? visible() : true, 
+								attr: {'class': 'item canSelect ' + $data.TabName, 'id': 'selenium_settings_' + $data.TabName}, 
+								css: {'selected': ($parent.tab() === $data.TabName)}, 
+								click: function () {$parent.showTab($data.TabName);}">
 							<span class="title">
 								<span class="icon"></span>
 								<span class="text" data-bind="text: $data.TabTitle"></span>

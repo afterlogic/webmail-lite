@@ -11,22 +11,24 @@
 					<span class="label">
 						<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_GROUP_NAME"></span>:
 					</span>
-					<input class="value input" type="text" data-bind="hasfocus: nameFocused, value: name, valueUpdate: 'afterkeydown', onEnter: $root.saveCommand" />
+					<input class="value input" type="text" id="selenium_contacts_edit_group_name"
+						   data-bind="hasfocus: nameFocused, value: name, valueUpdate: 'afterkeydown', onEnter: $root.saveCommand" />
 				</div>
 				<div class="row"> 
 					<span class="value offset"> 
 						<label class="custom_checkbox" data-bind="css: {'checked': isOrganization}"> 
 							<span class="icon"></span> 
-							<input type="checkbox" id="isOrganization" data-bind="checked: isOrganization">
+							<input type="checkbox" id="selenium_contacts_edit_group_is_organization" data-bind="checked: isOrganization">
 						</label>
-						<label for="isOrganization" data-i18n="CONTACTS/LABEL_GROUP_ORGANIZATION" data-bind="i18n: 'text'"></label>
+						<label for="selenium_contacts_edit_group_is_organization" data-i18n="CONTACTS/LABEL_GROUP_ORGANIZATION" data-bind="i18n: 'text'"></label>
 					</span>
 				</div>				
 				<div class="row" data-bind="visible: isOrganization">
 					<span class="label">
 						<span data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_GROUP_EMAIL"></span>:
 					</span>
-					<input class="value input" type="text" data-bind="value: email, valueUpdate: 'afterkeydown', onEnter: $root.saveCommand" />
+					<input class="value input" type="text" id="selenium_contacts_edit_group_email"
+						   data-bind="value: email, valueUpdate: 'afterkeydown', onEnter: $root.saveCommand" />
 				</div>
 				<div class="row" data-bind="visible: isOrganization">
 					<span class="label">
@@ -91,7 +93,7 @@
 </div>
 <div class="panel_bottom">
 	<div class="buttons">
-		<span class="button save" data-bind="command: $root.saveCommand">
+		<span class="button save" data-bind="command: $root.saveCommand" id="selenium_contacts_edit_group_save_button">
 			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/BUTTON_SAVE_CONTACT"></span>
 		</span>
 		<span class="button secondary cancel" data-bind="click: function () { $root.executeCancel(); }">

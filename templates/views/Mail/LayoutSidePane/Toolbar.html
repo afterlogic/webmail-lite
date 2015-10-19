@@ -13,7 +13,7 @@
 		<!-- /ko -->
 		<!-- ko if: !mobileApp -->
 		<span class="item checkmail" data-bind="command: checkMailCommand, checkmail: {'activeClass': 'process', 'state': checkMailIndicator(), 'duration': 800}, 
-				customTooltip: 'MAILBOX/TOOL_CHECK_MAIL'">
+				customTooltip: 'MAILBOX/TOOL_CHECK_MAIL'" id="selenium_mail_check_button">
 			<span class="icon"></span>
 			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_CHECK_MAIL"></span>
 		</span>
@@ -52,7 +52,7 @@
 			</span>
 		</span>
 		<!-- /ko -->
-		<span class="item delete" data-bind="command: deleteCommand, customTooltip: 'MAILBOX/TOOL_DELETE'">
+		<span class="item delete" data-bind="command: deleteCommand, customTooltip: 'MAILBOX/TOOL_DELETE'" id="selenium_mail_delete_button">
 			<span class="icon"></span>
 			<span class="hint" data-bind="text: selectedCount, visible: selectedCount() > 0"></span>
 			<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_DELETE"></span>

@@ -356,12 +356,12 @@ class CApiIntegratorManager extends AApiManager
 			$aAccountHashTable = CApi::DecodeKeyValues($sKey);
 			if (is_array($aAccountHashTable) && isset($aAccountHashTable['token']) &&
 				'auth' === $aAccountHashTable['token'] && 0 < strlen($aAccountHashTable['id']) && 
-					is_int($aAccountHashTable['id']) && isset($aAccountHashTable['email']))
+					is_int($aAccountHashTable['id']) && isset($aAccountHashTable['email']) && isset($aAccountHashTable['hash']))
 			{
 				$oApiUsersManager = \CApi::Manager('users');
 				
 				$oAccount = $oApiUsersManager->getAccountByEmail($aAccountHashTable['email']);
-				if ($oAccount && $oAccount->IdUser == $aAccountHashTable['id'])
+				if ($oAccount && $oAccount->IdUser == $aAccountHashTable['id'] && $aAccountHashTable['hash'] === sha1($oAccount->IncomingMailPassword . \CApi::$sSalt))
 				{
 					$iUserId = $aAccountHashTable['id'];
 				}
@@ -612,7 +612,8 @@ class CApiIntegratorManager extends AApiManager
 			'token' => 'auth',
 			'sign-me' => $bSignMe,
 			'id' => $oAccount->IdUser,
-			'email' => $oAccount->Email
+			'email' => $oAccount->Email,
+			'hash' => sha1($oAccount->IncomingMailPassword . \CApi::$sSalt)
 		);
 		
 		$iTime = $bSignMe ? time() + 60 * 60 * 24 * 30 : 0;
@@ -744,7 +745,7 @@ class CApiIntegratorManager extends AApiManager
 			{
 				throw new CApiManagerException(Errs::WebMailManager_AccountDisabled);
 			}
-
+			
 			if (0 < $oAccount->IdTenant)
 			{
 				$oApiTenantsManager = /* @var $oApiTenantsManager CApiTenantsManager */ CApi::Manager('tenants');

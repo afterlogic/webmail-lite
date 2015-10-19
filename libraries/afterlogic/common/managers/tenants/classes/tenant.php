@@ -30,6 +30,7 @@
  * @property bool $IsTrial
  * @property bool $AllowChangeAdminEmail
  * @property bool $AllowChangeAdminPassword
+ *
  * @property string $HelpdeskAdminEmailAccount
  * @property string $HelpdeskClientIframeUrl
  * @property string $HelpdeskAgentIframeUrl
@@ -39,14 +40,17 @@
  * @property int $HelpdeskFetcherType
  * @property bool $HelpdeskAllowFetcher
  * @property int $HelpdeskFetcherTimer
+ * 
  * @property string $LoginStyleImage
  * @property string $AppStyleImage
+ * 
  * @property bool $SipAllow
  * @property bool $SipAllowConfiguration
  * @property string $SipRealm
  * @property string $SipWebsocketProxyUrl
  * @property string $SipOutboundProxyUrl
  * @property string $SipCallerID
+ * 
  * @property bool $TwilioAllow
  * @property bool $TwilioAllowConfiguration
  * @property string $TwilioAccountSID

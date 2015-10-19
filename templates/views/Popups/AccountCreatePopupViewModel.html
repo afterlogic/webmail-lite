@@ -1,5 +1,5 @@
 <div class="mask" data-bind="click: onCancelClick"></div>
-<div class="popup_panel" data-bind="css: {'step_first': isFirstStep(), 'step_last': !isFirstStep()}">
+<div class="popup_panel" data-bind="css: {'step_first': isFirstStep(), 'step_last': !isFirstStep()}" id="selenium_settings_create_account_form">
 	
 	<span class="close" data-bind="click: onCancelClick"></span>
 
@@ -11,11 +11,15 @@
 		<div class="fieldset">
 			<div class="row name">
 				<span class="label" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_YOUR_NAME" data-bind="i18n: 'text'"></span>
-				<input class="value input" spellcheck="false"  type="text" maxlength="65" data-bind="value: friendlyName, hasfocus: friendlyNameFocus, valueUpdate: 'afterkeydown', onEnter: onSaveClick"/>
+				<input class="value input" spellcheck="false"  type="text" maxlength="65" 
+					   data-bind="value: friendlyName, hasfocus: friendlyNameFocus, valueUpdate: 'afterkeydown', onEnter: onSaveClick"
+					   id="selenium_settings_create_account_name" />
 			</div>
 			<div class="row email">
 				<span class="label required" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_EMAIL" data-bind="i18n: 'text'"></span>
-				<input class="value input" spellcheck="false"  type="text" maxlength="65" data-bind="value: email, hasfocus: emailFocus, onEnter: onSaveClick, disable: isConnectToMailType"/>
+				<input class="value input" spellcheck="false"  type="text" maxlength="65" 
+					   data-bind="value: email, hasfocus: emailFocus, onEnter: onSaveClick, disable: isConnectToMailType"
+					   id="selenium_settings_create_account_email" />
 			</div>
 			<div class="row login" data-bind="visible: !isFirstStep()">
 				<span class="label required" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_LOGIN" data-bind="i18n: 'text'"></span>
@@ -23,7 +27,9 @@
 			</div>
 			<div class="row password">
 				<span class="label required" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_PASSWORD" data-bind="i18n: 'text'"></span>
-				<input class="value input" spellcheck="false"  type="password" maxlength="255" data-bind="value: incomingMailPassword, hasfocus: incomingPasswordFocus, onEnter: onSaveClick"/>
+				<input class="value input" spellcheck="false"  type="password" maxlength="255" 
+					   data-bind="value: incomingMailPassword, hasfocus: incomingPasswordFocus, onEnter: onSaveClick"
+					   id="selenium_settings_create_account_password" />
 			</div>
 			<div class="row incoming" data-bind="visible: !isFirstStep()">
 				<!-- ko template: {name: 'Settings_ServerPropertiesViewModel', data: oIncoming} --><!-- /ko -->
@@ -44,7 +50,9 @@
 		</div>
 
 		<div class="buttons">
-			<span class="button save" data-i18n="SETTINGS/BUTTON_ADD" data-bind="i18n: 'text', click: onFirstSaveClick, visible: !loading() && isFirstStep()"></span>
+			<span class="button save" data-i18n="SETTINGS/BUTTON_ADD" 
+				  data-bind="i18n: 'text', click: onFirstSaveClick, visible: !loading() && isFirstStep()"
+				  id="selenium_settings_create_account_add_button"></span>
 			<span class="button save" data-i18n="SETTINGS/BUTTON_SAVE" data-bind="i18n: 'text', click: onSecondSaveClick, visible: !loading() && !isFirstStep()"></span>
 			<span class="button save" data-i18n="SETTINGS/BUTTON_ADDING" data-bind="i18n: 'text', visible: loading() && isFirstStep()"></span>
 			<span class="button save" data-i18n="SETTINGS/BUTTON_SAVING" data-bind="i18n: 'text', visible: loading() && !isFirstStep()"></span>

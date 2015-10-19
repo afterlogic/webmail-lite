@@ -106,6 +106,7 @@ class Plugin extends \Sabre\DAV\ServerPlugin {
 		$this->server->subscribeEvent('beforeMethod', array($this, 'beforeMethod'));   
 		$this->server->subscribeEvent('beforeBind', array($this, 'beforeBind'), 30);
 		$this->server->subscribeEvent('afterUnbind', array($this, 'afterUnbind'), 30);
+		$this->server->subscribeEvent('updateProperties', array($this, 'updateProperties'));		
 		
 	}
 
@@ -283,4 +284,17 @@ class Plugin extends \Sabre\DAV\ServerPlugin {
 		return true;
 	}
 	
+	public function updateProperties(&$properties, &$result, \Sabre\DAV\INode $node) 
+	{
+		if ($node instanceof \afterlogic\DAV\FS\File && array_key_exists('{DAV:}lastmodified', $properties))
+		{
+			$mResult = $node->updateLastModified($properties['{DAV:}lastmodified']);
+			if ($mResult !== false)
+			{
+				$result[200]['{DAV:}lastmodified'] = null;
+				unset($properties['{DAV:}lastmodified']);
+			}
+		}
+		return true;
+	}	
 }

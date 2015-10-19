@@ -49,6 +49,11 @@ class File extends \Sabre\DAV\FSExt\File{
 		$aData = $this->getResourceData();
 		$aData[$sName] = $mValue;
 		$this->putResourceData($aData);
-	}	
+	}
+	
+	public function updateLastModified($iLastModified)
+	{
+		return touch($this->path, $iLastModified) ? $iLastModified : false;
+	}
 }
 

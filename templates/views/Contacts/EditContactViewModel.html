@@ -12,13 +12,13 @@
 					<span class="label">
 						<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_DISPLAY_NAME"></span>:
 					</span>
-					<input class="value input" type="text" data-bind="value: displayName, hasfocus: displayNameFocused" />
+					<input class="value input" type="text" data-bind="value: displayName, hasfocus: displayNameFocused" id="selenium_contacts_edit_name" />
 				</div>
 				<div class="row" data-bind="visible: !itsMe()">
 					<span class="label">
 						<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/LABEL_EMAIL"></span>:
 					</span>
-					<input class="value input" type="text" data-bind="value: email" />
+					<input class="value input" type="text" data-bind="value: email" id="selenium_contacts_edit_email" />
 				</div>
 				<div class="row" data-bind="visible: itsMe()">
 					<span class="label">
@@ -351,7 +351,7 @@
 </div>
 <div class="panel_bottom">
 	<div class="buttons">
-		<span class="button save" data-bind="click: function () { $root.saveCommand($data); }">
+		<span class="button save" data-bind="click: function () { $root.saveCommand($data); }" id="selenium_contacts_edit_save_button">
 			<span class="text" data-bind="i18n: 'text'" data-i18n="CONTACTS/BUTTON_SAVE_CONTACT"></span>
 		</span>
 		<span class="button secondary cancel" data-bind="click: function () { $root.executeCancel(); }">
