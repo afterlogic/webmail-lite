@@ -2214,7 +2214,10 @@ class Actions extends ActionsBase
 			if ($oAccountToDelete instanceof \CAccount &&
 				$oAccountToDelete->IdUser === $oAccount->IdUser &&
 				!$oAccountToDelete->IsInternal &&
-				((0 < $oAccount->IdDomain && $oAccount->Domain->AllowUsersChangeEmailSettings) || !$oAccount->IsDefaultAccount || 0 === $oAccount->IdDomain || -1 === $oAccount->IdDomain)
+				((0 < $oAccount->IdDomain && $oAccount->Domain->AllowUsersChangeEmailSettings) || 
+						!$oAccountToDelete->IsDefaultAccount || 
+						0 === $oAccount->IdDomain || 
+						-1 === $oAccount->IdDomain)
 			)
 			{
 				$bResult = $this->oApiUsers->deleteAccount($oAccountToDelete);

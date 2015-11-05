@@ -3241,7 +3241,7 @@ ko.bindingHandlers.command = {
 		}
 
 		jqElement.toggleClass('command-disabled disable disabled', !bResult);
-		jqElement.toggleClass('command-disabled', !bResult);
+		jqElement.toggleClass('enable', bResult);
 
 //		if (jqElement.is('input') || jqElement.is('button'))
 //		{
@@ -10329,12 +10329,11 @@ function CAppSettingsModel(bAllowOpenPgp)
 	// allows to edit common settings and calendar settings
 	this.AllowUsersChangeInterfaceSettings = true;
 
-	// allows to delete accounts, allows to change account properties (name and password is always possible to change),
-	// allows to manage special folders, allows to add new accounts
+	// allows to delete default account, allows to change default account properties
 	this.AllowUsersChangeEmailSettings = true;
 
-	// allows to add new accounts (if AllowUsersChangeEmailSettings === true)
-	this.AllowUsersAddNewAccounts = true || this.AllowUsersChangeEmailSettings;
+	// allows to add new accounts
+	this.AllowUsersAddNewAccounts = true;
 	
 	this.SiteName = '';
 
@@ -10422,7 +10421,7 @@ CAppSettingsModel.prototype.parse = function (oData)
 	this.AllowWebMail = !!oData.AllowWebMail;
 	this.AllowUsersChangeInterfaceSettings = !!oData.AllowUsersChangeInterfaceSettings;
 	this.AllowUsersChangeEmailSettings = !!oData.AllowUsersChangeEmailSettings;
-	this.AllowUsersAddNewAccounts = !!oData.AllowUsersAddNewAccounts || this.AllowUsersChangeEmailSettings;
+	this.AllowUsersAddNewAccounts = !!oData.AllowUsersAddNewAccounts;
 	this.SiteName = Utils.pString(oData.SiteName);
 	this.Languages = oData.Languages;
 	this.Themes = oData.Themes;
@@ -10871,8 +10870,8 @@ function CAccountModel()
 	this.incomingMailServer = ko.observable('');
 	this.incomingMailPort = ko.observable(143); 
 	this.incomingMailSsl = ko.observable(false); 
-	this.isInternal = ko.observable(false);
-	this.isLinked = ko.observable(false);
+	this.isInternal = ko.observable(false); // If **true**, the account is hosted by bundled mailserver.
+	this.isLinked = ko.observable(false); // If **true**, the account is belonged to some domain.
 	this.isDefault = ko.observable(false);
 	this.outgoingMailAuth = ko.observable(0);
 	this.outgoingMailLogin = ko.observable('');
@@ -10899,7 +10898,7 @@ function CAccountModel()
 	this.extensionsRequested = ko.observable(false);
 	
 	this.canBeRemoved = ko.computed(function () {
-		return !this.isInternal() && AppData.App.AllowUsersChangeEmailSettings;
+		return !this.isInternal() && (!this.isDefault() || this.isDefault() && AppData.App.AllowUsersChangeEmailSettings);
 	}, this);
 	
 	this.removeHint = ko.computed(function () {
@@ -16954,10 +16953,10 @@ function CFetcherListModel()
 CFetcherListModel.prototype.parse = function (iAccountId, aData)
 {
 	var aParsedCollection = _.map(aData, function (oData) {
-			var oFetcher = new CFetcherModel();
-			oFetcher.parse(oData);
-			return oFetcher;
-		});
+		var oFetcher = new CFetcherModel();
+		oFetcher.parse(oData);
+		return oFetcher;
+	});
 
 	this.accountId = iAccountId;
 	this.collection(aParsedCollection);
@@ -16965,12 +16964,22 @@ CFetcherListModel.prototype.parse = function (iAccountId, aData)
 
 /**
  * @param {number} iFetcherId
+ * @returns {boolean}
+ */
+CFetcherListModel.prototype.hasFetcher = function (iFetcherId)
+{
+	return !!this.getFetcher(iFetcherId);
+};
+
+/**
+ * @param {number} iFetcherId
+ * @returns {Object|null}
  */
 CFetcherListModel.prototype.getFetcher = function (iFetcherId)
 {
 	var oFetcher = _.find(this.collection(), function (oFetcher) {
-			return oFetcher.id() === iFetcherId;
-		});
+		return oFetcher.id() === iFetcherId;
+	});
 
 	return oFetcher || null;
 };
@@ -17622,6 +17631,7 @@ function CHtmlEditorViewModel(bInsertImageAsBase64, oParent)
 	this.editorUploaderProgress = ko.observable(false);
 	
 	this.htmlEditorDom = ko.observable();
+	this.toolbarDom = ko.observable();
 	this.colorPickerDropdownDom = ko.observable();
 	this.insertLinkDropdownDom = ko.observable();
 	this.insertImageDropdownDom = ko.observable();
@@ -17727,11 +17737,33 @@ CHtmlEditorViewModel.prototype.hasOpenedPopup = function ()
 	return this.visibleInsertLinkPopup() || this.visibleLinkPopup() || this.visibleImagePopup() || this.visibleInsertImagePopup() || this.visibleFontColorPopup();
 };
 	
+CHtmlEditorViewModel.prototype.resize = function ()
+{
+	var
+		$htmlEditor = $(this.htmlEditorDom()),
+		$parent = $htmlEditor.parent(),
+		$workarea = $(this.workareaDom()),
+		$toolbar = $(this.toolbarDom()),
+
+		iWaWidthMargins = $workarea.outerWidth(true) - $workarea.width(),
+		iHeWidthMargins = $htmlEditor.outerWidth(true) - $htmlEditor.width(),
+		iHeWidth = $parent.width() - iHeWidthMargins,
+
+		iWaHeightMargins = $workarea.outerHeight(true) - $workarea.height(),
+		iHeHeight = $parent.height(),
+		iWaHeight = iHeHeight - iWaHeightMargins - $toolbar.outerHeight()
+	;
+	
+	$htmlEditor.width(iHeWidth);
+	$workarea.width(iHeWidth - iWaWidthMargins);
+
+	$htmlEditor.height(iHeHeight);
+	$workarea.height(iWaHeight);
+};
+	
 CHtmlEditorViewModel.prototype.init = function ()
 {
-	var self = this;
-
-	$(document.body).on('click', _.bind(function (oEvent) {
+	$(document.body).on('click', _.bind(function () {
 		this.closeAllPopups(true);
 	}, this));
 	
@@ -17986,7 +18018,7 @@ CHtmlEditorViewModel.prototype.setFontValuesFromText = function ()
 {
 	this.lockFontSubscribing(true);
 	this.selectedFont(this.oCrea.getFontName());
-	this.selectedSize(this.oCrea.getFontSizeInNumber());
+	this.selectedSize(this.oCrea.getFontSizeInNumber().toString());
 	this.lockFontSubscribing(false);
 
 };
@@ -22449,7 +22481,10 @@ CComposeViewModel.prototype.fromToExpandColaps = function ()
  */
 CComposeViewModel.prototype.onApplyBindings = function ()
 {
-
+	this.$viewModel.on('resize', '.panel_content', _.debounce(_.bind(function () {
+		this.oHtmlEditor.resize();
+	}, this), 1));
+	
     App.registerSessionTimeoutFunction(_.bind(this.executeSave, this, false));
 
     this.hotKeysBind();
@@ -22457,7 +22492,7 @@ CComposeViewModel.prototype.onApplyBindings = function ()
 
 CComposeViewModel.prototype.hotKeysBind = function ()
 {
-    $(document).on('keydown', $.proxy(function(ev) {
+    this.$viewModel.on('keydown', $.proxy(function(ev) {
 
         if (ev && ev.ctrlKey && !ev.altKey && !ev.shiftKey)
         {
@@ -22466,7 +22501,7 @@ CComposeViewModel.prototype.hotKeysBind = function ()
                 bShown = this.shown() && (!this.minimized || !this.minimized()),
                 bComputed = bShown && ev && ev.ctrlKey,
                 oEnumsKey = Enums.Key
-                ;
+			;
 
             if (bComputed && nKey === oEnumsKey.s)
             {

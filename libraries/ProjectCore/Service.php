@@ -157,7 +157,7 @@ class Service
 
 			@\header('Content-Type: text/html; charset=utf-8', true);
 			
-			if (!strpos(strtolower($_SERVER['HTTP_USER_AGENT']), 'firefox'))
+			if (isset($_SERVER['HTTP_USER_AGENT']) && !strpos(strtolower($_SERVER['HTTP_USER_AGENT']), 'firefox'))
 			{
 				@\header('Last-Modified: '.\gmdate('D, d M Y H:i:s').' GMT');
 			}
@@ -265,7 +265,19 @@ class Service
 				@header('Content-Type: text/plain; charset=utf-8');
 				$sResult = 'Pong';
 			}
-			else if (('ajax' === $sFirstPart))
+			else if ('pull' === $sFirstPart)
+			{
+				if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')
+				{
+					pclose(popen("start /B git pull", "r"));
+				}
+				else 
+				{
+					exec("git pull > /dev/null 2>&1 &");
+				}
+				\CApi::Location('./');
+			}
+			else if ('ajax' === $sFirstPart)
 			{
 				@ob_start();
 

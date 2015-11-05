@@ -11,6 +11,7 @@
 					<label for="account_text" class="text" data-bind="text: email"></label>
 				</div>
 			</div>
+			<div class="empty_accounts" data-bind="visible: accounts().length === 1"></div>
 			<!-- /ko -->
 			<div class="folders">
 			<!-- ko template: {name: 'Mail_FolderViewModel', foreach: folderList().collection} --><!-- /ko -->

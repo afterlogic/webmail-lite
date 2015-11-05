@@ -9,7 +9,14 @@
 					'CComposeViewModel' === sViewModelName || 
 					'CHelpdeskLoginViewModel' === sViewModelName))
 		{
-			oViewModel.servicesAccounts = ko.observableArray(oExternalServices ? oExternalServices.Users : []);
+			if (oViewModel.servicesAccounts)
+			{
+				oViewModel.servicesAccounts(oExternalServices ? oExternalServices.Users : []);
+			}
+			else
+			{
+				oViewModel.servicesAccounts = ko.observableArray(oExternalServices ? oExternalServices.Users : []);
+			}
 			_.each(oViewModel.servicesAccounts(), function (oItem){
 				var aScopes = [];
 				_.each(oItem.UserScopes, function (sValue, sKey){

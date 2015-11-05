@@ -1,7 +1,3 @@
-/*html.screen-compose .pSevenMain {
-	min-height: 570px; //Mail - BUG - Скролл на композе
-}*/
-
 .compose-toolbar() {
 		background: #d7f0c3;
 		filter: none;
@@ -45,8 +41,11 @@
 
 
 /*=== Compose screen CSS ===*/
-.panel.compose {
+.MailComposeLayout .panels,
+.compose_popup .panels {
 	background: #f9f9f9;
+}
+.panel.compose {
 	box-shadow: -1px 0 4px rgba(0, 0, 0, 0.23);
 	display: inline-block;
 	width: 100%;
@@ -310,11 +309,6 @@
 		.show_bcc,
 		.show_cc {
 			margin-left: 10px;
-		}
-		.cc .hide_cc,
-		.bcc .hide_bcc {
-			display: none;
-
 		}
 		.cc, .bcc, .to {
 			.inputosaurus {

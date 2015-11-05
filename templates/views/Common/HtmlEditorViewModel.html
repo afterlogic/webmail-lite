@@ -1,7 +1,7 @@
 <div class="html_editor" data-bind="css: {'inactive': inactive()}, onEsc: onEscHandler, initDom: htmlEditorDom">
 	<div class="disable_mask" data-bind="visible: disabled"></div>
 	<!-- ko if: !mobileApp -->
-	<div class="toolbar">
+	<div class="toolbar" data-bind="initDom: toolbarDom">
 		<div class="content">
 			<a href="javascript:void(0);" class="item undo" data-bind="click: function () { oCrea.undo(); return false; }, customTooltip: 'HTMLEDITOR/UNDO'">
 				<span class="icon"></span>

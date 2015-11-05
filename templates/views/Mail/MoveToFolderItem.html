@@ -1,7 +1,11 @@
 <span class="item" data-bind="visible: visible() && !bVirtual, css: {'system': isSystem, 'user': !isSystem()}">
 	<span class="folder" data-bind="attr: {'data-folder': fullName}, 
 		  css: {'disabled': selected, 'unselectable': !bCanBeSelected}">
-		<span class="title" data-bind="text: displayName"></span>
+		<span class="title" data-bind="text: displayName, attr: {'id':	(type() === Enums.FolderTypes.Inbox) ? 'selenium_moveto_folder_inbox' :
+																		((type() === Enums.FolderTypes.Sent) ? 'selenium_moveto_folder_sent' :
+																		((type() === Enums.FolderTypes.Drafts) ? 'selenium_moveto_folder_drafts' :
+																		((type() === Enums.FolderTypes.Spam) ? 'selenium_moveto_folder_spam' :
+																		((type() === Enums.FolderTypes.Trash) ? 'selenium_moveto_folder_trash' : ''))))}"></span>
 	</span>
 	<!-- ko if: !bNamespace -->
 		<span class="children" data-bind="template: { name: 'Mail_MoveToFolderItem', foreach: subfolders }"></span>

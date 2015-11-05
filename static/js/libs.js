@@ -3639,13 +3639,6 @@ function handler(event) {
 					}
 			}
 
-			widget._setValue(widget._buildValue());
-
-			// reposition autoComplete menu as <ul> grows and shrinks vertically
-			if(widget.options.autoCompleteSource){
-				setTimeout(function(){widget._autoCompleteMenuPosition.call(widget);}, 200);
-			}
-
 			if (widget.options.sourceResponseItems && widget.options.selectedItem && !widget.options.selectedItem.global && ev.keyCode === Enums.Key.Del && ev.shiftKey) //shift+del on suggestions list
 			{
 				ev.preventDefault();

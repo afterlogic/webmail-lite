@@ -3286,7 +3286,7 @@ ko.bindingHandlers.command = {
 		}
 
 		jqElement.toggleClass('command-disabled disable disabled', !bResult);
-		jqElement.toggleClass('command-disabled', !bResult);
+		jqElement.toggleClass('enable', bResult);
 
 //		if (jqElement.is('input') || jqElement.is('button'))
 //		{
@@ -8513,7 +8513,7 @@ CSelector.prototype.scrollToSelected = function ()
 			.replace(/~~1~~/, '<span class="email" style="opacity: 0.5">')
 			.replace(/~~2~~/, '</span>')
 		;*/
-		var aEmail = item.label.match(/[a-zA-Z0-9.\-_]+@[a-zA-Z0-9.]+/g);
+		var aEmail = item.label.match(/[a-zA-Z0-9.\-_]+@[a-zA-Z0-9.\-]+/g);
 		if (aEmail) {
 			item.label = item.label.replace('<' + aEmail[0] + '>', "<span style='opacity: 0.5'>" + '&lt;' + aEmail[0] + '&gt' + "</span>"); //highlight <email>
 		}
@@ -15749,12 +15749,11 @@ function CAppSettingsModel(bAllowOpenPgp)
 	// allows to edit common settings and calendar settings
 	this.AllowUsersChangeInterfaceSettings = true;
 
-	// allows to delete accounts, allows to change account properties (name and password is always possible to change),
-	// allows to manage special folders, allows to add new accounts
+	// allows to delete default account, allows to change default account properties
 	this.AllowUsersChangeEmailSettings = true;
 
-	// allows to add new accounts (if AllowUsersChangeEmailSettings === true)
-	this.AllowUsersAddNewAccounts = true || this.AllowUsersChangeEmailSettings;
+	// allows to add new accounts
+	this.AllowUsersAddNewAccounts = true;
 	
 	this.SiteName = '';
 
@@ -15842,7 +15841,7 @@ CAppSettingsModel.prototype.parse = function (oData)
 	this.AllowWebMail = !!oData.AllowWebMail;
 	this.AllowUsersChangeInterfaceSettings = !!oData.AllowUsersChangeInterfaceSettings;
 	this.AllowUsersChangeEmailSettings = !!oData.AllowUsersChangeEmailSettings;
-	this.AllowUsersAddNewAccounts = !!oData.AllowUsersAddNewAccounts || this.AllowUsersChangeEmailSettings;
+	this.AllowUsersAddNewAccounts = !!oData.AllowUsersAddNewAccounts;
 	this.SiteName = Utils.pString(oData.SiteName);
 	this.Languages = oData.Languages;
 	this.Themes = oData.Themes;
@@ -16291,8 +16290,8 @@ function CAccountModel()
 	this.incomingMailServer = ko.observable('');
 	this.incomingMailPort = ko.observable(143); 
 	this.incomingMailSsl = ko.observable(false); 
-	this.isInternal = ko.observable(false);
-	this.isLinked = ko.observable(false);
+	this.isInternal = ko.observable(false); // If **true**, the account is hosted by bundled mailserver.
+	this.isLinked = ko.observable(false); // If **true**, the account is belonged to some domain.
 	this.isDefault = ko.observable(false);
 	this.outgoingMailAuth = ko.observable(0);
 	this.outgoingMailLogin = ko.observable('');
@@ -16319,7 +16318,7 @@ function CAccountModel()
 	this.extensionsRequested = ko.observable(false);
 	
 	this.canBeRemoved = ko.computed(function () {
-		return !this.isInternal() && AppData.App.AllowUsersChangeEmailSettings;
+		return !this.isInternal() && (!this.isDefault() || this.isDefault() && AppData.App.AllowUsersChangeEmailSettings);
 	}, this);
 	
 	this.removeHint = ko.computed(function () {
@@ -23384,10 +23383,10 @@ function CFetcherListModel()
 CFetcherListModel.prototype.parse = function (iAccountId, aData)
 {
 	var aParsedCollection = _.map(aData, function (oData) {
-			var oFetcher = new CFetcherModel();
-			oFetcher.parse(oData);
-			return oFetcher;
-		});
+		var oFetcher = new CFetcherModel();
+		oFetcher.parse(oData);
+		return oFetcher;
+	});
 
 	this.accountId = iAccountId;
 	this.collection(aParsedCollection);
@@ -23395,12 +23394,22 @@ CFetcherListModel.prototype.parse = function (iAccountId, aData)
 
 /**
  * @param {number} iFetcherId
+ * @returns {boolean}
+ */
+CFetcherListModel.prototype.hasFetcher = function (iFetcherId)
+{
+	return !!this.getFetcher(iFetcherId);
+};
+
+/**
+ * @param {number} iFetcherId
+ * @returns {Object|null}
  */
 CFetcherListModel.prototype.getFetcher = function (iFetcherId)
 {
 	var oFetcher = _.find(this.collection(), function (oFetcher) {
-			return oFetcher.id() === iFetcherId;
-		});
+		return oFetcher.id() === iFetcherId;
+	});
 
 	return oFetcher || null;
 };
@@ -24054,6 +24063,7 @@ function CHtmlEditorViewModel(bInsertImageAsBase64, oParent)
 	this.editorUploaderProgress = ko.observable(false);
 	
 	this.htmlEditorDom = ko.observable();
+	this.toolbarDom = ko.observable();
 	this.colorPickerDropdownDom = ko.observable();
 	this.insertLinkDropdownDom = ko.observable();
 	this.insertImageDropdownDom = ko.observable();
@@ -24159,11 +24169,33 @@ CHtmlEditorViewModel.prototype.hasOpenedPopup = function ()
 	return this.visibleInsertLinkPopup() || this.visibleLinkPopup() || this.visibleImagePopup() || this.visibleInsertImagePopup() || this.visibleFontColorPopup();
 };
 	
+CHtmlEditorViewModel.prototype.resize = function ()
+{
+	var
+		$htmlEditor = $(this.htmlEditorDom()),
+		$parent = $htmlEditor.parent(),
+		$workarea = $(this.workareaDom()),
+		$toolbar = $(this.toolbarDom()),
+
+		iWaWidthMargins = $workarea.outerWidth(true) - $workarea.width(),
+		iHeWidthMargins = $htmlEditor.outerWidth(true) - $htmlEditor.width(),
+		iHeWidth = $parent.width() - iHeWidthMargins,
+
+		iWaHeightMargins = $workarea.outerHeight(true) - $workarea.height(),
+		iHeHeight = $parent.height(),
+		iWaHeight = iHeHeight - iWaHeightMargins - $toolbar.outerHeight()
+	;
+	
+	$htmlEditor.width(iHeWidth);
+	$workarea.width(iHeWidth - iWaWidthMargins);
+
+	$htmlEditor.height(iHeHeight);
+	$workarea.height(iWaHeight);
+};
+	
 CHtmlEditorViewModel.prototype.init = function ()
 {
-	var self = this;
-
-	$(document.body).on('click', _.bind(function (oEvent) {
+	$(document.body).on('click', _.bind(function () {
 		this.closeAllPopups(true);
 	}, this));
 	
@@ -24418,7 +24450,7 @@ CHtmlEditorViewModel.prototype.setFontValuesFromText = function ()
 {
 	this.lockFontSubscribing(true);
 	this.selectedFont(this.oCrea.getFontName());
-	this.selectedSize(this.oCrea.getFontSizeInNumber());
+	this.selectedSize(this.oCrea.getFontSizeInNumber().toString());
 	this.lockFontSubscribing(false);
 
 };
@@ -28881,7 +28913,10 @@ CComposeViewModel.prototype.fromToExpandColaps = function ()
  */
 CComposeViewModel.prototype.onApplyBindings = function ()
 {
-
+	this.$viewModel.on('resize', '.panel_content', _.debounce(_.bind(function () {
+		this.oHtmlEditor.resize();
+	}, this), 1));
+	
     App.registerSessionTimeoutFunction(_.bind(this.executeSave, this, false));
 
     this.hotKeysBind();
@@ -28889,7 +28924,7 @@ CComposeViewModel.prototype.onApplyBindings = function ()
 
 CComposeViewModel.prototype.hotKeysBind = function ()
 {
-    $(document).on('keydown', $.proxy(function(ev) {
+    this.$viewModel.on('keydown', $.proxy(function(ev) {
 
         if (ev && ev.ctrlKey && !ev.altKey && !ev.shiftKey)
         {
@@ -28898,7 +28933,7 @@ CComposeViewModel.prototype.hotKeysBind = function ()
                 bShown = this.shown() && (!this.minimized || !this.minimized()),
                 bComputed = bShown && ev && ev.ctrlKey,
                 oEnumsKey = Enums.Key
-                ;
+			;
 
             if (bComputed && nKey === oEnumsKey.s)
             {
@@ -33233,8 +33268,7 @@ function CEmailAccountsSettingsViewModel()
 	this.editedIdentityId = ko.observable(null);
 	
 	this.defaultAccount.fetchers.subscribe(function(oList) {
-
-		if(!oList)
+		if (!oList)
 		{
 			this.onChangeAccount(this.defaultAccountId());
 		}
@@ -33249,12 +33283,8 @@ function CEmailAccountsSettingsViewModel()
 
 			this.fetchers(oFetchers);
 			this.firstFetcher(oFirstFetcher);
-			/*if(this.editedFetcherId() && isFetcherTAb)
-			{
-				this.onChangeFetcher(this.editedFetcherId());
-			}
-			else */
-			if (isFetcherTAb)
+			
+			if (isFetcherTAb && !oFetchers.hasFetcher(this.editedFetcherId()))
 			{
 				this.editedFetcherId(nFirstFetcherId);
 				this.editedIdentityId(null);
@@ -33319,6 +33349,10 @@ CEmailAccountsSettingsViewModel.prototype.onRoute = function (aParams)
 		}
 		else
 		{
+			if (sNewTab !== aParams[1])
+			{
+				App.Routing.replaceHash([Enums.Screens.Settings, Enums.SettingsTab.EmailAccounts, sNewTab]);
+			}
 			this.changeCurrentTab(sNewTab);
 		}
 		
@@ -33397,14 +33431,6 @@ CEmailAccountsSettingsViewModel.prototype.changeCurrentTab = function (sTab)
 			App.Routing.replaceHash([Enums.Screens.Settings, Enums.SettingsTab.EmailAccounts, this.tab()]);
 		}
 	}
-};
-
-/**
- * @param {string} sTab
- * @returns {Object}
- */
-CEmailAccountsSettingsViewModel.prototype.allowedChangeTabAfterConfirm = function (sTab)
-{
 };
 
 /**
@@ -33524,12 +33550,12 @@ CEmailAccountsSettingsViewModel.prototype.fillAccountPermissions = function (iAc
 		oAccount = AppData.Accounts.getAccount(iAccountId),
 		bAllowMail = !!oAccount && oAccount.allowMail(),
 		bDefault = !!oAccount && oAccount.isDefault(),
-		bLinked = !!oAccount && oAccount.isLinked(),
-		bChangePass = !!oAccount && oAccount.extensionExists('AllowChangePasswordExtension')
+		bChangePass = !!oAccount && oAccount.extensionExists('AllowChangePasswordExtension'),
+		bCanBeRemoved =  !!oAccount && oAccount.canBeRemoved() && !oAccount.isDefault()
 	;
 	
 	this.isAllowMail(oAccount && oAccount.allowMail());
-	this.allowProperties(AppData.App.AllowUsersChangeEmailSettings && bAllowMail && (!bDefault || !bLinked) || !AppData.AllowIdentities || bChangePass);
+	this.allowProperties((!bDefault || bDefault && AppData.App.AllowUsersChangeEmailSettings) && bAllowMail || !AppData.AllowIdentities || bChangePass || bCanBeRemoved);
 };
 
 /**
@@ -33782,6 +33808,11 @@ CEmailAccountsSettingsViewModel.prototype.onRemoveIdentity = function ()
 	this.changeCurrentTab(this.tab());
 };
 
+/**
+ * @param {string} sTab
+ * @param {function} fCallback
+ * @param {mixed} mArgument
+ */
 CEmailAccountsSettingsViewModel.prototype.confirmSaving = function (sTab, fCallback, mArgument)
 {
 	var
@@ -34708,6 +34739,7 @@ CAccountSignatureViewModel.prototype.onShow = function (oAccount)
 
 	this.oHtmlEditor.initCrea(this.signature(), false, '');
 	this.oHtmlEditor.setActivitySource(this.useSignature);
+	this.oHtmlEditor.resize();
 	this.enableImageDragNDrop(this.oHtmlEditor.editorUploader.isDragAndDropSupported() && !App.browser.ie10AndAbove);
 	
 	this.updateFirstState();
@@ -36026,6 +36058,7 @@ CFetcherSignatureViewModel.prototype.onShow = function (aParams, oAccount)
 {
 	this.oHtmlEditor.initCrea(this.signature(), false, '');
 	this.oHtmlEditor.setActivitySource(this.useSignature);
+	this.oHtmlEditor.resize();
 	this.enableImageDragNDrop(this.oHtmlEditor.editorUploader.isDragAndDropSupported() && !App.browser.ie10AndAbove);
 	
 	this.updateFirstState();
@@ -36279,6 +36312,7 @@ CIdentityPropertiesViewModel.prototype.onShow = function (aParams, oAccount)
 {
 	this.oHtmlEditor.initCrea(this.signature(), false, '');
 	this.oHtmlEditor.setActivitySource(this.useSignature);
+	this.oHtmlEditor.resize();
 	this.enableImageDragNDrop(this.oHtmlEditor.editorUploader.isDragAndDropSupported() && !App.browser.ie10AndAbove);
 };
 

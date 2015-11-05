@@ -12,7 +12,11 @@
 		<span class="name">
 			<span class="icon" data-bind="css: 'type' + type()"></span>
 			<span class="collapse_handler" data-bind="visible: canExpand, css: {'expanded': expanded(), 'collapsed': !expanded()}, click: onAccordion"></span>
-			<span class="text animGoal" data-bind="text: displayName"></span>
+			<span class="text animGoal" data-bind="text: displayName, attr: {'id':	(type() === Enums.FolderTypes.Inbox) ? 'selenium_folder_inbox' :
+																					((type() === Enums.FolderTypes.Sent) ? 'selenium_folder_sent' :
+																					((type() === Enums.FolderTypes.Drafts) ? 'selenium_folder_drafts' :
+																					((type() === Enums.FolderTypes.Spam) ? 'selenium_folder_spam' :
+																					((type() === Enums.FolderTypes.Trash) ? 'selenium_folder_trash' : ''))))}"></span>
 		</span>
 	</a>
 	<span class="title" data-bind="visible: !bCanBeSelected">
