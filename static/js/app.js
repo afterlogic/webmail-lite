@@ -13874,7 +13874,8 @@ CalendarEventPopup.prototype.onShow = function (oParameters)
 	this.excluded(oParameters.Excluded || false);
 	this.repeatRuleParse(oParameters.RRule || null);
 
-	if (this.id() === null) {
+	if (this.id() === null)
+	{
 		this.subjectFocus(true);
 	}
 
@@ -13988,7 +13989,7 @@ CalendarEventPopup.prototype.onSaveClick = function ()
 						weekNum: null
 					};
 				}
-				else if (iPeriod === Enums.CalendarRepeatPeriod.Monthly && iAlways === Enums.CalendarAlways.Disable)
+				else if (iPeriod === Enums.CalendarRepeatPeriod.Monthly)
 				{
 					oEventData.rrule = {
 						byDays: [],
@@ -14000,7 +14001,7 @@ CalendarEventPopup.prototype.onSaveClick = function ()
 						weekNum: null
 					};
 				}
-				else if (iPeriod === Enums.CalendarRepeatPeriod.Yearly && iAlways === Enums.CalendarAlways.Disable)
+				else if (iPeriod === Enums.CalendarRepeatPeriod.Yearly)
 				{
 					oEventData.rrule = {
 						byDays: [],
