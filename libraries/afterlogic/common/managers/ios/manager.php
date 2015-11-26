@@ -147,7 +147,7 @@ class CApiIosManager extends AApiManager
 			'IncomingMailServerAuthentication'	=> 'EmailAuthPassword',
 			'OutgoingMailServerHostName'		=> $sOutMailServer,
 			'OutgoingMailServerPortNumber'		=> $iOutMailPort,
-			'OutgoingMailServerUseSSL'			=> 465 === $iIncMailPort,
+			'OutgoingMailServerUseSSL'			=> 465 === $iOutMailPort,
 			'OutgoingMailServerUsername'		=> 0 === strlen($oAccount->OutgoingMailLogin)
 				? $oAccount->IncomingMailLogin : $oAccount->OutgoingMailLogin,
 			'OutgoingPassword'					=> $bIsDemo ? 'demo' : (CApi::GetConf('labs.ios-profile.include-password', true) ? (0 === strlen($oAccount->OutgoingMailPassword)

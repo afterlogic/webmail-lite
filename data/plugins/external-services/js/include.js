@@ -110,29 +110,75 @@
 						'data-app-key': AfterLogicApi.getAppDataItem('SocialDropboxId')
 					});
 				}
-				oViewModel.getAttachFromTooltip = function (sService)
+				
+				oViewModel.onGoogleApiLoad = function ()
+				{
+					window.gapi.client.load('drive', 'v2', _.bind(oViewModel.doGoogleAuth, oViewModel, true));
+					window.gapi.load('picker');
+				};						
+
+				oViewModel.doGoogleAuth = function (bImmediate, fCallback) 
+				{
+					var oauthToken = window.gapi.auth.getToken();
+					if (!oauthToken || _.isEmpty(oauthToken) || oauthToken && oauthToken.error)
+					{
+						window.gapi.auth.authorize({
+								'client_id': AfterLogicApi.getAppDataItem('SocialGoogleId'),
+								'scope': ['https://www.googleapis.com/auth/drive.readonly'],
+								'immediate': bImmediate
+							},
+							fCallback);
+					 }
+				};
+				
+				oViewModel.showGooglePicker = function () 
 				{
 					var 
-						sResult = ''
+						oUser = AfterLogicApi.getAppDataItem('User')
 					;
-					if (sService === 'google')
-					{
-						sResult = AfterLogicApi.i18n('PLUGIN_EXTERNAL_SERVICES/ATTACH_FROM_GOOGLE_CLICK');
-					}
-					else if (sService === 'dropbox')
-					{
-						sResult = AfterLogicApi.i18n('PLUGIN_EXTERNAL_SERVICES/ATTACH_FROM_DROPBOX_CLICK');
-					}
-					
-					return sResult;
+
+					oViewModel.picker = new window.google.picker.PickerBuilder()
+						.addView(new window.google.picker.DocsView().setIncludeFolders(true))
+						.setOAuthToken(window.gapi.auth.getToken().access_token)
+						.setAppId(AfterLogicApi.getAppDataItem('SocialGoogleId'))
+						.setOrigin(window.location.protocol + '//' +  window.location.host)
+						.setCallback(_.bind(oViewModel.googlePickerCallback, this))
+						.enableFeature(window.google.picker.Feature.NAV_HIDDEN)
+						.enableFeature(window.google.picker.Feature.MULTISELECT_ENABLED)
+						.setLocale(oUser ? oUser.DefaultLanguageShort : 'en')
+						.build();
+
+					oViewModel.picker.setVisible(true);
+					oViewModel.picker.Ab.style.zIndex = 2000;
 				};
+
+				if (AfterLogicApi.getAppDataItem('SocialGoogle'))
+				{
+					AfterLogicApi.loadScript('https://apis.google.com/js/client.js?onload=onGoogleApiLoad',
+						_.bind(oViewModel.onGoogleApiLoad, oViewModel), null, 'onGoogleApiLoad');
+				}
+				
+				oViewModel.getAttachFromTooltip = function (sService)
+				{
+					return AfterLogicApi.i18n('PLUGIN_EXTERNAL_SERVICES/ATTACH_FROM_' + sService.toUpperCase() + '_CLICK');
+				};
+				
 				oViewModel.onShowAttachFromClick = function (sService)
 				{
 					if (sService === 'google')
 					{
-						/*global GooglePickerPopup:true */
-						AfterLogicApi.showPopup(GooglePickerPopup, [_.bind(this.googlePickerCallback, this)]);
-						/*global GooglePickerPopup:false */
+						var 
+							oauthToken = window.gapi.auth.getToken()
+						;
+
+						if (oauthToken && !oauthToken.error) 
+						{
+							oViewModel.showGooglePicker();
+						}
+						else
+						{
+							oViewModel.doGoogleAuth(false, _.bind(oViewModel.showGooglePicker, oViewModel));							
+						}
 					}
 					else if (sService === 'dropbox')
 					{
@@ -149,7 +195,7 @@
 					}
 				};
 
-				oViewModel.googlePickerCallback = function (aFileItems, sAccessToken)
+				oViewModel.googlePickerCallback = function (aData)
 				{
 					var
 						oAttach = null,
@@ -157,34 +203,37 @@
 						oParameters = {},
 						self = this
 					;
+					if (aData[window.google.picker.Response.ACTION] === window.google.picker.Action.PICKED)
+					{
+						_.each(aData[window.google.picker.Response.DOCUMENTS], function (oFileItem) {
+							oAttach = AfterLogicApi.createObjectInstance('CMailAttachmentModel');
+							if (oAttach)
+							{
+								oAttach
+									.fileName(oFileItem.name)
+									.hash(oFileItem.id)
+									.size(oFileItem.sizeBytes)
+									.uploadStarted(true)
+									.type(oFileItem.mimeType)
+									.thumb(oAttach.type().substr(0, 5) === 'image');
+							}
 
-					_.each(aFileItems, function (oFileItem) {
-						oAttach = AfterLogicApi.createObjectInstance('CMailAttachmentModel');
-						if (oAttach)
-						{
-							oAttach
-								.fileName(oFileItem.name)
-								.hash(oFileItem.id)
-								.size(oFileItem.sizeBytes)
-								.uploadStarted(true)
-								.type(oFileItem.mimeType)
-								.thumb(oAttach.type().substr(0, 5) === 'image');
-						}
+							self.attachments.push(oAttach);
+							aUrls.push(oFileItem.id);
 
-						self.attachments.push(oAttach);
-						aUrls.push(oFileItem.id);
+						}, this);
 
-					}, this);
+						oParameters = {
+							'Action': 'FilesUploadByLink',
+							'Links': aUrls,
+							'LinksAsIds': true,
+							'AccessToken': window.gapi.auth.getToken().access_token
+						};
 
-					oParameters = {
-						'Action': 'FilesUploadByLink',
-						'Links': aUrls,
-						'LinksAsIds': true,
-						'AccessToken': sAccessToken
-					};
+						oViewModel.messageUploadAttachmentsStarted(true);
+						AfterLogicApi.sendAjaxRequest(oParameters, oViewModel.onFilesUpload, this);
+					}
 
-					oViewModel.messageUploadAttachmentsStarted(true);
-					AfterLogicApi.sendAjaxRequest(oParameters, oViewModel.onFilesUpload, this);
 				};
 				// ----------------
 

@@ -4292,7 +4292,7 @@ ko.bindingHandlers.heightAdjust = {
 			sLocation = fValueAccessor().location,
 			sDelay = fValueAccessor().delay || 400
 		;
-
+		
 		if (!jqElement) {
 			oElement.jqElement = jqElement = $(oElement);
 		}
@@ -17743,22 +17743,26 @@ CHtmlEditorViewModel.prototype.resize = function ()
 		$htmlEditor = $(this.htmlEditorDom()),
 		$parent = $htmlEditor.parent(),
 		$workarea = $(this.workareaDom()),
-		$toolbar = $(this.toolbarDom()),
-
-		iWaWidthMargins = $workarea.outerWidth(true) - $workarea.width(),
-		iHeWidthMargins = $htmlEditor.outerWidth(true) - $htmlEditor.width(),
-		iHeWidth = $parent.width() - iHeWidthMargins,
-
-		iWaHeightMargins = $workarea.outerHeight(true) - $workarea.height(),
-		iHeHeight = $parent.height(),
-		iWaHeight = iHeHeight - iWaHeightMargins - $toolbar.outerHeight()
+		$toolbar = $(this.toolbarDom())
 	;
 	
-	$htmlEditor.width(iHeWidth);
-	$workarea.width(iHeWidth - iWaWidthMargins);
+	_.delay(function () {
+		var		
+			iWaWidthMargins = $workarea.outerWidth(true) - $workarea.width(),
+			iHeWidthMargins = $htmlEditor.outerWidth(true) - $htmlEditor.width(),
+			iHeWidth = $parent.width() - iHeWidthMargins,
 
-	$htmlEditor.height(iHeHeight);
-	$workarea.height(iWaHeight);
+			iWaHeightMargins = $workarea.outerHeight(true) - $workarea.height(),
+			iHeHeight = $parent.height(),
+			iWaHeight = iHeHeight - iWaHeightMargins - $toolbar.outerHeight()
+		;
+	
+		$htmlEditor.width(iHeWidth);
+		$workarea.width(iHeWidth - iWaWidthMargins);
+
+		$htmlEditor.height(iHeHeight);
+		$workarea.height(iWaHeight);
+	}, 1);
 };
 	
 CHtmlEditorViewModel.prototype.init = function ()
@@ -22365,6 +22369,7 @@ function CComposeViewModel()
     this.minHeightRemoveTrigger = ko.observable(false).extend({'autoResetToFalse': 105});
     this.jqContainers = $('.pSevenMain:first, .popup.compose_popup');
     ko.computed(function () {
+		window.console.log($('.compose_popup .panel_content .panels'));
         this.minHeightAdjustTrigger();
         this.minHeightRemoveTrigger();
         _.delay(function () {
@@ -22474,6 +22479,7 @@ CComposeViewModel.prototype.initInputosaurus = function (koAddrDom, koAddr, koLo
 CComposeViewModel.prototype.fromToExpandColaps = function ()
 {
     this.fromToExpandColapssed(!this.fromToExpandColapssed());
+	this.oHtmlEditor.resize();
 };
 
 /**
@@ -22484,6 +22490,14 @@ CComposeViewModel.prototype.onApplyBindings = function ()
 	this.$viewModel.on('resize', '.panel_content', _.debounce(_.bind(function () {
 		this.oHtmlEditor.resize();
 	}, this), 1));
+	
+	ko.computed(function (){
+		this.visibleBcc();
+		this.visibleCc();
+		this.fromToExpandColapssed();
+		
+		this.oHtmlEditor.resize();
+	}, this);
 	
     App.registerSessionTimeoutFunction(_.bind(this.executeSave, this, false));
 
@@ -23664,7 +23678,6 @@ CComposeViewModel.prototype.changeBccVisibility = function ()
     {
         this.focusToAddr();
     }
-
 };
 
 /**
@@ -25408,12 +25421,14 @@ CContactsViewModel.prototype.searchFocus = function ()
 	}
 };
 
-CContactsViewModel.prototype.onContactDblClick = function ()
+/**
+ * @param {Object} oContact
+ */
+CContactsViewModel.prototype.onContactDblClick = function (oContact)
 {
-	var oContact = this.selectedContact();
 	if (oContact)
 	{
-		App.Api.composeMessageToAddresses(oContact.email());
+		App.Api.composeMessageToAddresses(oContact.EmailAndName());
 	}
 };
 

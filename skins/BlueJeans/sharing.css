@@ -27,7 +27,7 @@ html.rtl .buttons {
     width: 280px;
 	margin: 0px auto;
 	padding: 130px 20px 20px;
-	background: url("images/logo.png?7.6.5") no-repeat center 20px;
+	background: url("images/logo.png?7.6.6") no-repeat center 20px;
 	text-align: center;
 	color: #555;
 }
@@ -62,7 +62,7 @@ html.rtl .buttons {
 	text-decoration: none;
 }
 .file .icon {
-	background-image: url("images/sprites.png?7.6.5");
+	background-image: url("images/sprites.png?7.6.6");
 	background-repeat: no-repeat;
 	background-position: 0px -360px;
 	display: inline-block;

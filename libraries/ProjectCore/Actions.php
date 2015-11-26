@@ -1543,14 +1543,14 @@ class Actions extends ActionsBase
 
 		return $oMessage;
 	}
-
+	
 	/**
 	 * @return array
 	 */
 	public function AjaxMessageSend()
 	{
 		$oAccount = $this->getAccountFromParam();
-
+		
 		$sSentFolder = $this->getParamValue('SentFolder', '');
 		$sDraftFolder = $this->getParamValue('DraftFolder', '');
 		$sDraftUid = $this->getParamValue('DraftUid', '');

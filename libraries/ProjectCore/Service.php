@@ -1013,8 +1013,8 @@ class Service
 									break;
 							}
 						}
-						$sReditectUrl = \CApi::GetConf('labs.post-login-error-redirect-url', './');
-						\CApi::Location($sReditectUrl . '?error=' . $iErrorCode);
+						$sRedirectUrl = \CApi::GetConf('labs.post-login-error-redirect-url', './');
+						\CApi::Location($sRedirectUrl . '?error=' . $iErrorCode);
 						exit;
 					}
 

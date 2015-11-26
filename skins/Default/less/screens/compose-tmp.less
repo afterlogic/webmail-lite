@@ -1,0 +1,110 @@
+.compose {
+	.panels {
+		background-color: #fff;
+	}
+	
+	.toolbar {
+		background-color: #f7f7f7 !important;
+		border: none !important;
+		
+		.text {
+			font-weight: normal !important;
+			font-size: 13pt !important;
+		}
+	}
+	
+	.left_panel {
+		border: none !important;
+		
+		table.fields {
+			td {
+				padding-top: 4px !important;
+				padding-bottom: 4px !important;
+			}
+			
+			tr {
+				border: none;
+			}
+			
+			&.no-compressed tr.from, &.no-compressed tr.to, &.no-compressed tr.cc, &.no-compressed tr.bcc {
+				border-bottom: 1px solid #e2e2e2;
+			}
+		}
+		
+		.label {
+			color: #bababa;
+			font-size: 13pt !important;
+		}
+		
+		.value .input, .value input {
+			color: #444;
+			border: none;
+			box-shadow: none;
+			font-size: 13pt !important;
+		}
+		
+		.inputosaurus-container li.ui-draggable,
+		.inputosaurus-moving-container li {
+			background-color: #e5eff7;
+			color: #5b9bcd;
+			border: none;
+			box-shadow: none;
+			border-radius: 11px;
+			padding: 3px 28px 3px 14px !important;
+			
+			a.ficon {
+				margin-right: 12px !important;
+			}
+
+			&.inputosaurus-selected {
+				background-color: #5b9bcd;
+				color: #fff;
+				
+				a.ficon {
+					color: #fff;
+					margin-right: 12px !important;
+				}
+			}
+		}
+		
+		.html_editor {
+			border-top: solid 1px #e2e2e2 !important;
+			
+			.toolbar {
+				border: none;
+				background-color: #fdfdfd !important;
+
+				.separator {
+					border-left: 1px solid #eee;
+				}
+			}
+
+			.workarea {
+				border: none;
+			}
+		}
+	}
+	
+	.attachments {
+		background-color: #fafafa;
+		
+		.panel_top {
+			background-color: inherit;
+			border: none;
+			padding-top: 35px !important;
+			
+			.uploader_button {
+				color: #aaa !important;
+				margin-right: 21px !important;
+				
+				.icon {
+					font-size: 28px !important;
+				}
+			}
+		}
+		
+		.panel_center, .items_list .item {
+			background-color: inherit;
+		}
+	}
+}

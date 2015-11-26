@@ -633,7 +633,7 @@ class CDbSchema
 			new CDbField('leave_messages', CDbField::BIT, 1),
 			new CDbField('frienly_name', CDbField::VAR_CHAR, ''),
 			new CDbField('email', CDbField::VAR_CHAR, ''),
-			new CDbField('signature', CDbField::TEXT, ''),
+			new CDbField('signature', CDbField::TEXT_MEDIUM, ''),
 			new CDbField('signature_opt', CDbField::INT_SHORT, 0),
 			new CDbField('inc_host', CDbField::VAR_CHAR, ''),
 			new CDbField('inc_port', CDbField::INT, 110),

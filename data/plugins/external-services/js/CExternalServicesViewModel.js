@@ -12,6 +12,7 @@ function CExternalServicesViewModel()
 		AfterLogicApi.runPluginHook('view-model-defined', [this.__name, this]);
 	}	
 }
+
 CExternalServicesViewModel.prototype.__name = 'CExternalServicesViewModel';
 CExternalServicesViewModel.prototype.TemplateName = 'Plugin_ExternalServicesSettings';
 CExternalServicesViewModel.prototype.TabName = 'services';
@@ -138,3 +139,6 @@ CExternalServicesViewModel.prototype.onServiceDeleteResponse = function (oRespon
 		}
 	}
 };		
+
+AfterLogicApi.addSettingsTab(CExternalServicesViewModel);
+

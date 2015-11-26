@@ -2141,7 +2141,7 @@ ko.bindingHandlers.heightAdjust = {
 			sLocation = fValueAccessor().location,
 			sDelay = fValueAccessor().delay || 400
 		;
-
+		
 		if (!jqElement) {
 			oElement.jqElement = jqElement = $(oElement);
 		}

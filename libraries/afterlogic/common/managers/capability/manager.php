@@ -154,7 +154,7 @@ class CApiCapabilityManager extends AApiManager
 	 */
 	public function isGlobalContactsSupported($oAccount = null, $bCheckShowSettings = true)
 	{
-		$bResult = $this->isContactsSupported() && $this->isCollaborationSupported() && !!CApi::Manager('gcontacts');
+		$bResult = $this->isContactsSupported() && $this->isNotLite() && !!CApi::Manager('gcontacts');
 		if ($bResult && $bCheckShowSettings)
 		{
 			$oSettings = null;
@@ -164,7 +164,7 @@ class CApiCapabilityManager extends AApiManager
 
 		if ($bResult && $oAccount)
 		{
-			$bResult = $this->isContactsSupported($oAccount) && $oAccount->User->getCapa(ECapa::GAB);
+			$bResult = $this->isContactsSupported($oAccount) && $oAccount->User->getCapa(ECapa::GAB) && $oAccount->GlobalAddressBook !== \EContactsGABVisibility::Off;
 		}
 
 		return $bResult;

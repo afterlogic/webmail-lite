@@ -112,13 +112,13 @@ return array(
 	'webmail.autosave' => true,
 
 	/**
-	 * Enable browsers to add WebMail as an application for mailto links.
+	 * Enable joining reply prefixes when subject of the answer is formed.
 	 * Default value: true
 	 */
 	'webmail.join-reply-prefixes' => true,
 
 	/**
-	 * Enable joining reply prefixes when subject of the answer is formed.
+	 * Enable browsers to add WebMail as an application for mailto links.
 	 * Default value: true
 	 */
 	'webmail.allow-app-register-mailto' => true,

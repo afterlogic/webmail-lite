@@ -46,7 +46,7 @@
 		<DefaultSkin>AfterLogic</DefaultSkin>
 		<MailsPerPage>20</MailsPerPage>
 		<AllowUsersChangeInterfaceSettings>On</AllowUsersChangeInterfaceSettings>
-		<AllowUsersChangeEmailSettings>On</AllowUsersChangeEmailSettings>
+		<AllowUsersChangeEmailSettings>Off</AllowUsersChangeEmailSettings>
 		<EnableAttachmentSizeLimit>Off</EnableAttachmentSizeLimit>
 		<AttachmentSizeLimit>102400000</AttachmentSizeLimit>
 		<ImageUploadSizeLimit>10240000</ImageUploadSizeLimit>
