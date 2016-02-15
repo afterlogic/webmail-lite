@@ -122,7 +122,7 @@
 								<span class="table-compressor" data-bind="visible: !mobileApp, click: fromToExpandColaps, css: { 'compressed': fromToExpandColapssed }"></span>
 
 								<div class="notice" data-bind="visible: isDemo, i18n: 'text'" data-i18n="DEMO/WARNING_SEND_EMAIL_TO_DEMO_ONLY"></div>
-								<table class="fields">
+								<table class="fields" data-bind="css: { 'no-compressed': !fromToExpandColapssed() }">
 									<tr class="first_row from" data-bind="visible: visibleFrom() && !fromToExpandColapssed()">
 										<td class="label">
 											<span data-bind="i18n: 'text'" data-i18n="COMPOSE/HEADER_FROM"></span>:

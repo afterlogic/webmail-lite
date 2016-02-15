@@ -72,7 +72,7 @@ class Server extends \Sabre\DAV\Server
 				$bErrorCreateDir = false;
 				
 				/* Public files folder */
-				$publicDir = \CApi::DataPath() . Constants::FILESTORAGE_PATH_ROOT;
+				$publicDir = FS\Plugin::GetFilesPath() . Constants::FILESTORAGE_PATH_ROOT;
 				if (!file_exists($publicDir))
 				{
 					if (!@mkdir($publicDir))
@@ -90,7 +90,7 @@ class Server extends \Sabre\DAV\Server
 					}
 				}
 
-				$personalDir = \CApi::DataPath() . Constants::FILESTORAGE_PATH_ROOT . 
+				$personalDir = FS\Plugin::GetFilesPath() . Constants::FILESTORAGE_PATH_ROOT . 
 						Constants::FILESTORAGE_PATH_PERSONAL;
 				if (!file_exists($personalDir))
 				{
@@ -99,7 +99,7 @@ class Server extends \Sabre\DAV\Server
 						$bErrorCreateDir = true;
 					}
 				}
-				$sharedDir = \CApi::DataPath() . Constants::FILESTORAGE_PATH_ROOT . 
+				$sharedDir = FS\Plugin::GetFilesPath() . Constants::FILESTORAGE_PATH_ROOT . 
 						Constants::FILESTORAGE_PATH_SHARED;
 				if (!file_exists($sharedDir))
 				{
@@ -111,7 +111,7 @@ class Server extends \Sabre\DAV\Server
 				
 				if ($bErrorCreateDir)
 				{
-					throw new \Sabre\DAV\Exception('Can\'t create directory in ' . \CApi::DataPath() . Constants::FILESTORAGE_PATH_ROOT , 500);
+					throw new \Sabre\DAV\Exception('Can\'t create directory in ' . FS\Plugin::GetFilesPath() . Constants::FILESTORAGE_PATH_ROOT , 500);
 				}
 
 				$aFilesTree = array(
@@ -170,7 +170,7 @@ class Server extends \Sabre\DAV\Server
 			/* HTML Frontend Plugin */
 			if (\CApi::GetConf('labs.dav.use-browser-plugin', false) !== false)
 			{
-				$this->addPlugin(new \Sabre\DAV\Browser\Plugin(false, false));
+				$this->addPlugin(new \Sabre\DAV\Browser\Plugin(true, false));
 			}
 
 			/* Locks Plugin */

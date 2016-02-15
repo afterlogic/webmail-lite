@@ -1,0 +1,96 @@
+.panel.messages {
+	.panel_center .customscroll-scrollbar-vertical {
+		margin-right: 0;
+	}
+	
+	.toolbar {
+		background: white !important;
+		border-bottom: 0;
+		opacity: 0.8;
+
+		.item .icon {
+			color: #78b8f0 !important;
+			text-shadow: none !important;
+			
+			&:hover {
+				color: darken(#78b8f0, 10%) !important;
+				text-shadow: none !important;
+			}
+		}
+	}
+	
+	.panel_top {
+		background: #f1f1f1;
+		
+		.input {
+			border-color: white;
+		}
+	}
+	
+	.panel_bottom {
+		background-color: #fff;
+		border-radius: 0 0 4px 4px;
+	}
+}
+
+.panel.message_viewer {
+	margin-left: 4px;
+	
+	.message_header {
+		background: white;
+		border-bottom: 0;
+		
+		.details_show {
+			margin-top: 5px;
+		}
+		
+		.message_info_line .contact {
+			background: white;
+			color: #5b9bcd;
+			padding: 3px 12px 5px;
+			border-radius: 11px;
+			border: solid 1px #e5eff7;
+			display: inline-block;
+			
+			&.found_contact {
+				background: #e5eff7;
+			}
+			
+			span:first-child {
+				padding-left: 2px !important;
+				padding-right: 2px !important;
+			}
+		}
+		
+		.toolbar .item .icon {
+			color: #78b8f0 !important;
+			text-shadow: none !important;
+			
+			&:hover {
+				color: darken(#78b8f0, 10%) !important;
+				text-shadow: none !important;
+			}
+		}
+		
+		.header_content {
+			padding-bottom: 3px;
+		}
+		
+		.subject_row {
+			display: block;
+			margin-top: 18px;
+		}
+	}
+	
+	.quick_reply {
+		background: white;
+		
+		textarea {
+			border: 0;
+		}
+	}
+}
+
+.message_viewer .message_header .message_info .message_info_line::after {
+	background: inherit;
+}

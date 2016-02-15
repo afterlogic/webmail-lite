@@ -115,7 +115,12 @@ class Directory extends \Sabre\DAV\FSExt\Directory {
 	public function createFile($name, $data = null) {
 
 		$this->initPath();
-		
+
+		if (strlen($this->path . '/' . $name) > PHP_MAXPATHLEN)
+		{
+			throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::MaxPathLen);
+		}
+        
 		parent::createFile($name, $data);
 
 		$oFile = $this->getChild($name);
@@ -216,17 +221,17 @@ class Directory extends \Sabre\DAV\FSExt\Directory {
 		{
 			if ($sType === \EFileStorageTypeStr::Corporate)
 			{
-				$sRootPath = \CApi::DataPath() . \afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
+				$sRootPath = Plugin::GetFilesPath() . \afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
 					\afterlogic\DAV\Constants::FILESTORAGE_PATH_CORPORATE . '/' . $oAccount->IdTenant;
 			}		
 			else if ($sType === \EFileStorageTypeStr::Shared)
 			{
-				$sRootPath = \CApi::DataPath() . \afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
+				$sRootPath = Plugin::GetFilesPath() . \afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
 						\afterlogic\DAV\Constants::FILESTORAGE_PATH_SHARED . '/' . $oAccount->Email;
 			}
 			else 
 			{
-				$sRootPath = \CApi::DataPath() . \afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
+				$sRootPath = Plugin::GetFilesPath() . \afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
 						\afterlogic\DAV\Constants::FILESTORAGE_PATH_PERSONAL . '/' . $oAccount->Email;
 			}
 		}

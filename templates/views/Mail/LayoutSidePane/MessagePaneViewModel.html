@@ -147,22 +147,25 @@
 				
 				<div class="message_info" data-bind="visible: !detailsVisible()">
 					<div class="message_info_line">
-						<span class="from control" data-bind="text: currentAccountEmail() === fromEmail() ? meSender : from,
-							contactCardInMessage: {'address': fromEmail(), 'trigger': recipientsContacts()},
-							css: {'link found': oFromAddr() && oFromAddr().found()}">
-						</span><span class="add_contact" data-bind="customTooltip: 'MESSAGE/ACTION_ADD_TO_CONTACTS', 
-									click: function () { addToContacts(oFromAddr().sEmail, oFromAddr().sName); },
-									visible: isCurrentNotDraftOrSent() && oFromAddr() && oFromAddr().loaded() && !oFromAddr().found()"></span>
-						<span data-i18n="MESSAGE/SHORT_LINE_TO" data-bind="i18n: 'text', visible: aAllRecipients().length > 0"></span>
-						<span data-bind="foreach: aAllRecipients">
-							<span data-bind="text: $parent.currentAccountEmail() === sEmail ? $parent.meRecipient : sDisplay,
-								contactCardInMessage: {'address': sEmail, 'trigger': $parent.recipientsContacts()},
-								css: {'link found': found}">
+						<span class="contact" data-bind="css: {'found_contact': oFromAddr() && oFromAddr().found()}">
+							<span class="from control" data-bind="text: currentAccountEmail() === fromEmail() ? meSender : from,
+								contactCardInMessage: {'address': fromEmail(), 'trigger': recipientsContacts()},
+								css: {'link found': oFromAddr() && oFromAddr().found()}">
 							</span><span class="add_contact" data-bind="customTooltip: 'MESSAGE/ACTION_ADD_TO_CONTACTS', 
-									click: function () { $parent.addToContacts(sEmail, sName); },
-									visible: loaded() && !found() && $parent.currentAccountEmail() !== sEmail">
+										click: function () { addToContacts(oFromAddr().sEmail, oFromAddr().sName); },
+										visible: isCurrentNotDraftOrSent() && oFromAddr() && oFromAddr().loaded() && !oFromAddr().found()"></span>
+						</span>
+						<span data-i18n="MESSAGE/SHORT_LINE_TO" data-bind="i18n: 'text', visible: aAllRecipients().length > 0">&#8594;</span>
+						<span data-bind="foreach: aAllRecipients">
+							<span class="contact" data-bind="css: {'found_contact': found}">
+								<span data-bind="text: $parent.currentAccountEmail() === sEmail ? $parent.meRecipient : sDisplay,
+									contactCardInMessage: {'address': sEmail, 'trigger': $parent.recipientsContacts()},
+									css: {'link found': found}">
+								</span><span class="add_contact" data-bind="customTooltip: 'MESSAGE/ACTION_ADD_TO_CONTACTS', 
+										click: function () { $parent.addToContacts(sEmail, sName); },
+										visible: loaded() && !found() && $parent.currentAccountEmail() !== sEmail">
+								</span>
 							</span><span data-bind="visible: $parent.aAllRecipients().length > $index() + 1">, </span>
-							
 						</span>
 					</div>
 				</div>
@@ -221,7 +224,7 @@
 				</div>
 			</div>
 
-			<div class="header_row" data-bind="css: {'nosubject': emptySubject()}">
+			<div class="header_row subject_row" data-bind="css: {'nosubject': emptySubject()}">
 				<span class="date" data-bind="text: midDate, visible: !detailsVisible()"></span>
 				<span class="icon importance" data-bind="visible: importance() === Enums.Importance.High"></span>
 				<h2 class="subject" data-bind="text: subjectForDisplay"></h2>

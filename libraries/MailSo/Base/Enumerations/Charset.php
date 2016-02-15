@@ -1,12 +1,10 @@
 <?php
 
 /*
- * This file is part of MailSo.
- *
- * (c) 2014 Usenko Timur
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * Copyright 2004-2015, AfterLogic Corp.
+ * Licensed under AGPLv3 license or AfterLogic license
+ * if commercial version of the product was purchased.
+ * See the LICENSE file for a full license statement.
  */
 
 namespace MailSo\Base\Enumerations;

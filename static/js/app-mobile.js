@@ -869,6 +869,7 @@ Enums.IcalConfigInt = {
  * @enum {number}
  */
 Enums.Key = {
+	'Backspace': 8,
 	'Tab': 9,
 	'Enter': 13,
 	'Shift': 16,
@@ -1697,7 +1698,7 @@ Utils.WindowOpener = {
 		});
 		
 		var aDraftUids = _.map(this._aOpenedWins, function (oWin) {
-			return oWin.App ? oWin.App.MailCache.editedDraftUid() : '';
+			return (oWin.App && (window.location.origin === oWin.location.origin)) ? oWin.App.MailCache.editedDraftUid() : '';
 		});
 		
 		if (App.Screens.hasOpenedMinimizedPopups())
@@ -2608,14 +2609,6 @@ Utils.htmlStartsWithBlockquote = function (sHtml)
 Utils.escapeQuotes  = function (sText)
 {
 	return sText.replace(/'/g, "\\\'").replace(/"/g, "\\\"");
-};
-
-/**
- * @param {string} sFaviconUrl
- */
-Utils.changeFavicon  = function (sFaviconUrl)
-{
-	$('head').append('<link rel="shortcut icon" type="image/x-icon" href=' + sFaviconUrl + ' />');
 };
 
 /**
@@ -6121,18 +6114,16 @@ CLinkBuilder.prototype.parseToAddr = function (mToAddr)
 		{
 			aMessageParts = aMailto[1].split('&');
 			_.each(aMessageParts, function (sPart) {
-				var
-					aParts = sPart.split('=')
-				;
+				var aParts = sPart.split('=');
 				if (aParts.length === 2)
 				{
-					switch (aParts[0])
+					switch (aParts[0].toLowerCase())
 					{
 						case 'subject': sSubject = aParts[1]; break;
 						case 'cc': sCcAddr = aParts[1]; break;
 						case 'bcc': sBccAddr = aParts[1]; break;
 						case 'body': sBody = aParts[1]; break;
-	}
+					}
 				}
 			});
 		}
@@ -8586,7 +8577,7 @@ CApi.prototype.showErrorByCode = function (oResponse, sDefaultError, bNotHide)
 	switch (iErrorCode)
 	{
 		default:
-			sResultError = sDefaultError;
+			sResultError = sDefaultError || Utils.i18n('WARNING/UNKNOWN_ERROR');
 			break;
 		case Enums.Errors.AuthError:
 			sResultError = Utils.i18n('WARNING/LOGIN_PASS_INCORRECT');
@@ -12597,10 +12588,8 @@ CCommonFileModel.prototype.onUploadProgress = function (iUploadedSize, iTotalSiz
 CCommonFileModel.prototype.onUploadComplete = function (sFileUid, bResponseReceived, oResult)
 {
 	var
-		bError = !bResponseReceived || !oResult || oResult.Error || false,
-		sError = (oResult && oResult.Error === 'size') ?
-			Utils.i18n('COMPOSE/UPLOAD_ERROR_SIZE') :
-			Utils.i18n('COMPOSE/UPLOAD_ERROR_UNKNOWN')
+		bError = !bResponseReceived || !oResult || !!oResult.Error || false,
+		sError = Utils.i18n('COMPOSE/UPLOAD_ERROR_UNKNOWN')
 	;
 	
 	this.visibleSpinner(false);
@@ -12609,8 +12598,25 @@ CCommonFileModel.prototype.onUploadComplete = function (sFileUid, bResponseRecei
 	
 	this.uploaded(true);
 	this.uploadError(bError);
-	this.statusText(bError ? sError : Utils.i18n('COMPOSE/UPLOAD_COMPLETE'));
+	
 
+	if (bError && oResult)
+	{
+		switch (oResult.Error)
+		{
+			case 'size':
+				sError = Utils.i18n('COMPOSE/UPLOAD_ERROR_SIZE');
+				break;
+			case 'exception':
+				if (oResult.ErrorCode === 110)
+				{
+					sError = Utils.i18n('FILESTORAGE/UPLOAD_ERROR_MAXPATHLEN');
+				}
+				break;
+		}
+	}
+	
+	this.statusText(bError ? sError : Utils.i18n('COMPOSE/UPLOAD_COMPLETE'));
 	if (!bError)
 	{
 		this.fillDataAfterUploadComplete(oResult, sFileUid);
@@ -12939,8 +12945,6 @@ function CFolderModel(iAccountId)
 	this.requestedLists = [];
 	
 	this.hasChanges = ko.observable(false);
-	
-	this.unseenFilterCommand = Utils.createCommand(this, this.executeUnseenFilter, this.showUnseenMessages);
 	
 	this.relevantInformationLastMoment = null;
 }
@@ -13972,13 +13976,22 @@ CFolderModel.prototype.onAccordion = function (oFolder, oEvent)
 
 	App.MailCache.countMessages(this);
 	
-	oEvent.stopPropagation();
+	if (oEvent)
+	{
+		oEvent.stopPropagation();
+	}
 };
 
 CFolderModel.prototype.executeUnseenFilter = function ()
 {
 	var bNotChanged = false;
-	if (this.showUnseenMessages())
+	
+	if (this.messageCountToShow() > this.unseenMessageCount())
+	{
+		this.onAccordion();
+	}
+	
+	if (this.showUnseenMessages() && this.unseenMessageCount() > 0)
 	{
 		App.MailCache.waitForUnseenMessages(true);
 		bNotChanged = App.Routing.setHash(App.Links.mailbox(this.fullName(), 1, '', '', Enums.FolderFilter.Unseen));
@@ -13989,6 +14002,7 @@ CFolderModel.prototype.executeUnseenFilter = function ()
 		}
 		return false;
 	}
+	
 	return true;
 };
 
@@ -21066,62 +21080,50 @@ CMessagePaneViewModel.prototype.setMessageBody = function ()
 		var
 			oMessage = this.currentMessage(),
 			sText = oMessage.text(),
-			$body = $(this.domTextBody())
+			$body = $(this.domTextBody()),
+			oDom = null,
+			sHtml = '',
+			sLen = sText.length,
+			sMaxLen = 5000000,
+			aCollapsedStatuses = []
 		;
-		
-		$body.empty();
-		
+
 		this.textBody(sText);
 		
-		_.defer(_.bind(function () {
-			if (this.currentMessage())
+		if ($body.data('displayed-message-uid') === oMessage.uid())
+		{
+			aCollapsedStatuses = this.getBlockquotesStatus();
+		}
+
+		$body.empty();
+
+		if (oMessage.isPlain() || sLen > sMaxLen)
+		{
+			$body.html(sText);
+
+			this.visiblePicturesControl(false);
+		}
+		else
+		{
+			oDom = oMessage.getDomText();
+			sHtml = oDom.length > 0 ? oDom.html() : '';
+
+			$body.append(sHtml);
+
+			this.visiblePicturesControl(oMessage.hasExternals() && !oMessage.isExternalsAlwaysShown());
+			this.visibleShowPicturesLink(!oMessage.isExternalsShown());
+
+			if (!Utils.htmlStartsWithBlockquote(sHtml))
 			{
-				var
-					oMessage = this.currentMessage(),
-					sText = oMessage.text(),
-					oDom = null,
-					sHtml = '',
-					sLen = sText.length,
-					sMaxLen = 5000000,
-					aCollapsedStatuses = []
-				;
-				
-				if ($body.data('displayed-message-uid') === oMessage.uid())
-				{
-					aCollapsedStatuses = this.getBlockquotesStatus();
-				}
-
-				$body.empty();
-				
-				if (oMessage.isPlain() || sLen > sMaxLen)
-				{
-					$body.html(sText);
-					
-					this.visiblePicturesControl(false);
-				}
-				else
-				{
-					oDom = oMessage.getDomText();
-					sHtml = oDom.length > 0 ? oDom.html() : '';
-					
-					$body.append(sHtml);
-
-					this.visiblePicturesControl(oMessage.hasExternals() && !oMessage.isExternalsAlwaysShown());
-					this.visibleShowPicturesLink(!oMessage.isExternalsShown());
-
-					if (!Utils.htmlStartsWithBlockquote(sHtml))
-					{
-						this.doHidingBlockquotes(aCollapsedStatuses);
-					}
-				}
-				
-				this.decryptPassword('');
-				this.visibleDecryptControl(AppData.User.enableOpenPgp() && oMessage.encryptedMessage());
-				this.visibleVerifyControl(AppData.User.enableOpenPgp() && oMessage.signedMessage());
-				$body.data('displayed-message-uid', oMessage.uid());
-				this.displayedMessageUid(oMessage.uid());
+				this.doHidingBlockquotes(aCollapsedStatuses);
 			}
-		}, this));
+		}
+
+		this.decryptPassword('');
+		this.visibleDecryptControl(AppData.User.enableOpenPgp() && oMessage.encryptedMessage());
+		this.visibleVerifyControl(AppData.User.enableOpenPgp() && oMessage.signedMessage());
+		$body.data('displayed-message-uid', oMessage.uid());
+		this.displayedMessageUid(oMessage.uid());
 	}
 };
 
@@ -21554,7 +21556,7 @@ CMessagePaneViewModel.prototype.onApplyBindings = function (oMailViewModel)
 			var sHref = $(this).attr('href');
 			if (sHref && 'mailto:' === sHref.toString().toLowerCase().substr(0, 7))
 			{
-				App.Api.composeMessageToAddresses(sHref.toString().substr(7));
+				App.Api.composeMessageToAddresses(sHref.toString());
 				return false;
 			}
 		}
@@ -22054,11 +22056,6 @@ function CComposeViewModel()
 {
     var self = this;
 
-	if (AppData.SingleMode)
-	{
-		Utils.changeFavicon("favicon-single-compose.ico");
-	}
-
     this.toAddrDom = ko.observable();
     this.toAddrDom.subscribe(function () {
         this.initInputosaurus(this.toAddrDom, this.toAddr, this.lockToAddr, 'to');
@@ -22369,7 +22366,6 @@ function CComposeViewModel()
     this.minHeightRemoveTrigger = ko.observable(false).extend({'autoResetToFalse': 105});
     this.jqContainers = $('.pSevenMain:first, .popup.compose_popup');
     ko.computed(function () {
-		window.console.log($('.compose_popup .panel_content .panels'));
         this.minHeightAdjustTrigger();
         this.minHeightRemoveTrigger();
         _.delay(function () {
@@ -26990,7 +26986,7 @@ CMailCache.prototype.moveMessagesToFolder = function (sToFolderFullName, aUids, 
 		var
 			oCurrFolder = this.folderList().currentFolder(),
 			bDraftsFolder = oCurrFolder && oCurrFolder.type() === Enums.FolderTypes.Drafts,
-			aOpenedDraftUids = Utils.WindowOpener.getOpenedDraftUids(),
+			aOpenedDraftUids = bDraftsFolder && Utils.WindowOpener.getOpenedDraftUids(),
 			bTryToDeleteEditedDraft = bDraftsFolder && _.find(aUids, _.bind(function (sUid) {
 				return -1 !== Utils.inArray(sUid, aOpenedDraftUids);
 			}, this)),

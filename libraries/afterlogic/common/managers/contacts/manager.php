@@ -217,16 +217,24 @@ class CApiContactsManager extends AApiManager
 					}
 				}
 			}
-
+			
 			if ('sabredav' !== CApi::GetManager()->GetStorageByType('contacts'))
 			{
 				$this->updateContactGroupsIdsWithNames($oContact);
-				$res2 = $this->oApiContactsMainManagerDAV->updateContact($oContact);
+				$oContactDAV = $this->oApiContactsMainManagerDAV->getContactByStrId($oContact->IdUser, $oContact->IdContactStr);
+				if ($oContactDAV)
+				{
+					$res2 = $this->oApiContactsMainManagerDAV->updateContact($oContact);
+				}
+				else
+				{
+					$res2 = $this->oApiContactsMainManagerDAV->createContact($oContact);
+				}
 			}
 			else
 			{
 				$res2 = true;
-			}
+			}			
 		}
 
 		return ($res1 && $res2);

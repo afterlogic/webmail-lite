@@ -291,6 +291,32 @@ class HtmlUtils
 	/**
 	 * @param \DOMDocument $oDom
 	 */
+	public static function BreakLinksContentInDOM(&$oDom)
+	{
+		$aNodes = $oDom->getElementsByTagName('a');
+		foreach ($aNodes as /* @var $oElement \DOMElement */ $oElement)
+		{
+			if ($oElement->childNodes->length === 1 && $oElement->childNodes->item(0)->nodeType === XML_TEXT_NODE)
+			{
+				$sTextContent = $oElement->childNodes->item(0)->textContent;
+				if (strlen($sTextContent) > 120 && 0 === preg_match('/\s+/', $sTextContent))
+				{
+					$aText = str_split($sTextContent, 80);
+					$oElement->removeChild($oElement->childNodes->item(0));
+					foreach ($aText as $sText)
+					{
+						$oElement->appendChild($oDom->createTextNode($sText));
+						$oElement->appendChild($oDom->createElement('wbr'));
+					}
+					$oElement->removeChild($oElement->lastChild);
+				}
+			}
+		}
+	}
+
+	/**
+	 * @param \DOMDocument $oDom
+	 */
 	public static function FindLinksInDOM(&$oDom)
 	{
 		$aNodes = $oDom->getElementsByTagName('*');
@@ -445,6 +471,8 @@ class HtmlUtils
 			{
 				\MailSo\Base\HtmlUtils::FindLinksInDOM($oDom);
 			}
+			
+			\MailSo\Base\HtmlUtils::BreakLinksContentInDOM($oDom);
 
 			$aNodes = $oDom->getElementsByTagName('*');
 			foreach ($aNodes as /* @var $oElement \DOMElement */ $oElement)

@@ -10,13 +10,23 @@
 		.text {
 			font-weight: normal !important;
 			font-size: 13pt !important;
+			
+			&:hover {
+				color: #4f4f4f;
+			}
 		}
 	}
 	
 	.left_panel {
 		border: none !important;
 		
+		.resize_handler {
+			box-shadow: 3px 0 2px #f1f1f1;
+		}
+		
 		table.fields {
+			margin-top: 0 !important;
+			
 			td {
 				padding-top: 4px !important;
 				padding-bottom: 4px !important;
@@ -50,9 +60,10 @@
 			border: none;
 			box-shadow: none;
 			border-radius: 11px;
-			padding: 3px 28px 3px 14px !important;
+			padding: 3px 28px 3px 12px !important;
 			
 			a.ficon {
+				margin-top: 0px !important;
 				margin-right: 12px !important;
 			}
 
@@ -62,6 +73,7 @@
 				
 				a.ficon {
 					color: #fff;
+					margin-top: 0px !important;
 					margin-right: 12px !important;
 				}
 			}
@@ -100,11 +112,20 @@
 				.icon {
 					font-size: 28px !important;
 				}
+				
+				&:hover {
+					color: #888 !important;
+				}
 			}
 		}
 		
 		.panel_center, .items_list .item {
 			background-color: inherit;
+			
+			.item_content {
+				background-color: #fff;
+				box-shadow: 0 2px 6px #ccc;
+			}
 		}
 	}
 }

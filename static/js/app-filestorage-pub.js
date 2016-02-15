@@ -860,6 +860,7 @@ Enums.IcalConfigInt = {
  * @enum {number}
  */
 Enums.Key = {
+	'Backspace': 8,
 	'Tab': 9,
 	'Enter': 13,
 	'Shift': 16,
@@ -3946,7 +3947,7 @@ Utils.WindowOpener = {
 		});
 		
 		var aDraftUids = _.map(this._aOpenedWins, function (oWin) {
-			return oWin.App ? oWin.App.MailCache.editedDraftUid() : '';
+			return (oWin.App && (window.location.origin === oWin.location.origin)) ? oWin.App.MailCache.editedDraftUid() : '';
 		});
 		
 		if (App.Screens.hasOpenedMinimizedPopups())
@@ -4857,14 +4858,6 @@ Utils.htmlStartsWithBlockquote = function (sHtml)
 Utils.escapeQuotes  = function (sText)
 {
 	return sText.replace(/'/g, "\\\'").replace(/"/g, "\\\"");
-};
-
-/**
- * @param {string} sFaviconUrl
- */
-Utils.changeFavicon  = function (sFaviconUrl)
-{
-	$('head').append('<link rel="shortcut icon" type="image/x-icon" href=' + sFaviconUrl + ' />');
 };
 
 /**
@@ -6893,7 +6886,7 @@ CApi.prototype.showErrorByCode = function (oResponse, sDefaultError, bNotHide)
 	switch (iErrorCode)
 	{
 		default:
-			sResultError = sDefaultError;
+			sResultError = sDefaultError || Utils.i18n('WARNING/UNKNOWN_ERROR');
 			break;
 		case Enums.Errors.AuthError:
 			sResultError = Utils.i18n('WARNING/LOGIN_PASS_INCORRECT');
@@ -9825,10 +9818,8 @@ CCommonFileModel.prototype.onUploadProgress = function (iUploadedSize, iTotalSiz
 CCommonFileModel.prototype.onUploadComplete = function (sFileUid, bResponseReceived, oResult)
 {
 	var
-		bError = !bResponseReceived || !oResult || oResult.Error || false,
-		sError = (oResult && oResult.Error === 'size') ?
-			Utils.i18n('COMPOSE/UPLOAD_ERROR_SIZE') :
-			Utils.i18n('COMPOSE/UPLOAD_ERROR_UNKNOWN')
+		bError = !bResponseReceived || !oResult || !!oResult.Error || false,
+		sError = Utils.i18n('COMPOSE/UPLOAD_ERROR_UNKNOWN')
 	;
 	
 	this.visibleSpinner(false);
@@ -9837,8 +9828,25 @@ CCommonFileModel.prototype.onUploadComplete = function (sFileUid, bResponseRecei
 	
 	this.uploaded(true);
 	this.uploadError(bError);
-	this.statusText(bError ? sError : Utils.i18n('COMPOSE/UPLOAD_COMPLETE'));
+	
 
+	if (bError && oResult)
+	{
+		switch (oResult.Error)
+		{
+			case 'size':
+				sError = Utils.i18n('COMPOSE/UPLOAD_ERROR_SIZE');
+				break;
+			case 'exception':
+				if (oResult.ErrorCode === 110)
+				{
+					sError = Utils.i18n('FILESTORAGE/UPLOAD_ERROR_MAXPATHLEN');
+				}
+				break;
+		}
+	}
+	
+	this.statusText(bError ? sError : Utils.i18n('COMPOSE/UPLOAD_COMPLETE'));
 	if (!bError)
 	{
 		this.fillDataAfterUploadComplete(oResult, sFileUid);

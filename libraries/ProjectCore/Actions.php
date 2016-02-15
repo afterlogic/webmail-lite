@@ -4918,48 +4918,46 @@ class Actions extends ActionsBase
 		$aContactsId = explode(',', $this->getParamValue('ContactsId', ''));
 		$aContactsId = array_map('trim', $aContactsId);
 		
-		$bSharedToAll = '1' === $this->getParamValue('SharedToAll', '0');
-		$iTenantId = $bSharedToAll ? $oAccount->IdTenant : null;
+		$iTenantId = ('1' === $this->getParamValue('SharedToAll', '0')) ? $oAccount->IdTenant : null;
 
 		if ($this->oApiCapability->isPersonalContactsSupported($oAccount))
 		{
 			$oApiContacts = $this->ApiContacts();
-		}
-
-		if ($oApiContacts && $this->oApiCapability->isSharedContactsSupported($oAccount))
-		{
-			foreach ($aContactsId as $sContactId)
+			if ($oApiContacts && $this->oApiCapability->isSharedContactsSupported($oAccount))
 			{
-				$oContact = $oApiContacts->getContactById($oAccount->IdUser, $sContactId, false, $iTenantId);
-				if ($oContact)
+				foreach ($aContactsId as $sContactId)
 				{
-					if ($oContact->SharedToAll)
+					$oContact = $oApiContacts->getContactById($oAccount->IdUser, $sContactId, false, $iTenantId);
+					if ($oContact)
 					{
-						$oApiContacts->updateContactUserId($oContact, $oAccount->IdUser);
-					}
-
-					$oContact->SharedToAll = !$oContact->SharedToAll;
-					$oContact->IdUser = $oAccount->IdUser;
-					$oContact->IdDomain = $oAccount->IdDomain;
-					$oContact->IdTenant = $oAccount->IdTenant;
-
-					if (!$oApiContacts->updateContact($oContact))
-					{
-						switch ($oApiContacts->getLastErrorCode())
+						if ($oContact->SharedToAll && $oContact->IdUser !== $oAccount->IdUser)
 						{
-							case \Errs::Sabre_PreconditionFailed:
-								throw new \ProjectCore\Exceptions\ClientException(
-									\ProjectCore\Notifications::ContactDataHasBeenModifiedByAnotherApplication);
+							$oApiContacts->updateContactUserId($oContact, $oAccount->IdUser);
+						}
+
+						$oContact->SharedToAll = !$oContact->SharedToAll;
+						$oContact->IdUser = $oAccount->IdUser;
+						$oContact->IdDomain = $oAccount->IdDomain;
+						$oContact->IdTenant = $oAccount->IdTenant;
+
+						if (!$oApiContacts->updateContact($oContact))
+						{
+							switch ($oApiContacts->getLastErrorCode())
+							{
+								case \Errs::Sabre_PreconditionFailed:
+									throw new \ProjectCore\Exceptions\ClientException(
+										\ProjectCore\Notifications::ContactDataHasBeenModifiedByAnotherApplication);
+							}
 						}
 					}
 				}
+
+				return $this->TrueResponse($oAccount, __FUNCTION__);
 			}
-			
-			return $this->TrueResponse($oAccount, __FUNCTION__);
-		}
-		else
-		{
-			throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::ContactsNotAllowed);
+			else
+			{
+				throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::ContactsNotAllowed);
+			}
 		}
 
 		return $this->FalseResponse($oAccount, __FUNCTION__);
@@ -5821,7 +5819,14 @@ class Actions extends ActionsBase
 					}
 					else
 					{
-						\MailSo\Base\Utils::FpassthruWithTimeLimitReset($mResult);
+						if ($sContentType === 'text/html')
+						{
+							echo(\MailSo\Base\HtmlUtils::ClearHtmlSimple(stream_get_contents($mResult)));
+						}
+						else
+						{
+							\MailSo\Base\Utils::FpassthruWithTimeLimitReset($mResult);
+						}
 					}
 					
 					@fclose($mResult);
@@ -6756,7 +6761,8 @@ class Actions extends ActionsBase
 	private function raw($bDownload = true, $bThumbnail = false)
 	{
 		$self = $this;
-		return $this->rawCallback((string) $this->getParamValue('RawKey', ''), function ($oAccount, $sContentType, $sFileName, $rResource, $oHelpdeskUser = null) use ($self, $bDownload, $bThumbnail) {
+		return $this->rawCallback((string) $this->getParamValue('RawKey', ''), 
+				function ($oAccount, $sContentType, $sFileName, $rResource, $oHelpdeskUser = null) use ($self, $bDownload, $bThumbnail) {
 			
 			$self->RawOutputHeaders($bDownload, $sContentType, $sFileName);
 
@@ -6834,7 +6840,19 @@ class Actions extends ActionsBase
 			if (isset($aValues['Iframed'], $aValues['MimeType'], $aValues['FileName']) && $aValues['Iframed'] &&
 				\CApi::isIframedMimeTypeSupported($aValues['MimeType'], $aValues['FileName']))
 			{
-				$oAccount = $this->getAccountFromParam(false);
+				$sHash = isset($aParts[5]) ? (string) $aParts[5] : '';
+				$oMin = \CApi::Manager('min');
+				$mMin = $oMin->getMinByHash($sHash);
+				$oAccount = null;
+				if (!empty($mMin['__hash__']))
+				{
+					$oAccount = $this->oApiUsers->getAccountById($mMin['Account']);
+				}
+				else
+				{
+					$oAccount = $this->getAccountFromParam(false);
+				}
+				
 				if ($oAccount)
 				{
 					$sNewUrl = '';
@@ -6842,8 +6860,8 @@ class Actions extends ActionsBase
 					$sResultUrl = '';
 					
 					$aSubParts = \CApi::DecodeKeyValues($aParts[3]);
-					if (isset($aSubParts['Iframed']) && (int) $aParts[2] === (int) $oAccount->IdAccount &&
-						0 < $oAccount->IdAccount)
+
+					if (isset($aSubParts['Iframed']))
 					{
 						$aSubParts['Time'] = \time();
 						$sNewHash = \CApi::EncodeKeyValues($aSubParts);

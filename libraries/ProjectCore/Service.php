@@ -735,109 +735,124 @@ class Service
 				
 				$oApiUsersManager = \CApi::Manager('users');
 				$oApiCalendarManager = \CApi::Manager('calendar');
-				if (isset($aInviteValues['organizer']))
+				if (isset($aInviteValues['organizer'], $aInviteValues['attendee'], $aInviteValues['calendarId'], $aInviteValues['eventId'], $aInviteValues['action']))
 				{
-					$oAccountOrganizer = $oApiUsersManager->getAccountByEmail($aInviteValues['organizer']);
-					if (isset($oAccountOrganizer, $aInviteValues['attendee'], $aInviteValues['calendarId'], $aInviteValues['eventId'], $aInviteValues['action']))
+					$sOrganizer = $aInviteValues['organizer'];
+					$sAttendee = $aInviteValues['attendee'];
+					$sCalendarId = $aInviteValues['calendarId'];
+					$sEventId = $aInviteValues['eventId'];
+					$sAction = $aInviteValues['action'];
+					
+					$oAccountOrganizer = $oApiUsersManager->getAccountByEmail($sOrganizer);
+					$oCalendar = $oApiCalendarManager->getCalendar($oAccountOrganizer, $sCalendarId);
+					if ($oCalendar)
 					{
-						$oCalendar = $oApiCalendarManager->getCalendar($oAccountOrganizer, $aInviteValues['calendarId']);
-						if ($oCalendar)
+						$oEvent = $oApiCalendarManager->getEvent($oAccountOrganizer, $sCalendarId, $sEventId);
+						if ($oEvent && is_array($oEvent) && 0 < count ($oEvent) && isset($oEvent[0]))
 						{
-							$oEvent = $oApiCalendarManager->getEvent($oAccountOrganizer, $aInviteValues['calendarId'], $aInviteValues['eventId']);
-							if ($oEvent && is_array($oEvent) && 0 < count ($oEvent) && isset($oEvent[0]))
+							if (is_string($sResult))
 							{
-								if (is_string($sResult))
+								$sResult = file_get_contents(PSEVEN_APP_ROOT_PATH.'templates/CalendarEventInviteExternal.html');
+
+								$dt = new \DateTime();
+								$dt->setTimestamp($oEvent[0]['startTS']);
+								if (!$oEvent[0]['allDay'])
 								{
-									$sResult = file_get_contents(PSEVEN_APP_ROOT_PATH.'templates/CalendarEventInviteExternal.html');
-
-									$dt = new \DateTime();
-									$dt->setTimestamp($oEvent[0]['startTS']);
-									if (!$oEvent[0]['allDay'])
-									{
-										$sDefaultTimeZone = new \DateTimeZone($oAccountOrganizer->getDefaultStrTimeZone());
-										$dt->setTimezone($sDefaultTimeZone);
-									}
-
-									$sAction = $aInviteValues['action'];
-									$sActionColor = 'green';
-									$sActionText = '';
-									switch (strtoupper($sAction))
-									{
-										case 'ACCEPTED':
-											$sActionColor = 'green';
-											$sActionText = 'Accepted';
-											break;
-										case 'DECLINED':
-											$sActionColor = 'red';
-											$sActionText = 'Declined';
-											break;
-										case 'TENTATIVE':
-											$sActionColor = '#A0A0A0';
-											$sActionText = 'Tentative';
-											break;
-									}
-
-									$sDateFormat = 'm/d/Y';
-									$sTimeFormat = 'h:i A';
-									switch ($oAccountOrganizer->User->DefaultDateFormat)
-									{
-										case \EDateFormat::DDMMYYYY:
-											$sDateFormat = 'd/m/Y';
-											break;
-										case \EDateFormat::DD_MONTH_YYYY:
-											$sDateFormat = 'd/m/Y';
-											break;
-										default:
-											$sDateFormat = 'm/d/Y';
-											break;
-									}
-									switch ($oAccountOrganizer->User->DefaultTimeFormat)
-									{
-										case \ETimeFormat::F24:
-											$sTimeFormat = 'H:i';
-											break;
-										case \EDateFormat::DD_MONTH_YYYY:
-											\ETimeFormat::F12;
-											$sTimeFormat = 'h:i A';
-											break;
-										default:
-											$sTimeFormat = 'h:i A';
-											break;
-									}
-									$sDateTime = $dt->format($sDateFormat.' '.$sTimeFormat);
-
-									$mResult = array(
-										'{{COLOR}}' => $oCalendar->Color,
-										'{{EVENT_NAME}}' => $oEvent[0]['subject'],
-										'{{EVENT_BEGIN}}' => ucfirst(\CApi::ClientI18N('REMINDERS/EVENT_BEGIN', $oAccountOrganizer)),
-										'{{EVENT_DATE}}' => $sDateTime,
-										'{{CALENDAR}}' => ucfirst(\CApi::ClientI18N('REMINDERS/CALENDAR', $oAccountOrganizer)),
-										'{{CALENDAR_NAME}}' => $oCalendar->DisplayName,
-										'{{EVENT_DESCRIPTION}}' => $oEvent[0]['description'],
-										'{{EVENT_ACTION}}' => $sActionText,
-										'{{ACTION_COLOR}}' => $sActionColor,
-									);
-
-									$sResult = strtr($sResult, $mResult);
+									$sDefaultTimeZone = new \DateTimeZone($oAccountOrganizer->getDefaultStrTimeZone());
+									$dt->setTimezone($sDefaultTimeZone);
 								}
-								else
+
+								$sActionColor = 'green';
+								$sActionText = '';
+								switch (strtoupper($sAction))
 								{
-									\CApi::Log('Empty template.', \ELogLevel::Error);
+									case 'ACCEPTED':
+										$sActionColor = 'green';
+										$sActionText = 'Accepted';
+										break;
+									case 'DECLINED':
+										$sActionColor = 'red';
+										$sActionText = 'Declined';
+										break;
+									case 'TENTATIVE':
+										$sActionColor = '#A0A0A0';
+										$sActionText = 'Tentative';
+										break;
 								}
+
+								$sDateFormat = 'm/d/Y';
+								$sTimeFormat = 'h:i A';
+								switch ($oAccountOrganizer->User->DefaultDateFormat)
+								{
+									case \EDateFormat::DDMMYYYY:
+										$sDateFormat = 'd/m/Y';
+										break;
+									case \EDateFormat::DD_MONTH_YYYY:
+										$sDateFormat = 'd/m/Y';
+										break;
+									default:
+										$sDateFormat = 'm/d/Y';
+										break;
+								}
+								switch ($oAccountOrganizer->User->DefaultTimeFormat)
+								{
+									case \ETimeFormat::F24:
+										$sTimeFormat = 'H:i';
+										break;
+									case \EDateFormat::DD_MONTH_YYYY:
+										\ETimeFormat::F12;
+										$sTimeFormat = 'h:i A';
+										break;
+									default:
+										$sTimeFormat = 'h:i A';
+										break;
+								}
+								$sDateTime = $dt->format($sDateFormat.' '.$sTimeFormat);
+
+								$mResult = array(
+									'{{COLOR}}' => $oCalendar->Color,
+									'{{EVENT_NAME}}' => $oEvent[0]['subject'],
+									'{{EVENT_BEGIN}}' => ucfirst(\CApi::ClientI18N('REMINDERS/EVENT_BEGIN', $oAccountOrganizer)),
+									'{{EVENT_DATE}}' => $sDateTime,
+									'{{CALENDAR}}' => ucfirst(\CApi::ClientI18N('REMINDERS/CALENDAR', $oAccountOrganizer)),
+									'{{CALENDAR_NAME}}' => $oCalendar->DisplayName,
+									'{{EVENT_DESCRIPTION}}' => $oEvent[0]['description'],
+									'{{EVENT_ACTION}}' => $sActionText,
+									'{{ACTION_COLOR}}' => $sActionColor,
+								);
+
+								$sResult = strtr($sResult, $mResult);
 							}
 							else
 							{
-								\CApi::Log('Event not found.', \ELogLevel::Error);
+								\CApi::Log('Empty template.', \ELogLevel::Error);
 							}
 						}
 						else
 						{
-							\CApi::Log('Calendar not found.', \ELogLevel::Error);
+							\CApi::Log('Event not found.', \ELogLevel::Error);
 						}
-						$sAttendee = $aInviteValues['attendee'];
-						if (!empty($sAttendee))
+					}
+					else
+					{
+						\CApi::Log('Calendar not found.', \ELogLevel::Error);
+					}
+					if (!empty($sAttendee))
+					{
+						$oAttendeeAccount = $oApiUsersManager->getAccountByEmail($sAttendee);
+						if ($oAttendeeAccount instanceof \CAccount)
 						{
-							$oApiCalendarManager->updateAppointment($oAccountOrganizer, $aInviteValues['calendarId'], $aInviteValues['eventId'], $sAttendee, $aInviteValues['action']);
+							$oAttendeeCalendar = $oApiCalendarManager->getDefaultCalendar($oAttendeeAccount);
+							if ($oAttendeeCalendar)
+							{
+								$oVCal = $oEvent['vcal'];
+								$oVCal->METHOD = 'REQUEST';
+								$oApiCalendarManager->appointmentAction($oAttendeeAccount, $sAttendee, $sAction, $oAttendeeCalendar['Id'], $oVCal->serialize());
+							}
+						}
+						else
+						{
+							$oApiCalendarManager->updateAppointment($oAccountOrganizer, $sCalendarId, $sEventId, $sAttendee, $sAction);
 						}
 					}
 				}

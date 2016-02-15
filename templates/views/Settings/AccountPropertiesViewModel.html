@@ -5,7 +5,7 @@
 			<input class="value input" spellcheck="false" type="text" maxlength="65" data-bind="value: friendlyName, onEnter: onSaveClick"/>
 		</div>
 
-        <div data-bind="visible: (!isDefault() || isDefault() && allowUsersChangeEmailSettings) && isAllowMail()">
+        <div data-bind="visible: (!isDefault() || isDefault() && !isLinked() && allowUsersChangeEmailSettings) && isAllowMail()">
             <div class="row">
 				<!-- ko template: {name: 'Settings_ServerPropertiesViewModel', data: oIncoming} --><!-- /ko -->
             </div>

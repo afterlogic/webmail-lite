@@ -297,4 +297,10 @@ class Plugin extends \Sabre\DAV\ServerPlugin {
 		}
 		return true;
 	}	
+	
+	public static function GetFilesPath()
+	{
+		return \CApi::GetConf('labs.files-root-path', \CApi::DataPath());
+	}
+	
 }

@@ -21,7 +21,7 @@ class SharedItem{
 	
 	public function getRootPath(){
 		
-		return \CApi::DataPath() . '/' . Plugin::getPersonalPath() . '/' . $this->getOwner();
+		return Plugin::GetFilesPath() . '/' . Plugin::getPersonalPath() . '/' . $this->getOwner();
 		
 	}		
 	

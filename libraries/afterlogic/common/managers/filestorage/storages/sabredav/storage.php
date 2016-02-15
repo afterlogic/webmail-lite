@@ -103,7 +103,7 @@ class CApiFilestorageSabredavStorage extends CApiFilestorageStorage
 		if ($oAccount)
 		{
 			$sUser = $bUser ? '/' . $oAccount->Email : '';
-			$sRootPath = \CApi::DataPath() . \afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
+			$sRootPath = \afterlogic\DAV\FS\Plugin::GetFilesPath() . \afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
 					\afterlogic\DAV\Constants::FILESTORAGE_PATH_PERSONAL . $sUser;
 
 			if ($sType === \EFileStorageTypeStr::Corporate)
@@ -111,12 +111,12 @@ class CApiFilestorageSabredavStorage extends CApiFilestorageStorage
 				$iTenantId = $oAccount ? $oAccount->IdTenant : 0;
 
 				$sTenant = $bUser ? $sTenant = '/' . $iTenantId : '';
-				$sRootPath = \CApi::DataPath() . \afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
+				$sRootPath = \afterlogic\DAV\FS\Plugin::GetFilesPath() . \afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
 					\afterlogic\DAV\Constants::FILESTORAGE_PATH_CORPORATE . $sTenant;
 			}
 			else if ($sType === \EFileStorageTypeStr::Shared)
 			{
-				$sRootPath = \CApi::DataPath() . \afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
+				$sRootPath = \afterlogic\DAV\FS\Plugin::GetFilesPath() . \afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
 					\afterlogic\DAV\Constants::FILESTORAGE_PATH_SHARED . $sUser;
 			}
 		}

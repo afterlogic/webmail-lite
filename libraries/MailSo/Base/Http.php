@@ -309,7 +309,7 @@ class Http
 	public function GetScheme()
 	{
 		$sHttps = \strtolower($this->GetServer('HTTPS', ''));
-		return ('on' === $sHttps || ('' === $sHttps && '443' === (string) $this->GetServer('SERVER_PORT', ''))) ? 'https' : 'http';
+		return ('on' === $sHttps || 1 == $sHttps || ('' === $sHttps && '443' === (string) $this->GetServer('SERVER_PORT', ''))) ? 'https' : 'http';
 	}
 
 	/**

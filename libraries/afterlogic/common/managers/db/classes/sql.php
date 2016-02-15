@@ -633,7 +633,7 @@ class CDbSchema
 			new CDbField('leave_messages', CDbField::BIT, 1),
 			new CDbField('frienly_name', CDbField::VAR_CHAR, ''),
 			new CDbField('email', CDbField::VAR_CHAR, ''),
-			new CDbField('signature', CDbField::TEXT_MEDIUM, ''),
+			new CDbField('signature', CDbField::TEXT_MEDIUM),
 			new CDbField('signature_opt', CDbField::INT_SHORT, 0),
 			new CDbField('inc_host', CDbField::VAR_CHAR, ''),
 			new CDbField('inc_port', CDbField::INT, 110),
@@ -1286,7 +1286,7 @@ class CDbSchema
 			new CDbField('type', CDbField::INT_SHORT),
 			new CDbField('time', CDbField::INT),
 			new CDbField('starttime', CDbField::INT),
-			new CDbField('eventid', CDbField::VAR_CHAR, null, 45)
+			new CDbField('eventid', CDbField::VAR_CHAR, null, 255)
 		), array(
 			new CDbKey(CDbKey::TYPE_PRIMARY_KEY, array('id'))
 		));

@@ -143,14 +143,14 @@ class CApiIosManager extends AApiManager
 			'IncomingMailServerPortNumber'		=> $iIncMailPort,
 			'IncomingMailServerUseSSL'			=> 993 === $iIncMailPort,
 			'IncomingMailServerUsername'		=> $oAccount->IncomingMailLogin,
-			'IncomingPassword'					=> $bIsDemo ? 'demo' : (CApi::GetConf('labs.ios-profile.include-password', true) ? $oAccount->IncomingMailPassword : ''),
+			'IncomingPassword'					=> $bIsDemo ? 'demo' : (CApi::GetConf('labs.ios-profile.include-password', false) ? $oAccount->IncomingMailPassword : ''),
 			'IncomingMailServerAuthentication'	=> 'EmailAuthPassword',
 			'OutgoingMailServerHostName'		=> $sOutMailServer,
 			'OutgoingMailServerPortNumber'		=> $iOutMailPort,
 			'OutgoingMailServerUseSSL'			=> 465 === $iOutMailPort,
 			'OutgoingMailServerUsername'		=> 0 === strlen($oAccount->OutgoingMailLogin)
 				? $oAccount->IncomingMailLogin : $oAccount->OutgoingMailLogin,
-			'OutgoingPassword'					=> $bIsDemo ? 'demo' : (CApi::GetConf('labs.ios-profile.include-password', true) ? (0 === strlen($oAccount->OutgoingMailPassword)
+			'OutgoingPassword'					=> $bIsDemo ? 'demo' : (CApi::GetConf('labs.ios-profile.include-password', false) ? (0 === strlen($oAccount->OutgoingMailPassword)
 				? $oAccount->IncomingMailPassword : $oAccount->OutgoingMailPassword) : ''),
 			'OutgoingMailServerAuthentication'	=> ESMTPAuthType::NoAuth === $oAccount->OutgoingMailAuth
 				? 'EmailAuthNone' : 'EmailAuthPassword',
@@ -181,7 +181,7 @@ class CApiIosManager extends AApiManager
 			'CalDAVAccountDescription'	=> $oAccount->Domain->SiteName.' Calendars',
 			'CalDAVHostName'			=> $this->oApiDavManager ? $this->oApiDavManager->getServerHost($oAccount) : '',
 			'CalDAVUsername'			=> $oAccount->Email,
-			'CalDAVPassword'			=> $bIsDemo ? 'demo' : (CApi::GetConf('labs.ios-profile.include-password', true) ? $oAccount->IncomingMailPassword : ''),
+			'CalDAVPassword'			=> $bIsDemo ? 'demo' : (CApi::GetConf('labs.ios-profile.include-password', false) ? $oAccount->IncomingMailPassword : ''),
 			'CalDAVUseSSL'				=> $this->oApiDavManager ? $this->oApiDavManager->isUseSsl($oAccount) : '',
 			'CalDAVPort'				=> $this->oApiDavManager ? $this->oApiDavManager->getServerPort($oAccount) : '',
 			'CalDAVPrincipalURL'		=> $this->oApiDavManager ? $this->oApiDavManager->getPrincipalUrl($oAccount) : '',
@@ -213,7 +213,7 @@ class CApiIosManager extends AApiManager
 			'CardDAVAccountDescription'	=> $oAccount->Domain->SiteName.' Contacts',
 			'CardDAVHostName'			=> $this->oApiDavManager ? $this->oApiDavManager->getServerHost($oAccount) : '',
 			'CardDAVUsername'			=> $oAccount->Email,
-			'CardDAVPassword'			=> $bIsDemo ? 'demo' : (CApi::GetConf('labs.ios-profile.include-password', true) ? $oAccount->IncomingMailPassword : ''),
+			'CardDAVPassword'			=> $bIsDemo ? 'demo' : (CApi::GetConf('labs.ios-profile.include-password', false) ? $oAccount->IncomingMailPassword : ''),
 			'CardDAVUseSSL'				=> $this->oApiDavManager ? $this->oApiDavManager->isUseSsl($oAccount) : '',
 			'CardDAVPort'				=> $this->oApiDavManager ? $this->oApiDavManager->getServerPort($oAccount) : '',
 			'CardDAVPrincipalURL'		=> $this->oApiDavManager ? $this->oApiDavManager->getPrincipalUrl($oAccount) : '',

@@ -1,49 +1,55 @@
 .compose-toolbar() {
-		background: #d7f0c3;
-		filter: none;
-		border-bottom: 1px solid #cacfd5;
+	background: #f7f7f7;
+	filter: none;
+	border: none;
+	
+	.text {
+		display: inline-block;
+		font-weight: normal !important;
+		font-size: 13pt !important;
+	}
+	
+	.item:not(.send):hover {
+		color: #4f4f4f;
+	}
 
-		.text {
-			display: inline-block;
-		}
+	.back .text {
+		display: none;
+	}
 
-		.back .text {
-			display: none;
-		}
+	.icon {
+		display: none;
+	}
 
-		.icon {
-			display: none;
-		}
+	.back .icon,
+	.new_window .icon,
+	.save_and_close .icon,
+	.minimize .icon,
+	.maximize .icon,
+	.confirmation .icon,
+	.pgp .icon {
+		display: inline-block;
+	}
 
-		.back .icon,
-		.new_window .icon,
-		.save_and_close .icon,
-		.minimize .icon,
-		.maximize .icon,
-		.confirmation .icon,
-		.pgp .icon {
-			display: inline-block;
-		}
-		
-		.new_window,
-		.minimize, .maximize, 
-		.save_and_close, {
-			border: 0px;
-			background: transparent;
-			box-shadow: none;
-			float: right;
+	.new_window,
+	.minimize, .maximize, 
+	.save_and_close, {
+		border: 0px;
+		background: transparent;
+		box-shadow: none;
+		float: right;
 
-			html.rtl & {
-				float: left;
-			}
+		html.rtl & {
+			float: left;
 		}
+	}
 }
 
 
 /*=== Compose screen CSS ===*/
 .MailComposeLayout .panels,
 .compose_popup .panels {
-	background: #f9f9f9;
+	background: #fff;
 }
 .panel.compose {
 	box-shadow: -1px 0 4px rgba(0, 0, 0, 0.23);
@@ -62,10 +68,10 @@
 	.left_panel {
 		z-index: 2;
 		width: 80%;
-		//float: left;
-		border-radius: 0px;
-		box-shadow: none;
-		border-right: 1px solid #E2E2E2;
+		border: none;
+		border-radius: 0;
+		box-shadow: 3px 0 2px #f1f1f1;
+		
 		.box-sizing();
 		
 		.middle_bar {
@@ -150,6 +156,15 @@
 		position: relative;
 		overflow: hidden;
 		
+		.panel_center, .items_list .item {
+			background-color: inherit;
+			
+			.item_content {
+				background-color: #fff;
+				box-shadow: 0 2px 6px #ccc;
+			}
+		}
+		
 		.middle_bar {
 			.resize_compensation_top(37px);
 			
@@ -157,16 +172,19 @@
 				padding: 6px 10px;
 				text-align: center;
 				line-height: 180%;
+				background-color: inherit;
+				border: none;
+				padding-top: 35px !important;
 				
 				.uploader_button {
 					display: inline;
 					vertical-align: middle;
-					color: #999;
+					color: #aaa;
 					cursor: pointer;
-					margin-right: 10px;
+					margin-right: 21px;
 					
 					&:hover {
-						color: #444;
+						color: #888;
 					}
 					
 					.icon {
@@ -174,7 +192,7 @@
 						vertical-align: middle;
 						width: 24px;
 						height: 24px;
-						font-size: 24px;
+						font-size: 28px;
 						.iconFontInit();
 					}
 					
@@ -203,6 +221,20 @@
 	.html_editor {
 		margin-left: 11px;
 		margin-right: 11px;
+		border-top: solid 1px #e2e2e2 !important;
+
+		.toolbar {
+			border: none;
+			background-color: #fdfdfd !important;
+
+			.separator {
+				border-left: 1px solid #eee;
+			}
+		}
+
+		.workarea {
+			border: none;
+		}
 	}
 
 	.input.inputosaurus {
@@ -237,21 +269,22 @@
 
 	table.fields {
 		width: 100%;
-		margin-top: 10px;
 		
-		table.fields {
-			margin-top: 0px;
+		tr {
+			border: none;
 		}
-		
-		td {
-			padding: 0px 0px 10px;
 			
-			td {
-				padding: 0px;
-			}
+		&.no-compressed tr.from, &.no-compressed tr.to, &.no-compressed tr.cc, &.no-compressed tr.bcc {
+			border-bottom: 1px solid #e2e2e2;
+		}
+
+		td {
+			padding: 4px 0px;
 		}
 		
 		.label {
+			color: #bababa;
+			font-size: 13pt !important;
 			text-align: right;
 			width: 90px;
 			padding-right: 10px;
@@ -268,6 +301,39 @@
 			
 			min-width: 100%;
 		    width: 100px !important;
+		}
+		
+		.value .input, .value input {
+			color: #444;
+			border: none;
+			box-shadow: none;
+			font-size: 13pt !important;
+		}
+		
+		.inputosaurus-container li.ui-draggable,
+		.inputosaurus-moving-container li {
+			background-color: #e5eff7;
+			color: #5b9bcd;
+			border: none;
+			box-shadow: none;
+			border-radius: 11px;
+			padding: 3px 28px 3px 12px !important;
+			
+			a.ficon {
+				margin-top: 0px !important;
+				margin-right: 12px !important;
+			}
+
+			&.inputosaurus-selected {
+				background-color: #5b9bcd;
+				color: #fff;
+				
+				a.ficon {
+					color: #fff;
+					margin-top: 0px !important;
+					margin-right: 12px !important;
+				}
+			}
 		}
 		
 		textarea.input {
@@ -346,7 +412,7 @@
 	
 	.attachments {
 		z-index: 1;
-		//float: right;
+		background-color: #fafafa;
 		
 		.uploader_mask {
 			.box-sizing;
@@ -440,6 +506,11 @@
 		width: auto;
 		
 		.toolbar {
+			background: #f7f7f7;
+			box-shadow: 1px 1px 4px #ccc;
+			border: none;
+			border-radius: none;
+			
 			.item.minimized_title {
 				max-width: 350px;
 				overflow: hidden;
@@ -467,7 +538,6 @@
 
 			.theme-compose-minimized-toolbar();
 
-			border-radius: 4px;
 			margin: 5px;
 			cursor: pointer;
 		}
