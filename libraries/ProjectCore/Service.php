@@ -230,22 +230,6 @@ class Service
 		/* @var $oApiIntegrator \CApiIntegratorManager */
 		$oApiIntegrator = \CApi::Manager('integrator');
 		
-		// ------ Redirect to HTTPS
-		$oSettings =& \CApi::GetSettings();
-		$bRedirectToHttps = $oSettings->GetConf('Common/RedirectToHttps');
-		
-		$bHttps = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== "off") || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == "443"));
-		if ($bRedirectToHttps && !$bHttps)
-		{
-			header("Location: https://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
-		}
-		// ------
-
-		/* @var $oApiCapability \CApiCapabilityManager */
-		$oApiCapability = \CApi::Manager('capability');
-
-		$sResult = '';
-
 		$sQuery = \trim(\trim($this->oHttp->GetServer('QUERY_STRING', '')), ' /');
 		
 		\CApi::Plugin()->RunQueryHandle($sQuery);
@@ -257,9 +241,58 @@ class Service
 		}
 
 		$aPaths = explode('/', $sQuery);
+		$sFirstPart = strtolower($aPaths[0]);
+		$bHttpsApiError = false;
+
+		// ------ Redirect to HTTPS
+		$oSettings =& \CApi::GetSettings();
+		$bRedirectToHttps = $oSettings->GetConf('Common/RedirectToHttps');
+		
+		$bHttps = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== "off") || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == "443"));
+		if ($bRedirectToHttps && !$bHttps)
+		{
+			$sRedirectUrl = "https://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+			if ('ajax' === $sFirstPart)
+			{
+				$bHttpsApiError = true;
+			}
+			else if ($this->oHttp->IsPost() || $this->oHttp->IsPut())
+			{
+				$aPostFields = array();
+				foreach($_POST as $sPostKey => $sPostValue) 
+				{ 
+					$aPostFields[] = $sPostKey . '=' . $sPostValue; 
+				}
+
+				//open connection
+				$ch = curl_init();
+
+				//set the url, number of POST vars, POST data
+				curl_setopt($ch,CURLOPT_URL, $sRedirectUrl);
+				curl_setopt($ch,CURLOPT_POST, count($aPostFields));
+				curl_setopt($ch,CURLOPT_POSTFIELDS, implode($aPostFields, '&'));
+
+				//execute post
+				curl_exec($ch);
+
+				//close connection
+				curl_close($ch);
+				exit();
+			}
+			else 
+			{
+				header("Location: " . $sRedirectUrl);
+			}
+		}
+		// ------
+
+		/* @var $oApiCapability \CApiCapabilityManager */
+		$oApiCapability = \CApi::Manager('capability');
+
+		$sResult = '';
+
 		if (0 < count($aPaths) && !empty($aPaths[0]))
 		{
-			$sFirstPart = strtolower($aPaths[0]);
 			if ('ping' === $sFirstPart)
 			{
 				@header('Content-Type: text/plain; charset=utf-8');
@@ -273,18 +306,23 @@ class Service
 				}
 				else 
 				{
-					exec("git pull > /dev/null 2>&1 &");
+					exec("git-pull > /dev/null 2>&1 &");
 				}
 				\CApi::Location('./');
 			}
 			else if ('ajax' === $sFirstPart)
 			{
 				@ob_start();
-
+				
 				$aResponseItem = null;
 				$sAction = $this->oHttp->GetPost('Action', null);
 				try
 				{
+					if ($bHttpsApiError)
+					{
+						throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::HttpsApiAccess, null, 'Use https to access AJAX API');
+					}
+
 					\CApi::Log('AJAX: Action: '.$sAction);
 					if ('SystemGetAppData' !== $sAction &&
 						\CApi::GetConf('labs.webmail.csrftoken-protection', true) &&
@@ -353,7 +391,7 @@ class Service
 				{
 					$rPutData = fopen("php://input", "r");
 					$aFilePath = array_slice($aPaths, 3);
-					$sFilePath = implode('/', $aFilePath);
+					$sFilePath = urldecode(implode('/', $aFilePath));
 					
 					$this->oActions->SetActionParams(array(
 						'FileData' => array(
@@ -367,8 +405,8 @@ class Service
 							'Folder' => dirname($sFilePath),
 							'Path' => dirname($sFilePath),
 							'GroupId' => '',
-							'IsShared' => false
-							
+							'IsShared' => false,
+							'Overwrite' => true
 						)),
 						'IsExt' => '1' === (string) $this->oHttp->GetQuery('IsExt', '0') ? '1' : '0',
 						'TenantHash' => (string) $this->oHttp->GetQuery('TenantHash', ''),

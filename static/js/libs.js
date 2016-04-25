@@ -325,7 +325,7 @@ function handler(event) {
 
 		if (this.x) {
 			css['padding-bottom'] = scrollWidth;
-			css['overflow-x'] = 'scroll';
+			css['overflow-x'] = 'auto';
 		} else {
 			css['overflow-x'] = 'hidden';
 		}
@@ -4099,8 +4099,7 @@ function handler(event) {
 		_click : function(ev) {
 			var widget = (ev && ev.data.widget) || this ;
 
-			//console.log(!!$(widget.elements.input.autocomplete('widget')).is(':visible'));
-			if (widget.elements.input.val() === '')
+			if (widget.elements.input.val() === '' && !ev || !$(ev.target).closest('li').data('inputosaurus'))
 			{
 				if (!widget.options.openedByClick)
 				{

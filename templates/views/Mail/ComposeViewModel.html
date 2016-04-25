@@ -119,7 +119,9 @@
 						<div class="middle_bar" data-bind="heightAdjust: {'location': 'bottom', 'delay': '0', 'elements': [messageFields, bottomPanel], 'triggers': [visibleBcc(), visibleCc(), toAddr(), bccAddr(), notInlineAttachments(), senderList(), fromToExpandColapssed()]}">
 							<div class="panel_top" data-bind="initDom: messageFields, minHeightAdjust: {'adjustElement': jqContainers, 'minHeight': 450, 'trigger': minHeightAdjustTrigger(), 'removeTrigger': minHeightRemoveTrigger()}">
 
-								<span class="table-compressor" data-bind="visible: !mobileApp, click: fromToExpandColaps, css: { 'compressed': fromToExpandColapssed }"></span>
+								<span class="table-compressor" data-bind="visible: !mobileApp, click: fromToExpandColaps, css: { 'compressed': fromToExpandColapssed }">
+									<span class="arrow"></span>
+								</span>
 
 								<div class="notice" data-bind="visible: isDemo, i18n: 'text'" data-i18n="DEMO/WARNING_SEND_EMAIL_TO_DEMO_ONLY"></div>
 								<table class="fields" data-bind="css: { 'no-compressed': !fromToExpandColapssed() }">

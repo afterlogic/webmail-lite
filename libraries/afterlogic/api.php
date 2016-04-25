@@ -130,6 +130,8 @@ class CApi
 			CApi::$oManager->PrepareStorageMap();
 
 			require_once CApi::RootPath().'DAV/autoload.php';
+			
+			CApi::RemoveOldLogs();
 		}
 	}
 
@@ -698,6 +700,27 @@ class CApi
 	public static function LogEnd()
 	{
 		CApi::Log('# script shutdown');
+	}
+
+	public static function RemoveOldLogs()
+	{
+		$sLogFile = self::GetLogFileName();
+		$sS = CApi::GetConf('log.custom-full-path', '');
+		$sLogDir = empty($sS) ? CApi::DataPath().'/logs/' : rtrim(trim($sS), '\\/').'/';
+		
+		if (!file_exists($sLogDir.$sLogFile))
+		{
+			$sCurrentDate = date('Y-m-d');
+			$sYesterday = date("Y-m-d", time() - 60 * 60 * 24);
+			$aLogFiles = array_diff(scandir($sLogDir), array('..', '.'));
+			foreach($aLogFiles as $sFileName)
+			{
+				if (strpos($sFileName, $sCurrentDate) === false && strpos($sFileName, $sYesterday) === false)
+				{
+					unlink($sLogDir.$sFileName);
+				}
+			}
+		}
 	}
 
 	/**

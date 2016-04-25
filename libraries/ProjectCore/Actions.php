@@ -767,22 +767,23 @@ class Actions extends ActionsBase
 					{
 						if ($aItem && isset($aItem['FileName'], $aItem['MimeType'], $aItem['Size'], $aItem['TempName']))
 						{
+							$sFileName = str_replace("\0", '', $aItem['FileName']);
 							$mResult[] = array(
-								'FileName' => $aItem['FileName'],
+								'FileName' => $sFileName,
 								'MimeType' => $aItem['MimeType'],
 								'EstimatedSize' => $aItem['Size'],
 								'CID' => '',
 								'Thumb' => \CApi::GetConf('labs.allow-thumbnail', true) &&
-									\api_Utils::IsGDImageMimeTypeSuppoted($aItem['MimeType'], $aItem['FileName']),
-								'Expand' => \CApi::isExpandMimeTypeSupported($aItem['MimeType'], $aItem['FileName']),
-								'Iframed' =>\CApi::isIframedMimeTypeSupported($aItem['MimeType'], $aItem['FileName']),
+									\api_Utils::IsGDImageMimeTypeSuppoted($aItem['MimeType'], $sFileName),
+								'Expand' => \CApi::isExpandMimeTypeSupported($aItem['MimeType'], $sFileName),
+								'Iframed' =>\CApi::isIframedMimeTypeSupported($aItem['MimeType'], $sFileName),
 								'IsInline' => false,
 								'IsLinked' => false,
 								'Hash' => \CApi::EncodeKeyValues(array(
 									'TempFile' => true,
-									'Iframed' =>\CApi::isIframedMimeTypeSupported($aItem['MimeType'], $aItem['FileName']),
+									'Iframed' =>\CApi::isIframedMimeTypeSupported($aItem['MimeType'], $sFileName),
 									'AccountID' => $oAccount->IdAccount,
-									'Name' => $aItem['FileName'],
+									'Name' => $sFileName,
 									'TempName' => $aItem['TempName']
 								))
 							);
@@ -3135,7 +3136,7 @@ class Actions extends ActionsBase
 	 */
 	public function AjaxFilesUploadByLink()
 	{
-		$oAccount = $this->getDefaultAccountFromParam();
+		$oAccount = $this->getAccountFromParam();
 		$oTenant = null;
 		if ($this->oApiTenants)
 		{
@@ -5018,6 +5019,30 @@ class Actions extends ActionsBase
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $oResult);
 	}
 
+	public function AjaxFileInfo()
+	{
+		$oAccount = $this->getDefaultAccountFromParam();
+		if (!$this->oApiCapability->isFilesSupported($oAccount))
+		{
+			throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::FilesNotAllowed);
+		}
+
+		$sType = $this->getParamValue('Type');
+		$sPath = $this->getParamValue('Path');
+		$sName = $this->getParamValue('Name');
+		
+		if (\EFileStorageTypeStr::Corporate === $sType && !$this->oApiCapability->isCollaborationSupported())
+		{
+			$oResult = false;
+		}
+		else
+		{
+			$oResult = $this->oApiFilestorage->getFileInfo($oAccount, $sType, $sPath, $sName);
+		}
+
+		return $this->DefaultResponse($oAccount, __FUNCTION__, $oResult);
+	}	
+	
 	public function AjaxFiles()
 	{
 		$oAccount = $this->getDefaultAccountFromParam();
@@ -5030,10 +5055,17 @@ class Actions extends ActionsBase
 		$sType = $this->getParamValue('Type');
 		$sPattern = $this->getParamValue('Pattern');
 		
-		$oResult = array(
-			'Items' => $this->oApiFilestorage->getFiles($oAccount, $sType, $sPath, $sPattern),
-			'Quota' => $this->oApiFilestorage->getQuota($oAccount)
-		);
+		if (\EFileStorageTypeStr::Corporate === $sType && !$this->oApiCapability->isCollaborationSupported())
+		{
+			$oResult = false;
+		}
+		else
+		{
+			$oResult = array(
+				'Items' => $this->oApiFilestorage->getFiles($oAccount, $sType, $sPath, $sPattern),
+				'Quota' => $this->oApiFilestorage->getQuota($oAccount)
+			);
+		}
 
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $oResult);
 	}	
@@ -6340,6 +6372,7 @@ class Actions extends ActionsBase
 				$iSize = (int) $aFileData['size'];
 				$sType = isset($mAdditionalData['Type']) ? $mAdditionalData['Type'] : 'personal';
 				$sPath = isset($mAdditionalData['Path']) ? $mAdditionalData['Path'] : '';
+				$bOverwrite = isset($mAdditionalData['Overwrite']) ? (bool) $mAdditionalData['Overwrite'] : false;
 				$sMimeType = \MailSo\Base\Utils::MimeContentType($sUploadName);
 
 				$sSavedName = 'upload-post-'.md5($aFileData['name'].$aFileData['tmp_name']);
@@ -6354,7 +6387,7 @@ class Actions extends ActionsBase
 				}
 				if ($rData)
 				{
-					$this->oApiFilestorage->createFile($oAccount, $sType, $sPath, $sUploadName, $rData, false);
+					$this->oApiFilestorage->createFile($oAccount, $sType, $sPath, $sUploadName, $rData, $bOverwrite);
 
 					$aResponse['File'] = array(
 						'Name' => $sUploadName,
@@ -8117,5 +8150,15 @@ class Actions extends ActionsBase
 	public function GetTwilio()
 	{
 		return $this->oApiTwilio;
+	}
+	
+	public function AjaxGetDavServerUrl()
+	{
+		$oApiDavManager = \CApi::Manager('dav');
+		$aResult = array(
+			'DavServerUrl' => $oApiDavManager->getServerUrl()
+		);
+
+		return $this->DefaultResponse(null, __FUNCTION__, $aResult);
 	}
 }

@@ -23,7 +23,7 @@ if (!defined('PSEVEN_APP_ROOT_PATH'))
 		
 		exit(0);
 	}
-
+	 
 	/*if (!isset($_COOKIE["cookiecheck"]))
 	{
 		if (isset($_REQUEST["cookiecheck"]) && isset($_COOKIE["cookiecheck"]))

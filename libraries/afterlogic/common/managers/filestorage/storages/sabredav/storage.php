@@ -242,6 +242,25 @@ class CApiFilestorageSabredavStorage extends CApiFilestorageStorage
 					$oResult->Path = $sPath;
 					$oResult->Type = $sType;
 					$oResult->Name = $sName;
+					$oResult->FullPath = $oResult->Name !== '' ? $oResult->Path . '/' . $oResult->Name : $oResult->Path ;
+					
+					if ($oItem instanceof \afterlogic\DAV\FS\File)
+					{
+						$oResult->Size = $oItem->getSize();
+						$oResult->LastModified = $oItem->getLastModified();
+						
+						$oResult->Iframed = !$oResult->IsFolder && !$oResult->IsLink &&
+							\CApi::isIframedMimeTypeSupported($oResult->ContentType, $oResult->Name);
+						$oResult->Hash = \CApi::EncodeKeyValues(array(
+							'Type' => $sType,
+							'Path' => $sPath,
+							'Name' => $oItem->getName(),
+							'FileName' => $oItem->getName(),
+							'MimeType' => $oItem->getContentType(),
+							'Size' => $oItem->getSize(),
+							'Iframed' => $oResult->Iframed
+						));						
+					}
 				}
 			}
 		}

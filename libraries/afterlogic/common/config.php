@@ -178,6 +178,7 @@ return array(
 		'Danish' => 'Dansk',
 		'Dutch' => 'Nederlands',
 		'English' => 'English',
+		'Estonian' => 'eesti',
 		'Finnish' => 'Suomi',
 		'French' => 'Français',
 		'German' => 'Deutsch',

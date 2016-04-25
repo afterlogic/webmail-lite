@@ -887,9 +887,9 @@ class BodyStructure
 		foreach ($aPath as $iPos => $iNum)
 		{
 			$iIndex = \intval($iNum) - 1;
-			if (0 <= $iIndex && 0 < $iPos ? isset($aCurrentPart[8][$iIndex]) : isset($aCurrentPart[$iIndex]))
+			if (0 <= $iIndex && 0 < $iPos && isset($aCurrentPart[8]) ? isset($aCurrentPart[8][$iIndex]) : isset($aCurrentPart[$iIndex]))
 			{
-				$aCurrentPart = 0 < $iPos ? $aCurrentPart[8][$iIndex] : $aCurrentPart[$iIndex];
+				$aCurrentPart = 0 < $iPos && isset($aCurrentPart[8]) ? $aCurrentPart[8][$iIndex] : $aCurrentPart[$iIndex];
 				$bFind = true;
 			}
 		}

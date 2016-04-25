@@ -24,6 +24,7 @@ class Notifications
 	const AccessDenied = 108;
 	const UnknownEmail = 109;
 	const MaxPathLen = 110;
+	const HttpsApiAccess = 110;
 
 	const CanNotGetMessageList = 201;
 	const CanNotGetMessage = 202;

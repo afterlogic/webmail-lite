@@ -696,6 +696,16 @@ abstract class ActionsBase
 			}
 			else if ('CApiMailMessageCollection' === $sClassName)
 			{
+				$aNewMsgsData = Array();
+				foreach ($mResponse->New as $aNewMsgData)
+				{
+					$aPreparedNewMsgData = Array();
+					$aPreparedNewMsgData['Folder'] = $aNewMsgData['Folder'];
+					$aPreparedNewMsgData['Uid'] = $aNewMsgData['Uid'];
+					$aPreparedNewMsgData['Subject'] = $aNewMsgData['Subject'];
+					$aPreparedNewMsgData['From'] = $this->responseObject($oAccount, $aNewMsgData['From'], $sParent, $aParameters);
+					$aNewMsgsData[] = $aPreparedNewMsgData;
+				}
 				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), array(
 					'Uids' => $mResponse->Uids,
 					'UidNext' => $mResponse->UidNext,
@@ -708,7 +718,7 @@ abstract class ActionsBase
 					'Limit' => $mResponse->Limit,
 					'Search' => $mResponse->Search,
 					'Filters' => $mResponse->Filters,
-					'New' => $mResponse->New
+					'New' => $aNewMsgsData
 				));
 			}
 			else if ('CIdentity' === $sClassName)

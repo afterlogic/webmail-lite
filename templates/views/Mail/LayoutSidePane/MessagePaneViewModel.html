@@ -27,6 +27,9 @@
 
 <div class="panel_center" data-bind="heightAdjust: {'elements': [domMessageHeader, domQuickReply], 'triggers': [detailsVisible(), currentMessage(), replyPaneVisible(), replyTextFocusThrottled()]}">
 	<div class="message_header" data-bind="initDom: domMessageHeader, visible: isCurrentMessage, event: {'dblclick': resizeDblClick}">
+		<!--<span data-bind="visible: !mobileApp, click: switchDetailsVisibility, css: { 'compressed': !detailsVisible() }" class="table-compressor">
+			<span class="arrow" data-bind="customTooltip: detailsTooltip"></span>
+		</span>-->
 		<!--<span class="resizer" data-bind="event: {'dblclick': resizeDblClick}, css: {large: detailsVisible()}, visible: fakeHeader"></span>-->
 		<div class="notice" data-bind="visible: visiblePicturesControl">
 			<span class="item">

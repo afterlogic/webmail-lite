@@ -533,13 +533,21 @@ class CApiContactsmainDbStorage extends CApiContactsmainStorage
 			$iUserId, $sSearch, $iRequestLimit)))
 		{
 			$mGroupItems = array();
+			$mTmpGroupItems = array();
 
 			while (false !== ($oRow = $this->oConnection->GetNextRecord()))
 			{
 				$oItem = new CContactListItem();
 				$oItem->InitByDbRowWithType('group', $oRow);
 				
-				$oContactItems = $this->getContactItems($iUserId, EContactSortField::Frequency, ESortOrder::ASC, 0, 99, '', '', $oItem->Id, $iSharedTenantId);
+				$mTmpGroupItems[] = $oItem;
+				
+				unset($oItem);
+			}
+			
+			foreach ($mTmpGroupItems as $oGroupItem)
+			{
+				$oContactItems = $this->getContactItems($iUserId, EContactSortField::Frequency, ESortOrder::ASC, 0, 99, '', '', $oGroupItem->Id, $iSharedTenantId);
 
 				$aEmails = array();
 				foreach ($oContactItems as $oContactItem)
@@ -548,14 +556,12 @@ class CApiContactsmainDbStorage extends CApiContactsmainStorage
 							'"'.trim($oContactItem->Name).'" <'.trim($oContactItem->Email).'>' : trim($oContactItem->Email);
 				}
 				
-				$oItem->Email = implode(', ', $aEmails);
+				$oGroupItem->Email = implode(', ', $aEmails);
 
-				if (!empty($oItem->Email))
+				if (!empty($oGroupItem->Email))
 				{
-					$mGroupItems[] = $oItem;
+					$mGroupItems[] = $oGroupItem;
 				}
-				
-				unset($oItem);
 			}
 		}
 		return $mGroupItems;

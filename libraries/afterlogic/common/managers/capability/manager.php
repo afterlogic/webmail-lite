@@ -193,7 +193,7 @@ class CApiCapabilityManager extends AApiManager
 	 */
 	public function isGlobalSuggestContactsSupported($oAccount = null)
 	{
-		return $this->isGlobalContactsSupported($oAccount, false);
+		return $this->isGlobalContactsSupported($oAccount, true);
 	}
 
 	/**

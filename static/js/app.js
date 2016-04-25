@@ -6934,6 +6934,8 @@ CPrefetcher.prototype.prefetchAll = function ()
 {
 	this.prefetchFetchersIdentities();
 	
+	this.prefetchAccountFilters();
+		
 	if (AppData.App.AllowPrefetch)
 	{
 		this.startMessagesPrefetch();
@@ -6949,7 +6951,7 @@ CPrefetcher.prototype.prefetchAll = function ()
 		this.prefetchUnseenMessageList();
 
 		this.prefetchAccountQuota();
-
+		
 		this.startOtherFoldersPrefetch();
 
 		this.prefetchCalendarList();
@@ -7311,6 +7313,18 @@ CPrefetcher.prototype.prefetchAccountQuota = function ()
 		this.prefetchStarted(true);
 	}
 };
+
+CPrefetcher.prototype.prefetchAccountFilters = function ()
+{
+	var oAccount = AppData.Accounts.getCurrent();
+
+	if (!this.prefetchStarted() && oAccount && !oAccount.filters() && oAccount.allowMail() && oAccount.extensionExists('AllowSieveFiltersExtension'))
+	{
+		oAccount.requestFilters();
+		this.prefetchStarted(true);
+	}
+};
+
 
 /**
  * @param {Function} list (knockout)
@@ -9643,7 +9657,7 @@ function CPhone()
 			case Enums.PhoneAction.Online:
 
 				App.Screens.hidePopup(PhonePopup);
-				App.desktopNotify('hide');
+				App.desktopNotify({action: 'hide'});
 				this.provider.reconnect();
 				this.provider.hangup();
 				break;
@@ -9660,7 +9674,7 @@ function CPhone()
 			case Enums.PhoneAction.IncomingConnect:
 
 				App.Screens.hidePopup(PhonePopup);
-				App.desktopNotify('hide');
+				App.desktopNotify({action: 'hide'});
 				this.provider.answer();
 				break;
 		}
@@ -10014,7 +10028,7 @@ CPhoneWebrtc.prototype.eventSession = function (ev)
 			}
 			else if(ev.description === 'In call')
 			{
-				App.desktopNotify('hide');
+				App.desktopNotify({action: 'hide'});
 			}
 			break;
 		case 'terminating':
@@ -16661,6 +16675,29 @@ CAccountModel.prototype.onAccountDeleteResponse = function (oResponse, oRequest)
 	}
 };
 
+CAccountModel.prototype.requestFilters = function ()
+{
+	var
+		oParameters = {
+			'Action': 'AccountSieveFiltersGet',
+			'AccountID': this.id()
+		}
+	;
+
+	App.Ajax.send(oParameters, this.onAccountSieveFiltersGetResponse, this);
+};
+
+CAccountModel.prototype.onAccountSieveFiltersGetResponse = function (oResponse, oRequest)
+{
+	var
+		oSieveFilters = new CSieveFiltersModel(),
+		iAccountId = Utils.pInt(oResponse.AccountID)
+	;
+	
+	oSieveFilters.parse(iAccountId, oResponse.Result);
+	this.filters(oSieveFilters);
+};
+
 
 /**
  * @constructor
@@ -18174,16 +18211,24 @@ CMailAttachmentModel.prototype.setMessageData = function (sFolderName, sMessageU
  */
 CMailAttachmentModel.prototype.onMessageGetResponse = function (oData, oParameters)
 {
-	var
-		oResult = oData.Result,
-		oMessage = new CMessageModel()
-	;
-	
-	if (oResult && this.oNewWindow)
+	if (this.oNewWindow)
 	{
-		oMessage.parse(oResult, oData.AccountID, false, true);
-		this.messagePart(oMessage);
-		this.messagePart().viewMessage(this.oNewWindow);
+		var
+			oResult = oData.Result,
+			oMessage = new CMessageModel()
+		;
+
+		if (oResult)
+		{
+			oMessage.parse(oResult, oData.AccountID, false, true);
+			this.messagePart(oMessage);
+			this.messagePart().viewMessage(this.oNewWindow);
+		}
+		else
+		{
+			this.oNewWindow.close();
+		}
+		
 		this.oNewWindow = undefined;
 	}
 };
@@ -20144,7 +20189,7 @@ CMessageModel.prototype.showNextLoadingLink = function (fLoadNext)
 
 CMessageModel.prototype.increaseThreadCountForLoad = function ()
 {
-	this.threadCountForLoad(this.threadCountForLoad() + 5);
+	this.threadCountForLoad(this.threadCountForLoad() + 15);
 	App.MailCache.showOpenedThreads(this.folder());
 };
 
@@ -22508,7 +22553,6 @@ CCalendarModel.prototype.parseEvent = function (oEvent)
 	oEvent.start = moment(oEvent.start);
 	oEvent.end = moment(oEvent.end);
 */
-
 	oEvent.title = Utils.getTitleForEvent(oEvent.subject);
 	oEvent.editable = oEvent.appointment ? false : true;
 	oEvent.backgroundColor = oEvent.borderColor = this.color();
@@ -24175,7 +24219,14 @@ function CHtmlEditorViewModel(bInsertImageAsBase64, oParent)
 	this.disabled = ko.observable(false);
 	
 	this.textChanged = ko.observable(false);
+	
+	if (AfterLogicApi.runPluginHook)
+	{
+		AfterLogicApi.runPluginHook('view-model-defined', [this.__name, this]);
+	}
 }
+
+CHtmlEditorViewModel.prototype.__name = 'CHtmlEditorViewModel';
 
 CHtmlEditorViewModel.prototype.hasOpenedPopup = function ()
 {
@@ -24614,6 +24665,11 @@ CHtmlEditorViewModel.prototype.closeAllPopups = function (bWithoutLinkPopup)
 	this.visibleImagePopup(false);
 	this.visibleInsertImagePopup(false);
 	this.visibleFontColorPopup(false);
+	
+	if (AfterLogicApi.runPluginHook)
+	{
+		AfterLogicApi.runPluginHook('close-all-htmleditor-popups');
+	}
 };
 
 /**
@@ -27373,6 +27429,7 @@ CMessagePaneViewModel.prototype.onCurrentMessageSubscribe = function ()
 			}, this));
 			this.ical().updateAttendeeStatus(this.fromEmail());
 		}
+		
 		oVcard = oMessage.vcard();
 		if (oVcard && this.singleMode())
 		{
@@ -27555,6 +27612,8 @@ CMessagePaneViewModel.prototype.setMessageBody = function ()
 		this.visibleVerifyControl(AppData.User.enableOpenPgp() && oMessage.signedMessage());
 		$body.data('displayed-message-uid', oMessage.uid());
 		this.displayedMessageUid(oMessage.uid());
+		
+		$body.find("[data-id='appointment_actions_part']").hide();
 	}
 };
 
@@ -28205,12 +28264,12 @@ function CMailViewModel()
 	
 	this.allowedSpamAction = ko.computed(function () {
 		var oAccount = AppData.Accounts.getCurrent();
-		return oAccount ? oAccount.extensionExists('AllowSpamFolderExtension') && !this.isSpamFolder() : false;
+		return !!this.folderList().spamFolder() && !!oAccount && oAccount.extensionExists('AllowSpamFolderExtension') && !this.isSpamFolder();
 	}, this);
 	
 	this.allowedNotSpamAction = ko.computed(function () {
 		var oAccount = AppData.Accounts.getCurrent();
-		return oAccount ? oAccount.extensionExists('AllowSpamFolderExtension') && this.isSpamFolder() : false;
+		return !!this.folderList().spamFolder() && !!oAccount && oAccount.extensionExists('AllowSpamFolderExtension') && this.isSpamFolder();
 	}, this);
 	
 	this.isTrashFolder = ko.computed(function () {
@@ -29074,7 +29133,10 @@ CComposeViewModel.prototype.onRoute = function (aParams)
                     this.subject(oToAddr.subject);
                     this.setRecipient(this.ccAddr, oToAddr.cc);
                     this.setRecipient(this.bccAddr, oToAddr.bcc);
-                    this.textBody('<div>' + oToAddr.body + '</div>');
+					if (oToAddr.body !== '')
+                    {
+						this.textBody('<div>' + oToAddr.body + '</div>');
+					}
                 }
             }
 
@@ -37391,26 +37453,12 @@ CCalendarViewModel.prototype.setAutoReloadTimer = function ()
 	}
 };
 
-CCalendarViewModel.prototype.reloadAll = function ()
-{
-	this.startDateTime = 0;
-	this.endDateTime = 0;
-	this.needsToReload = true;
-	
-	this.getCalendars();
-};
-
 CCalendarViewModel.prototype.getTimeLimits = function ()
 {
 	var
 		iStart = this.getDateFromCurrentView('start'),
 		iEnd = this.getDateFromCurrentView('end')
 	;
-/*	
-	this.startDateTime = iStart;
-	this.endDateTime = iEnd;
-	this.needsToReload = true;
-*/	
 	
 	if (this.startDateTime === 0 && this.endDateTime === 0)
 	{
@@ -37664,7 +37712,7 @@ CCalendarViewModel.prototype.openImportCalendarForm = function (oCalendar)
 {
 	if (!this.isPublic)
 	{
-		App.Screens.showPopup(CalendarImportPopup, [_.bind(this.reloadAll, this), oCalendar]);
+		App.Screens.showPopup(CalendarImportPopup, [_.bind(this.getCalendars, this), oCalendar]);
 	}
 };
 
@@ -38587,7 +38635,7 @@ CCalendarViewModel.prototype.onFileUploadComplete = function (sFileUid, bRespons
 
 	if (!bError)
 	{
-		this.reloadAll();
+		this.getCalendars();
 	}
 	else
 	{
@@ -38615,6 +38663,7 @@ CCalendarViewModel.prototype.restoreScroll = function (iScrollTop)
 		this.domScrollWrapper.data('customscroll')['vertical'].set(iScrollTop);
 	}
 };
+
 
 /**
 * @constructor
@@ -42500,19 +42549,26 @@ CMailCache.prototype.checkMessageFlags = function ()
  */
 CMailCache.prototype.onMessagesGetFlagsResponse = function (oResponse, oRequest)
 {
-	var oInbox = this.folderList().inboxFolder();
+	var
+		oFolderList = this.oFolderListItems[oRequest.AccountID],
+		oInbox = (oFolderList) ? oFolderList.inboxFolder() : null
+	;
 	
-	if (oResponse.Result)
+	if (oInbox)
 	{
-		_.each(oResponse.Result, function (aFlags, sUid) {
-			if (_.indexOf(aFlags, '\\flagged') === -1)
-			{
-				oInbox.setMessageUnflaggedByUid(sUid);
-			}
-		});
+		if (oResponse.Result)
+		{
+			_.each(oResponse.Result, function (aFlags, sUid) {
+				if (_.indexOf(aFlags, '\\flagged') === -1)
+				{
+					oInbox.setMessageUnflaggedByUid(sUid);
+				}
+			});
+		}
+		
+		oInbox.removeFlaggedMessageListsFromCache();
+		App.Prefetcher.prefetchStarredMessageList();
 	}
-	oInbox.removeFlaggedMessageListsFromCache();
-	App.Prefetcher.prefetchStarredMessageList();
 };
 
 /**
@@ -44483,16 +44539,11 @@ AppBase.prototype.getTitleByScreen = function ()
 };
 
 /**
- * @param {string} sAction
- * @param {string=} sTitle
- * @param {string=} sBody
- * @param {string=} sIcon
- * @param {Function=} fnCallback
- * @param {number=} iTimeout
+ * @param {Object} oParameters
  */
-AppBase.prototype.desktopNotify = function (sAction, sTitle, sBody, sIcon, fnCallback, iTimeout)
+AppBase.prototype.desktopNotify = function (oParameters)
 {
-	Utils.desktopNotify(sAction, sTitle, sBody, sIcon, fnCallback, iTimeout);
+	Utils.desktopNotify(oParameters);
 };
 
 AppBase.prototype.phoneInOneTab = function ()
@@ -44561,6 +44612,7 @@ AppMain.prototype.collectScreensData = function ()
 			'Helpdesk_HelpdeskViewModel', CHelpdeskViewModel, true);
 	}
 };
+
 App = new AppMain();
 window.App = App;
 

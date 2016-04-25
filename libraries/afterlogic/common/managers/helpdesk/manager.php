@@ -439,10 +439,6 @@ class CApiHelpdeskManager extends AApiManagerWithStorage
 						$this->NotifyRegistration($oHelpdeskUser, $bCreateFromFetcher);
 					}
 				}
-				else
-				{
-					throw new CApiManagerException(Errs::HelpdeskManager_UserAlreadyExists);
-				}
 			}
 			
 			$bResult = true;
