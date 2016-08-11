@@ -441,8 +441,9 @@ class CReminder
 										
 										$sSubject = $this->getSubject($oAccount, $sEventStart, $iEventStartTS, $sEventName, $sDate, $iNowTS_UTC, $bAllDay);
 										
-										$aAccounts = array();
-										$aAccounts[] = $oAccount;
+										$aAccounts = array(
+											$oAccount->IdAccount => $oAccount
+										);
 										
 										$aCalendarUsers = $this->oApiCalendarManager->getCalendarUsers($oAccount, $oCalendar);
 										if (0 < count($aCalendarUsers))
@@ -452,7 +453,7 @@ class CReminder
 												$oCalendarAccount = $this->getAccount($aCalendarUser['email']);
 												if ($oCalendarAccount)
 												{
-													$aAccounts[] = $oCalendarAccount;
+													$aAccounts[$oCalendarAccount->IdAccount] = $oCalendarAccount;
 												}
 											}
 										}

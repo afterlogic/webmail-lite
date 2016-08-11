@@ -125,7 +125,7 @@
 
 								<div class="notice" data-bind="visible: isDemo, i18n: 'text'" data-i18n="DEMO/WARNING_SEND_EMAIL_TO_DEMO_ONLY"></div>
 								<table class="fields" data-bind="css: { 'no-compressed': !fromToExpandColapssed() }">
-									<tr class="first_row from" data-bind="visible: visibleFrom() && !fromToExpandColapssed()">
+									<tr class="first_row from" data-bind="if: visibleFrom(), visible: !fromToExpandColapssed()">
 										<td class="label">
 											<span data-bind="i18n: 'text'" data-i18n="COMPOSE/HEADER_FROM"></span>:
 										</td>

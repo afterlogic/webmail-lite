@@ -1,4 +1,4 @@
-<div class="panel_top pathway">
+<div class="panel_top pathway" data-bind="visible: !isPublic">
 	<!-- ko foreach: pathItems() -->
 		<!-- ko if: $parent.iPathIndex() !== $index() || $index() === 0 || $parent.searchPattern() !== '' -->		
 		<!-- ko if: $index() > 0 -->&raquo;<!-- /ko --> <a data-bind="

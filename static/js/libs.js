@@ -865,7 +865,7 @@ function handler(event) {
 	 * 
 	 * @param {boolean} bEditable
 	 */
-	Crea.prototype.start = function (bEditable)
+	Crea.prototype.start = function (bEditable, bAllowShortcuts)
 	{
 		function isValidURL(sUrl)
 		{
@@ -979,19 +979,19 @@ function handler(event) {
 
 			self.bEditing = true;
 
-			if((bShiftKey && bCtrlKey && iKey === Enums.Key.z) || (bCtrlKey && iKey === Enums.Key.y))
+			if (bAllowShortcuts && !bAltKey && ((bShiftKey && bCtrlKey && iKey === Enums.Key.z) || (bCtrlKey && iKey === Enums.Key.y)))
 			{
 				oEvent.preventDefault();
 
 				self.editableRedo();
 			}
-			else if(bCtrlKey && !bAltKey && iKey === Enums.Key.z)
+			else if (bAllowShortcuts && bCtrlKey && !bAltKey && iKey === Enums.Key.z)
 			{
 				oEvent.preventDefault();
 
 				self.editableUndo();
 			}
-			else if (bCtrlKey && (iKey === Enums.Key.k || iKey === Enums.Key.b || iKey === Enums.Key.i || iKey === Enums.Key.u))
+			else if (bAllowShortcuts && bCtrlKey && (iKey === Enums.Key.k || iKey === Enums.Key.b || iKey === Enums.Key.i || iKey === Enums.Key.u))
 			{
 				oEvent.preventDefault();
 				switch (iKey)

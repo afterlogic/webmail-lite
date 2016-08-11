@@ -565,15 +565,15 @@ class CAdminPanel
 			{
 				if ($this->AType)
 				{
-					$this->sHelpUrl = 'http://www.afterlogic.com/wiki/Aurora_documentation';
+					$this->sHelpUrl = 'http://www.afterlogic.com/docs/aurora';
 				}
 				else if ($this->PType)
 				{
-					$this->sHelpUrl = 'http://www.afterlogic.com/wiki/WebMail_Pro_documentation';
+					$this->sHelpUrl = 'http://www.afterlogic.com/docs/webmail-pro';
 				}
 				else
 				{
-					$this->sHelpUrl = 'http://www.afterlogic.com/wiki/WebMail_Lite_documentation';
+					$this->sHelpUrl = 'http://www.afterlogic.com/docs/webmail-lite';
 				}
 			}
 			

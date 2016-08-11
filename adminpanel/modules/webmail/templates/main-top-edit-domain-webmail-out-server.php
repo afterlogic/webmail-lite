@@ -39,7 +39,7 @@
 
 				<br /><br />
 
-				<?php if(!$this->Data->getValue('IsDefaultDomain', 'bool')){ ?>
+				<?php /*if(!$this->Data->getValue('IsDefaultDomain', 'bool')){ */?>
 
 					<input type="radio" class="wm_checkbox" name="radioAuthType" id="radioAuthTypeAuthSpecified"
 						value="<?php echo EnumConvert::ToPost(ESMTPAuthType::AuthSpecified, 'ESMTPAuthType');
@@ -59,7 +59,7 @@
 
 					<br /><br />
 
-				<?php } ?>
+				<?php /*}*/ ?>
 
 				<input type="radio" class="wm_checkbox" name="radioAuthType" id="radioAuthTypeAuthCurrentUser"
 					value="<?php echo EnumConvert::ToPost(ESMTPAuthType::AuthCurrentUser, 'ESMTPAuthType');

@@ -219,14 +219,14 @@ In case of a shared hosting, you need to ask your hosting provider to do this.')
 				: $this->getErrorHtmlValue('Error, can\'t create/delete sub-folders in the data folder.', '
 You need to grant read/write permission over data folder and all its contents to your web server user.
 For instructions, please refer to this section of documentation and our
-<a href="http://www.afterlogic.com/support/faq-webmail-pro-php#3.1" target="_blank">FAQ</a>.'),
+<a href="http://www.afterlogic.com/docs/webmail-pro/troubleshooting/administration-settings-disappeared-are-not-saved-why" target="_blank">FAQ</a>.'),
 
 			'CreatingDeletingFiles' => ($this->aCompatibility['data.file.create'] && $this->aCompatibility['data.file.delete'])
 				? $this->getSuccessHtmlValue('OK')
 				: $this->getErrorHtmlValue('Error, can\'t create/delete files in the data folder.', '
 You need to grant read/write permission over data folder and all its contents to your web server user.
 For instructions, please refer to this section of documentation and our
-<a href="http://www.afterlogic.com/support/faq-webmail-pro-php#3.1" target="_blank">FAQ</a>.'),
+<a href="http://www.afterlogic.com/docs/webmail-pro/troubleshooting/administration-settings-disappeared-are-not-saved-why" target="_blank">FAQ</a>.'),
 			
 			'WebMailSettingsFile' => ($this->aCompatibility['settings.file.exist'])
 				? $this->getSuccessHtmlValue('Found')
@@ -239,7 +239,7 @@ By default, the data folder is webmail subfolder, and if it\'s not the case make
 				: $this->getErrorHtmlValue('Not Found, can\'t find "'.$this->aCompatibility['settings.file'].'" file.', '
 You should grant read/write permission over settings file to your web server user.
 For instructions, please refer to this section of documentation and our
-<a href="http://www.afterlogic.com/support/faq-webmail-pro-php#3.1" target="_blank">FAQ</a>.'),
+<a href="http://www.afterlogic.com/docs/webmail-pro/troubleshooting/administration-settings-disappeared-are-not-saved-why" target="_blank">FAQ</a>.'),
 
 			'Result' => ($this->aCompatibility['compatibility']) ?
 					'The current server environment meets all the requirements. Click Next to proceed.' :

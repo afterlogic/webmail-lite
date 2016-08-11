@@ -610,7 +610,7 @@ class CApiMailManager extends AApiManagerWithStorage
 
 		$oImapClient =& $this->_getImapClient($oAccount);
 
-		$oImapClient->FolderExamine($sFolderFullNameRaw);
+		$oImapClient->FolderSelect($sFolderFullNameRaw);
 
 		$aResult = array();
 		$aFetchResponse = $oImapClient->Fetch(array(
@@ -1456,7 +1456,7 @@ class CApiMailManager extends AApiManagerWithStorage
 
 		$oImapClient =& $this->_getImapClient($oAccount);
 
-		$oImapClient->FolderExamine($sFolderName);
+		$oImapClient->FolderSelect($sFolderName);
 
 		$aUids = $oImapClient->MessageSimpleSearch('HEADER Message-ID '.$sMessageId, true);
 
@@ -1503,7 +1503,7 @@ class CApiMailManager extends AApiManagerWithStorage
 
 		$oImapClient =& $this->_getImapClient($oAccount);
 
-		$oImapClient->FolderExamine($sFolderFullNameRaw);
+		$oImapClient->FolderSelect($sFolderFullNameRaw);
 
 		$oMessage = false;
 
@@ -1778,7 +1778,7 @@ class CApiMailManager extends AApiManagerWithStorage
 
 		$oImapClient =& $this->_getImapClient($oAccount);
 
-		$oImapClient->FolderExamine($sFolderName);
+		$oImapClient->FolderSelect($sFolderName);
 
 		$sFileName = '';
 		$sContentType = '';
@@ -2553,12 +2553,12 @@ class CApiMailManager extends AApiManagerWithStorage
 		{
 			throw new CApiInvalidArgumentException();
 		}
+		$aList = $this->_getFolderInformation($oImapClient, $sFolderFullNameRaw);
 
-		$oImapClient->FolderExamine($sFolderFullNameRaw);
+		$oImapClient->FolderSelect($sFolderFullNameRaw);
 
 		$aResult = array();
 
-		$aList = $this->_getFolderInformation($oImapClient, $sFolderFullNameRaw);
 		$iCount = $aList[0];
 		
 		if (0 < $iCount)
@@ -2620,7 +2620,7 @@ class CApiMailManager extends AApiManagerWithStorage
 			throw new CApiInvalidArgumentException();
 		}
 
-		$oImapClient->FolderExamine($sFolderFullNameRaw);
+		$oImapClient->FolderSelect($sFolderFullNameRaw);
 
 		$aResult = array();
 
@@ -2686,9 +2686,9 @@ class CApiMailManager extends AApiManagerWithStorage
 		$oSettings =& CApi::GetSettings();
 		$oImapClient =& $this->_getImapClient($oAccount, 20, 60 * 2);
 
-		$oImapClient->FolderExamine($sFolderFullNameRaw);
-
 		$aList = $this->_getFolderInformation($oImapClient, $sFolderFullNameRaw);
+
+		$oImapClient->FolderSelect($sFolderFullNameRaw);
 
 		$iMessageCount = $aList[0];
 		$iRealMessageCount = $aList[0];
@@ -2994,9 +2994,9 @@ class CApiMailManager extends AApiManagerWithStorage
 
 		$oImapClient =& $this->_getImapClient($oAccount);
 
-		$oImapClient->FolderExamine($sFolderFullNameRaw);
-
 		$aList = $this->_getFolderInformation($oImapClient, $sFolderFullNameRaw);
+
+		$oImapClient->FolderSelect($sFolderFullNameRaw);
 
 		$iMessageRealCount = $aList[0];
 		$iMessageUnseenCount = $aList[1];
@@ -3106,9 +3106,9 @@ class CApiMailManager extends AApiManagerWithStorage
 
 		$oImapClient =& $this->_getImapClient($oAccount);
 
-		$oImapClient->FolderExamine($sFolderFullNameRaw);
-
 		$aList = $this->_getFolderInformation($oImapClient, $sFolderFullNameRaw);
+
+		$oImapClient->FolderSelect($sFolderFullNameRaw);
 
 		$iMessageRealCount = $aList[0];
 
@@ -3161,9 +3161,9 @@ class CApiMailManager extends AApiManagerWithStorage
 		$sFolderFullNameRaw = 'INBOX';
 		$oImapClient =& $this->_getImapClient($oAccount);
 
-		$oImapClient->FolderExamine($sFolderFullNameRaw);
-
 		$aList = $this->_getFolderInformation($oImapClient, $sFolderFullNameRaw);
+
+		$oImapClient->FolderSelect($sFolderFullNameRaw);
 
 		$iMessageRealCount = $aList[0];
 		$aUidsForRequest = array();

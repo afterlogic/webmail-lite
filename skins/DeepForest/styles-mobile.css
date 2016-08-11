@@ -1325,7 +1325,7 @@ html.rtl .toolbar .content .group > .item:last-child {
 }
 .no-cssanimations .toolbar .group.checkmail .icon,
 .no-cssanimations .toolbar .item.checkmail .icon {
-  background: url("images/check.png?7.6.8") no-repeat 0px 0px;
+  background: url("images/check.png?7.6.9") no-repeat 0px 0px;
   overflow: hidden;
   width: 19px !important;
   height: 19px !important;
@@ -2657,11 +2657,11 @@ html.rtl .languages .custom_selector .control {
   width: 16px;
   height: 11px;
   margin-right: 4px;
-  background: url("images/sprites.png?7.6.8") no-repeat 40px -400px;
+  background: url("images/sprites.png?7.6.9") no-repeat 40px -400px;
 }
 @media only screen and (-webkit-min-device-pixel-ratio: 1.3), only screen and (-moz-min-device-pixel-ratio: 1.3), only screen and (-o-min-device-pixel-ratio: 1.3/1), only screen and (min-resolution: 1.3dppx), only screen and (min-resolution: 125dpi) {
   .languages .icon {
-    background-image: url("images/sprites2x.png?7.6.8");
+    background-image: url("images/sprites2x.png?7.6.9");
     background-size: 1440px 560px;
   }
 }
@@ -2947,7 +2947,7 @@ html.rtl .languages .custom_selector .control {
   content: "\e63e";
 }
 .attachments .attachment .spinner {
-  background: url("images/wait.gif?7.6.8") no-repeat left top;
+  background: url("images/wait.gif?7.6.9") no-repeat left top;
   display: inline-block;
   width: 20px;
   height: 20px;
@@ -3906,7 +3906,7 @@ html.rtl .folders .children .children .children .children .children .children .c
   vertical-align: middle;
   width: 16px;
   height: 16px;
-  background-image: url("images/sprites.png?7.6.8");
+  background-image: url("images/sprites.png?7.6.9");
   background-repeat: no-repeat;
 }
 .html_editor .toolbar .content .item.link .icon {
@@ -5779,7 +5779,7 @@ html.rtl .login_panel .links {
   position: absolute;
   right: 2px;
   top: 0px;
-  background: url('images/sprites.png?7.6.8') no-repeat 0px -200px;
+  background: url('images/sprites.png?7.6.9') no-repeat 0px -200px;
 }
 .panel.messages .items_list .item.answered .marker {
   display: inline-block;
@@ -6695,7 +6695,7 @@ html.rtl .panel.contacts .panel_top .search_block {
 /*=== END Contacts screen CSS ===*/
 /*=== Contact viewer CSS ===*/
 .panel.contact_viewer .panel_content {
-  background: url("images/contacts-bg.png?7.6.8") repeat 0 0;
+  background: url("images/contacts-bg.png?7.6.9") repeat 0 0;
 }
 .panel.contact_viewer .middle_bar {
   -webkit-box-sizing: border-box;
@@ -7330,7 +7330,7 @@ html.rtl .panel.threads .customscroll-scrollbar-vertical {
 /*=== retina displays ===*/
 @media only screen and (-webkit-min-device-pixel-ratio: 1.3), only screen and (-moz-min-device-pixel-ratio: 1.3), only screen and (-o-min-device-pixel-ratio: 1.3/1), only screen and (min-resolution: 1.3dppx), only screen and (min-resolution: 125dpi) {
   .spritesX2 {
-    background-image: url("images/sprites2x.png?7.6.8");
+    background-image: url("images/sprites2x.png?7.6.9");
     background-size: 1440px 560px;
   }
 }
@@ -7338,7 +7338,7 @@ html.rtl .panel.threads .customscroll-scrollbar-vertical {
   .file .icon,
   .messages .items_list .item .marker,
   .html_editor .toolbar .item .icon {
-    background-image: url("images/sprites2x.png?7.6.8");
+    background-image: url("images/sprites2x.png?7.6.9");
     background-size: 1440px 560px;
   }
 }

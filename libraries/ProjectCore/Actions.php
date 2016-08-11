@@ -5473,13 +5473,14 @@ class Actions extends ActionsBase
 		$bIsPublic = (bool) $this->getParamValue('IsPublic'); 
 		$iTimezoneOffset = $this->getParamValue('TimezoneOffset'); 
 		$sTimezone = $this->getParamValue('Timezone'); 
+		$bExpand = (bool) $this->getParamValue('Expand', true); 
 		
 		if ($bIsPublic)
 		{
 			$oPublicAccount = $this->oApiCalendar->getPublicAccount();
 			$oPublicAccount->User->DefaultTimeZone = $iTimezoneOffset;
 			$oPublicAccount->User->ClientTimeZone = $sTimezone;
-			$mResult = $this->oApiCalendar->getEvents($oPublicAccount, $aCalendarIds, $iStart, $iEnd);
+			$mResult = $this->oApiCalendar->getEvents($oPublicAccount, $aCalendarIds, $iStart, $iEnd, $bExpand);
 		}
 		else
 		{
@@ -5488,11 +5489,32 @@ class Actions extends ActionsBase
 			{
 				throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::CalendarsNotAllowed);
 			}
-			$mResult = $this->oApiCalendar->getEvents($oAccount, $aCalendarIds, $iStart, $iEnd);
+			$mResult = $this->oApiCalendar->getEvents($oAccount, $aCalendarIds, $iStart, $iEnd, $bExpand);
 		}
 		
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $mResult);
 	}
+	
+	/**
+	 * @return array
+	 */
+	public function AjaxCalendarEventsInfo()
+	{
+		$mResult = false;
+		$aCalendarIds = @json_decode($this->getParamValue('CalendarIds'), true);
+		$iStart = $this->getParamValue('Start'); 
+		$iEnd = $this->getParamValue('End'); 
+		$bGetData = (bool) $this->getParamValue('GetData', false); 
+		
+		$oAccount = $this->getDefaultAccountFromParam();
+		if (!$this->oApiCapability->isCalendarSupported($oAccount))
+		{
+			throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::CalendarsNotAllowed);
+		}
+		$mResult = $this->oApiCalendar->getEventsInfo($oAccount, $aCalendarIds, $iStart, $iEnd, $bGetData);
+		
+		return $this->DefaultResponse($oAccount, __FUNCTION__, $mResult);
+	}	
 	
 	/**
 	 * @return array
@@ -5543,6 +5565,8 @@ class Actions extends ActionsBase
 		{
 			$oRRule = new \CRRule($oAccount);
 			$oRRule->Populate($aRRule);
+			$oRRule->StartBase = $oEvent->Start;
+			$oRRule->AllDay = $oEvent->AllDay;
 			$oEvent->RRule = $oRRule;
 		}
 
@@ -5589,6 +5613,9 @@ class Actions extends ActionsBase
 		{
 			$oRRule = new \CRRule($oAccount);
 			$oRRule->Populate($aRRule);
+			$oRRule->StartBase = $oEvent->Start;
+			$oRRule->AllDay = $oEvent->AllDay;
+			
 			$oEvent->RRule = $oRRule;
 		}
 		
@@ -5618,6 +5645,25 @@ class Actions extends ActionsBase
 			
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $mResult);
 	}	
+	
+	public function AjaxCalendarEventUpdateRaw()
+	{
+		$mResult = false;
+		$oAccount = $this->getDefaultAccountFromParam();
+		if (!$this->oApiCapability->isCalendarSupported($oAccount))
+		{
+			throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::CalendarsNotAllowed);
+		}
+		
+		$sCalendarId = $this->getParamValue('calendarId');
+		$sEventUrl = $this->getParamValue('url');
+		$sData = urldecode($this->getParamValue('data'));
+		
+		$mResult = $this->oApiCalendar->updateEventRaw($oAccount, $sCalendarId, $sEventUrl, $sData);
+			
+		return $this->DefaultResponse($oAccount, __FUNCTION__, $mResult);
+		
+	}
 	
 	/**
 	 * @return array
@@ -5684,6 +5730,29 @@ class Actions extends ActionsBase
 		
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $mResult);
 	}
+	
+	/**
+	 * @return array
+	 */
+	public function AjaxCalendarEventsDeleteByUrls()
+	{
+		$mResult = true;
+		$oAccount = $this->getDefaultAccountFromParam();
+		
+		$sCalendarId = $this->getParamValue('calendarId');
+		$aEventUrls = @json_decode($this->getParamValue('eventUrls'), true);
+
+		foreach ($aEventUrls as $sEventUrl)
+		{
+			if (!$this->oApiCalendar->deleteEventByUrl($oAccount, $sCalendarId, $sEventUrl))
+			{
+				$mResult = false;
+				break;
+			}
+		}
+		
+		return $this->DefaultResponse($oAccount, __FUNCTION__, $mResult);
+	}	
 	
 	/**
 	 * @return array

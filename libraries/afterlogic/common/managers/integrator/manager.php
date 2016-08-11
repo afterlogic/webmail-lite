@@ -1298,6 +1298,7 @@ class CApiIntegratorManager extends AApiManager
 			$aResult['DefaultLanguageShort'] = api_Utils::ConvertLanguageNameToShort($oAccount->User->DefaultLanguage);
 			$aResult['DefaultDateFormat'] = $oAccount->User->DefaultDateFormat;
 			$aResult['DefaultTimeFormat'] = $oAccount->User->DefaultTimeFormat;
+			$aResult['DefaultTimeZone'] = $oAccount->getDefaultStrTimeZone();
 
 			$aResult['AllowCompose'] = (bool) $oAccount->AllowCompose;
 			$aResult['AllowReply'] = (bool) $oAccount->AllowReply;

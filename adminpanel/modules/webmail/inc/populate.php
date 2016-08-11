@@ -71,11 +71,11 @@ class CWebMailPopulateData extends ap_CoreModuleHelper
 			{
 				if ($this->oAdminPanel->AType)
 				{
-					$mLinkWebUrl = 'http://www.afterlogic.com/wiki/Configuring_web_domain_names_(Aurora)';
+					$mLinkWebUrl = 'http://www.afterlogic.com/docs/aurora/configuring-webmail/configuring-web-domain-names';
 				}
 				else
 				{
-					$mLinkWebUrl = 'http://www.afterlogic.com/wiki/Configuring_web_domain_names_(WebMail_Pro)';
+					$mLinkWebUrl = 'http://www.afterlogic.com/docs/webmail-pro/configuring-webmail/configuring-web-domain-names';
 				}
 			}
 			

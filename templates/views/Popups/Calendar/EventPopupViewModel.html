@@ -203,7 +203,7 @@
 								<span class="input" data-bind="text: subject, visible: !isEditable()"></span>
 								<textarea id="event_subject" class="input autosize" data-bind="
 									autosize: {minHeight: 40, autosizeTrigger: autosizeTrigger, scrollableHeight: 110}, 
-									customBind: {onKeydown: onKeydown, onKeyup: onKeyup, onPaste: onPaste, valueObserver: subject}, 
+									onEnter: onSaveClick,
 									value: subject, valueUpdate: 'afterkeydown', hasfocus: subjectFocus, visible: isEditable()"></textarea>
 							</div>
 						</div>
@@ -226,7 +226,7 @@
 								<span class="input" data-bind="text: location, visible: !isEditable()"></span>
 								<textarea id="event_location" class="input autosize" data-bind="
 									autosize: {minHeight: 26, autosizeTrigger: autosizeTrigger, scrollableHeight: 74}, 
-									customBind: {onKeydown: onKeydown, onKeyup: onKeyup, onPaste: onPaste, valueObserver: location}, 
+									onEnter: onSaveClick,
 									value: location, valueUpdate: 'afterkeydown', hasfocus: locationFocus, visible: isEditable()"></textarea>
 							</div>
 						</div>

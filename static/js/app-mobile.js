@@ -129,6 +129,7 @@ if (window.Modernizr && navigator)
  */
 function CBrowser()
 {
+	this.edge = /edge/.test(navigator.userAgent.toLowerCase());
 	this.ie11 = !!navigator.userAgent.match(/Trident.*rv[ :]*11\./);
 	this.ie = (/msie/.test(navigator.userAgent.toLowerCase()) && !window.opera) || this.ie11;
 	this.ieVersion = this.getIeVersion();
@@ -1965,7 +1966,7 @@ Utils.getPlural = function (sLang, iNumber)
 		case 'Estonian':
 			iResult = (iNumber === 1 ? 0 : 1);
 			break;
-		case 'Finish':
+		case 'Finnish':
 			iResult = (iNumber === 1 ? 0 : 1);
 			break;
 		case 'French':
@@ -2971,6 +2972,30 @@ Utils.Message.joinReplyPrefixesInSubject = function (sSubject, sRePrefix, sFwdPr
 };
 
 /**
+ * @param {Object} oWin
+ * @param {string} sHtml
+ */
+Utils.Message.displayPrintMessageInWindow = function (oWin, sHtml) {
+	if (App.browser.edge)
+	{
+		var aHtml = sHtml.split(/<style[^>]*>/);
+		if (aHtml.length === 2)
+		{
+			aHtml = _.union([aHtml[0]], aHtml[1].split('</style>'));
+		}
+		if (aHtml.length === 3)
+		{
+			$(oWin.document).find('head').append('<style scoped>' + aHtml[1] + '</style>');
+			$(oWin.document.body).html(aHtml[0] + aHtml[2]);
+		}
+	}
+	else
+	{
+		$(oWin.document.body).html(sHtml);
+	}
+};
+
+/**
  * Used in AfterLogicApi, OpenPgpKey, Inputosaurus, CComposeViewModel, CHtmlEditorViewModel, CalendarSharePopup.
  * Included in main, mobile, helpdesk, calendar_pub, filestorage_pub applications.
  * 
@@ -3309,80 +3334,48 @@ ko.bindingHandlers.alert = {
 
 ko.bindingHandlers.onEnter = {
 	'init': function (oElement, fValueAccessor, fAllBindingsAccessor, oViewModel) {
-		ko.bindingHandlers.event.init(oElement, function () {
-			return {
-				'keyup': function (oData, oEvent) {
-					if (oEvent && 13 === window.parseInt(oEvent.keyCode, 10))
-					{
-						$(oElement).trigger('change');
-						fValueAccessor().call(this, oData);
-					}
-				}
-			};
-		}, fAllBindingsAccessor, oViewModel);
+		$(oElement).on('keydown', function (oEvent) {
+			if (oEvent.keyCode === Enums.Key.Enter)
+			{
+				$(oElement).trigger('change');
+				fValueAccessor().call(oViewModel, ko.dataFor(oElement));
+				return false;
+			}
+		});
 	}
 };
 
 ko.bindingHandlers.onCtrlEnter = {
 	'init': bMobileApp ? null : function (oElement, fValueAccessor, fAllBindingsAccessor, oViewModel) {
-		ko.bindingHandlers.event.init(oElement, function () {
-			return {
-				'keydown': function (oData, oEvent) {
-					if (oEvent && 13 === window.parseInt(oEvent.keyCode, 10) && oEvent.ctrlKey)
-					{
-						$(oElement).trigger('change');
-						fValueAccessor().call(this, oData);
-
-						return false;
-					}
-
-					return true;
-				}
-			};
-		}, fAllBindingsAccessor, oViewModel);
+		var $Element = $(oElement);
+		$Element.on('keydown', function (oEvent) {
+			if (oEvent.ctrlKey && oEvent.keyCode === Enums.Key.Enter)
+			{
+				$Element.trigger('change');
+				fValueAccessor().call(oViewModel, ko.dataFor(oElement));
+			}
+		});
 	}
 };
 
 ko.bindingHandlers.onEsc = {
 	'init': bMobileApp ? null : function (oElement, fValueAccessor, fAllBindingsAccessor, oViewModel) {
-		ko.bindingHandlers.event.init(oElement, function () {
-			return {
-				'keyup': function (oData, oEvent) {
-					if (oEvent && 27 === window.parseInt(oEvent.keyCode, 10))
-					{
-						$(oElement).trigger('change');
-						fValueAccessor().call(this, oData);
-					}
-				}
-			};
-		}, fAllBindingsAccessor, oViewModel);
+		var $Element = $(oElement);
+		$Element.on('keydown', function (oEvent) {
+			if (oEvent.keyCode === Enums.Key.Esc)
+			{
+				$Element.trigger('change');
+				fValueAccessor().call(oViewModel, ko.dataFor(oElement));
+			}
+		});
 	}
 };
 
 ko.bindingHandlers.onFocusSelect = {
 	'init': function (oElement, fValueAccessor, fAllBindingsAccessor, oViewModel) {
-		ko.bindingHandlers.event.init(oElement, function () {
-			return {
-				'focus': function () {
-					oElement.select();
-				}
-			};
-		}, fAllBindingsAccessor, oViewModel);
-	}
-};
-
-ko.bindingHandlers.onEnterChange = {
-	'init': function (oElement, fValueAccessor, fAllBindingsAccessor, oViewModel) {
-		ko.bindingHandlers.event.init(oElement, function () {
-			return {
-				'keyup': function (oData, oEvent) {
-					if (oEvent && 13 === window.parseInt(oEvent.keyCode, 10))
-					{
-						$(oElement).trigger('change');
-					}
-				}
-			};
-		}, fAllBindingsAccessor, oViewModel);
+		$(oElement).on('focus', function (oEvent) {
+			oElement.select();
+		});
 	}
 };
 
@@ -4914,17 +4907,6 @@ ko.bindingHandlers.autosize = {
 		jqEl.on('paste', function(oEvent, oData) {
 			fResize();
 		});
-		/*jqEl.on('input', function(oEvent, oData) {
-			fResize();
-		});
-		ko.bindingHandlers.event.init(oElement, function () {
-			return {
-				'keydown': function (oData, oEvent) {
-					fResize();
-					return true;
-				}
-			};
-		}, fAllBindingsAccessor, oViewModel);*/
 
 		if (oAutosizeTrigger)
 		{
@@ -4937,51 +4919,21 @@ ko.bindingHandlers.autosize = {
 	}
 };
 
-ko.bindingHandlers.customBind = {
-	'init': function (oElement, fValueAccessor, fAllBindingsAccessor, oViewModel, bindingContext) {
-
-		var
-			oOptions = fValueAccessor(),
-			oKeydown = oOptions.onKeydown ? oOptions.onKeydown : null,
-			oKeyup = oOptions.onKeyup ? oOptions.onKeyup : null,
-			oPaste = oOptions.onPaste ? oOptions.onPaste : null,
-			oInput = oOptions.onInput ? oOptions.onInput : null,
-			oValueObserver = oOptions.valueObserver ? oOptions.valueObserver : null
-		;
-
-		ko.bindingHandlers.event.init(oElement, function () {
-			return {
-				'keydown': function (oData, oEvent) {
-					if(oKeydown)
-					{
-						oKeydown.call(this, oElement, oEvent, oValueObserver);
-					}
-					return true;
-				},
-				'keyup': function (oData, oEvent) {
-					if(oKeyup)
-					{
-						oKeyup.call(this, oElement, oEvent, oValueObserver);
-					}
-					return true;
-				},
-				'paste': function (oData, oEvent) {
-					if(oPaste)
-					{
-						oPaste.call(this, oElement, oEvent, oValueObserver);
-					}
-					return true;
-				},
-				'input': function (oData, oEvent) {
-					if(oInput)
-					{
-						oInput.call(this, oElement, oEvent, oValueObserver);
-					}
-					return true;
-				}
-			};
-		}, fAllBindingsAccessor, oViewModel);
+ko.extenders.disableLinebreaks = function (oTarget, bDisable) {
+	if (bDisable)
+	{
+		var oResult = ko.computed({
+			'read': function () {
+				return oTarget();
+			},
+			'write': function(sNewValue) {
+				oTarget(sNewValue.replace(/[\r\n\t]+/gm, ' '));
+			}
+		});
+		oResult(oTarget());
+		return oResult;
 	}
+	return oTarget;
 };
 
 ko.bindingHandlers.fade = {
@@ -5092,47 +5044,45 @@ ko.bindingHandlers.highlighter = {
 			bHighlight = !_.include(aTabooLang, sUserLanguage)
 		;
 
-		ko.bindingHandlers.event.init(oElement, function () {
-			return {
-				'keydown': function (oData, oEvent) {
-					return oEvent.keyCode !== Enums.Key.Enter;
-				},
-				'keyup': function (oData, oEvent) {
-					var
-						aMoveKeys = [Enums.Key.Left, Enums.Key.Right, Enums.Key.Home, Enums.Key.End],
-						bMoveKeys = -1 !== Utils.inArray(oEvent.keyCode, aMoveKeys)
-					;
+		$(oElement)
+			.on('keydown', function (oEvent) {
+				return oEvent.keyCode !== Enums.Key.Enter;
+			})
+			.on('keyup', function (oEvent) {
+				var
+					aMoveKeys = [Enums.Key.Left, Enums.Key.Right, Enums.Key.Home, Enums.Key.End],
+					bMoveKeys = -1 !== Utils.inArray(oEvent.keyCode, aMoveKeys)
+				;
 
-					if (!(
+				if (!(
 //							oEvent.keyCode === Enums.Key.Enter					||
-							oEvent.keyCode === Enums.Key.Shift					||
-							oEvent.keyCode === Enums.Key.Ctrl					||
-							// for international english -------------------------
-							oEvent.keyCode === Enums.Key.Dash					||
-							oEvent.keyCode === Enums.Key.Apostrophe				||
-							oEvent.keyCode === Enums.Key.Six && oEvent.shiftKey	||
-							// ---------------------------------------------------
-							bMoveKeys											||
+						oEvent.keyCode === Enums.Key.Shift					||
+						oEvent.keyCode === Enums.Key.Ctrl					||
+						// for international english -------------------------
+//						oEvent.keyCode === Enums.Key.Dash					||
+//						oEvent.keyCode === Enums.Key.Apostrophe				||
+//						oEvent.keyCode === Enums.Key.Six && oEvent.shiftKey	||
+						// ---------------------------------------------------
+						bMoveKeys											||
 //							((oEvent.shiftKey || iPrevKeyCode === Enums.Key.Shift) && bMoveKeys) ||
-							((oEvent.ctrlKey || iPrevKeyCode === Enums.Key.Ctrl) && oEvent.keyCode === Enums.Key.a)
-						))
-					{
-						oValueObserver(fClear(jqEl.text()));
-						highlight(false);
-					}
-					iPrevKeyCode = oEvent.keyCode;
-					return true;
-				},
-				// firefox fix for html paste
-				'paste': function (oData, oEvent) {
-					setTimeout(function () {
-						oValueObserver(fClear(jqEl.text()));
-						highlight(false);
-					}, 0);
-					return true;
+						((oEvent.ctrlKey || iPrevKeyCode === Enums.Key.Ctrl) && oEvent.keyCode === Enums.Key.a)
+					))
+				{
+					oValueObserver(fClear(jqEl.text()));
+					highlight(false);
 				}
-			};
-		}, fAllBindingsAccessor, oViewModel);
+				iPrevKeyCode = oEvent.keyCode;
+				return true;
+			})
+				// firefox fix for html paste
+			.on('paste', function (oEvent) {
+				setTimeout(function () {
+					oValueObserver(fClear(jqEl.text()));
+					highlight(false);
+				}, 0);
+				return true;
+			})
+		;
 
 		// highlight on init
 		setTimeout(function () {
@@ -6189,7 +6139,14 @@ CMessageSender.prototype.send = function (sAction, oParameters, bSaveMailInSentI
 	
 	if (AppData.User.SaveRepliedToCurrFolder && !bSelfRecipient && Utils.isNonEmptyArray(oParameters.DraftInfo, 3))
 	{
-		sSentFolder = oParameters.DraftInfo[2];
+		var
+			sOrigFolder = oParameters.DraftInfo[2],
+			oOrigFolder = oFolderList && oFolderList.getFolderByFullName(sOrigFolder)
+		;
+		if (oOrigFolder && oOrigFolder.type() !== Enums.FolderTypes.Spam)
+		{
+			sSentFolder = sOrigFolder;
+		}
 	}
 	
 	oParameters.Action = sAction;
@@ -6388,7 +6345,12 @@ CMessageSender.prototype.onMessageSendOrSaveResponse = function (oResponse, oReq
 			{
 				if (!bResult && oResponse.ErrorCode === Enums.Errors.NotSavedInSentItems)
 				{
-					App.Api.showError(Utils.i18n('WARNING/SENT_EMAIL_NOT_SAVED'));
+					var
+						oFolderList = App.MailCache.oFolderListItems[oRequest.AccountID],
+						oSent = oFolderList.getFolderByFullName(oRequest.SentFolder),
+						sWarn = Utils.i18n('WARNING/SENT_EMAIL_NOT_SAVED', {'FOLDER': oSent.displayName()})
+					;
+					App.Api.showError(sWarn);
 				}
 				else if (oRequest.IsQuickReply)
 				{
@@ -10414,6 +10376,8 @@ function CAppSettingsModel(bAllowOpenPgp)
 	
 	this.PasswordMinLength = 0;
 	this.PasswordMustBeComplex = false;
+	
+	this.AllowComposeShortcuts = true;
 }
 	
 /**
@@ -14705,16 +14669,14 @@ function CMessageModel()
 CMessageModel.prototype.viewMessage = function (oWin)
 {
 	var
-		oDomText = this.getDomText(Utils.Common.getAppPath()),
-		sHtml = ''
+		oDomText = this.getDomText(Utils.Common.getAppPath())
 	;
 	
 	this.textBodyForNewWindow(oDomText.html());
-	sHtml = $(this.domMessageForPrint()).html();
 	
 	if (oWin)
 	{
-		$(oWin.document.body).html(sHtml);
+		Utils.Message.displayPrintMessageInWindow(oWin, $(this.domMessageForPrint()).html());
 		oWin.focus();
 		_.each(this.attachments(), function (oAttach) {
 			var oLink = $(oWin.document.body).find("[data-hash='download-" + oAttach.hash() + "']");
@@ -18051,7 +18013,7 @@ CHtmlEditorViewModel.prototype.initCrea = function (sText, bPlain, sTabIndex)
 			'openInsertLinkDialog': _.bind(this.insertLink, this),
 			'onUrlClicked': true
 		});
-		this.oCrea.start(this.isEnable());
+		this.oCrea.start(this.isEnable(), AppData.App.AllowComposeShortcuts);
 	}
 
 	this.oCrea.setTabIndex(sTabIndex);
@@ -21414,16 +21376,13 @@ CMessagePaneViewModel.prototype.executePrint = function ()
 {
 	var
 		oMessage = this.currentMessage(),
-		oWin = oMessage ? Utils.WindowOpener.open('', this.subject() + '-print') : null,
-		sHtml = ''
+		oWin = oMessage ? Utils.WindowOpener.open('', this.subject() + '-print') : null
 	;
-
+	
 	if (oMessage && oWin)
 	{
 		this.textBodyForNewWindow(oMessage.getConvertedHtml(Utils.Common.getAppPath(), true));
-		sHtml = $(this.domMessageForPrint()).html();
-
-		$(oWin.document.body).html(sHtml);
+		Utils.Message.displayPrintMessageInWindow(oWin, $(this.domMessageForPrint()).html());
 		oWin.print();
 	}
 };
@@ -22406,7 +22365,7 @@ function CComposeViewModel()
     this.mobileApp = bMobileApp;
     this.showHotkeysHints = !bMobileDevice && !bMobileApp;
 
-    this.aHotkeys = [
+    this.aHotkeys = AppData.App.AllowComposeShortcuts ? [
         { value: 'Ctrl+Enter', action: Utils.i18n('COMPOSE/HOTKEY_SEND') },
         { value: 'Ctrl+S', action: Utils.i18n('COMPOSE/HOTKEY_SAVE') },
         { value: 'Ctrl+Z', action: Utils.i18n('COMPOSE/HOTKEY_UNDO') },
@@ -22415,7 +22374,7 @@ function CComposeViewModel()
         { value: 'Ctrl+B', action: Utils.i18n('COMPOSE/HOTKEY_BOLD') },
         { value: 'Ctrl+I', action: Utils.i18n('COMPOSE/HOTKEY_ITALIC') },
         { value: 'Ctrl+U', action: Utils.i18n('COMPOSE/HOTKEY_UNDERLINE') }
-    ];
+    ] : [];
 
     this.allowFiles = ko.observable(false);
 
@@ -22562,34 +22521,37 @@ CComposeViewModel.prototype.onApplyBindings = function ()
 
 CComposeViewModel.prototype.hotKeysBind = function ()
 {
-    this.$viewModel.on('keydown', $.proxy(function(ev) {
+	if (AppData.App.AllowComposeShortcuts)
+	{
+		this.$viewModel.on('keydown', $.proxy(function(ev) {
 
-        if (ev && ev.ctrlKey && !ev.altKey && !ev.shiftKey)
-        {
-            var
-                nKey = ev.keyCode,
-                bShown = this.shown() && (!this.minimized || !this.minimized()),
-                bComputed = bShown && ev && ev.ctrlKey,
-                oEnumsKey = Enums.Key
-			;
+			if (ev && ev.ctrlKey && !ev.altKey && !ev.shiftKey)
+			{
+				var
+					nKey = ev.keyCode,
+					bShown = this.shown() && (!this.minimized || !this.minimized()),
+					bComputed = bShown && ev && ev.ctrlKey,
+					oEnumsKey = Enums.Key
+				;
 
-            if (bComputed && nKey === oEnumsKey.s)
-            {
-                ev.preventDefault();
-                ev.returnValue = false;
+				if (bComputed && nKey === oEnumsKey.s)
+				{
+					ev.preventDefault();
+					ev.returnValue = false;
 
-                if (this.isEnableSaving())
-                {
-                    this.saveCommand();
-                }
-            }
-            else if (bComputed && nKey === oEnumsKey.Enter && this.toAddr() !== '')
-            {
-                this.sendCommand();
-            }
-        }
+					if (this.isEnableSaving())
+					{
+						this.saveCommand();
+					}
+				}
+				else if (bComputed && nKey === oEnumsKey.Enter && this.toAddr() !== '')
+				{
+					this.sendCommand();
+				}
+			}
 
-    },this));
+		},this));
+	}
 };
 
 CComposeViewModel.prototype.getMessageOnRoute = function ()
@@ -23003,7 +22965,7 @@ CComposeViewModel.prototype.setDataFromMessage = function (oMessage)
         bPgpEncrypted = false,
         bPgpSigned = false,
         oFetcherOrIdentity = App.MessageSender.getFirstFetcherOrIdentityByRecipientsOrDefault(oMessage.oFrom.aCollection, oMessage.accountId())
-        ;
+	;
 
     this.oSenderSelector.changeSenderAccountId(oMessage.accountId(), oFetcherOrIdentity);
 
@@ -23026,7 +22988,7 @@ CComposeViewModel.prototype.setDataFromMessage = function (oMessage)
     {
         sTextBody = oMessage.getConvertedHtml();
     }
-
+	
     this.draftInfo(oMessage.draftInfo());
     this.inReplyTo(oMessage.inReplyTo());
     this.references(oMessage.references());
@@ -23034,7 +22996,9 @@ CComposeViewModel.prototype.setDataFromMessage = function (oMessage)
     this.setRecipient(this.ccAddr, oMessage.oCc.getFull());
     this.setRecipient(this.bccAddr, oMessage.oBcc.getFull());
     this.subject(oMessage.subject());
-    this.attachments(oMessage.attachments());
+    this.attachments(_.map(oMessage.attachments(), function (oAttach) {
+		return oAttach.getCopy();
+	}));
     this.plainText(oMessage.isPlain());
     this.textBody(sTextBody);
     this.selectedImportance(oMessage.importance());

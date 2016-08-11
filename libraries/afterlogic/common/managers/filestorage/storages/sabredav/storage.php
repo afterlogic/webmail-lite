@@ -432,7 +432,7 @@ class CApiFilestorageSabredavStorage extends CApiFilestorageStorage
 					$aItems = $oDirectory->getChildren();
 				}
 
-				$iThumbnailLimit = 1024 * 1024 * 2; // 2MB
+				$iThumbnailLimit = 1024 * 1024 * 5; // 5MB
 
 				foreach ($aItems as $oValue) 
 				{

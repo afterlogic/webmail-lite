@@ -708,7 +708,7 @@ class CApi
 		$sS = CApi::GetConf('log.custom-full-path', '');
 		$sLogDir = empty($sS) ? CApi::DataPath().'/logs/' : rtrim(trim($sS), '\\/').'/';
 		
-		if (!file_exists($sLogDir.$sLogFile))
+		if (is_dir($sLogDir) && !file_exists($sLogDir.$sLogFile))
 		{
 			$sCurrentDate = date('Y-m-d');
 			$sYesterday = date("Y-m-d", time() - 60 * 60 * 24);
@@ -973,7 +973,7 @@ class CApi
 			case 'Estonian':
 				$iResult = ($iNumber === 1 ? 0 : 1);
 				break;
-			case 'Finish':
+			case 'Finnish':
 				$iResult = ($iNumber === 1 ? 0 : 1);
 				break;
 			case 'French':

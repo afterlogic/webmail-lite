@@ -333,5 +333,29 @@ Utils.Message.joinReplyPrefixesInSubject = function (sSubject, sRePrefix, sFwdPr
 	return sReSubject;
 };
 
+/**
+ * @param {Object} oWin
+ * @param {string} sHtml
+ */
+Utils.Message.displayPrintMessageInWindow = function (oWin, sHtml) {
+	if (App.browser.edge)
+	{
+		var aHtml = sHtml.split(/<style[^>]*>/);
+		if (aHtml.length === 2)
+		{
+			aHtml = _.union([aHtml[0]], aHtml[1].split('</style>'));
+		}
+		if (aHtml.length === 3)
+		{
+			$(oWin.document).find('head').append('<style scoped>' + aHtml[1] + '</style>');
+			$(oWin.document.body).html(aHtml[0] + aHtml[2]);
+		}
+	}
+	else
+	{
+		$(oWin.document.body).html(sHtml);
+	}
+};
+
 
 }(window));

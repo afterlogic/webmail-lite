@@ -146,7 +146,7 @@ return array(
 	
 	'links.outlook-sync-plugin-32' => 'http://www.afterlogic.com/download/OutlookSyncAddIn.msi',
 	'links.outlook-sync-plugin-64' => 'http://www.afterlogic.com/download/OutlookSyncAddIn64.msi',
-	'links.outlook-sync-read-more' => 'http://www.afterlogic.com/wiki/Outlook_sync_(Aurora)',
+	'links.outlook-sync-read-more' => 'http://www.afterlogic.com/docs/aurora/configuring-webmail/outlook-sync',
 
 	/*
 	 * temp.cron-time-*

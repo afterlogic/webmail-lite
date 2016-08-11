@@ -120,6 +120,7 @@ bExtApp = true;
  */
 function CBrowser()
 {
+	this.edge = /edge/.test(navigator.userAgent.toLowerCase());
 	this.ie11 = !!navigator.userAgent.match(/Trident.*rv[ :]*11\./);
 	this.ie = (/msie/.test(navigator.userAgent.toLowerCase()) && !window.opera) || this.ie11;
 	this.ieVersion = this.getIeVersion();
@@ -1166,80 +1167,48 @@ ko.bindingHandlers.alert = {
 
 ko.bindingHandlers.onEnter = {
 	'init': function (oElement, fValueAccessor, fAllBindingsAccessor, oViewModel) {
-		ko.bindingHandlers.event.init(oElement, function () {
-			return {
-				'keyup': function (oData, oEvent) {
-					if (oEvent && 13 === window.parseInt(oEvent.keyCode, 10))
-					{
-						$(oElement).trigger('change');
-						fValueAccessor().call(this, oData);
-					}
-				}
-			};
-		}, fAllBindingsAccessor, oViewModel);
+		$(oElement).on('keydown', function (oEvent) {
+			if (oEvent.keyCode === Enums.Key.Enter)
+			{
+				$(oElement).trigger('change');
+				fValueAccessor().call(oViewModel, ko.dataFor(oElement));
+				return false;
+			}
+		});
 	}
 };
 
 ko.bindingHandlers.onCtrlEnter = {
 	'init': bMobileApp ? null : function (oElement, fValueAccessor, fAllBindingsAccessor, oViewModel) {
-		ko.bindingHandlers.event.init(oElement, function () {
-			return {
-				'keydown': function (oData, oEvent) {
-					if (oEvent && 13 === window.parseInt(oEvent.keyCode, 10) && oEvent.ctrlKey)
-					{
-						$(oElement).trigger('change');
-						fValueAccessor().call(this, oData);
-
-						return false;
-					}
-
-					return true;
-				}
-			};
-		}, fAllBindingsAccessor, oViewModel);
+		var $Element = $(oElement);
+		$Element.on('keydown', function (oEvent) {
+			if (oEvent.ctrlKey && oEvent.keyCode === Enums.Key.Enter)
+			{
+				$Element.trigger('change');
+				fValueAccessor().call(oViewModel, ko.dataFor(oElement));
+			}
+		});
 	}
 };
 
 ko.bindingHandlers.onEsc = {
 	'init': bMobileApp ? null : function (oElement, fValueAccessor, fAllBindingsAccessor, oViewModel) {
-		ko.bindingHandlers.event.init(oElement, function () {
-			return {
-				'keyup': function (oData, oEvent) {
-					if (oEvent && 27 === window.parseInt(oEvent.keyCode, 10))
-					{
-						$(oElement).trigger('change');
-						fValueAccessor().call(this, oData);
-					}
-				}
-			};
-		}, fAllBindingsAccessor, oViewModel);
+		var $Element = $(oElement);
+		$Element.on('keydown', function (oEvent) {
+			if (oEvent.keyCode === Enums.Key.Esc)
+			{
+				$Element.trigger('change');
+				fValueAccessor().call(oViewModel, ko.dataFor(oElement));
+			}
+		});
 	}
 };
 
 ko.bindingHandlers.onFocusSelect = {
 	'init': function (oElement, fValueAccessor, fAllBindingsAccessor, oViewModel) {
-		ko.bindingHandlers.event.init(oElement, function () {
-			return {
-				'focus': function () {
-					oElement.select();
-				}
-			};
-		}, fAllBindingsAccessor, oViewModel);
-	}
-};
-
-ko.bindingHandlers.onEnterChange = {
-	'init': function (oElement, fValueAccessor, fAllBindingsAccessor, oViewModel) {
-		ko.bindingHandlers.event.init(oElement, function () {
-			return {
-				'keyup': function (oData, oEvent) {
-					if (oEvent && 13 === window.parseInt(oEvent.keyCode, 10))
-					{
-						$(oElement).trigger('change');
-					}
-				}
-			};
-		}, fAllBindingsAccessor, oViewModel);
+		$(oElement).on('focus', function (oEvent) {
+			oElement.select();
+		});
 	}
 };
 
@@ -2771,17 +2740,6 @@ ko.bindingHandlers.autosize = {
 		jqEl.on('paste', function(oEvent, oData) {
 			fResize();
 		});
-		/*jqEl.on('input', function(oEvent, oData) {
-			fResize();
-		});
-		ko.bindingHandlers.event.init(oElement, function () {
-			return {
-				'keydown': function (oData, oEvent) {
-					fResize();
-					return true;
-				}
-			};
-		}, fAllBindingsAccessor, oViewModel);*/
 
 		if (oAutosizeTrigger)
 		{
@@ -2794,51 +2752,21 @@ ko.bindingHandlers.autosize = {
 	}
 };
 
-ko.bindingHandlers.customBind = {
-	'init': function (oElement, fValueAccessor, fAllBindingsAccessor, oViewModel, bindingContext) {
-
-		var
-			oOptions = fValueAccessor(),
-			oKeydown = oOptions.onKeydown ? oOptions.onKeydown : null,
-			oKeyup = oOptions.onKeyup ? oOptions.onKeyup : null,
-			oPaste = oOptions.onPaste ? oOptions.onPaste : null,
-			oInput = oOptions.onInput ? oOptions.onInput : null,
-			oValueObserver = oOptions.valueObserver ? oOptions.valueObserver : null
-		;
-
-		ko.bindingHandlers.event.init(oElement, function () {
-			return {
-				'keydown': function (oData, oEvent) {
-					if(oKeydown)
-					{
-						oKeydown.call(this, oElement, oEvent, oValueObserver);
-					}
-					return true;
-				},
-				'keyup': function (oData, oEvent) {
-					if(oKeyup)
-					{
-						oKeyup.call(this, oElement, oEvent, oValueObserver);
-					}
-					return true;
-				},
-				'paste': function (oData, oEvent) {
-					if(oPaste)
-					{
-						oPaste.call(this, oElement, oEvent, oValueObserver);
-					}
-					return true;
-				},
-				'input': function (oData, oEvent) {
-					if(oInput)
-					{
-						oInput.call(this, oElement, oEvent, oValueObserver);
-					}
-					return true;
-				}
-			};
-		}, fAllBindingsAccessor, oViewModel);
+ko.extenders.disableLinebreaks = function (oTarget, bDisable) {
+	if (bDisable)
+	{
+		var oResult = ko.computed({
+			'read': function () {
+				return oTarget();
+			},
+			'write': function(sNewValue) {
+				oTarget(sNewValue.replace(/[\r\n\t]+/gm, ' '));
+			}
+		});
+		oResult(oTarget());
+		return oResult;
 	}
+	return oTarget;
 };
 
 ko.bindingHandlers.fade = {
@@ -2949,47 +2877,45 @@ ko.bindingHandlers.highlighter = {
 			bHighlight = !_.include(aTabooLang, sUserLanguage)
 		;
 
-		ko.bindingHandlers.event.init(oElement, function () {
-			return {
-				'keydown': function (oData, oEvent) {
-					return oEvent.keyCode !== Enums.Key.Enter;
-				},
-				'keyup': function (oData, oEvent) {
-					var
-						aMoveKeys = [Enums.Key.Left, Enums.Key.Right, Enums.Key.Home, Enums.Key.End],
-						bMoveKeys = -1 !== Utils.inArray(oEvent.keyCode, aMoveKeys)
-					;
+		$(oElement)
+			.on('keydown', function (oEvent) {
+				return oEvent.keyCode !== Enums.Key.Enter;
+			})
+			.on('keyup', function (oEvent) {
+				var
+					aMoveKeys = [Enums.Key.Left, Enums.Key.Right, Enums.Key.Home, Enums.Key.End],
+					bMoveKeys = -1 !== Utils.inArray(oEvent.keyCode, aMoveKeys)
+				;
 
-					if (!(
+				if (!(
 //							oEvent.keyCode === Enums.Key.Enter					||
-							oEvent.keyCode === Enums.Key.Shift					||
-							oEvent.keyCode === Enums.Key.Ctrl					||
-							// for international english -------------------------
-							oEvent.keyCode === Enums.Key.Dash					||
-							oEvent.keyCode === Enums.Key.Apostrophe				||
-							oEvent.keyCode === Enums.Key.Six && oEvent.shiftKey	||
-							// ---------------------------------------------------
-							bMoveKeys											||
+						oEvent.keyCode === Enums.Key.Shift					||
+						oEvent.keyCode === Enums.Key.Ctrl					||
+						// for international english -------------------------
+//						oEvent.keyCode === Enums.Key.Dash					||
+//						oEvent.keyCode === Enums.Key.Apostrophe				||
+//						oEvent.keyCode === Enums.Key.Six && oEvent.shiftKey	||
+						// ---------------------------------------------------
+						bMoveKeys											||
 //							((oEvent.shiftKey || iPrevKeyCode === Enums.Key.Shift) && bMoveKeys) ||
-							((oEvent.ctrlKey || iPrevKeyCode === Enums.Key.Ctrl) && oEvent.keyCode === Enums.Key.a)
-						))
-					{
-						oValueObserver(fClear(jqEl.text()));
-						highlight(false);
-					}
-					iPrevKeyCode = oEvent.keyCode;
-					return true;
-				},
-				// firefox fix for html paste
-				'paste': function (oData, oEvent) {
-					setTimeout(function () {
-						oValueObserver(fClear(jqEl.text()));
-						highlight(false);
-					}, 0);
-					return true;
+						((oEvent.ctrlKey || iPrevKeyCode === Enums.Key.Ctrl) && oEvent.keyCode === Enums.Key.a)
+					))
+				{
+					oValueObserver(fClear(jqEl.text()));
+					highlight(false);
 				}
-			};
-		}, fAllBindingsAccessor, oViewModel);
+				iPrevKeyCode = oEvent.keyCode;
+				return true;
+			})
+				// firefox fix for html paste
+			.on('paste', function (oEvent) {
+				setTimeout(function () {
+					oValueObserver(fClear(jqEl.text()));
+					highlight(false);
+				}, 0);
+				return true;
+			})
+		;
 
 		// highlight on init
 		setTimeout(function () {
@@ -4214,7 +4140,7 @@ Utils.getPlural = function (sLang, iNumber)
 		case 'Estonian':
 			iResult = (iNumber === 1 ? 0 : 1);
 			break;
-		case 'Finish':
+		case 'Finnish':
 			iResult = (iNumber === 1 ? 0 : 1);
 			break;
 		case 'French':

@@ -550,7 +550,7 @@ abstract class ActionsBase
 			}
 			else if ('CHelpdeskAttachment' === $sClassName)
 			{
-				$iThumbnailLimit = 1024 * 1024 * 2; // 2MB
+				$iThumbnailLimit = 1024 * 1024 * 5; // 5MB
 
 				/* @var $mResponse CHelpdeskAttachment */
 				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), array(
@@ -648,7 +648,7 @@ abstract class ActionsBase
 
 				$sFileName = $mResponse->getFileName(true);
 				$iEstimatedSize = $mResponse->getEstimatedSize();
-				$iThumbnailLimit = 1024 * 1024 * 2; // 2MB //TODO
+				$iThumbnailLimit = 1024 * 1024 * 5; // 5MB //TODO
 
 				if (in_array($sMimeType, array('application/octet-stream')))
 				{
