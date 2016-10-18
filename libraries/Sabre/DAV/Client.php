@@ -93,7 +93,7 @@ class Client {
 
         foreach($validSettings as $validSetting) {
             if (isset($settings[$validSetting])) {
-                $this->$validSetting = $settings[$validSetting];
+                $this->{$validSetting} = $settings[$validSetting];
             }
         }
 

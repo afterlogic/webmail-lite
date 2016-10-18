@@ -59,8 +59,8 @@ class Basic extends \Sabre\DAV\Auth\Backend\AbstractBasic
 
 				if ($oAccount)
 				{
-					$bIsMobileSync = $oApiCapabilityManager->isMobileSyncSupported($oAccount);
-					$bIsOutlookSync = $oApiCapabilityManager->isOutlookSyncSupported($oAccount);
+					$bIsMobileSync = $oApiCapabilityManager->isMobileSyncSupported($oAccount) && $oAccount->User->Capa !== 'LITE';
+					$bIsOutlookSync = $oApiCapabilityManager->isOutlookSyncSupported($oAccount) && $oAccount->User->Capa !== 'LITE';
 					
 					\CApi::Plugin()->RunHook('plugin-is-demo-account', array(&$oAccount, &$bIsDemo));
 				}

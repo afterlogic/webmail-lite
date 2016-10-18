@@ -1108,7 +1108,7 @@ class CApiIntegratorManager extends AApiManager
 
 			$aResult['AllowUsersChangeInterfaceSettings'] = (bool) $oDomain->AllowUsersChangeInterfaceSettings;
 			$aResult['AllowUsersChangeEmailSettings'] = (bool) $oDomain->AllowUsersChangeEmailSettings;
-			$aResult['AllowUsersAddNewAccounts'] = (bool) $oDomain->AllowUsersAddNewAccounts;
+			$aResult['AllowUsersAddNewAccounts'] = (bool) $oApiCapabilityManager->isNotLite() && $oDomain->AllowUsersAddNewAccounts;
 			$aResult['AllowOpenPGP'] = (bool) $oDomain->AllowOpenPGP;
 			$aResult['AllowWebMail'] = (bool) $oDomain->AllowWebMail;
 			$aResult['DefaultTab'] = $oDomain->DefaultTab;
@@ -1214,6 +1214,9 @@ class CApiIntegratorManager extends AApiManager
 			$aResult['ServerUrlRewriteBase'] = (string) CApi::GetConf('labs.server-url-rewrite-base', '');
 			$aResult['IosDetectOnLogin'] = (bool) CApi::GetConf('labs.webmail.ios-detect-on-login', true);
 
+			$aResult['SettingsFilesAppsEnabled'] = (bool) CApi::GetConf('settings.files-apps-enabled', true);
+			$aResult['SettingsMobilesyncAppsEnabled'] = (bool) CApi::GetConf('settings.mobilesync-apps-enabled', true);
+			
 			$aResult['AllowContactsSharing'] = $oApiCapabilityManager->isSharedContactsSupported($oDefaultAccount);
 
 			if ($aResult['IosDetectOnLogin'])

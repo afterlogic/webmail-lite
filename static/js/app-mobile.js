@@ -10378,6 +10378,9 @@ function CAppSettingsModel(bAllowOpenPgp)
 	this.PasswordMustBeComplex = false;
 	
 	this.AllowComposeShortcuts = true;
+	
+	this.SettingsFilesAppsEnabled = true;
+	this.SettingsMobilesyncAppsEnabled = true;
 }
 	
 /**
@@ -10444,6 +10447,9 @@ CAppSettingsModel.prototype.parse = function (oData)
 	this.AllowIosProfile = !!oData.AllowIosProfile;
 	this.PasswordMinLength = oData.PasswordMinLength;
 	this.PasswordMustBeComplex = !!oData.PasswordMustBeComplex;
+	
+	this.SettingsFilesAppsEnabled = !!oData.SettingsFilesAppsEnabled;
+	this.SettingsMobilesyncAppsEnabled = !!oData.SettingsMobilesyncAppsEnabled;
 };
 
 /**
@@ -20426,6 +20432,7 @@ CMessageListViewModel.prototype.initUploader = function ()
 			'disableAjaxUpload': this.isPublic,
 			'disableFolderDragAndDrop': this.isPublic,
 			'disableDragAndDrop': this.isPublic,
+			'disableAutoUploadOnDrop': true,
 			'hidden': {
 				'Token': function () {
 					return AppData.Token;
@@ -20450,11 +20457,15 @@ CMessageListViewModel.prototype.initUploader = function ()
 	}
 };
 
-CMessageListViewModel.prototype.onFileDrop = function (oData)
+CMessageListViewModel.prototype.onFileDrop = function (oData, oEvent, fContinueHandler)
 {
 	if (!(oData && oData.File && oData.File.type && oData.File.type.indexOf('message/') === 0))
 	{
 		App.Api.showError(Utils.i18n('MAILBOX/ERROR_INCORRECT_FILE_EXTENSION'));
+	}
+	else
+	{
+		fContinueHandler();
 	}
 };
 
@@ -20470,7 +20481,7 @@ CMessageListViewModel.prototype.onFileUploadComplete = function (sFileUid, bResp
 	{
 		if (oResponse.ErrorCode && oResponse.ErrorCode === Enums.Errors.IncorrectFileExtension)
 		{
-			App.Api.showError(Utils.i18n('CONTACTS/ERROR_INCORRECT_FILE_EXTENSION'));
+			App.Api.showError(Utils.i18n('MAILBOX/ERROR_INCORRECT_FILE_EXTENSION'));
 		}
 		else
 		{
@@ -22232,7 +22243,7 @@ function CComposeViewModel()
         this.oHtmlEditor.commit();
     }, this);
 
-    this.focusedField = ko.observable();
+    this.focusedField = ko.observable('');
     this.textFocused.subscribe(function () {
         if (this.textFocused())
         {
@@ -22723,40 +22734,49 @@ CComposeViewModel.prototype.focusBccAddr = function ()
 
 CComposeViewModel.prototype.focusAfterFilling = function ()
 {
-    switch (this.focusedField())
-    {
-        case 'to':
-            this.focusToAddr();
-            break;
-        case 'cc':
-            this.visibleCc(true);
-            this.focusCcAddr();
-            break;
-        case 'bcc':
-            this.visibleBcc(true);
-            this.focusBccAddr();
-            break;
-        case 'subject':
-            this.subjectFocused(true);
-            break;
-        case 'text':
-            this.oHtmlEditor.setFocus();
-            break;
-        default:
-            if (this.toAddr().length === 0)
-            {
-                this.focusToAddr();
-            }
-            else if (this.subject().length === 0)
-            {
-                this.subjectFocused(true);
-            }
-            else
-            {
-                this.oHtmlEditor.setFocus();
-            }
-            break;
-    }
+	var bUseFocusRules = !this.singleMode();
+	if (this.singleMode())
+	{
+		switch (this.focusedField())
+		{
+			case 'to':
+				this.focusToAddr();
+				break;
+			case 'cc':
+				this.visibleCc(true);
+				this.focusCcAddr();
+				break;
+			case 'bcc':
+				this.visibleBcc(true);
+				this.focusBccAddr();
+				break;
+			case 'subject':
+				this.subjectFocused(true);
+				break;
+			case 'text':
+				this.oHtmlEditor.setFocus();
+				break;
+			default:
+				bUseFocusRules = true;
+				break;
+		}
+	}
+	
+	if (bUseFocusRules)
+	{
+		if (this.toAddr().length === 0)
+		{
+			this.focusToAddr();
+		}
+		else if (this.subject().length === 0)
+		{
+			this.subjectFocused(true);
+		}
+		else
+		{
+			this.oHtmlEditor.setFocus();
+		}
+	}
 };
 
 /**
@@ -22793,6 +22813,11 @@ CComposeViewModel.prototype.beforeHide = function (fContinueScreenChanging)
  * Executes if view model was hidden.
  */
 CComposeViewModel.prototype.onHide = function ()
+{
+	this.clearFields();
+};
+
+CComposeViewModel.prototype.clearFields = function ()
 {
     this.stopAutosaveTimer();
 
@@ -23778,7 +23803,7 @@ CComposeViewModel.prototype.openInNewWindow = function ()
     if (this.draftUid().length > 0 && !this.isChanged())
     {
         sHash = App.Routing.buildHashFromArray(App.Links.composeFromMessage('drafts', App.MailCache.folderList().draftsFolderFullName(), this.draftUid(), true));
-        oWin = Utils.WindowOpener.openTab(sHash);
+		oWin = Utils.WindowOpener.openTab(sHash);
     }
     else if (!this.isChanged())
     {
@@ -27413,7 +27438,9 @@ CMailCache.prototype.executeGroupOperation = function (sAction, aUids, sField, b
 		
 		if (this.uidList().filters() !== Enums.FolderFilter.Unseen || this.waitForUnseenMessages())
 		{
-			this.setMessagesFromUidList(this.uidList(), iOffset, oCurrFolder.oMessages, true);
+			_.delay(_.bind(function () {
+				this.setMessagesFromUidList(this.uidList(), iOffset, oCurrFolder.oMessages, true);
+			}, this));
 		}
 	}
 };

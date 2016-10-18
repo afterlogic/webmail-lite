@@ -25,7 +25,23 @@ class CApiCapabilityManager extends AApiManager
 	 */
 	public function isNotLite()
 	{
-		return !!CApi::Manager('licensing');
+		static $bNotLite = null;
+		if ($bNotLite === null)
+		{
+			$oApiIntegrator = \CApi::Manager('integrator');
+			$iUserId = $oApiIntegrator->getLogginedUserId();
+			$oApiUsersManager = /* @var $oApiUsersManager CApiUsersManager */ CApi::Manager('users');
+			$oUser = $oApiUsersManager->getUserById($iUserId);
+			if ($oUser)
+			{
+				$bNotLite = $oUser->Capa !== 'LITE' && !!CApi::Manager('licensing');
+			}
+			else
+			{
+				$bNotLite = !!CApi::Manager('licensing');
+			}
+		}
+		return $bNotLite;
 	}
 
 	/**
@@ -329,14 +345,14 @@ class CApiCapabilityManager extends AApiManager
 	 */
 	public function isOutlookSyncSupported($oAccount = null)
 	{
-		$bResult = $this->isNotLite() && $this->isDavSupported() && $this->isCollaborationSupported();
+		return $this->isMobileSyncSupported($oAccount);
+//		$bResult = $this->isNotLite() && $this->isDavSupported() && $this->isCollaborationSupported();
 //		if ($bResult && $oAccount)
 //		{
 //			$bResult = $oAccount->User->GetCapa(ECapa::OUTLOOK_SYNC);
 //		}
 // TODO
-
-		return $bResult;
+//		return $bResult;
 	}
 
 	/**

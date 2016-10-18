@@ -156,7 +156,7 @@ class Invite extends DAV\Property implements CalDAV\Notifications\INotificationT
             if (!property_exists($this, $key)) {
                 throw new \InvalidArgumentException('Unknown option: ' . $key);
             }
-            $this->$key = $value;
+            $this->{$key} = $value;
         }
 
     }

@@ -258,7 +258,7 @@ class Cli {
 
             while($input = $this->readInput()) {
 
-                $returnCode = $this->$command($input);
+                $returnCode = $this->{$command($input)};
                 if ($returnCode!==0) $realCode = $returnCode;
 
             }

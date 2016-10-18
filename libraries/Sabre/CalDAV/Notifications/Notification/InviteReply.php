@@ -108,7 +108,7 @@ class InviteReply extends DAV\Property implements CalDAV\Notifications\INotifica
             if (!property_exists($this, $key)) {
                 throw new \InvalidArgumentException('Unknown option: ' . $key);
             }
-            $this->$key = $value;
+            $this->{$key} = $value;
         }
 
     }

@@ -550,5 +550,29 @@ class PDO extends \Sabre\CalDAV\Backend\PDO implements \Sabre\CalDAV\Backend\Sha
 	 * @return void
 	 */
 	public function deleteNotification($sPrincipalUri, \Sabre\CalDAV\Notifications\INotificationType $oNotification){ }
+	
+    /**
+     * Returns information from a single calendar object, based on it's object
+     * uri.
+     *
+     * The returned array must have the same keys as getCalendarObjects. The
+     * 'calendardata' object is required here though, while it's not required
+     * for getCalendarObjects.
+     *
+     * This method must return null if the object did not exist.
+     *
+     * @param string $calendarId
+     * @param string $objectUri
+     * @return array|null
+     */
+    public function getCalendarObject($calendarId,$objectUri) {
+
+		$aResult = parent::getCalendarObject($calendarId, $objectUri);
+		if (isset($aResult['calendardata']))
+		{
+			$aResult['calendardata'] = mb_convert_encoding($aResult['calendardata'], 'UTF-8', 'UTF-8');
+		}
+		return $aResult;
+    }
 
 }

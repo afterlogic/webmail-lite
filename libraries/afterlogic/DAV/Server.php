@@ -67,7 +67,7 @@ class Server extends \Sabre\DAV\Server
 			$this->oApiCapaManager = \CApi::Manager('capability');
 
 			/* Files folder */
-			if ($this->oApiCapaManager->isFilesSupported())
+			if ($this->oApiCapaManager->isFilesSupported() && $this->isNotLite())
 			{
 				$bErrorCreateDir = false;
 				
@@ -149,7 +149,7 @@ class Server extends \Sabre\DAV\Server
 			/* Contacts Plugin */
 			$this->addPlugin(new Contacts\Plugin());
 
-			if ($this->oApiCapaManager->isMobileSyncSupported())
+			if ($this->oApiCapaManager->isMobileSyncSupported() && $this->isNotLite())
 			{
 				/* CalDAV Plugin */
 				$this->addPlugin(new \Sabre\CalDAV\Plugin());
@@ -193,6 +193,21 @@ class Server extends \Sabre\DAV\Server
 		}
 		return $this->oAccount;
 	}	
+	
+	public function isNotLite()
+	{
+		$bNotLite = true;
+		$oAccount = $this->getAccount();
+		if ($oAccount instanceof \CAccount)
+		{
+			$bNotLite = $oAccount->User->Capa !== 'LITE' && !!\CApi::Manager('licensing');
+		}
+		else
+		{
+			$bNotLite = !!\CApi::Manager('licensing');
+		}
+		return $bNotLite;
+	}
 
 	/**
 	 * @param string $path

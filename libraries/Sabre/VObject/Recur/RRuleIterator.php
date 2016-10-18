@@ -662,7 +662,7 @@ class RRuleIterator implements Iterator {
                         throw new \InvalidArgumentException(strtoupper($key) . ' in RRULE must be a positive integer!');
                     }
                     $key = strtolower($key);
-                    $this->$key = $val;
+                    $this->{$key} = $val;
                     break;
 
                 case 'BYSECOND' :

@@ -869,7 +869,7 @@ class Actions extends ActionsBase
 
 		return $this->DefaultResponse($oAccount, __FUNCTION__, array(
 			'Counts' => $aResult,
-			'New' => $oReturnInboxNewData->GetData()
+			'New' => isset($oReturnInboxNewData) ? $oReturnInboxNewData->getData() : 0
 		));
 	}
 

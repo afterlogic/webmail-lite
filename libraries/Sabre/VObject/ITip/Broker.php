@@ -914,7 +914,7 @@ class Broker {
             }
 
             foreach($this->significantChangeProperties as $prop) {
-                if (isset($vevent->$prop)) {
+                if (isset($vevent->{$prop})) {
                     $propertyValues = $vevent->select($prop);
 
                     $significantChangeHash.=$prop.':';

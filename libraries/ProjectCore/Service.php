@@ -203,6 +203,7 @@ class Service
 	 */
 	public function Handle()
 	{
+		$sError = '';
 		$sVersion = file_get_contents(PSEVEN_APP_ROOT_PATH.'VERSION');
 		define('PSEVEN_APP_VERSION', $sVersion);
 

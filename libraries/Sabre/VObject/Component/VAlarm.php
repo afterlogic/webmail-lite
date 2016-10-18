@@ -37,7 +37,7 @@ class VAlarm extends VObject\Component {
                     $propName = 'DTSTART';
                 }
 
-                $effectiveTrigger = clone $parentComponent->$propName->getDateTime();
+                $effectiveTrigger = clone $parentComponent->{$propName}->getDateTime();
                 $effectiveTrigger->add($triggerDuration);
             } else {
                 if ($parentComponent->name === 'VTODO') {
@@ -48,8 +48,8 @@ class VAlarm extends VObject\Component {
                     throw new \LogicException('time-range filters on VALARM components are only supported when they are a child of VTODO or VEVENT');
                 }
 
-                if (isset($parentComponent->$endProp)) {
-                    $effectiveTrigger = clone $parentComponent->$endProp->getDateTime();
+                if (isset($parentComponent->{$endProp})) {
+                    $effectiveTrigger = clone $parentComponent->{$endProp}->getDateTime();
                     $effectiveTrigger->add($triggerDuration);
                 } elseif (isset($parentComponent->DURATION)) {
                     $effectiveTrigger = clone $parentComponent->DTSTART->getDateTime();

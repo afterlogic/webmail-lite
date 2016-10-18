@@ -10080,8 +10080,8 @@ function CFileStorageViewModel(bPopup)
 	this.collection = ko.computed(function () {
 		var files = _.union(this.files(), this.getUploadingFiles());
 
-		files.sort(function(left, right) { 
-			return left.fileName() === right.fileName() ? 0 : (left.fileName() < right.fileName() ? -1 : 1); 
+		files.sort(function(left, right) {
+			return left.fileName() === right.fileName() ? 0 : (left.fileName().toLowerCase() < right.fileName().toLowerCase() ? -1 : 1); 
 		});
 		
 		return _.union(this.folders(), files);

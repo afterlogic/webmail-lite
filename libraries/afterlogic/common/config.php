@@ -275,4 +275,6 @@ return array(
 		'twitter',
 	),
 */	
+	'settings.files-apps-enabled' => true,
+	'settings.mobilesync-apps-enabled' => true,
 );
