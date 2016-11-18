@@ -469,20 +469,21 @@ class api_Settings
 				$aNodeItems = array();
 				foreach($this->aContainer[$sKey] as $sArrayKey => $aValue)
 				{
-					$aNodeItems[$sArrayKey] = new CXmlDomNode($sArrayKey);
+					$sArrayKeyTmp = $sArrayKey;
+					$aNodeItems[$sArrayKeyTmp] = new CXmlDomNode($sArrayKeyTmp);
 					if (is_array($aValue))
 					{
 						foreach ($aValue as $sSubKey => $sSubValue)
 						{
 							$sSubValue = api_Utils::EncodeSpecialXmlChars((string) $sSubValue);
-							$aNodeItems[$sArrayKey]->AppendChild(new CXmlDomNode($sSubKey, $sSubValue));
+							$aNodeItems[$sArrayKeyTmp]->AppendChild(new CXmlDomNode($sSubKey, $sSubValue));
 						}
 					}
-					$oNode->AppendChild($aNodeItems[$sArrayKey]);
+					$oNode->AppendChild($aNodeItems[$sArrayKeyTmp]);
 				}
 			}
 		}
-	}	
+	}
 
 	/**
 	 * @param string $sKey
