@@ -1448,6 +1448,7 @@ class api_Utils
 			'romanian' => 'ro',
 			'russian' => 'ru',
 			'serbian' => 'sr',
+			'slovak' => 'sk',
 			'slovenian' => 'sl',
 			'spanish' => 'es',
 			'swedish' => 'sv',

@@ -198,6 +198,7 @@ return array(
 		'Romanian' => 'Română',
 		'Russian' => 'Русский',
 		'Serbian' => 'Srpski',
+		'Slovak' => 'Slovenčina',
 		'Slovenian' => 'Slovenščina',
 		'Spanish' => 'Español',
 		'Swedish' => 'Svenska',
