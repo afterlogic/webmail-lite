@@ -1,0 +1,22 @@
+<!-- ko if: bEnabled -->
+	<div class="fieldset advanced_login" data-bind="visible: displayForm, initDom: advancedLoginForm">
+		<div class="row incoming">
+			<!-- ko template: {name: 'Settings_ServerPropertiesViewModel', data: oIncoming} --><!-- /ko -->
+		</div>
+		<div class="row outgoing">
+			<!-- ko template: {name: 'Settings_ServerPropertiesViewModel', data: oOutgoing} --><!-- /ko -->
+		</div>
+		<div class="row" data-bind="visible: bShowUseSmtpAuth">
+			<div>
+				<label class="custom_checkbox checked" data-bind="css: {'checked': useSmtpAuthentication}">
+					<span class="icon"></span>
+					<input id="mail_out_auth" data-bind="checked: useSmtpAuthentication" type="checkbox">
+				</label>
+				<label for="mail_out_auth" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_USE_SMTP_AUTHENTICATION" data-bind="i18n: 'text'"></label>
+			</div>
+		</div>
+	</div>
+	<div class="row links advanced_login_links">
+		<span class="link" data-bind="click: triggerFormDisplaying, text: triggerLinkText"></span>
+	</div>
+<!-- /ko -->

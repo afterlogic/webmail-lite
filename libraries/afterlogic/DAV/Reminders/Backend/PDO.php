@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2004-2015, AfterLogic Corp.
+ * Copyright 2004-2017, AfterLogic Corp.
  * Licensed under AGPLv3 license or AfterLogic license
  * if commercial version of the product was purchased.
  * See the LICENSE file for a full license statement.
@@ -177,8 +177,9 @@ class PDO
 		return (strpos($uri, 'calendars/') !== false ||	strpos($uri, 'delegation/') !== false);
 	}	
 
-	public function updateReminder($uri, $data, $user)
+	public function updateReminder($uri, $data, $user, $sCalendarUri = null)
 	{
+		$oApiCalendarManager = \CApi::Manager("calendar");
 		if (self::isCalendar($uri) && self::isEvent($uri))
 		{
 			$calendarUri = trim($this->getCalendarUri($uri), '/');
@@ -195,11 +196,6 @@ class PDO
 				$oBaseEvent = $aBaseEvents[0];
 
 				$oNowDT = new \DateTime('now', new \DateTimeZone('UTC'));
-				$iReminderStartTS = $oNowDT->getTimestamp();
-				if ($aReminder)
-				{
-					$iReminderStartTS = $aReminder['starttime'];
-				}
 
 				$bAllDay = !$oBaseEvent->DTSTART->hasTime();
 				$oStartDT = $oBaseEvent->DTSTART->getDateTime();
@@ -209,42 +205,73 @@ class PDO
 				$oEndDT = $oBaseEvent->DTEND->getDateTime();
 				$oEndDT->setTimezone(new \DateTimeZone('UTC'));
 
-				$oInterval = $oStartDT->diff($oEndDT);
-
-				$oStartDT = \CCalendarHelper::getNextRepeat($oNowDT, $oBaseEvent);
-				if ($oStartDT)
+				$iReminderTime = false;
+				//NextRepeat
+				if (isset($oBaseEvent->RRULE))
 				{
-					$iReminderTime = \CCalendarHelper::getActualReminderTime($oBaseEvent, $oNowDT, $oStartDT);
-
-					if ($iReminderTime === false && isset($oBaseEvent->RRULE))
+					$oAccount = \afterlogic\DAV\Utils::GetAccountByLogin($user);
+					$oCalendar = $oApiCalendarManager->getCalendar($oAccount, $sCalendarUri);
+					$oEndDT = \CCalendarHelper::getRRuleIteratorNextRepeat($oNowDT, $oBaseEvent);
+					$oVCalOriginal = clone $vCal;
+					if ($oCalendar && $oAccount && $oEndDT)
 					{
-						$iStartTS = $oStartDT->getTimestamp();
-						if ($iStartTS == $iReminderStartTS)
-						{
-							$oStartDT->add($oInterval);
-							$oStartDT = \CCalendarHelper::getNextRepeat($oStartDT, $oBaseEvent);
-						}
+						$oEndDT->setTimezone(new \DateTimeZone('UTC'));
 
-						$iReminderTime = \CCalendarHelper::getActualReminderTime($oBaseEvent, $oNowDT, $oStartDT);
+						$vCal->expand(
+							\Sabre\VObject\DateTimeParser::parse($oNowDT->format("Ymd\THis\Z")),
+							\Sabre\VObject\DateTimeParser::parse($oEndDT->format("Ymd\T235959\Z"))
+						);
+						$aEvents = \CalendarParser::parseEvent($oAccount, $oCalendar,  $vCal, $oVCalOriginal);
 					}
 
-					if ($iReminderTime !== false)
+					if (is_array($aEvents))
 					{
-						$iOffset = 0;
-						if ($bAllDay)
-						{
-							$oAccount = \afterlogic\DAV\Utils::GetAccountByLogin($user);
-							if ($oAccount)
+						foreach ($aEvents as $key => $value)
+						{  //ignore events with triggered reminders
+							if (!($value['alarms']) || ($value['startTS'] - min($value['alarms']) * 60) < $oNowDT->getTimestamp())
 							{
-								$oClientTZ = new \DateTimeZone($oAccount->User->ClientTimeZone);
-								$oNowDTClientTZ = new \DateTime("now", $oClientTZ);
-								$iOffset = $oNowDTClientTZ->getOffset();
+								unset($aEvents[$key]);
 							}
 						}
-
-						$iStartTS = $oStartDT->getTimestamp();
-						$this->addReminder($user, $calendarUri, $eventId, $iReminderTime - $iOffset, $iStartTS - $iOffset, $bAllDay);
 					}
+					if (is_array($aEvents) && $aEvents)
+					{
+
+						$aEvent = reset($aEvents);
+						$aAlarms = $aEvent['alarms'];
+						sort($aAlarms);
+						//search nearest alarm
+						$i = 0;
+						do {
+							$iReminderTime = $aEvent['startTS'] - $aAlarms[$i++] * 60;
+						} while($i < count($aAlarms) && ($aEvent['startTS'] - $aAlarms[$i] * 60) > $oNowDT->getTimestamp());
+					}
+				}
+				if ($iReminderTime == false)
+				{
+					$oStartDT = \CCalendarHelper::getNextRepeat($oNowDT, $oBaseEvent);
+					if ($oStartDT)
+					{
+						$iReminderTime = \CCalendarHelper::getActualReminderTime($oBaseEvent, $oNowDT, $oStartDT);
+					}
+				}
+
+				if ($iReminderTime !== false)
+				{
+					$iOffset = 0;
+					if ($bAllDay)
+					{
+						$oAccount = \afterlogic\DAV\Utils::GetAccountByLogin($user);
+						if ($oAccount)
+						{
+							$oClientTZ = new \DateTimeZone($oAccount->User->ClientTimeZone);
+							$oNowDTClientTZ = new \DateTime("now", $oClientTZ);
+							$iOffset = $oNowDTClientTZ->getOffset();
+						}
+					}
+
+					$iStartTS = $oStartDT->getTimestamp();
+					$this->addReminder($user, $calendarUri, $eventId, $iReminderTime - $iOffset, $iStartTS - $iOffset, $bAllDay);
 				}
 			}
 		}

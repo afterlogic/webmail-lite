@@ -1,5 +1,4 @@
 <div class="panels">
-	<!-- loginCustomLogo -->
 	<div class="login_panel" data-bind="css: {'flipForgot': gotoForgot(), 'flipRegister': gotoRegister(), 'flipSocialRegister': gotoSocialRegister(), 'flipChangepass': gotoChangepass()}">
 		<div class="login_panel_content">
 			<div class="header" data-bind="css: {'custom_logo': loginCustomLogo()}">
@@ -7,7 +6,6 @@
 				<!-- ko if: loginCustomLogo() !== '' --><img data-bind="attr: {'src': loginCustomLogo()}"/><!-- /ko -->
 				<span class="text" data-i18n="LOGIN/HEADING" data-bind="i18n: 'text'"></span>
 			</div>
-			<!--<div class="content clearfix" data-bind="css: {'flipIn': gotoForgot() && forgotAnimation(), 'flipOut': !gotoForgot() && forgotAnimation()}">-->
 
 			<div class="col right">
 				<div class="content login clearfix">
@@ -75,7 +73,6 @@
 				<div class="content send clearfix">
 					<form class="form fields" action="#/" onsubmit="return false;">
 
-						<!--<span class="question_title" data-i18n="Ask your first question" data-bind="i18n: 'text'"></span>-->
 						<div class="fieldset">
 							<label for="question" class="title placeholder"></label>
 							<textarea id="question" class="question" data-bind="hasfocus: helpdeskQuestionFocus, value: helpdeskQuestion, valueUpdate: 'afterkeydown', i18n: 'placeholder'" data-i18n="HELPDESK/PLACEHOLDER_QUESTION"></textarea>

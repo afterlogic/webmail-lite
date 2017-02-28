@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2004-2015, AfterLogic Corp.
+ * Copyright 2004-2017, AfterLogic Corp.
  * Licensed under AGPLv3 license or AfterLogic license
  * if commercial version of the product was purchased.
  * See the LICENSE file for a full license statement.
@@ -198,7 +198,6 @@ return array(
 		'Romanian' => 'Română',
 		'Russian' => 'Русский',
 		'Serbian' => 'Srpski',
-		'Slovak' => 'Slovenčina',
 		'Slovenian' => 'Slovenščina',
 		'Spanish' => 'Español',
 		'Swedish' => 'Svenska',
@@ -278,4 +277,22 @@ return array(
 */	
 	'settings.files-apps-enabled' => true,
 	'settings.mobilesync-apps-enabled' => true,
+	
+	'calendar.attach-file-to-event-enabled' => false,
+	'calendar.notification-enabled' => false,
+	'calendar.add-email-to-shared-calendar-name' => false,
+	
+	'login.advanced' => array(
+		'Enabled' => false,
+		'ShowUseSmtpAuth' => true,
+		'UseSmtpAuth' => true,
+		'IncomingPort' => 143,
+		'IncomingSslPort' => 993,
+		'IncomingUseSsl' => true,
+		'OutgoingPort' => 587,
+		'OutgoingSslPort' => 465,
+		'OutgoingUseSsl' => true,
+	),
+
+	'admin.default-password' => '12345',
 );

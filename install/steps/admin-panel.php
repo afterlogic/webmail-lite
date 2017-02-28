@@ -29,7 +29,7 @@ class CAdminpanelStep extends AInstallerStep
 			}
 			else
 			{
-				$this->oSettings->SetConf('Common/AdminPassword', md5(CPost::get('txtPassword1', '')));
+				$this->oSettings->SetConf('Common/AdminPassword', crypt(trim(CPost::get('txtPassword1')), CApi::$sSalt));
 				return $this->oSettings->SaveToXml();
 			}
 		}

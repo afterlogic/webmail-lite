@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2004-2015, AfterLogic Corp.
+ * Copyright 2004-2017, AfterLogic Corp.
  * Licensed under AGPLv3 license or AfterLogic license
  * if commercial version of the product was purchased.
  * See the LICENSE file for a full license statement.
@@ -767,7 +767,7 @@ LIMIT 5000';
 		
 		$sSql = 'SELECT id_addr, str_id, id_user, auto_create, view_email, primary_email, h_email, b_email, other_email,
 use_frequency, fullname, firstname, use_friendly_nm, type, type_id, b_phone, h_phone, h_mobile, shared_to_all,
-(use_frequency/CEIL(DATEDIFF(CURDATE() + 1, date_modified)/30)) as age_score
+(use_frequency/CEIL(DATEDIFF(CURDATE() + INTERVAL 1 DAY, date_modified)/30)) as age_score
 FROM %sawm_addr_book
 WHERE %s AND deleted = 0 AND hide_in_gab = 0%s AND use_frequency >= 0
 ORDER BY age_score DESC, type ASC, shared_to_all ASC

@@ -101,14 +101,6 @@
 						<span class="text" data-bind="i18n: 'text'" data-i18n="COMPOSE/TOOL_UNDOPGP"></span>
 					</span>
 					<!-- /ko -->
-					
-					<!--<span class="item">
-						<label class="custom_checkbox" data-bind="css: {'checked': saveMailInSentItems}">
-							<span class="icon" data-bind="customTooltip: 'COMPOSE/LINK_SAVE_IN_SENT_ITEMS'"></span>
-							<input type="checkbox" id="chSaveMailInSentItems" data-bind="checked: saveMailInSentItems" />
-						</label>
-						<label for="chSaveMailInSentItems" data-bind="i18n: 'text'" data-i18n="COMPOSE/LINK_SAVE_IN_SENT_ITEMS"></label>
-					</span>-->
 				</span>
 			</div>
 
@@ -289,7 +281,6 @@
 							</div>
 							<div class="panel_center" data-bind="customScrollbar: {x: false}">
 								<div class="scroll-inner">
-									<!--<div class="items_list" data-bind="customScrollbar: {x: false}, visible: notInlineAttachments().length > 0">-->
 									<div class="items_list">
 										<span class="list_notification" data-bind="i18n: 'text', visible: allowDragNDrop() && notInlineAttachments().length === 0" data-i18n="COMPOSE/ATTACH_HINT"></span>
 										<div class="attachments_container" data-bind="template: {name: 'Common_FileViewModel', foreach: notInlineAttachments}"></div>

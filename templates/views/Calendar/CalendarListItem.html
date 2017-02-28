@@ -10,7 +10,7 @@
 		</label>
 		<span class="icon public" data-bind="visible: isPublic(), click: function (oItem, eEvent) {$parent.openGetLinkCalendarForm(oItem, eEvent);}"></span>
 		<span class="title">
-			<span data-bind="text: name() + (isShared() ? ' - ' + owner() : ''), fade: {color: color}"></span>
+			<span data-bind="text: name() + (isShared() && addEmailToName ? ' - ' + owner() : ''), fade: {color: color}"></span>
 		</span>
 	</div>
 	<div class="button-container">

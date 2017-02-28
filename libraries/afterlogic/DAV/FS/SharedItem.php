@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2004-2015, AfterLogic Corp.
+ * Copyright 2004-2017, AfterLogic Corp.
  * Licensed under AGPLv3 license or AfterLogic license
  * if commercial version of the product was purchased.
  * See the LICENSE file for a full license statement.
@@ -74,6 +74,10 @@ class SharedItem{
      */
     protected function getData() 
 	{
+		if (strtolower(basename($this->path)) === '.sabredav')
+		{
+			 throw new DAV\Exception\Forbidden('Permission denied to .sabredav');
+		}
 
         if (!file_exists($this->path)) return array();
 
@@ -112,6 +116,10 @@ class SharedItem{
      */
     protected function putData(array $newData) 
 	{
+		if (strtolower(basename($this->path)) === '.sabredav')
+		{
+			 throw new DAV\Exception\Forbidden('Permission denied to .sabredav');
+		}
 
         // opening up the file, and creating a shared lock
         $handle = fopen($this->path,'w+');
@@ -158,6 +166,10 @@ class SharedItem{
 	
 	public function delete()
 	{
+		if (strtolower(basename($this->path)) === '.sabredav')
+		{
+			 throw new DAV\Exception\Forbidden('Permission denied to .sabredav');
+		}
 
 		unlink($this->path);
 		

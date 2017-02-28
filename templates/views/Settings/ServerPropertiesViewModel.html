@@ -1,10 +1,14 @@
-<span class="label required" data-bind="text: label, css: {'disabled': !isEnabled()}"></span>
-<input class="value input server" spellcheck="false" type="text" maxlength="255"  data-bind="value: server, hasfocus: focused, onEnter: function () { $parent.onSaveClick(); }, enable: isEnabled, css: {'disabled': !isEnabled()}"/>
+<span class="label server required" data-bind="text: label, css: {'disabled': !isEnabled()}"></span>
+<input class="value input server" spellcheck="false" type="text" maxlength="255" 
+	   data-bind="value: server, hasfocus: focused, onEnter: function () { if (_.isFunction($parent.onSaveClick)) { $parent.onSaveClick(); } }, 
+					enable: isEnabled, css: {'disabled': !isEnabled()}"/>
 
-<span class="label required" style="width: auto; margin-left: 10px;" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_PORT" data-bind="i18n: 'text', css: {'disabled': !isEnabled()}"></span>
-<input  class="value input port" spellcheck="false"  type="text" maxlength="5"  data-bind="value: port, onEnter: function () { $parent.onSaveClick(); }, enable: isEnabled, css: {'disabled': !isEnabled()}"/>
+<span class="label port required" data-i18n="SETTINGS/ACCOUNT_PROPERTIES_PORT" data-bind="i18n: 'text', css: {'disabled': !isEnabled()}"></span>
+<input  class="value input port" spellcheck="false"  type="text" maxlength="5" 
+		data-bind="value: port, onEnter: function () { if (_.isFunction($parent.onSaveClick)) { $parent.onSaveClick(); } }, 
+					enable: isEnabled, css: {'disabled': !isEnabled()}"/>
 
-<span>
+<span class="ssl">
 	<label class="custom_checkbox" data-bind="css: {'checked': ssl, 'disabled': !isEnabled()}">
 		<span class="icon"></span>
 		<input type="checkbox" data-bind="checked: ssl, attr: {'id': id + '_ssl'}, enable: isEnabled, css: {'disabled': !isEnabled()}" />

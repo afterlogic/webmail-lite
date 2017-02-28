@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2004-2015, AfterLogic Corp.
+ * Copyright 2004-2017, AfterLogic Corp.
  * Licensed under AGPLv3 license or AfterLogic license
  * if commercial version of the product was purchased.
  * See the LICENSE file for a full license statement.
@@ -130,8 +130,8 @@ class CAccount extends api_AContainer
 
 			'OutgoingMailServer'	=> $oDomain->OutgoingMailServer,
 			'OutgoingMailPort'		=> $oDomain->OutgoingMailPort,
-			'OutgoingMailLogin'		=> '',
-			'OutgoingMailPassword'	=> '',
+			'OutgoingMailLogin'		=> $oDomain->IsDefaultDomain && $oDomain->OutgoingMailLogin ? $oDomain->OutgoingMailLogin : '',
+			'OutgoingMailPassword'	=> $oDomain->IsDefaultDomain && $oDomain->OutgoingMailPassword ? $oDomain->OutgoingMailPassword : '',
 			'OutgoingMailAuth'		=> $oDomain->OutgoingMailAuth,
 			'OutgoingMailUseSSL'	=> $oDomain->OutgoingMailUseSSL,
 			'OutgoingSendingMethod'	=> $oDomain->OutgoingSendingMethod,

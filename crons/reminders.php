@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2004-2015, AfterLogic Corp.
+ * Copyright 2004-2017, AfterLogic Corp.
  * Licensed under AGPLv3 license or AfterLogic license
  * if commercial version of the product was purchased.
  * See the LICENSE file for a full license statement.
@@ -368,6 +368,51 @@ class CReminder
 					$sDefaultTimeZone = new \DateTimeZone($oAccount->getDefaultStrTimeZone());
 					$dt->setTimezone($sDefaultTimeZone);
 
+					$aEventClear = [];
+					if (is_array($aCacheEvents[$sEventId]['data']))
+					{
+						foreach ($aCacheEvents[$sEventId]['data'] as $key =>$val)
+						{
+							if (is_int($key))
+							{
+								$aEventClear[$key] = $val['id'];
+
+								if (is_array($val['alarms']))
+								{
+									$oNowDT = new \DateTime('now', $sDefaultTimeZone);
+
+									$oStarReminderDT = new \DateTime();
+									$oStarReminderDT->setTimestamp($val['startTS'] - max($val['alarms']) * 60);
+									$oStarReminderDT->setTimezone($sDefaultTimeZone);
+
+									$oStarEventDT = new \DateTime();
+									$oStarEventDT->setTimestamp($val['startTS']);
+									$oStarEventDT->setTimezone($sDefaultTimeZone);
+
+									if ($oNowDT->getTimestamp() < $oStarReminderDT->getTimestamp() || !($oNowDT->format('H:i:s') >= $oStarReminderDT->format('H:i:s') && $oNowDT->format('H:i:s') <= $oStarEventDT->format('H:i:s')))
+									{ //start - ( max(alarms) * 60 ) > now OR StarReminderTime >= now >= StarEventTime
+										unset($aCacheEvents[$sEventId]['data'][$key]);
+									}
+								}
+							}
+						}
+						//clearing of the doubles of excluded event 
+						$aCountEventClear = array_count_values($aEventClear);
+						foreach ($aCountEventClear as $key => $value)
+						{
+							if ($value > 1)
+							{
+								$aDoubles = array_keys($aEventClear, $key);
+								foreach ($aDoubles as $val)
+								{
+									if (isset($aCacheEvents[$sEventId]['data'][$val]) && !isset($aCacheEvents[$sEventId]['data'][$val]['excluded']))
+									{
+										unset($aCacheEvents[$sEventId]['data'][$val]);
+									}
+								}
+							}
+						}
+					}
 					$aCacheEvents[$sEventId]['time'] = $dt->format($this->getDateTimeFormat($oAccount));
 				}
 
@@ -436,6 +481,17 @@ class CReminder
 										$sEventName = $aEvent['subject'];
 										$sEventText = $aEvent['description'];
 										$bAllDay = $aEvent['allDay'];
+
+										if (isset($vCal->getBaseComponent('VEVENT')->RRULE) && $iEventStartTS < $iNowTS_UTC)
+										{ // the correct date for repeatable events
+											$oEventStartDT = new \DateTime();
+											$oEventStartDT->setTimestamp($iEventStartTS);
+											$oEventStartDT->setTimezone($oTimeZoneUTC);
+											$oEventStartDT = new \DateTime($oNowDT_UTC->format('Y-m-d') . ' ' . $oEventStartDT->format('H:i:s'), $oTimeZoneUTC);
+											$iEventStartTS = $oEventStartDT->getTimestamp();
+											$oEventStartDT->setTimezone(new \DateTimeZone($oAccount->getDefaultStrTimeZone()));
+											$sEventStart = $oEventStartDT->format('Y-m-d H:i:s');
+										}
 
 										$sDate = $aUserEvent['time'];
 										

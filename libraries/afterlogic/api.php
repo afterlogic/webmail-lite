@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2004-2015, AfterLogic Corp.
+ * Copyright 2004-2017, AfterLogic Corp.
  * Licensed under AGPLv3 license or AfterLogic license
  * if commercial version of the product was purchased.
  * See the LICENSE file for a full license statement.
@@ -36,6 +36,11 @@ class CApi
 	 * @var string
 	 */
 	static $sSalt;
+
+	/**
+	 * @var string
+	 */
+	static $sSaltShort;
 
 	/**
 	 * @var array
@@ -83,6 +88,7 @@ class CApi
 			CApi::Inc('common.db.storage');
 
 			$sSalt = '';
+			$sSaltShort = '';
 			$sSaltFile = CApi::DataPath().'/salt.php';
 			if (!@file_exists($sSaltFile))
 			{
@@ -91,10 +97,12 @@ class CApi
 			}
 			else
 			{
-				$sSalt = md5(file_get_contents($sSaltFile));
+				$sSaltShort = md5(file_get_contents($sSaltFile));
+				$sSalt = '$2y$07$' . $sSaltShort . '$';
 			}
 
 			CApi::$sSalt = $sSalt;
+			CApi::$sSaltShort = $sSaltShort;
 			CApi::$aConfig = include CApi::RootPath().'common/config.php';
 			
 			$sSettingsFile = CApi::DataPath().'/settings/config.php';

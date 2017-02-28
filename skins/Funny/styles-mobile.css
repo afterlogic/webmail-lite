@@ -632,15 +632,15 @@ html.rtl .items_list .use_threads .threaded {
 .items_list .item .from,
 .items_list .item .subject {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.6.10) repeat-y top right;
-  -o-mask: url(images/mask.png?7.6.10) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.0) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.0) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .items_list .item .from,
 html.rtl .items_list .item .subject {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .items_list .item.unseen {
@@ -650,15 +650,15 @@ html.rtl .items_list .item .subject {
 .items_list .item.unseen .from,
 .items_list .item.unseen .subject {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.6.10) repeat-y top right;
-  -o-mask: url(images/mask.png?7.6.10) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.0) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.0) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .items_list .item.unseen .from,
 html.rtl .items_list .item.unseen .subject {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .items_list .item.deleted {
@@ -675,15 +675,15 @@ html.rtl .items_list .item.unseen .subject {
 .items_list .item.checked .from,
 .items_list .item.checked .subject {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.6.10) repeat-y top right;
-  -o-mask: url(images/mask.png?7.6.10) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.0) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.0) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .items_list .item.checked .from,
 html.rtl .items_list .item.checked .subject {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .items_list .item.selected {
@@ -693,15 +693,15 @@ html.rtl .items_list .item.checked .subject {
 .items_list .item.selected .from,
 .items_list .item.selected .subject {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.6.10) repeat-y top right;
-  -o-mask: url(images/mask.png?7.6.10) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.0) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.0) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .items_list .item.selected .from,
 html.rtl .items_list .item.selected .subject {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .items_list .item.selected .custom_checkbox .icon {
@@ -1261,7 +1261,7 @@ html.rtl .toolbar .content .group > .item:last-child {
 }
 .no-cssanimations .toolbar .group.checkmail .icon,
 .no-cssanimations .toolbar .item.checkmail .icon {
-  background: url("images/check.png?7.6.10") no-repeat 0px 0px;
+  background: url("images/check.png?7.7.0") no-repeat 0px 0px;
   overflow: hidden;
   width: 19px !important;
   height: 19px !important;
@@ -2590,11 +2590,11 @@ html.rtl .languages .custom_selector .control {
   width: 16px;
   height: 11px;
   margin-right: 4px;
-  background: url("images/sprites.png?7.6.10") no-repeat 40px -400px;
+  background: url("images/sprites.png?7.7.0") no-repeat 40px -400px;
 }
 @media only screen and (-webkit-min-device-pixel-ratio: 1.3), only screen and (-moz-min-device-pixel-ratio: 1.3), only screen and (-o-min-device-pixel-ratio: 1.3/1), only screen and (min-resolution: 1.3dppx), only screen and (min-resolution: 125dpi) {
   .languages .icon {
-    background-image: url("images/sprites2x.png?7.6.10");
+    background-image: url("images/sprites2x.png?7.7.0");
     background-size: 1440px 560px;
   }
 }
@@ -2880,7 +2880,7 @@ html.rtl .languages .custom_selector .control {
   content: "\e63e";
 }
 .attachments .attachment .spinner {
-  background: url("images/wait.gif?7.6.10") no-repeat left top;
+  background: url("images/wait.gif?7.7.0") no-repeat left top;
   display: inline-block;
   width: 20px;
   height: 20px;
@@ -3838,7 +3838,7 @@ html.rtl .folders .children .children .children .children .children .children .c
   vertical-align: middle;
   width: 16px;
   height: 16px;
-  background-image: url("images/sprites.png?7.6.10");
+  background-image: url("images/sprites.png?7.7.0");
   background-repeat: no-repeat;
 }
 .html_editor .toolbar .content .item.link .icon {
@@ -5361,6 +5361,48 @@ html.rtl .login_panel .row .placeholder:before {
 .login_panel .row .input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0 1000px #fff3ce inset !important;
 }
+.login_panel .advanced_login_links.links {
+  margin-bottom: 10px;
+}
+.login_panel .advanced_login .row {
+  background: #f5f4ef;
+  padding-left: 10px;
+  text-align: left;
+  white-space: normal;
+}
+.login_panel .advanced_login .row .input {
+  font-size: 10pt;
+  border-radius: 4px;
+  box-sizing: border-box;
+  padding: 4px 6px;
+  background: #fff none repeat scroll 0 0;
+  border: solid 1px #cdcac3 !important;
+}
+.login_panel .advanced_login .row .label.server {
+  width: 35%;
+  padding: 0;
+  vertical-align: middle;
+}
+.login_panel .advanced_login .row .value.server {
+  width: 65%;
+  margin: 0 0 6px;
+}
+.login_panel .advanced_login .row .label.port {
+  width: 35%;
+  padding: 0;
+  vertical-align: middle;
+}
+.login_panel .advanced_login .row .value.port {
+  width: 20%;
+  margin: 0;
+}
+.login_panel .advanced_login .row .ssl {
+  vertical-align: middle;
+  margin-left: 20px;
+}
+.login_panel .advanced_login .row .label.required:before {
+  display: none;
+}
 .login_panel .custom_checkbox.focus {
   box-shadow: 0px 4px 3px -3px #e5e5e5 inset, 0 0 2px 0 #1d67cd;
 }
@@ -5707,7 +5749,7 @@ html.rtl .login_panel .links {
   position: absolute;
   right: 2px;
   top: 0px;
-  background: url('images/sprites.png?7.6.10') no-repeat 0px -200px;
+  background: url('images/sprites.png?7.7.0') no-repeat 0px -200px;
 }
 .panel.messages .items_list .item.answered .marker {
   display: inline-block;
@@ -6623,7 +6665,7 @@ html.rtl .panel.contacts .panel_top .search_block {
 /*=== END Contacts screen CSS ===*/
 /*=== Contact viewer CSS ===*/
 .panel.contact_viewer .panel_content {
-  background: url("images/contacts-bg.png?7.6.10") repeat 0 0;
+  background: url("images/contacts-bg.png?7.7.0") repeat 0 0;
 }
 .panel.contact_viewer .middle_bar {
   -webkit-box-sizing: border-box;
@@ -7011,8 +7053,8 @@ html.rtl .settings .folders .items_list .item > .title .name {
 .panel.storages .items_list .item > .title.droppableHover .name,
 .settings .folders .items_list .item > .title.droppableHover .name {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.6.10) repeat-y top right;
-  -o-mask: url(images/mask.png?7.6.10) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.0) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.0) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .panel.folders .items_list .item > .title.droppableHover .name,
@@ -7020,8 +7062,8 @@ html.rtl .panel.groups .items_list .item > .title.droppableHover .name,
 html.rtl .panel.storages .items_list .item > .title.droppableHover .name,
 html.rtl .settings .folders .items_list .item > .title.droppableHover .name {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .panel.folders .items_list .item.canSelect > .title,
@@ -7061,8 +7103,8 @@ html.rtl .settings .folders .items_list .item > .title.droppableHover .name {
 .panel.storages .items_list .item.selected > .title .name,
 .settings .folders .items_list .item.selected > .title .name {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.6.10) repeat-y top right;
-  -o-mask: url(images/mask.png?7.6.10) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.0) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.0) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .panel.folders .items_list .item.selected > .title .name,
@@ -7070,8 +7112,8 @@ html.rtl .panel.groups .items_list .item.selected > .title .name,
 html.rtl .panel.storages .items_list .item.selected > .title .name,
 html.rtl .settings .folders .items_list .item.selected > .title .name {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .panel.folders .items_list .item.selected > .title.droppableHover .name,
@@ -7079,8 +7121,8 @@ html.rtl .settings .folders .items_list .item.selected > .title .name {
 .panel.storages .items_list .item.selected > .title.droppableHover .name,
 .settings .folders .items_list .item.selected > .title.droppableHover .name {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.6.10) repeat-y top right;
-  -o-mask: url(images/mask.png?7.6.10) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.0) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.0) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .panel.folders .items_list .item.selected > .title.droppableHover .name,
@@ -7088,8 +7130,8 @@ html.rtl .panel.groups .items_list .item.selected > .title.droppableHover .name,
 html.rtl .panel.storages .items_list .item.selected > .title.droppableHover .name,
 html.rtl .settings .folders .items_list .item.selected > .title.droppableHover .name {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .panel.folders .items_list .item .count,
@@ -7148,40 +7190,40 @@ html.rtl .settings .folders .items_list .item .count {
 .panel.groups .items_list .item .title .name,
 .panel.storages .items_list .item .title .name {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.6.10) repeat-y top right;
-  -o-mask: url(images/mask.png?7.6.10) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.0) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.0) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .panel.folders .items_list .item .title .name,
 html.rtl .panel.groups .items_list .item .title .name,
 html.rtl .panel.storages .items_list .item .title .name {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .panels.settings .folders .items_list .item .title .name {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.6.10) repeat-y top right;
-  -o-mask: url(images/mask.png?7.6.10) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.0) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.0) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .panels.settings .folders .items_list .item .title .name {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .panels.settings .folders .items_list .item.canDrag .title:hover .name {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.6.10) repeat-y top right;
-  -o-mask: url(images/mask.png?7.6.10) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.0) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.0) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .panels.settings .folders .items_list .item.canDrag .title:hover .name {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.6.10) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.0) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .folders .title .icon:before {
@@ -7292,7 +7334,7 @@ html.rtl .panel.threads .customscroll-scrollbar-vertical {
 /*=== retina displays ===*/
 @media only screen and (-webkit-min-device-pixel-ratio: 1.3), only screen and (-moz-min-device-pixel-ratio: 1.3), only screen and (-o-min-device-pixel-ratio: 1.3/1), only screen and (min-resolution: 1.3dppx), only screen and (min-resolution: 125dpi) {
   .spritesX2 {
-    background-image: url("images/sprites2x.png?7.6.10");
+    background-image: url("images/sprites2x.png?7.7.0");
     background-size: 1440px 560px;
   }
 }
@@ -7300,7 +7342,7 @@ html.rtl .panel.threads .customscroll-scrollbar-vertical {
   .file .icon,
   .messages .items_list .item .marker,
   .html_editor .toolbar .item .icon {
-    background-image: url("images/sprites2x.png?7.6.10");
+    background-image: url("images/sprites2x.png?7.7.0");
     background-size: 1440px 560px;
   }
 }

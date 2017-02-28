@@ -235,7 +235,7 @@
 		border-width: 1px;
 		text-align: right;
 		white-space: nowrap;
-
+		
 		&.focused{
 			background: @focusedBackground;
 			border-width: 1px;
@@ -379,6 +379,57 @@
 		}
 	}
 	
+	.advanced_login_links.links {
+		margin-bottom: 10px;
+	}
+
+	.advanced_login .row {
+		background: #f5f4ef;
+		padding-left: 10px;
+		text-align: left;
+		white-space: normal;
+		
+		.input {
+			font-size: 10pt;
+			border-radius: 4px;
+			box-sizing: border-box;
+			padding: 4px 6px;
+			background: #fff none repeat scroll 0 0;
+			border: solid 1px #cdcac3 !important;
+		}
+		
+		.label.server {
+			width: 35%;
+			padding: 0;
+			vertical-align: middle;
+		}
+		
+		.value.server {
+			width: 65%;
+			margin: 0 0 6px;
+		}
+		
+		.label.port {
+			width: 35%;
+			padding: 0;
+			vertical-align: middle;
+		}
+		
+		.value.port {
+			width: 20%;
+			margin: 0;
+		}
+		
+		.ssl {
+			vertical-align: middle;
+			margin-left: 20px;
+		}
+		
+		.label.required:before {
+			display: none;
+		}
+	}
+
 	.custom_checkbox.focus {
 		box-shadow: 0px 4px 3px -3px #E5E5E5 inset, 0 0 2px 0 #1D67CD;
 		.icon {

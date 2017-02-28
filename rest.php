@@ -28,6 +28,11 @@ $bMethod = in_array($sMethod, array(
 	'PUT /account/password',
 	'GET /account/list',
 	'GET /account/exists',
+	'POST /channel',
+	'DELETE /channel',
+	'POST /tenant',
+	'PATCH /tenant',
+	'DELETE /tenant',
 	'GET /account',
 	'POST /domain',
 	'PUT /domain/update',
@@ -55,6 +60,9 @@ else if (class_exists('CApi') && CApi::IsValid() && $bMethod)
 	/* @var $oApiTenantsManager CApiTenantsManager */
 	$oApiTenantsManager = CApi::Manager('tenants');
 
+	/* @var $oApiChannelsManager CApiChannelsManager */
+	$oApiChannelsManager = CApi::Manager('channels');
+
 	/* @var $oApiUsersManager CApiUsersManager */
 	$oApiUsersManager = CApi::Manager('users');
 
@@ -75,7 +83,7 @@ else if (class_exists('CApi') && CApi::IsValid() && $bMethod)
 
 			$iTenantId = $oApiTenantsManager->getTenantIdByLogin($sLogin, $sPassword);
 
-			if (!((($sSettingsLogin === $sLogin) && ($sSettingsPassword === md5($sPassword))) || $iTenantId > 0))
+			if (!((($sSettingsLogin === $sLogin) && ($sSettingsPassword === crypt($sPassword, CApi::$sSalt))) || $iTenantId > 0))
 			{
 				$aResult['message'] = getErrorMessage('incorrect login or password', $oApiUsersManager);
 				$aResult['errorCode'] = \ProjectCore\Notifications::RestInvalidCredentials;
@@ -114,6 +122,458 @@ else if (class_exists('CApi') && CApi::IsValid() && $bMethod)
 
 		switch ($sMethod)
 		{
+			case 'POST /tenant':
+				$sLogin = isset($aInputData['tenantLogin']) ? trim($aInputData['tenantLogin']) : null;
+
+				$sPassword = isset($aInputData['tenantPassword']) ? trim($aInputData['tenantPassword']) : null;
+
+				$sDescription = isset($aInputData['tenantDescription']) ? trim($aInputData['tenantDescription']) : null;
+
+				$sAdminEmail = isset($aInputData['tenantAdminEmail']) ? trim($aInputData['tenantAdminEmail']) : null;
+
+				$sChannel = isset($aInputData['tenantChannel']) ? trim($aInputData['tenantChannel']) : null;
+
+				// ToDo : Get a give a default && max limit for user count
+				$iUserCountLimit = isset($aInputData['tenantUserCountLimit']) ? trim($aInputData['tenantUserCountLimit']) : 1;
+				// ToDo : Give a default && max limit for quota
+				$iQuotaInMB = isset($aInputData['tenantQuotaInMB']) ? trim($aInputData['tenantQuotaInMB']) : 1;
+
+				if (!isset($sLogin))
+				{
+					$aResult['message'] = 'Tenant : Required parameters cannot be empty';
+					$aResult['errorCode'] = 400;
+					break;
+				}
+
+				if (!isset($oApiTenantsManager))
+				{
+					$aResult['message'] = 'Tenant : Required manager not found';
+					$aResult['errorCode'] = 500;
+					break;
+				}
+
+				if (!class_exists('CTenant'))
+				{
+					$aResult['message'] = 'Tenant : Required classes not found';
+					$aResult['errorCode'] = 500;
+					break;
+				}
+
+				// try get tenant by taken tenant login & password
+				$iTenantId = $oApiTenantsManager->getTenantIdByLogin($sLogin);
+				if ($iTenantId > 0)
+				{
+					$aResult['message'] = 'Tenant : Already exist';
+					$aResult['errorCode'] = 400;
+					break;
+				}
+
+				/* @var $oTenant CTenant */
+				$oTenant = new CTenant();
+				$oTenant->Login = $sLogin;
+
+				// Nullable properties
+				$oTenant->setPassword($sPassword);
+				$oTenant->Description = $sDescription;
+				$oTenant->Email = $sAdminEmail;
+
+				// Non-nullable properties
+				$oTenant->UserCountLimit = $oTenant->UserCountLimit = $iUserCountLimit;
+				$oTenant->QuotaInMB = $iQuotaInMB;
+
+				if (!isset($oApiChannelsManager))
+				{
+					$aResult['message'] = 'Channel : Required manager not found';
+					$aResult['errorCode'] = 500;
+					break;
+				}
+
+				// Is tenant related with a channel
+				if (isset($sChannel))
+				{
+					// if Channel input isn't integer try get by Login
+					if (!is_numeric($sChannel))
+					{
+						$iChannelId = $oApiChannelsManager->getChannelIdByLogin($sChannel);
+						if ($iChannelId == 0)
+						{
+							$aResult['message'] = 'Channel : Not found';
+							$aResult['errorCode'] = 404;
+							break;
+						}
+						else
+						{
+							// Set founded channel id to tenant instance
+							$oTenant->IdChannel = $iChannelId;
+						}
+						// If Channel input is a integer try to get it
+					}
+					else if (is_numeric($sChannel))
+					{
+						$iChannelId = intval($sChannel);
+
+						// ToDo : Investigate return object
+						if (!isset($iChannelId) || $iChannelId<=0)
+						{
+							$aResult['message'] = 'Channel : Not valid channel id';
+							$aResult['errorCode'] = 404;
+							break;
+						}
+
+						$oChannel = $oApiChannelsManager->getChannelById($iChannelId);
+
+						if ($oChannel->IdChannel == 0)
+						{
+							$aResult['message'] = 'Channel : Not found';
+							$aResult['errorCode'] = 404;
+							break;
+						}
+						else
+						{
+							// Valid channel id set it to tenant
+							$oTenant->IdChannel = $iChannelId;
+						}
+					}
+				}
+
+				// Try create a tenant
+				$bIsTenantCreated = $oApiTenantsManager->createTenant($oTenant);
+
+				if (!$bIsTenantCreated)
+				{
+					$aResult['message'] = 'Tenant Manager : Not created';
+					$aResult['errorCode'] = 500;
+					break;
+				}
+
+				// Try get created tenant id
+				$iTenantId = $oApiTenantsManager->getTenantIdByLogin($sLogin);
+				if ($iTenantId == 0)
+				{
+					$aResult['message'] = 'Tenant Manager : created but not found';
+					$aResult['errorCode'] = 500;
+					break;
+				}
+
+				// Tenant created and ready
+				$aResult['result'] = array(
+					'channelId' => isset($iChannelId) ? $iChannelId : -1,
+					'tenantId'  => $iTenantId
+				);
+				break;
+
+			case 'PATCH /tenant':
+				$sLogin = isset($aInputData['tenantLogin']) ? trim($aInputData['tenantLogin']) : null;
+
+				// ToDo : Get a give a default && max limit for user count
+				$iUserCountLimit = isset($aInputData['tenantUserCountLimit']) ? trim($aInputData['tenantUserCountLimit']) : 1;
+				// ToDo : Give a default && max limit for quota
+				$iQuotaInMB = isset($aInputData['tenantQuotaInMB']) ? trim($aInputData['tenantQuotaInMB']) : 1;
+
+				// is required properties empty
+				if (!isset($sLogin))
+				{
+					$aResult['message'] = 'Tenant : Required parameters cannot be empty';
+					$aResult['errorCode'] = 400;
+					break;
+				}
+
+				if (!isset($oApiTenantsManager))
+				{
+					$aResult['message'] = 'Tenant : Required manager cant loaded';
+					$aResult['errorCode'] = 500;
+					break;
+				}
+
+				if (!class_exists('CTenant'))
+				{
+					$aResult['message'] = 'Tenant : Required classes not found';
+					$aResult['errorCode'] = 500;
+					break;
+				}
+
+				// Try get tenant by taken tenant login
+				$iTenantId = $oApiTenantsManager->getTenantIdByLogin($sLogin);
+				if ($iTenantId == 0)
+				{
+					$aResult['message'] = 'Tenant : not found';
+					$aResult['errorCode'] = 404;
+					break;
+				}
+
+				/* @var $oTenant CTenant */
+				$oTenant = $oApiTenantsManager->getTenantById($iTenantId);
+
+				// Non-nullable properties
+				$oTenant->UserCountLimit = $iUserCountLimit;
+				$oTenant->QuotaInMB = $iQuotaInMB;
+
+				// Try create a tenant
+				$isTenantUpdated = $oApiTenantsManager->updateTenant($oTenant);
+
+				if (!$isTenantUpdated)
+				{
+					$aResult['message'] = 'Tenant Manager : Not updated';
+					$aResult['errorCode'] = 500;
+					break;
+				}
+
+				// Tenant created and ready
+				$aResult['result'] = array(
+					'tenantId' => $iTenantId
+				);
+
+				break;
+
+			case 'DELETE /tenant':
+				$sLogin = isset($aInputData['tenantLogin']) ? trim($aInputData['tenantLogin']) : null;
+
+				if (!isset($sLogin))
+				{
+
+					$aResult['message'] = 'Tenant : Required parameters cannot be empty';
+					$aResult['errorCode'] = 400;
+					break;
+				}
+
+				// Try get tenant id by login
+				$iTenantId = $oApiTenantsManager->getTenantIdByLogin($sLogin);
+				if ($iTenantId == 0)
+				{
+					$aResult['message'] = 'Tenant : not found';
+					$aResult['errorCode'] = 404;
+					break;
+				}
+
+				$oTenant = new CTenant();
+				$oTenant->IdTenant = $iTenantId;
+				$bIsTenantDeleted = $oApiTenantsManager->deleteTenant($oTenant);
+
+				if (!$bIsTenantDeleted)
+				{
+					$aResult['message'] = 'Tenant : not deleted';
+					$aResult['errorCode'] = 500;
+					break;
+				}
+
+				// it's success
+				$aResult['result'] = array(
+					'tenantId' => $iTenantId
+				);
+
+				break;
+
+			case 'POST /channel':
+				$sChannelLogin = isset($aInputData['channelLogin']) ? trim($aInputData['channelLogin']) : null;
+
+				// Login inputs are required,check both of them if one of them null return error
+				if (!isset($sChannelLogin))
+				{
+					$aResult['message'] = 'Channel : Invalid input parameters';
+					$aResult['errorCode'] = 500;
+					break;
+				}
+
+				// is required managers are ready
+				if (!isset($oApiChannelsManager))
+				{
+					$aResult['message'] = 'Channel : Required manager not loaded';
+					$aResult['errorCode'] = 500;
+					break;
+				}
+
+				if (!class_exists('CChannel'))
+				{
+					$aResult['message'] = 'Channel : Required classes not found';
+					$aResult['errorCode'] = 500;
+					break;
+				}
+
+				// Channel object
+				$oChannel = new CChannel();
+
+				$oChannel->Login = $sChannelLogin;
+
+				// try get channel by taken id, if it's already exist return a error
+				$iChannelId = $oApiChannelsManager->getChannelIdByLogin($oChannel->Login);
+
+				if ($iChannelId > 0)
+				{
+					$aResult['message'] = 'Channel Manager : Already exist';
+					$aResult['errorCode'] = 400;
+					break;
+				}
+
+				// channel not exist lets validate is new channel login name is valid
+				$isChannelValid = $oChannel->validate();
+
+				if (!$isChannelValid)
+				{
+					$aResult['message'] = 'Channel : non-valid channel login value';
+					$aResult['errorCode'] = 400;
+					break;
+				}
+
+				// channel name is valid lets break some eggs and make a channel
+				$bIsChannelCreated = $oApiChannelsManager->createChannel($oChannel);
+
+				if (!$bIsChannelCreated)
+				{
+					$aResult['message'] = 'Channel Manager : not created';
+					$aResult['errorCode'] = 500;
+					break;
+				}
+
+				// Get created channel's id
+				$iChannelId = $oApiChannelsManager->getChannelIdByLogin($oChannel->Login);
+
+				if ($iChannelId == 0)
+				{
+					$aResult['message'] = 'channel created but not found';
+					$aResult['errorCode'] = 500;
+					break;
+
+				}
+
+				// Channel is created and ready
+				$aResult['result'] = array(
+					'channelId' => $iChannelId
+				);
+
+				break;
+
+			case 'DELETE /channel':
+				$sChannelLogin = isset($aInputData['channelLogin']) ? trim($aInputData['channelLogin']) : null;
+
+				if (!isset($sChannelLogin))
+				{
+					$aResult['message'] = 'Channel : Required parameters cannot be empty';
+					$aResult['errorCode'] = 400;
+					break;
+				}
+
+				// is required managers are ready
+				if (!isset($oApiChannelsManager))
+				{
+					$aResult['message'] = 'Channel : Required manager not loaded';
+					$aResult['errorCode'] = 500;
+					break;
+				}
+
+				if (!class_exists('CChannel'))
+				{
+					$aResult['message'] = 'Channel : required classes not found';
+					$aResult['errorCode'] = 500;
+					break;
+				}
+
+				$oChannel = new CChannel();
+				$oChannel->Login = $sChannelLogin;
+				$iChannelId = $oApiChannelsManager->getChannelIdByLogin($sChannelLogin);
+
+				if ($iChannelId == 0)
+				{
+					$aResult['message'] = 'Channel not found';
+					$aResult['errorCode'] = 404;
+					break;
+				}
+
+				$oChannel->IdChannel = $iChannelId;
+				$bIsDeleted = $oApiChannelsManager->deleteChannel($oChannel);
+
+				if (!$bIsDeleted)
+				{
+					$aResult['message'] = 'Channel Manager : Channel not deleted';
+					$aResult['errorCode'] = 500;
+					break;
+				}
+
+				$aResult['result'] = array(
+					'channelId' => $iChannelId
+				);
+				break;
+
+			case 'POST /domain':
+				$sDomain = isset($aInputData['domain']) ? trim($aInputData['domain']) : '';
+				$sTenant = isset($aInputData['tenant']) ? trim($aInputData['tenant']) : '';
+
+				# HEO CHANGES
+				$sIncomingMailServer = isset($aInputData['incomingMailServer']) ? trim($aInputData['incomingMailServer']) : null;
+
+				$sOutgoingMailServer = isset($aInputData['outgoingMailServer']) ? trim($aInputData['outgoingMailServer']) : null;
+
+				$sAllowNewUsersRegister = isset($aInputData['allowNewUsersRegister']) ? trim($aInputData['allowNewUsersRegister']) : null;
+
+				$sSiteName = isset($aInputData['siteName']) ? trim($aInputData['siteName']) : null;
+				#HEO CHANGES END
+
+				if (0 < strlen($sDomain) && $oApiDomainsManager && $oApiTenantsManager)
+				{
+					$oDomain = new CDomain();
+					$oDomain->Name = trim($sDomain);
+
+					# HEO CHANGES
+					if( isset($sIncomingMailServer) )
+					{
+						$oDomain->IncomingMailServer = $sIncomingMailServer;
+					}
+					if( isset($sOutgoingMailServer) )
+					{
+						$oDomain->OutgoingMailServer = $sOutgoingMailServer;
+					}
+					if ( isset($sAllowNewUsersRegister) )
+					{
+						$bAllowNewUsersRegister = filter_var($sAllowNewUsersRegister, FILTER_VALIDATE_BOOLEAN);
+						$oDomain->AllowNewUsersRegister = $bAllowNewUsersRegister;
+					}
+
+					$oDomain->SiteName = $sSiteName;
+					# HEO CHANGES END
+
+					if (strlen($sTenant) > 0)
+					{
+						$iIdTenant = $oApiTenantsManager->getTenantIdByLogin($sTenant);
+
+						if ($iIdTenant > 0)
+						{
+							if (!$iAuthTenantId || $iIdTenant === $iAuthTenantId) {
+								$oDomain->IdTenant = $iIdTenant;
+								$aResult['result'] = $oApiDomainsManager->createDomain($oDomain);
+								if (!$aResult['result']) {
+									$aResult['message'] = getErrorMessage('cannot create domain', $oApiDomainsManager);
+									$aResult['errorCode'] = \ProjectCore\Notifications::RestOtherError;
+								}
+							}
+							else
+							{
+								$aResult['message'] = getErrorMessage('cannot create domain', $oApiDomainsManager);
+								$aResult['errorCode'] = \ProjectCore\Notifications::RestOtherError;
+							}
+						}
+						else
+						{
+							$aResult['message'] = getErrorMessage('cannot find tenant', $oApiDomainsManager);
+							$aResult['errorCode'] = \ProjectCore\Notifications::RestTenantFindFailed;
+						}
+					}
+					else
+					{
+						$aResult['result'] = $oApiDomainsManager->createDomain($oDomain);
+						if (!$aResult['result'])
+						{
+							$aResult['message'] = getErrorMessage('cannot create domain', $oApiDomainsManager);
+							$aResult['errorCode'] = \ProjectCore\Notifications::RestOtherError;
+						}
+					}
+				}
+				else
+				{
+					$aResult['message'] = 'invalid input parameters';
+					$aResult['errorCode'] = \ProjectCore\Notifications::RestInvalidParameters;
+				}
+
+				break;
+
 			case 'POST /account':
 
 				$oDefaultDomain = $oApiDomainsManager->getDefaultDomain();
@@ -121,6 +581,10 @@ else if (class_exists('CApi') && CApi::IsValid() && $bMethod)
 				$sEmail = isset($aInputData['email']) ? trim($aInputData['email']) : '';
 				$sPassword = isset($aInputData['password']) ? trim($aInputData['password']) : '';
 				$sParent = isset($aInputData['parent']) ? trim($aInputData['parent']) : '';
+				$sCapa = isset($aInputData['capa']) ? trim($aInputData['capa']) : '';
+				# HEO CHANGES
+				$sQuota = isset($aInputData['tenantQuotaInMB']) ? trim($aInputData['tenantQuotaInMB']) : '0';
+				#HEO CHANGES END
 
 				$sFriendlyName = isset($aInputData['friendlyName']) ? trim($aInputData['friendlyName']) : '';
 				$sIncomingMailLogin = isset($aInputData['incomingMailLogin']) ? trim($aInputData['incomingMailLogin']) : $sEmail;
@@ -165,6 +629,13 @@ else if (class_exists('CApi') && CApi::IsValid() && $bMethod)
 						$oAccount->OutgoingMailUseSSL = $oDomain ? $oDomain->OutgoingMailUseSSL : $iOutgoingMailUseSSL;
 						$oAccount->OutgoingMailAuth = $oDomain ? $oDomain->OutgoingMailAuth : $iOutgoingMailAuth;
 						$oAccount->OutgoingMailPassword = $sOutgoingMailPassword;
+
+						$oAccount->User->Capa = $sCapa;
+						# HEO CHANGES
+						if(isset($sQuota) && is_numeric($sQuota)){
+							$oAccount->StorageQuota = (int)$sQuota * 1024;
+						}
+						# HEO CHANGES END
 
 						$bNotInDomainRequiredInputParameters = (strlen($sEmail) > 0 && strlen($sPassword) > 0 && strlen($sIncomingMailLogin) > 0 && strlen($sIncomingMailServer) > 0 && $iIncomingMailPort > 0 && strlen($sOutgoingMailServer) > 0 && $iOutgoingMailPort > 0);
 
@@ -238,6 +709,9 @@ else if (class_exists('CApi') && CApi::IsValid() && $bMethod)
 						}
 						if (isset($aInputData['signatureOptions'])) {
 							$oAccount->SignatureOptions = (bool) $aInputData['signatureOptions'] ? 1 : 0;
+						}
+						if (isset($aInputData['capa'])) {
+							$oAccount->User->Capa = (string) $aInputData['capa'];
 						}
 
 						$aResult['result'] = $oApiUsersManager->updateAccount($oAccount);
@@ -827,6 +1301,9 @@ else if (class_exists('CApi') && CApi::IsValid() && $bMethod)
 
 				break;
 
+			default:
+				$aResult['message'] = 'Invalid Endpoint';
+				$aResult['errorCode'] = 400;
 				break;
 		}
 	}

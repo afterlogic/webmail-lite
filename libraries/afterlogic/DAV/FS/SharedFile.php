@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2004-2015, AfterLogic Corp.
+ * Copyright 2004-2017, AfterLogic Corp.
  * Licensed under AGPLv3 license or AfterLogic license
  * if commercial version of the product was purchased.
  * See the LICENSE file for a full license statement.
@@ -96,6 +96,11 @@ class SharedFile extends File{
     }	
 	
 	public function delete() {
+
+		if (strtolower(basename($this->path)) === '.sabredav')
+		{
+			 throw new DAV\Exception\Forbidden('Permission denied to .sabredav');
+		}
 
         parent::delete();
 		

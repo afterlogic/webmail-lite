@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2004-2015, AfterLogic Corp.
+ * Copyright 2004-2017, AfterLogic Corp.
  * Licensed under AGPLv3 license or AfterLogic license
  * if commercial version of the product was purchased.
  * See the LICENSE file for a full license statement.
@@ -431,15 +431,6 @@ class CApiUsersManager extends AApiManagerWithStorage
 
 								$this->_validateAccountSubscriptionLimits($oAccount, $oTenant, true);
 							}
-
-							if (0 < $oTenant->QuotaInMB)
-							{
-								$iSize = $oTenantsApi->getTenantAllocatedSize($oTenant->IdTenant);
-								if (((int) ($oAccount->getRealQuotaSize() / 1024)) + $iSize > $oTenant->QuotaInMB)
-								{
-									throw new CApiManagerException(Errs::TenantsManager_QuotaLimitExided);
-								}
-							}
 						}
 					}
 
@@ -474,10 +465,34 @@ class CApiUsersManager extends AApiManagerWithStorage
 
 							$aConnectErrors[1] = true;
 							$bConnectValid = true;
-
+							$aClientQuota = $oImapClient->Quota();
 							$oImapClient->LogoutAndDisconnect();
 						}
 						catch (\Exception $oExceprion) {}
+					}
+
+					if (is_array($aClientQuota) && $aClientQuota[1] > 0)
+					{
+						if (isset($oTenant) && 0 < $oTenant->QuotaInMB)
+						{
+							$iSize = $oTenantsApi->getTenantAllocatedSize($oTenant->IdTenant);
+							if (((int) ($aClientQuota[1] / 1024)) + $iSize > $oTenant->QuotaInMB)
+							{
+								throw new CApiManagerException(Errs::TenantsManager_QuotaLimitExided);
+							}
+							$oAccount->StorageQuota = $aClientQuota[1];
+						}
+					}
+					else
+					{
+						if (isset($oTenant) && 0 < $oTenant->QuotaInMB)
+						{
+							$iSize = $oTenantsApi->getTenantAllocatedSize($oTenant->IdTenant);
+							if (((int) ($oAccount->getRealQuotaSize() / 1024)) + $iSize > $oTenant->QuotaInMB)
+							{
+								throw new CApiManagerException(Errs::TenantsManager_QuotaLimitExided);
+							}
+						}
 					}
 
 					if ($bConnectValid)
@@ -581,9 +596,6 @@ class CApiUsersManager extends AApiManagerWithStorage
 		{
 			if ($oAccount->isValid())
 			{
-				$oAccount->IncomingMailUseSSL = in_array($oAccount->IncomingMailPort, array(993, 995));
-				$oAccount->OutgoingMailUseSSL = in_array($oAccount->OutgoingMailPort, array(465));
-
 				if (0 < $oAccount->Domain->IdTenant && CApi::GetConf('tenant', false) && null !== $oAccount->GetObsoleteValue('StorageQuota'))
 				{
 					/* @var $oTenantsApi CApiTenantsManager */

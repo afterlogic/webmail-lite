@@ -27,10 +27,6 @@
 
 <div class="panel_center" data-bind="heightAdjust: {'elements': [domMessageHeader, domQuickReply], 'triggers': [detailsVisible(), currentMessage(), replyPaneVisible(), replyTextFocusThrottled()]}">
 	<div class="message_header" data-bind="initDom: domMessageHeader, visible: isCurrentMessage, event: {'dblclick': resizeDblClick}">
-		<!--<span data-bind="visible: !mobileApp, click: switchDetailsVisibility, css: { 'compressed': !detailsVisible() }" class="table-compressor">
-			<span class="arrow" data-bind="customTooltip: detailsTooltip"></span>
-		</span>-->
-		<!--<span class="resizer" data-bind="event: {'dblclick': resizeDblClick}, css: {large: detailsVisible()}, visible: fakeHeader"></span>-->
 		<div class="notice" data-bind="visible: visiblePicturesControl">
 			<span class="item">
 				<span data-i18n="MESSAGE/INFO_MESSAGE_BLOCKED" data-bind="i18n: 'text'"></span>
@@ -129,6 +125,11 @@
 											<span class="text" data-bind="i18n: 'text'" data-i18n="MAILBOX/TOOL_SAVE_AS_PDF"></span>
 										</span>
 
+										<span class="item forward" data-bind="visible: allowForwardAsAttachment, command: forwardAsAttachment">
+											<span class="icon"></span>
+											<span class="text" data-i18n="MAILBOX/TOOL_FORWARD_AS_ATTACHMENT" data-bind="i18n: 'text'"></span>
+										</span>
+										
 										<span class="item headers" data-bind="visible: currentMessage() && currentMessage().completelyFilled(), click: showSourceHeaders">
 											<span class="icon"></span>
 											<span class="text" data-i18n="MESSAGE/LINK_VIEW_MESSAGE_HEADERS" data-bind="i18n: 'text'"></span>
@@ -221,9 +222,6 @@
 						<span class="title" data-i18n="MESSAGE/HEADER_DATE" data-bind="i18n: 'text'"></span>: 
 						<span data-bind="text: fullDate"></span>
 					</div>
-					<!--<div class="message_info_line" data-bind="visible: currentMessage() && currentMessage().completelyFilled()">
-						<span class="link" data-i18n="MESSAGE/LINK_VIEW_MESSAGE_HEADERS" data-bind="i18n: 'text', click: showSourceHeaders"></span>
-					</div>-->
 				</div>
 			</div>
 
@@ -295,7 +293,6 @@
 					<div class="message_body_info" data-i18n="MESSAGE/INFO_LOADING" 
 						 data-bind="visible: isLoading, i18n: 'text'"></div>
 					<div class="message_body html" data-bind="initDom: domTextBody, attr: {'dir': rtlMessage() ? 'rtl' : 'ltr'}"></div>
-					<!--<div class="bodyparts_separator"></div>-->
 				</div>
 			</div>
 		</div>

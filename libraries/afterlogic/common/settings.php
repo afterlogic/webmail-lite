@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2004-2015, AfterLogic Corp.
+ * Copyright 2004-2017, AfterLogic Corp.
  * Licensed under AGPLv3 license or AfterLogic license
  * if commercial version of the product was purchased.
  * See the LICENSE file for a full license statement.
@@ -469,21 +469,20 @@ class api_Settings
 				$aNodeItems = array();
 				foreach($this->aContainer[$sKey] as $sArrayKey => $aValue)
 				{
-					$sArrayKeyTmp = $sArrayKey;
-					$aNodeItems[$sArrayKeyTmp] = new CXmlDomNode($sArrayKeyTmp);
+					$aNodeItems[$sArrayKey] = new CXmlDomNode($sArrayKey);
 					if (is_array($aValue))
 					{
 						foreach ($aValue as $sSubKey => $sSubValue)
 						{
 							$sSubValue = api_Utils::EncodeSpecialXmlChars((string) $sSubValue);
-							$aNodeItems[$sArrayKeyTmp]->AppendChild(new CXmlDomNode($sSubKey, $sSubValue));
+							$aNodeItems[$sArrayKey]->AppendChild(new CXmlDomNode($sSubKey, $sSubValue));
 						}
 					}
-					$oNode->AppendChild($aNodeItems[$sArrayKeyTmp]);
+					$oNode->AppendChild($aNodeItems[$sArrayKey]);
 				}
 			}
 		}
-	}
+	}	
 
 	/**
 	 * @param string $sKey

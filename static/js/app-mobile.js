@@ -91,7 +91,6 @@ var
 
 if (window.Modernizr && navigator)
 {
-	// v = 15;
 	window.Modernizr.addTest('pdf', function() {
 		var aMimes = navigator.mimeTypes, iIndex = 0, iLen = aMimes.length;
 		for (; iIndex < iLen; iIndex++)
@@ -112,6 +111,7 @@ if (!Date.now)
 		return (new Date()).getTime();
 	};
 }
+
 bMobileApp = true;
 
 if (window.Modernizr && navigator)
@@ -1530,6 +1530,16 @@ Utils.getFilestorageDownloadLinkByHash = function (iAccountId, sHash, sPublicHas
 };
 
 /**
+ * @param {number} iAccountId
+ * @param {string} sHash
+ * @returns {String}
+ */
+Utils.getEventDownloadLinkByHash = function (iAccountId, sHash)
+{
+	return '?/Raw/EventAttachment/' + iAccountId + '/' + sHash;
+};
+
+/**
  * Gets link for download by hash.
  *
  * @param {number} iAccountId
@@ -2654,7 +2664,7 @@ Utils.calmEvent  = function (oEvent)
 		oEvent.returnValue = false;
 	}
 };
-/* 
+/**
  * Can be connected to external applications. Don't use App object here.
  */
 
@@ -3260,11 +3270,6 @@ ko.bindingHandlers.command = {
 
 		jqElement.toggleClass('command-disabled disable disabled', !bResult);
 		jqElement.toggleClass('enable', bResult);
-
-//		if (jqElement.is('input') || jqElement.is('button'))
-//		{
-//			jqElement.prop('disabled', !bResult);
-//		}
 	}
 };
 
@@ -3867,9 +3872,6 @@ ko.bindingHandlers.customSelect = {
 					aOptions[_.indexOf(oCommand['options'], item)].addClass(oCommand['selected']);
 					oText.text($.trim(item[oCommand['optionsText']]));
 				}
-
-//				aOptions[_.indexOf(oCommand['options'], item)].addClass(oCommand['selected']);
-//				oText.text($.trim(item[oCommand['optionsText']]));
 
 				return item[oCommand['optionsValue']];
 			},
@@ -4895,7 +4897,6 @@ ko.bindingHandlers.autosize = {
 					setTimeout(function () {
 						jqEl.height(iMinHeight - iPaddingTB - iBorder);
 						jqEl.height(jqEl.prop('scrollHeight') + iPadding - iPaddingTB);
-						//$('.calendar_event .scrollable_field').scrollTop(jqEl.height('scrollHeight'))
 					}, 100);
 				}
 			}
@@ -5055,7 +5056,6 @@ ko.bindingHandlers.highlighter = {
 				;
 
 				if (!(
-//							oEvent.keyCode === Enums.Key.Enter					||
 						oEvent.keyCode === Enums.Key.Shift					||
 						oEvent.keyCode === Enums.Key.Ctrl					||
 						// for international english -------------------------
@@ -5064,7 +5064,6 @@ ko.bindingHandlers.highlighter = {
 //						oEvent.keyCode === Enums.Key.Six && oEvent.shiftKey	||
 						// ---------------------------------------------------
 						bMoveKeys											||
-//							((oEvent.shiftKey || iPrevKeyCode === Enums.Key.Shift) && bMoveKeys) ||
 						((oEvent.ctrlKey || iPrevKeyCode === Enums.Key.Ctrl) && oEvent.keyCode === Enums.Key.a)
 					))
 				{
@@ -7388,7 +7387,6 @@ function CSelector(list, fSelectCallback, fDeleteCallback, fDblClickCallback, fE
 
 			if (oItemToSelect)
 			{
-//				self.scrollToSelected();
 				this.oLast = oItemToSelect;
 			}
 		},
@@ -8209,6 +8207,15 @@ CApi.prototype.composeMessageToAddresses = function (sToAddresses)
 CApi.prototype.composeMessageWithVcard = function (oVcard)
 {
 	var aParams = ['vcard', oVcard];
+	App.Routing.goDirectly(App.Links.compose(), aParams);
+};
+
+/**
+ * @param {Object} oMessage
+ */
+CApi.prototype.composeMessageWithEml = function (oMessage)
+{
+	var aParams = ['eml', oMessage];
 	App.Routing.goDirectly(App.Links.compose(), aParams);
 };
 
@@ -9282,7 +9289,6 @@ OpenPgp.prototype.generateKey = function (sUserID, sPassword, nKeyLength)
 
 	try
 	{
-//		mKeyPair = this.pgp.generateKeyPair(1, Utils.pInt(nKeyLength), sUserID, Utils.trim(sPassword));
 		mKeyPair = this.pgp.generateKeyPair({
 			'userId': sUserID,
 			'numBits': Utils.pInt(nKeyLength),
@@ -10381,6 +10387,9 @@ function CAppSettingsModel(bAllowOpenPgp)
 	
 	this.SettingsFilesAppsEnabled = true;
 	this.SettingsMobilesyncAppsEnabled = true;
+	
+	this.CalendarAttachFileToEventEnabled = false;
+	this.CalendarNotificationEnabled = false;
 }
 	
 /**
@@ -10450,6 +10459,9 @@ CAppSettingsModel.prototype.parse = function (oData)
 	
 	this.SettingsFilesAppsEnabled = !!oData.SettingsFilesAppsEnabled;
 	this.SettingsMobilesyncAppsEnabled = !!oData.SettingsMobilesyncAppsEnabled;
+	
+	this.CalendarAttachFileToEventEnabled = !!oData.CalendarAttachFileToEventEnabled;
+	this.CalendarNotificationEnabled = !!oData.CalendarNotificationEnabled;
 };
 
 /**
@@ -12486,7 +12498,7 @@ CCommonFileModel.prototype.viewCommonFile = function ()
 
 	if (this.visibleViewLink() && this.viewLink().length > 0 && this.viewLink() !== '#')
 	{
-		if (this.isLink()/* && this.linkType() === Enums.FileStorageLinkType.GoogleDrive*/)
+		if (this.isLink())
 		{
 			sUrl = this.linkUrl();
 		}
@@ -13577,7 +13589,7 @@ CFolderModel.prototype.parse = function (oData, sParentFullName, bDisableManageS
 		this.type(oData.Type);
 		this.bNamespace = (sNamespaceFolder === this.fullName());
 		
-		this.subscribed(oData.IsSubscribed);
+		this.subscribed(this.type() === Enums.FolderTypes.Inbox || !!oData.IsSubscribed);
 		this.bSelectable = oData.IsSelectable;
 		this.bExists = oData.Exists;
 		
@@ -14700,11 +14712,14 @@ CMessageModel.prototype.viewMessage = function (oWin)
 CMessageModel.prototype.fillFromOrToText = function ()
 {
 	var
-		oFolder = App.MailCache.getFolderByFullName(this.accountId(), this.folder()),
+		oFolderList = App.MailCache.folderList(),
+		oFolder = oFolderList ? oFolderList.getFolderByFullName(this.folder()) : null,
+		oSent = oFolderList ? oFolderList.sentFolder() : null,
+		oDraft = oFolderList ? oFolderList.draftsFolder() : null,
 		oAccount = AppData.Accounts.getAccount(this.accountId())
 	;
 	
-	if (oFolder.type() === Enums.FolderTypes.Drafts || oFolder.type() === Enums.FolderTypes.Sent)
+	if (oFolder && (oSent && oFolder.fullName().indexOf(oSent.fullName()) !== -1 || oDraft && oFolder.fullName().indexOf(oDraft.fullName()) !== -1))
 	{
 		this.fromOrToText(this.oTo.getDisplay(Utils.i18n('MESSAGE/ME_RECIPIENT'), oAccount.email()));
 	}
@@ -16875,10 +16890,10 @@ CSignatureModel.prototype.parse = function (iAccountId, oData)
 {
 	this.iAccountId = iAccountId;
 	
-//	this.type(parseInt(oData.Type, 10) === 1 ? true : false);
 	this.options(parseInt(oData.Options, 10));
 	this.signature(oData.Signature);
 };
+
 
 /**
  * @constructor
@@ -17484,17 +17499,6 @@ function CPageSwitcherViewModel(iCount, iPerPage)
 		
 	}, this);
 
-	
-//	this.firstPage = ko.computed(function () {
-//		var iValue = this.currentPage() - this.iLimitAround;
-//		return (iValue > 0) ? iValue : 1;
-//	}, this);
-//
-//	this.lastPage = ko.computed(function () {
-//		var iValue = this.firstPage() + this.iLimitAround * 2;
-//		return (iValue <= this.pagesCount()) ? iValue : this.pagesCount();
-//	}, this);
-
 	this.visibleFirst = ko.computed(function () {
 		return (this.firstPage() > 1);
 	}, this);
@@ -17638,6 +17642,7 @@ CPageSwitcherViewModel.prototype.clickLastPage = function ()
 {
 	this.currentPage(this.pagesCount());
 };
+
 
 /**
  * @constructor
@@ -17908,10 +17913,17 @@ CHtmlEditorViewModel.prototype.showImagePopup = function ($image, oEvent)
 	this.imagePopupTop(Math.round(oEvent.pageY + oWorkareaPos.top - oWorkareaOffset.top));
 
 	this.visibleImagePopup(true);
+	if ($image.parent('a').length > 0) { //show  LinkPopup if link contains image
+		this.oCrea.oCurrLink = $image.parent('a').get(0);
+		this.showLinkPopup($image.parent('a'));
+	}
 };
 
 CHtmlEditorViewModel.prototype.hideImagePopup = function ()
 {
+	if (this.visibleLinkPopup() && this.visibleImagePopup()) { //hide  LinkPopup if link contains image
+		this.visibleLinkPopup(false);
+	}
 	this.visibleImagePopup(false);
 };
 
@@ -19070,8 +19082,113 @@ CWrapLoginViewModel.prototype.changeLanguage = function (sLanguage)
 /**
  * @constructor
  */
+function CLoginAdvancedViewModel()
+{
+	var oSett = AppData.LoginAdvanced;
+	this.bEnabled = !!(oSett && oSett.Enabled);
+	if (this.bEnabled)
+	{
+		this.displayForm = ko.observable(false);
+		this.triggerLinkText = ko.computed(function () {
+			return this.displayForm() ? Utils.i18n('LOGIN/LINK_LESS_OPTIONS') : Utils.i18n('LOGIN/LINK_MORE_OPTIONS');
+		}, this);
+		this.oIncoming = new CServerPropertiesViewModel(oSett.IncomingPort || 143, oSett.IncomingSslPort || 993, !!oSett.IncomingUseSsl, 'acc_login_incoming', Utils.i18n('SETTINGS/ACCOUNT_PROPERTIES_INCOMING_MAIL'));
+		this.oOutgoing = new CServerPropertiesViewModel(oSett.OutgoingPort || 25, oSett.OutgoingSslPort || 465, !!oSett.OutgoingUseSsl, 'acc_login_outgoing', Utils.i18n('SETTINGS/ACCOUNT_PROPERTIES_OUTGOING_MAIL'), this.oIncoming.server);
+		this.bShowUseSmtpAuth = !!oSett.ShowUseSmtpAuth;
+		this.useSmtpAuthentication = ko.observable(!!oSett.UseSmtpAuth);
+		this.advancedLoginForm = ko.observable(null);
+	}
+}
+
+CLoginAdvancedViewModel.prototype.onApplyBindings = function ()
+{
+	if (this.bEnabled && _.isArray(AppData.LoginAdvanced.Hosts))
+	{
+		var aHosts = _.compact(_.map(AppData.LoginAdvanced.Hosts, function (sHost) {
+			return (typeof sHost === 'string') ? Utils.trim(sHost) : '';
+		}));
+		
+		if (aHosts.length > 0)
+		{
+			var
+				oServerInputs = this.advancedLoginForm().find('input.input.server'),
+				oIncoming = this.oIncoming,
+				oOutgoing = this.oOutgoing
+			;
+			oServerInputs.each(function () {
+				var oInput = $(this);
+				oInput.autocomplete({
+					source: _.sortBy(aHosts, function (sHost) { return sHost; }),
+					select: function ( event, ui ) {
+						if (oInput.parent() && ui.item)
+						{
+							if (oInput.parent().hasClass('incoming'))
+							{
+								oIncoming.server(ui.item.value);
+							}
+							if (oInput.parent().hasClass('outgoing'))
+							{
+								oOutgoing.server(ui.item.value);
+							}
+						}
+					},
+					change: function(event,ui) {
+						if (_.indexOf(aHosts, oInput.val()) === -1)
+						{
+							if (oInput.parent().hasClass('incoming'))
+							{
+								oIncoming.server('');
+							}
+							if (oInput.parent().hasClass('outgoing'))
+							{
+								oOutgoing.server('');
+							}
+							oInput.focus();
+						}
+					}
+				});
+				oInput.on('click', function () {
+					oInput.autocomplete('option', 'minLength', 0); //for triggering search on empty field
+					oInput.autocomplete('search');
+					setTimeout(function () {
+						oInput.autocomplete('option', 'minLength', 1);
+					}.bind(this), 0);
+				});
+			});
+		}
+	}
+};
+
+CLoginAdvancedViewModel.prototype.triggerFormDisplaying = function ()
+{
+	this.displayForm(!this.displayForm());
+};
+
+CLoginAdvancedViewModel.prototype.getData = function ()
+{
+	if (this.bEnabled && this.displayForm())
+	{
+		return {
+			'IncHost': this.oIncoming.server(),
+			'IncPort': this.oIncoming.getIntPort(),
+			'IncSsl': this.oIncoming.getIntSsl(),
+			'OutHost': this.oOutgoing.server(),
+			'OutPort': this.oOutgoing.getIntPort(),
+			'OutSsl': this.oOutgoing.getIntSsl(),
+			'OutAuth': this.useSmtpAuthentication() ? '1' : '0'
+		};
+	}
+	return {};
+};
+
+
+/**
+ * @constructor
+ */
 function CLoginViewModel()
 {
+	this.oLoginAdvancedViewModel = new CLoginAdvancedViewModel();
+	
 	this.allowRegistration = AppData.App.AllowRegistration;
 	this.allowPasswordReset = AppData.App.AllowPasswordReset;
 
@@ -19147,6 +19264,7 @@ CLoginViewModel.prototype.__name = 'CLoginViewModel';
 CLoginViewModel.prototype.onApplyBindings = function ()
 {
 	$html.addClass('non-adjustable-valign');
+	this.oLoginAdvancedViewModel.onApplyBindings();
 };
 
 CLoginViewModel.prototype.onShow = function ()
@@ -19243,6 +19361,8 @@ CLoginViewModel.prototype.sendRequest = function ()
 			'SignMe': this.signMe() ? '1' : '0'
 		}
 	;
+	
+	_.extend(oParameters, this.oLoginAdvancedViewModel.getData());
 
 	this.loading(true);
 	App.Ajax.send(oParameters, this.onSystemLoginResponse, this);
@@ -20547,6 +20667,12 @@ function CMessagePaneViewModel(fOpenMessageInNewWindowBinded)
 		return this.isCurrentMessageLoaded() && this.allowSaveAsPdf();
 	}, this);
 
+	this.allowForwardAsAttachment =  ko.observable(true);
+	
+	this.isEnableForwardAsAttachment = ko.computed(function () {
+		return this.isCurrentMessageLoaded() && this.allowForwardAsAttachment();
+	}, this);
+
 	this.deleteCommand = Utils.createCommand(this, this.executeDeleteMessage, this.isEnableDelete);
 	this.prevMessageCommand = Utils.createCommand(this, this.executePrevMessage, this.isEnablePrevMessage);
 	this.nextMessageCommand = Utils.createCommand(this, this.executeNextMessage, this.isEnableNextMessage);
@@ -20557,6 +20683,7 @@ function CMessagePaneViewModel(fOpenMessageInNewWindowBinded)
 	this.printCommand = Utils.createCommand(this, this.executePrint, this.isEnablePrint);
 	this.saveCommand = Utils.createCommand(this, this.executeSave, this.isEnableSave);
 	this.saveAsPdfCommand = Utils.createCommand(this, this.executeSaveAsPdf, this.isEnableSaveAsPdf);
+	this.forwardAsAttachment = Utils.createCommand(this, this.executeForwardAsAttachment, this.isEnableForwardAsAttachment);
 	this.moreCommand = Utils.createCommand(this, null, this.isCurrentMessageLoaded);
 
 	this.ical = ko.observable(null);
@@ -21406,6 +21533,14 @@ CMessagePaneViewModel.prototype.executeSave = function ()
 	}
 };
 
+CMessagePaneViewModel.prototype.executeForwardAsAttachment = function ()
+{
+	if (this.currentMessage())
+	{
+		App.Api.composeMessageWithEml(this.currentMessage());
+	}
+};
+
 CMessagePaneViewModel.prototype.executeSaveAsPdf = function ()
 {
 	if (this.currentMessage())
@@ -21773,7 +21908,6 @@ function CMailViewModel()
 	this.markAsUnreadCommand = Utils.createCommand(this.oMessageList, this.oMessageList.executeMarkAsUnread, this.isEnableGroupOperations);
 	this.markAllReadCommand = Utils.createCommand(this.oMessageList, this.oMessageList.executeMarkAllRead);
 	this.moveToFolderCommand = Utils.createCommand(this, Utils.emptyFunction, this.isEnableGroupOperations);
-//	this.copyToFolderCommand = Utils.createCommand(this, Utils.emptyFunction, this.isEnableGroupOperations);
 	this.deleteCommand = Utils.createCommand(this.oMessageList, this.oMessageList.executeDelete, this.isEnableGroupOperations);
 	this.selectedCount = ko.computed(function () {
 		return this.oMessageList.checkedUids().length;
@@ -22688,6 +22822,11 @@ CComposeViewModel.prototype.onRoute = function (aParams)
                 this.addContactAsAttachment(aParams[1]);
             }
 
+            if (this.routeType() === 'eml' && aParams.length === 2)
+            {
+                this.addMessageAsAttachment(aParams[1]);
+            }
+
             if (this.routeType() === 'file' && aParams.length === 2)
             {
                 this.addFilesAsAttachment(aParams[1]);
@@ -23169,34 +23308,101 @@ CComposeViewModel.prototype.onFilesUpload = function (oResponse, oRequest)
 };
 
 /**
+ * @param {Object} oMessage
+ */
+CComposeViewModel.prototype.addMessageAsAttachment = function (oMessage)
+{
+	var
+		oAttach = new CMailAttachmentModel(),
+		oParameters = null
+	;
+	
+	if (oMessage)
+	{
+		oAttach.fileName(oMessage.subject() + '.eml');
+		oAttach.uploadStarted(true);
+		
+		this.attachments.push(oAttach);
+		
+		oParameters = {
+			'Action': 'MessageEmlUpload',
+			'MessageFolder': oMessage.folder(),
+			'MessageUid': oMessage.uid(),
+			'Name': oAttach.fileName()
+		};
+		
+		this.messageUploadAttachmentsStarted(true);
+		
+		App.Ajax.send(oParameters, this.onMessageEmlUpload, this);
+	}
+};
+
+/**
+ * @param {Object} oResponse
+ * @param {Object} oRequest
+ */
+CComposeViewModel.prototype.onMessageEmlUpload = function (oResponse, oRequest)
+{
+	var
+		oResult = oResponse.Result,
+		oAttach = null
+	;
+	
+	this.messageUploadAttachmentsStarted(false);
+	
+	if (oResult)
+	{
+		oAttach = _.find(this.attachments(), function (oAttach) {
+			return oAttach.fileName() === oRequest.Name && oAttach.uploadStarted();
+		});
+		
+		if (oAttach)
+		{
+			oAttach.parseFromUpload(oResult, oResponse.AccountID);
+		}
+	}
+	else
+	{
+		oAttach = _.find(this.attachments(), function (oAttach) {
+			return oAttach.fileName() === oRequest.Name && oAttach.uploadStarted();
+		});
+		
+		if (oAttach)
+		{
+			oAttach.errorFromUpload();
+		}
+	}
+};
+
+/**
  * @param {Object} oContact
  */
 CComposeViewModel.prototype.addContactAsAttachment = function (oContact)
 {
-    var
-        oAttach = new CMailAttachmentModel(),
-        oParameters = null
-        ;
-
-    if (oContact)
-    {
-        oAttach.fileName('contact-' + oContact.idContact() + '.vcf');
-        oAttach.uploadStarted(true);
-
-        this.attachments.push(oAttach);
-
-        oParameters = {
-            'Action': 'ContactVCardUpload',
-            'ContactId': oContact.idContact(),
-            'Global': oContact.global() ? '1' : '0',
-            'Name': oAttach.fileName(),
-			'SharedWithAll': oContact.sharedToAll() ? '1' : '0',
-        };
-
-        this.messageUploadAttachmentsStarted(true);
-
-        App.Ajax.send(oParameters, this.onContactVCardUpload, this);
-    }
+	var
+		oAttach = new CMailAttachmentModel(),
+		oParameters = null
+	;
+	
+	if (oContact)
+	{
+		oAttach.fileName('contact-' + oContact.idContact() + '.vcf');
+		oAttach.uploadStarted(true);
+		
+		this.attachments.push(oAttach);
+		
+		oParameters = {
+			'Action': 'ContactVCardUpload',
+			'ContactId': oContact.idContact(),
+			'Global': oContact.global() ? '1' : '0',
+			'Name': oAttach.fileName(),
+			'SharedWithAll': oContact.sharedToAll() ? '1' : '0'
+		};
+		
+		this.messageUploadAttachmentsStarted(true);
+		
+		App.Ajax.send(oParameters, this.onContactVCardUpload, this);
+	}
 };
 
 /**
@@ -25863,6 +26069,87 @@ CContactsViewModel.prototype.createNewContact = function ()
 	}
 };
 
+/**
+ * @constructor
+ * 
+ * @param {number} iDefaultPort
+ * @param {number} iDefaultSslPort
+ * @param {bool} bDefaultUseSsl
+ * @param {string} sId
+ * @param {string} sLabel
+ * @param {object} koDefaultServerValue
+ */
+function CServerPropertiesViewModel(iDefaultPort, iDefaultSslPort, bDefaultUseSsl, sId, sLabel, koDefaultServerValue)
+{
+	this.server = ko.observable('');
+	this.label = sLabel;
+	this.focused = ko.observable(false);
+	this.defaultPort = ko.observable(iDefaultPort);
+	this.defaultSslPort = ko.observable(iDefaultSslPort);
+	this.port = ko.observable(bDefaultUseSsl ? iDefaultSslPort : iDefaultPort);
+	this.ssl = ko.observable(bDefaultUseSsl);
+	this.isEnabled = ko.observable(true);
+	this.id = sId;
+
+	if (_.isFunction(koDefaultServerValue))
+	{
+		koDefaultServerValue.subscribe(function () {
+			_.defer(_.bind(function () {
+				if (this.server() === '')
+				{
+					this.server(koDefaultServerValue());
+				}
+			}, this));
+		}, this);
+	}
+
+	this.ssl.subscribe(function () {
+		if (this.ssl())
+		{
+			if (this.port() === this.defaultPort())
+			{
+				this.port(this.defaultSslPort());
+			}
+		}
+		else
+		{
+			if (this.port() === this.defaultSslPort())
+			{
+				this.port(this.defaultPort());
+			}
+		}
+	}, this);
+}
+
+/**
+ * @param {string} sServer
+ * @param {number} iPort
+ * @param {boolean} bSsl
+ */
+CServerPropertiesViewModel.prototype.set = function (sServer, iPort, bSsl)
+{
+	this.server(sServer);
+	this.port(iPort);
+	this.ssl(bSsl);
+};
+
+CServerPropertiesViewModel.prototype.clear = function ()
+{
+	this.server('');
+	this.port(this.defaultPort());
+	this.ssl(false);
+};
+
+CServerPropertiesViewModel.prototype.getIntPort = function ()
+{
+	return parseInt(this.port(), 10);
+};
+
+CServerPropertiesViewModel.prototype.getIntSsl = function ()
+{
+	return this.ssl() ? 1 : 0;
+};
+
 
 /**
  * @constructor
@@ -26290,24 +26577,13 @@ CScreens.prototype.initScreens = function ()
 		'Model': CComposeViewModel,
 		'TemplateName': 'Mail_ComposeViewModel'
 	};
-//	this.oScreens[Enums.Screens.SingleCompose] = {
-//		'Model': CComposeViewModel,
-//		'TemplateName': 'Mail_ComposeViewModel'
-//	};
-//	this.oScreens[Enums.Screens.Settings] = {
-//		'Model': CSettingsViewModel,
-//		'TemplateName': 'Settings_SettingsViewModel'
-//	};
-//	this.oScreens[Enums.Screens.SingleHelpdesk] = {
-//		'Model': CHelpdeskViewModel,
-//		'TemplateName': 'Helpdesk_ViewThreadInNewWindow'
-//	};
 };
 
 CScreens.prototype.initLayout = function ()
 {
 	$('#pSevenContent').append($('#Layout').html());
 };
+
 
 /**
  * @constructor
@@ -27086,6 +27362,11 @@ CMailCache.prototype.moveMessagesToFolder = function (sToFolderFullName, aUids, 
 				if (oToFolder && oToFolder.type() === Enums.FolderTypes.Spam)
 				{
 					AfterLogicApi.runPluginHook('move-messages-to-spam', 
+						[AppData.Accounts.currentId(), oParameters.Folder, aUids]);
+				}
+				if (oCurrFolder && oCurrFolder.type() === Enums.FolderTypes.Spam)
+				{
+					AfterLogicApi.runPluginHook('move-messages-from-spam', 
 						[AppData.Accounts.currentId(), oParameters.Folder, aUids]);
 				}
 			}, this)
@@ -27897,7 +28178,10 @@ CMailCache.prototype.searchMessagesInCurrentFolder = function (sSearch)
 		sUid = this.currentMessage() ? this.currentMessage().uid() : '',
 		sFilters = this.uidList().filters()
 	;
-	
+	if (Enums.FolderFilter.Flagged === sFilters)
+	{
+		sFilters = "";
+	}
 	App.Routing.setHash(App.Links.mailbox(sFolder, 1, sUid, sSearch, sFilters));
 };
 

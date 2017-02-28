@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2004-2015, AfterLogic Corp.
+ * Copyright 2004-2017, AfterLogic Corp.
  * Licensed under AGPLv3 license or AfterLogic license
  * if commercial version of the product was purchased.
  * See the LICENSE file for a full license statement.
@@ -162,7 +162,7 @@ class Service
 				@\header('Last-Modified: '.\gmdate('D, d M Y H:i:s').' GMT');
 			}
 			
-			if ((\CApi::GetConf('labs.cache-ctrl', true) && isset($_COOKIE['aft-cache-ctrl'])))
+			if ((\CApi::GetConf('labs.cache-ctrl', false) && isset($_COOKIE['aft-cache-ctrl'])))
 			{
 				setcookie('aft-cache-ctrl', '', time() - 3600);
 				$this->oHttp->StatusHeader(304);

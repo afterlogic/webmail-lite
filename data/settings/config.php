@@ -1,6 +1,6 @@
 <?php
 
-$aSieveDomains = array('imap.domain1.com', 'imap.domain2.com');
+$aSieveDomains = array('127.0.0.1', 'localhost');
 
 return array(
 	

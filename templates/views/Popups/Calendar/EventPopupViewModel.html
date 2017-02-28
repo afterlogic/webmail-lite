@@ -18,7 +18,6 @@
 							'tentative': status === 3
 						 }">
 						<span class="control remove" data-bind="visible: $parent.isEditable(), click: $parent.removeGuest.bind($parent), customTooltip: 'CALENDAR/EVENT_GUESTS_REMOVE'"></span>
-						<!--<span class="name" data-bind="css: {'recivedAnim': $parent.recivedAnim}">-->
 						<span class="name" data-bind="css: {'recivedAnim': $parent.recivedAnim() && email === $parent.whomAnimate()}">
 							<span class="icon status" data-bind="customTooltip: function () { return $parent.getAttenderTextStatus(status); }"></span>
 							<span class="text" data-bind="customTooltip: email, text: name, visible: name !== ''"></span>
@@ -45,7 +44,6 @@
 		</div>
 
 		<div class="main_panel">
-			<!--<span class="icon repeat" data-bind="visible: repeatPeriod() !== Enums.CalendarRepeatPeriod.None"></span>-->
 			<span class="icon appointment" data-bind="visible: attendees().length !== 0"></span>
 			<span class="close" data-bind="click: closePopup"></span>
 			<span class="title" data-bind="dropdown: {'control': false}, style: {backgroundColor: calendarColor}, css: {'calendar_selector': calendarsList().length > 1 && selectedCalendarIsEditable()}">
@@ -81,21 +79,16 @@
 							<div class="form_content">
 								<div class="row" data-bind="css: {'ampm_time': ampmTimeFormat()}">
 									<input class="date input" type="text"  spellcheck="false" readonly="readonly" data-bind="initDom: startDom" />
-									<!--<input class="time input" type="text" spellcheck="false"  data-bind="value: startTime, visible: !allDay()" />-->
 									<span class="custom_selector" data-bind="visible: !allDay(), customSelect: {'control': false, 'selected': 'selected', 'input': true, 'options': timeOptions(), 'timeOptions': timeOptions, value: startTime, optionsText: 'text', optionsValue: 'value'}">
 										<input class="value time input"  spellcheck="false" type="text" data-bind="value: startTime" />
 										<span class="dropdown">
 											<span class="dropdown_helper">
 												<span class="dropdown_arrow"><span></span></span>
-												<span class="dropdown_content">
-												<!--<span class="dropdown_content" data-bind="customScrollbar: {x: false}">-->
-													<!--<span class="scroll-inner"></span>-->
-												</span>
+												<span class="dropdown_content"></span>
 											</span>
 										</span>
 									</span>
 									<input class="date input" type="text" spellcheck="false"  readonly="readonly" data-bind="initDom: endDom" />
-									<!--<input class="time input" type="text" spellcheck="false"  data-bind="value: endTime, visible: !allDay()" />-->
 									<span class="custom_selector" data-bind="visible: !allDay(), customSelect: {'control': false, 'selected': 'selected', 'input': true, 'options': timeOptions(), 'timeOptions': timeOptions, value: endTime, optionsText: 'text', optionsValue: 'value'}">
 										<input class="value time input" spellcheck="false"  type="text" data-bind="value: endTime" />
 										<span class="dropdown">
@@ -271,6 +264,11 @@
 					</div>
 					<span class="button save" data-i18n="CALENDAR/BUTTON_SAVE" data-bind="i18n: 'text', click: onSaveClick, visible: isEditable() || isEditableReminders()"></span>
 					<span class="link remove" data-i18n="CALENDAR/LINK_REMOVE" data-bind="i18n: 'text', click: onDeleteClick, visible: isEditForm() && isEditable()"></span>
+					<!-- ko if: bCalendarAttachFileToEventEnabled -->
+					<span style="float: right;" class="button save" data-i18n="CALENDAR/ACTION_ATTACH_FILE" data-bind="i18n: 'text', initDom: eventUploaderButton, visible: isMyEvent() && !attachUploaded()"></span>
+					<span style="float: right; margin-top: 8px; margin-left: 8px;" class="link remove" data-i18n="CALENDAR/ACTION_REMOVE_FILE" data-bind="i18n: 'text', visible: isMyEvent() && attachUploaded(), click: removeAttach"></span>
+					<span style="float: right; margin-top: 8px;" data-bind="text: attachName, visible: attachUploaded, css: {'link': attachDownloadLink}, click: downloadAttachment, customTooltip: 'CALENDAR/HINT_CLICK_TO_DOWNLOAD'"></span>
+					<!-- /ko -->
 				</div>
 
 			</div>

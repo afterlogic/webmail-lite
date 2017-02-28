@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2004-2015, AfterLogic Corp.
+ * Copyright 2004-2017, AfterLogic Corp.
  * Licensed under AGPLv3 license or AfterLogic license
  * if commercial version of the product was purchased.
  * See the LICENSE file for a full license statement.
@@ -214,7 +214,12 @@ class CApiWebmailManager extends AApiManagerWithStorage
 	public function validateAdminPassword($sPassword)
 	{
 		$sSettingsPassword = $this->oSettings->GetConf('Common/AdminPassword');
-		return $sSettingsPassword === $sPassword || md5($sPassword) === $sSettingsPassword;
+		$sAdminDefaultPassword = CApi::GetConf('admin.default-password', '');
+                if($sSettingsPassword === '' && $sPassword === $sAdminDefaultPassword)
+                {
+                    return true;
+                }
+		return crypt($sPassword, CApi::$sSalt) === $sSettingsPassword;
 	}
 
 	/**

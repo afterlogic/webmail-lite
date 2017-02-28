@@ -91,7 +91,6 @@ var
 
 if (window.Modernizr && navigator)
 {
-	// v = 15;
 	window.Modernizr.addTest('pdf', function() {
 		var aMimes = navigator.mimeTypes, iIndex = 0, iLen = aMimes.length;
 		for (; iIndex < iLen; iIndex++)
@@ -112,6 +111,7 @@ if (!Date.now)
 		return (new Date()).getTime();
 	};
 }
+
 bExtApp = true;
 
 
@@ -1093,11 +1093,6 @@ ko.bindingHandlers.command = {
 
 		jqElement.toggleClass('command-disabled disable disabled', !bResult);
 		jqElement.toggleClass('enable', bResult);
-
-//		if (jqElement.is('input') || jqElement.is('button'))
-//		{
-//			jqElement.prop('disabled', !bResult);
-//		}
 	}
 };
 
@@ -1700,9 +1695,6 @@ ko.bindingHandlers.customSelect = {
 					aOptions[_.indexOf(oCommand['options'], item)].addClass(oCommand['selected']);
 					oText.text($.trim(item[oCommand['optionsText']]));
 				}
-
-//				aOptions[_.indexOf(oCommand['options'], item)].addClass(oCommand['selected']);
-//				oText.text($.trim(item[oCommand['optionsText']]));
 
 				return item[oCommand['optionsValue']];
 			},
@@ -2728,7 +2720,6 @@ ko.bindingHandlers.autosize = {
 					setTimeout(function () {
 						jqEl.height(iMinHeight - iPaddingTB - iBorder);
 						jqEl.height(jqEl.prop('scrollHeight') + iPadding - iPaddingTB);
-						//$('.calendar_event .scrollable_field').scrollTop(jqEl.height('scrollHeight'))
 					}, 100);
 				}
 			}
@@ -2888,7 +2879,6 @@ ko.bindingHandlers.highlighter = {
 				;
 
 				if (!(
-//							oEvent.keyCode === Enums.Key.Enter					||
 						oEvent.keyCode === Enums.Key.Shift					||
 						oEvent.keyCode === Enums.Key.Ctrl					||
 						// for international english -------------------------
@@ -2897,7 +2887,6 @@ ko.bindingHandlers.highlighter = {
 //						oEvent.keyCode === Enums.Key.Six && oEvent.shiftKey	||
 						// ---------------------------------------------------
 						bMoveKeys											||
-//							((oEvent.shiftKey || iPrevKeyCode === Enums.Key.Shift) && bMoveKeys) ||
 						((oEvent.ctrlKey || iPrevKeyCode === Enums.Key.Ctrl) && oEvent.keyCode === Enums.Key.a)
 					))
 				{
@@ -3701,6 +3690,16 @@ Utils.getFilestorageDownloadLinkByHash = function (iAccountId, sHash, sPublicHas
 		sUrl = sUrl + '/0/' + sPublicHash;
 	}
 	return sUrl;
+};
+
+/**
+ * @param {number} iAccountId
+ * @param {string} sHash
+ * @returns {String}
+ */
+Utils.getEventDownloadLinkByHash = function (iAccountId, sHash)
+{
+	return '?/Raw/EventAttachment/' + iAccountId + '/' + sHash;
 };
 
 /**
@@ -4828,7 +4827,7 @@ Utils.calmEvent  = function (oEvent)
 		oEvent.returnValue = false;
 	}
 };
-/* 
+/**
  * Can be connected to external applications. Don't use App object here.
  */
 
@@ -5319,7 +5318,6 @@ function CSelector(list, fSelectCallback, fDeleteCallback, fDblClickCallback, fE
 
 			if (oItemToSelect)
 			{
-//				self.scrollToSelected();
 				this.oLast = oItemToSelect;
 			}
 		},
@@ -6370,10 +6368,9 @@ CSelector.prototype.scrollToSelected = function ()
 		if (aEmail) {
 			item.label = item.label.replace('<' + aEmail[0] + '>', "<span style='opacity: 0.5'>" + '&lt;' + aEmail[0] + '&gt' + "</span>"); //highlight <email>
 		}
-
+		
 		return $('<li>')
-			.append('<a>' + item.label + (item.global ? '' : '<span class="del"></span>') + '</a>')
-			//.append(item.global ? null : '<span class="del"></span>')
+			.append('<a>' + item.label + (item.global === false ? '<span class="del"></span>' : '') + '</a>')
 			.appendTo(ul);
 	};
 
@@ -6468,6 +6465,15 @@ CApi.prototype.composeMessageToAddresses = function (sToAddresses)
 CApi.prototype.composeMessageWithVcard = function (oVcard)
 {
 	var aParams = ['vcard', oVcard];
+	App.Routing.goDirectly(App.Links.compose(), aParams);
+};
+
+/**
+ * @param {Object} oMessage
+ */
+CApi.prototype.composeMessageWithEml = function (oMessage)
+{
+	var aParams = ['eml', oMessage];
 	App.Routing.goDirectly(App.Links.compose(), aParams);
 };
 
@@ -7261,7 +7267,6 @@ OpenPgp.prototype.generateKey = function (sUserID, sPassword, nKeyLength)
 
 	try
 	{
-//		mKeyPair = this.pgp.generateKeyPair(1, Utils.pInt(nKeyLength), sUserID, Utils.trim(sPassword));
 		mKeyPair = this.pgp.generateKeyPair({
 			'userId': sUserID,
 			'numBits': Utils.pInt(nKeyLength),
@@ -9635,7 +9640,7 @@ CCommonFileModel.prototype.viewCommonFile = function ()
 
 	if (this.visibleViewLink() && this.viewLink().length > 0 && this.viewLink() !== '#')
 	{
-		if (this.isLink()/* && this.linkType() === Enums.FileStorageLinkType.GoogleDrive*/)
+		if (this.isLink())
 		{
 			sUrl = this.linkUrl();
 		}
@@ -10124,13 +10129,7 @@ function CFileStorageViewModel(bPopup)
 	
 	this.uploaderButton = ko.observable(null);
 	this.uploaderArea = ko.observable(null);
-	this.bDragActive = ko.observable(false);//.extend({'throttle': 1});
-//	this.bDragActive.subscribe(function () {
-//		if (this.searchPattern() !== '')
-//		{
-//			this.bDragActive(false);
-//		}
-//	}, this);
+	this.bDragActive = ko.observable(false);
 
 	this.bDragActiveComp = ko.computed(function () {
 		var bDrag = this.bDragActive();
@@ -10830,11 +10829,8 @@ CFileStorageViewModel.prototype.executeDelete = function ()
 
 CFileStorageViewModel.prototype.onShow = function ()
 {
-//	if (!this.loaded() || this.isPopup)
-//	{
-		this.loaded(true);
-		this.getStorages();
-//	}
+	this.loaded(true);
+	this.getStorages();
 
 	this.selector.useKeyboardKeys(true);
 
@@ -10874,8 +10870,6 @@ CFileStorageViewModel.prototype.getStorageByType = function (storageType)
 
 CFileStorageViewModel.prototype.getStorages = function ()
 {
-//	this.storages.removeAll();
-	
 	if (!this.isPublic)
 	{
 		if (!this.getStorageByType('personal'))

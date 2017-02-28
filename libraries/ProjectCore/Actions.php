@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2004-2015, AfterLogic Corp.
+ * Copyright 2004-2017, AfterLogic Corp.
  * Licensed under AGPLv3 license or AfterLogic license
  * if commercial version of the product was purchased.
  * See the LICENSE file for a full license statement.
@@ -2879,8 +2879,52 @@ class Actions extends ActionsBase
 				$sLanguage = $this->oApiIntegrator->getLoginLanguage();
 			}
 
+			$aExtValues = array();
+			$LoginAdvanced = \CApi::GetConf('login.advanced', false);
+			if (is_array($LoginAdvanced))
+			{
+				$sIncHost = $this->getParamValue('IncHost');
+				if (isset($sIncHost))
+				{
+					$aExtValues['IncHost'] = (string) $sIncHost;
+				}
+				$iIncPort = $this->getParamValue('IncPort');
+				if (isset($iIncPort))
+				{
+					$aExtValues['IncPort'] = (int) $iIncPort;
+				}
+				$bIncSsl = $this->getParamValue('IncSsl');
+				if (isset($bIncSsl))
+				{
+					$aExtValues['IncSsl'] = (bool) $bIncSsl;
+				}
+				$sOutHost = $this->getParamValue('OutHost');
+				if (isset($sOutHost))
+				{
+					$aExtValues['OutHost'] = (string) $sOutHost;
+				}
+				$iOutPort = $this->getParamValue('OutPort');
+				if (isset($iOutPort))
+				{
+					$aExtValues['OutPort'] = (int) $iOutPort;
+				}
+				$bOutSsl = $this->getParamValue('OutSsl');
+				if (isset($bOutSsl))
+				{
+					$aExtValues['OutSsl'] = (bool) $bOutSsl;
+				}
+				$bOutAuth = $this->getParamValue('OutAuth');
+				if (isset($bOutAuth))
+				{
+					$aExtValues['OutAuth'] = (bool) $bOutAuth;
+				}
+				if (!empty($aExtValues))
+				{
+					$aExtValues['IncProtocol'] = 1;
+				}
+			}
 			$oAccount = $this->oApiIntegrator->loginToAccount(
-				$sEmail, $sIncPassword, $sIncLogin, $sLanguage
+				$sEmail, $sIncPassword, $sIncLogin, $sLanguage, $aExtValues
 			);
 		}
 		catch (\Exception $oException)
@@ -5371,6 +5415,62 @@ class Actions extends ActionsBase
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $mResult);
 	}	
 
+	public function AjaxMessageEmlUpload()
+	{
+		$sFolder = $this->getParamValue('MessageFolder');
+		$iUid =	$this->getParamValue('MessageUid');
+		$sFileName =	$this->getParamValue('Name');
+		
+		$oAccount = $this->getDefaultAccountFromParam();
+		
+		$sTempName = md5($sFolder.$iUid);
+		if (!$this->ApiFileCache()->isFileExists($oAccount, $sTempName))
+		{
+			$self = $this;
+			$this->oApiMail->directMessageToStream($oAccount,
+				function($rResource, $sContentType, $sFileName, $sMimeIndex = '') use ($oAccount, &$mResult, $sTempName, $self) {
+					$sContentType = (empty($sFileName)) ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
+					$sFileName = $self->clearFileName($sFileName, $sContentType, $sMimeIndex);
+
+					if ($self->ApiFileCache()->putFile($oAccount, $sTempName, $rResource))
+					{
+						$mResult = array(
+							'TempName' => $sTempName,
+							'Name' => $sFileName,
+							'Size' => $this->ApiFileCache()->fileSize($oAccount, $sTempName),
+							'MimeType' => $sContentType,
+							'Hash' => \CApi::EncodeKeyValues(array(
+								'TempFile' => true,
+								'AccountID' => $oAccount->IdAccount,
+								'Iframed' => false,
+								'Name' => $sFileName,
+								'TempName' => $sTempName
+							))
+						);					
+					}
+				}, $sFolder, $iUid, ''
+			);			
+		}
+		else
+		{
+			$mResult = array(
+				'TempName' => $sTempName,
+				'Name' => $sFileName,
+				'Size' => $this->ApiFileCache()->fileSize($oAccount, $sTempName),
+				'MimeType' => \MailSo\Base\Utils::MimeContentType($sFileName),
+				'Hash' => \CApi::EncodeKeyValues(array(
+					'TempFile' => true,
+					'AccountID' => $oAccount->IdAccount,
+					'Iframed' => false,
+					'Name' => $sFileName,
+					'TempName' => $sTempName
+				))
+			);
+		}
+		
+		return $this->DefaultResponse($oAccount, __FUNCTION__, $mResult);
+	}
+	
 	/**
 	 * @return array
 	 */
@@ -5535,7 +5635,23 @@ class Actions extends ActionsBase
 		
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $mResult);
 	}	
+
+/**
+	 * @return array
+	 */
+	public function AjaxCalendarSendEventNotifications()
+	{
+		$oAccount = $this->getDefaultAccountFromParam();
+		$sCalendarId = $this->getParamValue('CalendarId');
+		$sEventId = $this->getParamValue('EventUid');
+		$bUpdate = (bool) $this->getParamValue('Update', false);
+		$mResult = $this->oApiCalendar->sendNotification($oAccount, $sCalendarId, $sEventId, $bUpdate);
+
+		return $this->DefaultResponse($oAccount, __FUNCTION__, $mResult);
+	}
 	
+//	sendNotification($oAccount, $sCalendarId, $sEventId, $bUpdate = false)
+
 	/**
 	 * @return array
 	 */
@@ -5559,6 +5675,9 @@ class Actions extends ActionsBase
 		$oEvent->AllDay = (bool) $this->getParamValue('allDay');
 		$oEvent->Alarms = @json_decode($this->getParamValue('alarms'), true);
 		$oEvent->Attendees = @json_decode($this->getParamValue('attendees'), true);
+		
+		$oEvent->Attachments = @json_decode($this->getParamValue('attachments'), true);
+		
 
 		$aRRule = @json_decode($this->getParamValue('rrule'), true);
 		if ($aRRule)
@@ -5607,6 +5726,8 @@ class Actions extends ActionsBase
 		$oEvent->AllDay = (bool) $this->getParamValue('allDay');
 		$oEvent->Alarms = @json_decode($this->getParamValue('alarms'), true);
 		$oEvent->Attendees = @json_decode($this->getParamValue('attendees'), true);
+		
+		$oEvent->Attachments = @json_decode($this->getParamValue('attachments'), true);
 		
 		$aRRule = @json_decode($this->getParamValue('rrule'), true);
 		if ($aRRule)
@@ -5948,6 +6069,38 @@ class Actions extends ActionsBase
 		return $this->rawFiles(true);
 	}
 	
+	/**
+	 * @return array
+	 */
+	public function RawEventAttachment()
+	{
+		$sRawKey = (string) $this->getParamValue('RawKey', '');
+		$aValues = \CApi::DecodeKeyValues($sRawKey);
+		
+		$oAccount = $this->getDefaultAccountFromParam();
+		
+		if (isset($aValues['CalendarId'], $aValues['EventId'], $aValues['FileName']))
+		{
+			$sCalendarId = $aValues['CalendarId'];
+			$sEventId = $aValues['EventId'];
+			$sFilename = $aValues['FileName'];
+
+			$oApiCalendarManager = /* @var $oApiCalendarManager \CApiCalendarManager */ \CApi::Manager('calendar');
+			$sOutput = $oApiCalendarManager->getEventAttach($oAccount, $sCalendarId, $sEventId, $sFilename);
+			if (false !== $sOutput)
+			{
+				header('Pragma: public');
+				header('Content-Type: text/calendar');
+				header('Content-Disposition: attachment; filename="'.$sFilename.'";');
+				header('Content-Transfer-Encoding: binary');
+
+				echo $sOutput;
+				return true;
+			}
+		}
+		
+	}
+
 	/**
 	 * @return array
 	 */
@@ -6337,6 +6490,85 @@ class Actions extends ActionsBase
 	/**
 	 * @return array
 	 */
+	public function UploadEventAttachment()
+	{
+		$oAccount = $this->getAccountFromParam();
+
+		$aFileData = $this->getParamValue('FileData', null);
+
+		$iSizeLimit = 0;
+
+		$sError = '';
+		$aResponse = array();
+
+		if ($oAccount)
+		{
+			if (is_array($aFileData))
+			{
+				if (0 < $iSizeLimit && $iSizeLimit < (int) $aFileData['size'])
+				{
+					$sError = 'size';
+				}
+				else
+				{
+					$sSavedName = 'upload-post-'.md5($aFileData['name'].$aFileData['tmp_name']);
+					if (is_resource($aFileData['tmp_name']))
+					{
+						$this->ApiFileCache()->putFile($oAccount, $sSavedName, $aFileData['tmp_name']);
+					}
+					else
+					{
+						$this->ApiFileCache()->moveUploadedFile($oAccount, $sSavedName, $aFileData['tmp_name']);
+					}
+					if ($this->ApiFileCache()->isFileExists($oAccount, $sSavedName))
+					{
+						$sUploadName = $aFileData['name'];
+						$iSize = $aFileData['size'];
+						$sMimeType = \MailSo\Base\Utils::MimeContentType($sUploadName);
+
+						$bIframed = \CApi::isIframedMimeTypeSupported($sMimeType, $sUploadName);
+						$aResponse['Attachment'] = array(
+							'Name' => $sUploadName,
+							'TempName' => $sSavedName,
+							'MimeType' => $sMimeType,
+							'Size' =>  (int) $iSize,
+							'Iframed' => $bIframed,
+							'Hash' => \CApi::EncodeKeyValues(array(
+								'TempFile' => true,
+								'AccountID' => $oAccount->IdAccount,
+								'Iframed' => $bIframed,
+								'Name' => $sUploadName,
+								'TempName' => $sSavedName
+							))
+						);
+					}
+					else
+					{
+						$sError = 'unknown';
+					}
+				}
+			}
+			else
+			{
+				$sError = 'unknown';
+			}
+		}
+		else
+		{
+			$sError = 'auth';
+		}
+
+		if (0 < strlen($sError))
+		{
+			$aResponse['Error'] = $sError;
+		}
+
+		return $this->DefaultResponse($oAccount, __FUNCTION__, $aResponse);
+	}
+
+	/**
+	 * @return array
+	 */
 	public function UploadAttachment()
 	{
 		$oAccount = $this->getAccountFromParam();
@@ -6645,16 +6877,44 @@ class Actions extends ActionsBase
 	public function thumbResource($oAccount, $rResource, $sFileName)
 	{
 		$sMd5Hash = md5(rand(1000, 9999));
-
+		
 		$this->ApiFileCache()->putFile($oAccount, 'Raw/Thumbnail/'.$sMd5Hash, $rResource, '_'.$sFileName);
 		if ($this->ApiFileCache()->isFileExists($oAccount, 'Raw/Thumbnail/'.$sMd5Hash, '_'.$sFileName))
 		{
+			$sFullFilePath = $this->ApiFileCache()->generateFullFilePath($oAccount, 'Raw/Thumbnail/'.$sMd5Hash, '_'.$sFileName);
+			$iRotateAngle = 0;
+			if (function_exists('exif_read_data')) 
+			{ 
+				if ($exif_data = @exif_read_data($sFullFilePath, 'IFD0')) 
+				{ 
+					switch (@$exif_data['Orientation']) 
+					{ 
+						case 1: 
+							$iRotateAngle = 0; 
+							break; 
+						case 3: 
+							$iRotateAngle = 180; 
+							break; 
+						case 6: 
+							$iRotateAngle = 270; 
+							break; 
+						case 8: 
+							$iRotateAngle = 90; 
+							break; 
+					}
+				}
+			}
+			
 			try
 			{
 				$oThumb = new \PHPThumb\GD(
-					$this->ApiFileCache()->generateFullFilePath($oAccount, 'Raw/Thumbnail/'.$sMd5Hash, '_'.$sFileName)
+					$sFullFilePath
 				);
-
+				if ($iRotateAngle > 0)
+				{
+					$oThumb->rotateImageNDegrees($iRotateAngle);
+				}
+				
 				$oThumb->adaptiveResize(120, 100)->show();
 			}
 			catch (\Exception $oE) {}

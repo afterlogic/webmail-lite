@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2004-2015, AfterLogic Corp.
+ * Copyright 2004-2017, AfterLogic Corp.
  * Licensed under AGPLv3 license or AfterLogic license
  * if commercial version of the product was purchased.
  * See the LICENSE file for a full license statement.
@@ -95,9 +95,11 @@ class CCommonPostAction extends ap_CoreModuleHelper
 					$bDoSave = false;
 					$this->LastError = CM_PASSWORDS_NOT_MATCH;
 				} else if (AP_DUMMYPASSWORD !== (string)CPost::get('txtNewPassword')) {
-					$this->oSettings->SetConf('Common/AdminPassword', md5(trim(CPost::get('txtNewPassword'))));
+					if (empty($this->oSettings->GetConf('Common/AdminPassword')) || crypt(trim(CPost::get('txtOldPassword')), \CApi::$sSalt) === $this->oSettings->GetConf('Common/AdminPassword'))
+					{
+						$this->oSettings->SetConf('Common/AdminPassword', crypt(trim(CPost::get('txtNewPassword')), CApi::$sSalt));
+					}
 				}
-
 				if ($bDoSave) {
 					if (CPost::Has('txtUserName')) {
 						$this->oSettings->SetConf('Common/AdminLogin', CPost::get('txtUserName'));

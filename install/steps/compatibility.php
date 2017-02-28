@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2004-2015, AfterLogic Corp.
+ * Copyright 2004-2017, AfterLogic Corp.
  * Licensed under AGPLv3 license or AfterLogic license
  * if commercial version of the product was purchased.
  * See the LICENSE file for a full license statement.
@@ -14,7 +14,7 @@ class CCompatibilityStep extends AInstallerStep
 	 */
 	var $aCompatibility;
 
-	function CCompatibilityStep()
+	function __construct()
 	{
 		include_once WM_INSTALLER_PATH . '/../libraries/afterlogic/api.php';		
 		
@@ -55,7 +55,7 @@ class CCompatibilityStep extends AInstallerStep
 		$this->aCompatibility['curl.valid'] = (int) function_exists('curl_init');
 		$this->aCompatibility['mbstring.valid'] = (int) function_exists('mb_detect_encoding');
 		$this->aCompatibility['openssl.valid'] = (int) extension_loaded('openssl');
-		$this->aCompatibility['xml.valid'] = (int) class_exists('DOMDocument');
+		$this->aCompatibility['xml.valid'] = (int) (class_exists('DOMDocument') && function_exists('xml_parser_create'));
 		$this->aCompatibility['json.valid'] = (int) function_exists('json_decode');
 
 		$this->aCompatibility['ini-get.valid'] = (int) function_exists('ini_get');

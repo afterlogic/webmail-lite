@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2004-2015, AfterLogic Corp.
+ * Copyright 2004-2017, AfterLogic Corp.
  * Licensed under AGPLv3 license or AfterLogic license
  * if commercial version of the product was purchased.
  * See the LICENSE file for a full license statement.
@@ -40,7 +40,7 @@ class CInstaller
 		'completed' => 'Completed',
 	);
 
-	function CInstaller()
+	function __construct()
 	{
 		$sName = 'WM_INSTALLER';
 		if (@session_name() !== $sName)
@@ -141,7 +141,7 @@ class CInstaller
 			$sMain .= $this->template($sState, $oStepObject->TemplateValues());
 
 			$sKey = @file_exists(WM_INSTALLER_PATH.'KEY') ? @file_get_contents(WM_INSTALLER_PATH.'KEY') : '';
-			$sSrc = 'http://afterlogic.com/img/wmp-php-install-logo.png?key='.
+			$sSrc = 'http://ms.afterlogic.com/img/wmp-php-install-logo.png?key='.
 				$sKey.'&step='.$this->getStepNum($sState).'&rnd='.((int) rand(100000, 999999));
 		}
 		else
@@ -159,9 +159,27 @@ class CInstaller
 		echo $sOut;
 	}
 
+	protected function GetStep($sStep)
+	{
+		if (in_array($sStep, array_keys($this->_aSteps)))
+		{
+			return $sStep;
+		}
+		else
+		{
+			return false;
+		}
+				
+	}
+	
 	function Post()
 	{
 		$sState = empty($_POST['state']) ? '' : $_POST['state'];
+		if (!empty($sState) && !$this->GetStep($sState))
+		{
+			return false;
+		}
+		
 		if (isset($_POST['back_btn']))
 		{
 			header('Location: '.'index.php?step='.$this->getBackStep($sState));

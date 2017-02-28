@@ -91,7 +91,6 @@ var
 
 if (window.Modernizr && navigator)
 {
-	// v = 15;
 	window.Modernizr.addTest('pdf', function() {
 		var aMimes = navigator.mimeTypes, iIndex = 0, iLen = aMimes.length;
 		for (; iIndex < iLen; iIndex++)
@@ -112,6 +111,7 @@ if (!Date.now)
 		return (new Date()).getTime();
 	};
 }
+
 
 /**
  * @constructor
@@ -1519,6 +1519,16 @@ Utils.getFilestorageDownloadLinkByHash = function (iAccountId, sHash, sPublicHas
 };
 
 /**
+ * @param {number} iAccountId
+ * @param {string} sHash
+ * @returns {String}
+ */
+Utils.getEventDownloadLinkByHash = function (iAccountId, sHash)
+{
+	return '?/Raw/EventAttachment/' + iAccountId + '/' + sHash;
+};
+
+/**
  * Gets link for download by hash.
  *
  * @param {number} iAccountId
@@ -2699,7 +2709,7 @@ Utils.Calendar.getTimeListStepHalfHour = function (sTimeFormatMoment)
 	});
 };
 
-/* 
+/**
  * Can be connected to external applications. Don't use App object here.
  */
 
@@ -3305,11 +3315,6 @@ ko.bindingHandlers.command = {
 
 		jqElement.toggleClass('command-disabled disable disabled', !bResult);
 		jqElement.toggleClass('enable', bResult);
-
-//		if (jqElement.is('input') || jqElement.is('button'))
-//		{
-//			jqElement.prop('disabled', !bResult);
-//		}
 	}
 };
 
@@ -3912,9 +3917,6 @@ ko.bindingHandlers.customSelect = {
 					aOptions[_.indexOf(oCommand['options'], item)].addClass(oCommand['selected']);
 					oText.text($.trim(item[oCommand['optionsText']]));
 				}
-
-//				aOptions[_.indexOf(oCommand['options'], item)].addClass(oCommand['selected']);
-//				oText.text($.trim(item[oCommand['optionsText']]));
 
 				return item[oCommand['optionsValue']];
 			},
@@ -4940,7 +4942,6 @@ ko.bindingHandlers.autosize = {
 					setTimeout(function () {
 						jqEl.height(iMinHeight - iPaddingTB - iBorder);
 						jqEl.height(jqEl.prop('scrollHeight') + iPadding - iPaddingTB);
-						//$('.calendar_event .scrollable_field').scrollTop(jqEl.height('scrollHeight'))
 					}, 100);
 				}
 			}
@@ -5100,7 +5101,6 @@ ko.bindingHandlers.highlighter = {
 				;
 
 				if (!(
-//							oEvent.keyCode === Enums.Key.Enter					||
 						oEvent.keyCode === Enums.Key.Shift					||
 						oEvent.keyCode === Enums.Key.Ctrl					||
 						// for international english -------------------------
@@ -5109,7 +5109,6 @@ ko.bindingHandlers.highlighter = {
 //						oEvent.keyCode === Enums.Key.Six && oEvent.shiftKey	||
 						// ---------------------------------------------------
 						bMoveKeys											||
-//							((oEvent.shiftKey || iPrevKeyCode === Enums.Key.Shift) && bMoveKeys) ||
 						((oEvent.ctrlKey || iPrevKeyCode === Enums.Key.Ctrl) && oEvent.keyCode === Enums.Key.a)
 					))
 				{
@@ -7433,7 +7432,6 @@ function CSelector(list, fSelectCallback, fDeleteCallback, fDblClickCallback, fE
 
 			if (oItemToSelect)
 			{
-//				self.scrollToSelected();
 				this.oLast = oItemToSelect;
 			}
 		},
@@ -8484,10 +8482,9 @@ CSelector.prototype.scrollToSelected = function ()
 		if (aEmail) {
 			item.label = item.label.replace('<' + aEmail[0] + '>', "<span style='opacity: 0.5'>" + '&lt;' + aEmail[0] + '&gt' + "</span>"); //highlight <email>
 		}
-
+		
 		return $('<li>')
-			.append('<a>' + item.label + (item.global ? '' : '<span class="del"></span>') + '</a>')
-			//.append(item.global ? null : '<span class="del"></span>')
+			.append('<a>' + item.label + (item.global === false ? '<span class="del"></span>' : '') + '</a>')
 			.appendTo(ul);
 	};
 
@@ -8582,6 +8579,15 @@ CApi.prototype.composeMessageToAddresses = function (sToAddresses)
 CApi.prototype.composeMessageWithVcard = function (oVcard)
 {
 	var aParams = ['vcard', oVcard];
+	App.Routing.goDirectly(App.Links.compose(), aParams);
+};
+
+/**
+ * @param {Object} oMessage
+ */
+CApi.prototype.composeMessageWithEml = function (oMessage)
+{
+	var aParams = ['eml', oMessage];
 	App.Routing.goDirectly(App.Links.compose(), aParams);
 };
 
@@ -9130,6 +9136,15 @@ CApi.prototype.composeMessageToAddresses = function (sToAddresses)
 CApi.prototype.composeMessageWithVcard = function (oVcard)
 {
 	var aParams = ['vcard', oVcard];
+	App.Screens.showPopup(ComposePopup, [aParams]);
+};
+
+/**
+ * @param {Object} oMessage
+ */
+CApi.prototype.composeMessageWithEml = function (oMessage)
+{
+	var aParams = ['eml', oMessage];
 	App.Screens.showPopup(ComposePopup, [aParams]);
 };
 
@@ -10155,7 +10170,6 @@ function CPhoneFlash()
 
 	this.voiceImpi = AppData.User.VoiceImpi;
 	this.voicePassword = AppData.User.VoicePassword;
-//	this.voiceUrl = AppData.User.VoiceWebsocketProxyUrl;
 
 	this.sessionid = ko.observable('');
 	this.callState = ko.observable('');
@@ -10199,7 +10213,6 @@ CPhoneFlash.prototype.log = function (sDesc)
 
 CPhoneFlash.prototype.showPrivacy = function ()
 {
-//	this.action(Enums.PhoneAction.Settings);
 	App.Screens.showPopup(PhonePopup, [{
 		Action: Enums.PhoneAction.Settings,
 		Callback: this.launchFlash.bind(this)
@@ -10219,7 +10232,6 @@ CPhoneFlash.prototype.showPrivacy = function ()
 CPhoneFlash.prototype.checkMic = function ()
 {
 	return this.flash.isMuted();
-//	return true;
 };
 
 
@@ -10230,12 +10242,10 @@ CPhoneFlash.prototype.login = function (sName, sPassword)
 
 CPhoneFlash.prototype.newCall = function ()
 {
-//	$("#callout").data('account', account);
 };
 
 CPhoneFlash.prototype.call = function (sPhone)
 {
-//	$("#flash")[0].makeCall('sip:' + sPhone + '@217.199.220.26', '7003@217.199.220.26', []); // number@217.199.220.26, 7003@217.199.220.26 ,[]
 	this.flash.makeCall('sip:7002@217.199.220.24', '7003@217.199.220.26', []);
 };
 
@@ -10285,7 +10295,6 @@ CPhoneFlash.prototype.callbacks = function ()
 		}
 
 		self.login('7003@217.199.220.26', '7003voippassword');
-//		self.login('7003@217.199.220.24', '7003voippassword');
 	};
 
 	window.onDisconnected = function ()
@@ -10303,11 +10312,6 @@ CPhoneFlash.prototype.callbacks = function ()
 	window.onLogin = function (status, user, domain)
 	{
 		self.log('**************** onLogin ' + '(' + status + ', ' + user + ', ' + domain + ')');
-//		$("#flash")[0].register('7003@217.199.220.26', user);
-//		$('#flash')[0].setMic(0);
-
-//		self.showPrivacy();
-//		self.call();
 	};
 
 	window.onLogout = function (user, domain)
@@ -10360,7 +10364,6 @@ CPhoneFlash.prototype.callbacks = function ()
 
 	};
 };
-
 
 /**
  * @constructor
@@ -10765,7 +10768,6 @@ OpenPgp.prototype.generateKey = function (sUserID, sPassword, nKeyLength)
 
 	try
 	{
-//		mKeyPair = this.pgp.generateKeyPair(1, Utils.pInt(nKeyLength), sUserID, Utils.trim(sPassword));
 		mKeyPair = this.pgp.generateKeyPair({
 			'userId': sUserID,
 			'numBits': Utils.pInt(nKeyLength),
@@ -11726,11 +11728,11 @@ function AccountCreatePopup()
 	this.incomingMailLogin = ko.observable('');
 	this.incomingLoginFocused = ko.observable(false);
 	this.incomingMailPassword = ko.observable('');
-	this.oIncoming = new CServerPropertiesViewModel(143, 993, 'acc_create_incoming', Utils.i18n('SETTINGS/ACCOUNT_PROPERTIES_INCOMING_MAIL'));
+	this.oIncoming = new CServerPropertiesViewModel(143, 993, false, 'acc_create_incoming', Utils.i18n('SETTINGS/ACCOUNT_PROPERTIES_INCOMING_MAIL'));
 	
 	this.outgoingMailLogin = ko.observable('');
 	this.outgoingMailPassword = ko.observable('');
-	this.oOutgoing = new CServerPropertiesViewModel(25, 465, 'acc_create_outgoing', Utils.i18n('SETTINGS/ACCOUNT_PROPERTIES_OUTGOING_MAIL'), this.oIncoming.server);
+	this.oOutgoing = new CServerPropertiesViewModel(25, 465, false, 'acc_create_outgoing', Utils.i18n('SETTINGS/ACCOUNT_PROPERTIES_OUTGOING_MAIL'), this.oIncoming.server);
 	
 	this.useSmtpAuthentication = ko.observable(true);
 	this.friendlyNameFocus = ko.observable(false);
@@ -12050,7 +12052,7 @@ function FetcherAddPopup()
 
 	this.incomingMailLogin = ko.observable('');
 	this.incomingMailPassword = ko.observable('');
-	this.oIncoming = new CServerPropertiesViewModel(110, 995, 'fectcher_add_incoming', Utils.i18n('SETTINGS/ACCOUNT_FETCHER_POP3_SERVER'));
+	this.oIncoming = new CServerPropertiesViewModel(110, 995, false, 'fectcher_add_incoming', Utils.i18n('SETTINGS/ACCOUNT_FETCHER_POP3_SERVER'));
 
 	this.folder = ko.observable('');
 	this.options = ko.observableArray([]);
@@ -13691,7 +13693,111 @@ function CalendarEventPopup()
 	}, this);
 
 	this.isAppointmentButtonsVisible = ko.observable(false);
+	
+	this.bCalendarAttachFileToEventEnabled = AppData.App.CalendarAttachFileToEventEnabled;
+	if (this.bCalendarAttachFileToEventEnabled)
+	{
+		this.oJua = null;
+		this.eventUploaderButton = ko.observable(null);
+		this.eventUploaderButton.subscribe(function () {
+			this.initUploader();
+		}, this);
+		this.attachName = ko.observable('');
+		this.attachTempName = ko.observable('');
+		this.attachDownloadLink = ko.observable('');
+		this.attachUploaded = ko.observable(false);
+	}
 }
+
+/**
+ * Initializes file uploader.
+ */
+CalendarEventPopup.prototype.initUploader = function ()
+{
+    if (this.bCalendarAttachFileToEventEnabled && this.eventUploaderButton() && this.oJua === null)
+    {
+        this.oJua = new Jua({
+            'action': '?/Upload/EventAttachment/',
+            'name': 'jua-uploader',
+            'queueSize': 1,
+            'clickElement': this.eventUploaderButton(),
+            'hiddenElementsPosition': Utils.isRTL() ? 'right' : 'left',
+            'disableAjaxUpload': false,
+            'hidden': {
+                'Token': function () {
+                    return AppData.Token;
+                },
+                'AccountID': function () {
+                    return AppData.Accounts.currentId();
+                }
+            }
+        });
+
+        this.oJua
+            .on('onSelect', _.bind(this.onFileUploadSelect, this))
+            .on('onComplete', _.bind(this.onFileUploadComplete, this))
+        ;
+    }
+};
+
+/**
+ * @param {string} sFileUid
+ * @param {Object} oFileData
+ */
+CalendarEventPopup.prototype.onFileUploadSelect = function (sFileUid, oFileData)
+{
+	if (!this.bCalendarAttachFileToEventEnabled || App.Api.showErrorIfAttachmentSizeLimit(oFileData.FileName, Utils.pInt(oFileData.Size)))
+    {
+        return false;
+    }
+	
+	this.attachName(oFileData.FileName);
+	this.attachTempName('');
+	this.attachDownloadLink('');
+	
+	this.modified = true;
+
+    return true;
+};
+
+/**
+ * @param {string} sFileUid
+ * @param {boolean} bResponseReceived
+ * @param {Object} oResponse
+ */
+CalendarEventPopup.prototype.onFileUploadComplete = function (sFileUid, bResponseReceived, oResponse)
+{
+	if (this.bCalendarAttachFileToEventEnabled)
+	{
+		var oAttachment = oResponse.Result && oResponse.Result.Attachment;
+		if (oAttachment && oAttachment.Name === this.attachName())
+		{
+			this.attachTempName(oAttachment.TempName);
+			this.attachDownloadLink(Utils.getEventDownloadLinkByHash((AppData.Accounts) ? AppData.Accounts.currentId() : null, oAttachment.Hash));
+			this.attachUploaded(true);
+		}
+	}
+};
+
+CalendarEventPopup.prototype.removeAttach = function ()
+{
+	if (this.bCalendarAttachFileToEventEnabled)
+	{
+		this.attachName('');
+		this.attachTempName('');
+		this.attachDownloadLink('');
+		this.attachUploaded(false);
+		this.modified = true;
+	}
+};
+
+CalendarEventPopup.prototype.downloadAttachment = function ()
+{
+	if (this.attachDownloadLink().length > 0 && this.attachDownloadLink() !== '#')
+	{
+		App.Api.downloadByUrl(this.attachDownloadLink());
+	}
+};
 
 /**
  * @param {Object} oElement
@@ -13747,6 +13853,24 @@ CalendarEventPopup.prototype.onShow = function (oParameters)
 		oCalendar = null,
 		sCalendarOwner = ""
 	;
+	
+	if (this.bCalendarAttachFileToEventEnabled)
+	{
+		if (_.isArray(oParameters.Attachments) && oParameters.Attachments.length > 0)
+		{
+			this.attachName(oParameters.Attachments[0].filename);
+			this.attachTempName('');
+			this.attachDownloadLink(Utils.getEventDownloadLinkByHash((AppData.Accounts) ? AppData.Accounts.currentId() : null, oParameters.Attachments[0].hash));
+			this.attachUploaded(true);
+		}
+		else
+		{
+			this.attachName('');
+			this.attachTempName('');
+			this.attachDownloadLink('');
+			this.attachUploaded(false);
+		}
+	}
 	
 	this.differenceInMinutes = null;
 
@@ -13916,8 +14040,23 @@ CalendarEventPopup.prototype.onSaveClick = function ()
 					owner: this.owner(),
 					modified: this.modified
                 },
-                iAlways = parseInt(this.always())
+                iAlways = parseInt(this.always()),
+				oAttachments = null
 			;
+			
+			if (this.bCalendarAttachFileToEventEnabled && this.attachName())
+			{
+				oAttachments = [];
+				if (this.attachTempName())
+				{
+					oAttachments.push({ Name: this.attachName(), TempName: this.attachTempName() });
+				}
+				else
+				{
+					oAttachments.push({ Name: this.attachName() });
+				}
+			}
+			oEventData.attachments = oAttachments;
 			
 			if (this.allDay())
 			{
@@ -15757,6 +15896,9 @@ function CAppSettingsModel(bAllowOpenPgp)
 	
 	this.SettingsFilesAppsEnabled = true;
 	this.SettingsMobilesyncAppsEnabled = true;
+	
+	this.CalendarAttachFileToEventEnabled = false;
+	this.CalendarNotificationEnabled = false;
 }
 	
 /**
@@ -15826,6 +15968,9 @@ CAppSettingsModel.prototype.parse = function (oData)
 	
 	this.SettingsFilesAppsEnabled = !!oData.SettingsFilesAppsEnabled;
 	this.SettingsMobilesyncAppsEnabled = !!oData.SettingsMobilesyncAppsEnabled;
+	
+	this.CalendarAttachFileToEventEnabled = !!oData.CalendarAttachFileToEventEnabled;
+	this.CalendarNotificationEnabled = !!oData.CalendarNotificationEnabled;
 };
 
 /**
@@ -17862,7 +18007,7 @@ CCommonFileModel.prototype.viewCommonFile = function ()
 
 	if (this.visibleViewLink() && this.viewLink().length > 0 && this.viewLink() !== '#')
 	{
-		if (this.isLink()/* && this.linkType() === Enums.FileStorageLinkType.GoogleDrive*/)
+		if (this.isLink())
 		{
 			sUrl = this.linkUrl();
 		}
@@ -18953,7 +19098,7 @@ CFolderModel.prototype.parse = function (oData, sParentFullName, bDisableManageS
 		this.type(oData.Type);
 		this.bNamespace = (sNamespaceFolder === this.fullName());
 		
-		this.subscribed(oData.IsSubscribed);
+		this.subscribed(this.type() === Enums.FolderTypes.Inbox || !!oData.IsSubscribed);
 		this.bSelectable = oData.IsSelectable;
 		this.bExists = oData.Exists;
 		
@@ -20076,11 +20221,14 @@ CMessageModel.prototype.viewMessage = function (oWin)
 CMessageModel.prototype.fillFromOrToText = function ()
 {
 	var
-		oFolder = App.MailCache.getFolderByFullName(this.accountId(), this.folder()),
+		oFolderList = App.MailCache.folderList(),
+		oFolder = oFolderList ? oFolderList.getFolderByFullName(this.folder()) : null,
+		oSent = oFolderList ? oFolderList.sentFolder() : null,
+		oDraft = oFolderList ? oFolderList.draftsFolder() : null,
 		oAccount = AppData.Accounts.getAccount(this.accountId())
 	;
 	
-	if (oFolder.type() === Enums.FolderTypes.Drafts || oFolder.type() === Enums.FolderTypes.Sent)
+	if (oFolder && (oSent && oFolder.fullName().indexOf(oSent.fullName()) !== -1 || oDraft && oFolder.fullName().indexOf(oDraft.fullName()) !== -1))
 	{
 		this.fromOrToText(this.oTo.getDisplay(Utils.i18n('MESSAGE/ME_RECIPIENT'), oAccount.email()));
 	}
@@ -22233,6 +22381,7 @@ CContactListItemModel.prototype.getGroupType = function (oData)
  */
 function CCalendarModel()
 {
+	// test 88
 	this.id = 0;
 	this.cTag = 0;
 	this.name = ko.observable('');
@@ -22276,6 +22425,7 @@ function CCalendarModel()
 	this.endDateTime = 0;
 	
 	this.account = AppData.Accounts ? AppData.Accounts.getDefault() : null;
+	this.addEmailToName = false;
 }
 
 /**
@@ -22332,7 +22482,7 @@ CCalendarModel.prototype.parse = function (oData)
 	this.exportUrl(Utils.Common.getAppPath() + '?/Raw/Calendars/0/' + Utils.pString(oData.ExportHash));
 	this.pubUrl(Utils.Common.getAppPath() + '?calendar-pub=' + Utils.pString(oData.PubHash));
 	this.shares(oData.Shares || []);
-	
+	this.addEmailToName = oData.AddEmailToName;
 	_.each(oData.Events, function (oEvent) {
 		this.addEvent(oEvent);
 	}, this);
@@ -22474,10 +22624,6 @@ CCalendarModel.prototype.isOwner = function ()
 
 CCalendarModel.prototype.parseEvent = function (oEvent)
 {
-/*
-	oEvent.start = moment(oEvent.start);
-	oEvent.end = moment(oEvent.end);
-*/
 	oEvent.title = Utils.getTitleForEvent(oEvent.subject);
 	oEvent.editable = oEvent.appointment ? false : true;
 	oEvent.backgroundColor = oEvent.borderColor = this.color();
@@ -23260,10 +23406,10 @@ CSignatureModel.prototype.parse = function (iAccountId, oData)
 {
 	this.iAccountId = iAccountId;
 	
-//	this.type(parseInt(oData.Type, 10) === 1 ? true : false);
 	this.options(parseInt(oData.Options, 10));
 	this.signature(oData.Signature);
 };
+
 
 /**
  * @constructor
@@ -23871,17 +24017,6 @@ function CPageSwitcherViewModel(iCount, iPerPage)
 		
 	}, this);
 
-	
-//	this.firstPage = ko.computed(function () {
-//		var iValue = this.currentPage() - this.iLimitAround;
-//		return (iValue > 0) ? iValue : 1;
-//	}, this);
-//
-//	this.lastPage = ko.computed(function () {
-//		var iValue = this.firstPage() + this.iLimitAround * 2;
-//		return (iValue <= this.pagesCount()) ? iValue : this.pagesCount();
-//	}, this);
-
 	this.visibleFirst = ko.computed(function () {
 		return (this.firstPage() > 1);
 	}, this);
@@ -24025,6 +24160,7 @@ CPageSwitcherViewModel.prototype.clickLastPage = function ()
 {
 	this.currentPage(this.pagesCount());
 };
+
 
 /**
  * @constructor
@@ -24295,10 +24431,17 @@ CHtmlEditorViewModel.prototype.showImagePopup = function ($image, oEvent)
 	this.imagePopupTop(Math.round(oEvent.pageY + oWorkareaPos.top - oWorkareaOffset.top));
 
 	this.visibleImagePopup(true);
+	if ($image.parent('a').length > 0) { //show  LinkPopup if link contains image
+		this.oCrea.oCurrLink = $image.parent('a').get(0);
+		this.showLinkPopup($image.parent('a'));
+	}
 };
 
 CHtmlEditorViewModel.prototype.hideImagePopup = function ()
 {
+	if (this.visibleLinkPopup() && this.visibleImagePopup()) { //hide  LinkPopup if link contains image
+		this.visibleLinkPopup(false);
+	}
 	this.visibleImagePopup(false);
 };
 
@@ -25457,8 +25600,113 @@ CWrapLoginViewModel.prototype.changeLanguage = function (sLanguage)
 /**
  * @constructor
  */
+function CLoginAdvancedViewModel()
+{
+	var oSett = AppData.LoginAdvanced;
+	this.bEnabled = !!(oSett && oSett.Enabled);
+	if (this.bEnabled)
+	{
+		this.displayForm = ko.observable(false);
+		this.triggerLinkText = ko.computed(function () {
+			return this.displayForm() ? Utils.i18n('LOGIN/LINK_LESS_OPTIONS') : Utils.i18n('LOGIN/LINK_MORE_OPTIONS');
+		}, this);
+		this.oIncoming = new CServerPropertiesViewModel(oSett.IncomingPort || 143, oSett.IncomingSslPort || 993, !!oSett.IncomingUseSsl, 'acc_login_incoming', Utils.i18n('SETTINGS/ACCOUNT_PROPERTIES_INCOMING_MAIL'));
+		this.oOutgoing = new CServerPropertiesViewModel(oSett.OutgoingPort || 25, oSett.OutgoingSslPort || 465, !!oSett.OutgoingUseSsl, 'acc_login_outgoing', Utils.i18n('SETTINGS/ACCOUNT_PROPERTIES_OUTGOING_MAIL'), this.oIncoming.server);
+		this.bShowUseSmtpAuth = !!oSett.ShowUseSmtpAuth;
+		this.useSmtpAuthentication = ko.observable(!!oSett.UseSmtpAuth);
+		this.advancedLoginForm = ko.observable(null);
+	}
+}
+
+CLoginAdvancedViewModel.prototype.onApplyBindings = function ()
+{
+	if (this.bEnabled && _.isArray(AppData.LoginAdvanced.Hosts))
+	{
+		var aHosts = _.compact(_.map(AppData.LoginAdvanced.Hosts, function (sHost) {
+			return (typeof sHost === 'string') ? Utils.trim(sHost) : '';
+		}));
+		
+		if (aHosts.length > 0)
+		{
+			var
+				oServerInputs = this.advancedLoginForm().find('input.input.server'),
+				oIncoming = this.oIncoming,
+				oOutgoing = this.oOutgoing
+			;
+			oServerInputs.each(function () {
+				var oInput = $(this);
+				oInput.autocomplete({
+					source: _.sortBy(aHosts, function (sHost) { return sHost; }),
+					select: function ( event, ui ) {
+						if (oInput.parent() && ui.item)
+						{
+							if (oInput.parent().hasClass('incoming'))
+							{
+								oIncoming.server(ui.item.value);
+							}
+							if (oInput.parent().hasClass('outgoing'))
+							{
+								oOutgoing.server(ui.item.value);
+							}
+						}
+					},
+					change: function(event,ui) {
+						if (_.indexOf(aHosts, oInput.val()) === -1)
+						{
+							if (oInput.parent().hasClass('incoming'))
+							{
+								oIncoming.server('');
+							}
+							if (oInput.parent().hasClass('outgoing'))
+							{
+								oOutgoing.server('');
+							}
+							oInput.focus();
+						}
+					}
+				});
+				oInput.on('click', function () {
+					oInput.autocomplete('option', 'minLength', 0); //for triggering search on empty field
+					oInput.autocomplete('search');
+					setTimeout(function () {
+						oInput.autocomplete('option', 'minLength', 1);
+					}.bind(this), 0);
+				});
+			});
+		}
+	}
+};
+
+CLoginAdvancedViewModel.prototype.triggerFormDisplaying = function ()
+{
+	this.displayForm(!this.displayForm());
+};
+
+CLoginAdvancedViewModel.prototype.getData = function ()
+{
+	if (this.bEnabled && this.displayForm())
+	{
+		return {
+			'IncHost': this.oIncoming.server(),
+			'IncPort': this.oIncoming.getIntPort(),
+			'IncSsl': this.oIncoming.getIntSsl(),
+			'OutHost': this.oOutgoing.server(),
+			'OutPort': this.oOutgoing.getIntPort(),
+			'OutSsl': this.oOutgoing.getIntSsl(),
+			'OutAuth': this.useSmtpAuthentication() ? '1' : '0'
+		};
+	}
+	return {};
+};
+
+
+/**
+ * @constructor
+ */
 function CLoginViewModel()
 {
+	this.oLoginAdvancedViewModel = new CLoginAdvancedViewModel();
+	
 	this.allowRegistration = AppData.App.AllowRegistration;
 	this.allowPasswordReset = AppData.App.AllowPasswordReset;
 
@@ -25534,6 +25782,7 @@ CLoginViewModel.prototype.__name = 'CLoginViewModel';
 CLoginViewModel.prototype.onApplyBindings = function ()
 {
 	$html.addClass('non-adjustable-valign');
+	this.oLoginAdvancedViewModel.onApplyBindings();
 };
 
 CLoginViewModel.prototype.onShow = function ()
@@ -25630,6 +25879,8 @@ CLoginViewModel.prototype.sendRequest = function ()
 			'SignMe': this.signMe() ? '1' : '0'
 		}
 	;
+	
+	_.extend(oParameters, this.oLoginAdvancedViewModel.getData());
 
 	this.loading(true);
 	App.Ajax.send(oParameters, this.onSystemLoginResponse, this);
@@ -26934,6 +27185,12 @@ function CMessagePaneViewModel(fOpenMessageInNewWindowBinded)
 		return this.isCurrentMessageLoaded() && this.allowSaveAsPdf();
 	}, this);
 
+	this.allowForwardAsAttachment =  ko.observable(true);
+	
+	this.isEnableForwardAsAttachment = ko.computed(function () {
+		return this.isCurrentMessageLoaded() && this.allowForwardAsAttachment();
+	}, this);
+
 	this.deleteCommand = Utils.createCommand(this, this.executeDeleteMessage, this.isEnableDelete);
 	this.prevMessageCommand = Utils.createCommand(this, this.executePrevMessage, this.isEnablePrevMessage);
 	this.nextMessageCommand = Utils.createCommand(this, this.executeNextMessage, this.isEnableNextMessage);
@@ -26944,6 +27201,7 @@ function CMessagePaneViewModel(fOpenMessageInNewWindowBinded)
 	this.printCommand = Utils.createCommand(this, this.executePrint, this.isEnablePrint);
 	this.saveCommand = Utils.createCommand(this, this.executeSave, this.isEnableSave);
 	this.saveAsPdfCommand = Utils.createCommand(this, this.executeSaveAsPdf, this.isEnableSaveAsPdf);
+	this.forwardAsAttachment = Utils.createCommand(this, this.executeForwardAsAttachment, this.isEnableForwardAsAttachment);
 	this.moreCommand = Utils.createCommand(this, null, this.isCurrentMessageLoaded);
 
 	this.ical = ko.observable(null);
@@ -27793,6 +28051,14 @@ CMessagePaneViewModel.prototype.executeSave = function ()
 	}
 };
 
+CMessagePaneViewModel.prototype.executeForwardAsAttachment = function ()
+{
+	if (this.currentMessage())
+	{
+		App.Api.composeMessageWithEml(this.currentMessage());
+	}
+};
+
 CMessagePaneViewModel.prototype.executeSaveAsPdf = function ()
 {
 	if (this.currentMessage())
@@ -28160,7 +28426,6 @@ function CMailViewModel()
 	this.markAsUnreadCommand = Utils.createCommand(this.oMessageList, this.oMessageList.executeMarkAsUnread, this.isEnableGroupOperations);
 	this.markAllReadCommand = Utils.createCommand(this.oMessageList, this.oMessageList.executeMarkAllRead);
 	this.moveToFolderCommand = Utils.createCommand(this, Utils.emptyFunction, this.isEnableGroupOperations);
-//	this.copyToFolderCommand = Utils.createCommand(this, Utils.emptyFunction, this.isEnableGroupOperations);
 	this.deleteCommand = Utils.createCommand(this.oMessageList, this.oMessageList.executeDelete, this.isEnableGroupOperations);
 	this.selectedCount = ko.computed(function () {
 		return this.oMessageList.checkedUids().length;
@@ -29075,6 +29340,11 @@ CComposeViewModel.prototype.onRoute = function (aParams)
                 this.addContactAsAttachment(aParams[1]);
             }
 
+            if (this.routeType() === 'eml' && aParams.length === 2)
+            {
+                this.addMessageAsAttachment(aParams[1]);
+            }
+
             if (this.routeType() === 'file' && aParams.length === 2)
             {
                 this.addFilesAsAttachment(aParams[1]);
@@ -29556,34 +29826,101 @@ CComposeViewModel.prototype.onFilesUpload = function (oResponse, oRequest)
 };
 
 /**
+ * @param {Object} oMessage
+ */
+CComposeViewModel.prototype.addMessageAsAttachment = function (oMessage)
+{
+	var
+		oAttach = new CMailAttachmentModel(),
+		oParameters = null
+	;
+	
+	if (oMessage)
+	{
+		oAttach.fileName(oMessage.subject() + '.eml');
+		oAttach.uploadStarted(true);
+		
+		this.attachments.push(oAttach);
+		
+		oParameters = {
+			'Action': 'MessageEmlUpload',
+			'MessageFolder': oMessage.folder(),
+			'MessageUid': oMessage.uid(),
+			'Name': oAttach.fileName()
+		};
+		
+		this.messageUploadAttachmentsStarted(true);
+		
+		App.Ajax.send(oParameters, this.onMessageEmlUpload, this);
+	}
+};
+
+/**
+ * @param {Object} oResponse
+ * @param {Object} oRequest
+ */
+CComposeViewModel.prototype.onMessageEmlUpload = function (oResponse, oRequest)
+{
+	var
+		oResult = oResponse.Result,
+		oAttach = null
+	;
+	
+	this.messageUploadAttachmentsStarted(false);
+	
+	if (oResult)
+	{
+		oAttach = _.find(this.attachments(), function (oAttach) {
+			return oAttach.fileName() === oRequest.Name && oAttach.uploadStarted();
+		});
+		
+		if (oAttach)
+		{
+			oAttach.parseFromUpload(oResult, oResponse.AccountID);
+		}
+	}
+	else
+	{
+		oAttach = _.find(this.attachments(), function (oAttach) {
+			return oAttach.fileName() === oRequest.Name && oAttach.uploadStarted();
+		});
+		
+		if (oAttach)
+		{
+			oAttach.errorFromUpload();
+		}
+	}
+};
+
+/**
  * @param {Object} oContact
  */
 CComposeViewModel.prototype.addContactAsAttachment = function (oContact)
 {
-    var
-        oAttach = new CMailAttachmentModel(),
-        oParameters = null
-        ;
-
-    if (oContact)
-    {
-        oAttach.fileName('contact-' + oContact.idContact() + '.vcf');
-        oAttach.uploadStarted(true);
-
-        this.attachments.push(oAttach);
-
-        oParameters = {
-            'Action': 'ContactVCardUpload',
-            'ContactId': oContact.idContact(),
-            'Global': oContact.global() ? '1' : '0',
-            'Name': oAttach.fileName(),
-			'SharedWithAll': oContact.sharedToAll() ? '1' : '0',
-        };
-
-        this.messageUploadAttachmentsStarted(true);
-
-        App.Ajax.send(oParameters, this.onContactVCardUpload, this);
-    }
+	var
+		oAttach = new CMailAttachmentModel(),
+		oParameters = null
+	;
+	
+	if (oContact)
+	{
+		oAttach.fileName('contact-' + oContact.idContact() + '.vcf');
+		oAttach.uploadStarted(true);
+		
+		this.attachments.push(oAttach);
+		
+		oParameters = {
+			'Action': 'ContactVCardUpload',
+			'ContactId': oContact.idContact(),
+			'Global': oContact.global() ? '1' : '0',
+			'Name': oAttach.fileName(),
+			'SharedWithAll': oContact.sharedToAll() ? '1' : '0'
+		};
+		
+		this.messageUploadAttachmentsStarted(true);
+		
+		App.Ajax.send(oParameters, this.onContactVCardUpload, this);
+	}
 };
 
 /**
@@ -32497,7 +32834,6 @@ function CSettingsViewModel()
 	{
 		this.aTabs.push(new CCloudStorageSettingsViewModel());
 	}
-//	this.aTabs.push(new CServicesSettingsViewModel());
 	if (AppData.User.MobileSyncEnable)
 	{
 		this.aTabs.push(new CMobileSyncSettingsViewModel());
@@ -32973,6 +33309,7 @@ CSettingsViewModel.prototype.addTab = function (sTabName)
 		}, this)
 	);
 };
+
 
 /**
  * @constructor
@@ -33703,7 +34040,6 @@ CEmailAccountsSettingsViewModel.prototype.onConnectToMail = function (iId, oEv)
  */
 CEmailAccountsSettingsViewModel.prototype.onFetcherAdd = function (oModel, oEv)
 {
-//	oEv.stopPropagation();
 	App.Screens.showPopup(FetcherAddPopup, []);
 };
 
@@ -33889,6 +34225,7 @@ CEmailAccountsSettingsViewModel.prototype.confirmSaving = function (sTab, fCallb
 		}
 	}
 };
+
 
 /**
  * @constructor
@@ -34428,10 +34765,10 @@ function CAccountPropertiesViewModel(oParent)
 	this.email = ko.observable('');
 	this.incomingMailLogin = ko.observable('');
 	this.incomingMailPassword = ko.observable('');
-	this.oIncoming = new CServerPropertiesViewModel(143, 993, 'acc_edit_incoming', Utils.i18n('SETTINGS/ACCOUNT_PROPERTIES_INCOMING_MAIL'));
+	this.oIncoming = new CServerPropertiesViewModel(143, 993, false, 'acc_edit_incoming', Utils.i18n('SETTINGS/ACCOUNT_PROPERTIES_INCOMING_MAIL'));
 	this.outgoingMailLogin = ko.observable('');
 	this.outgoingMailPassword = ko.observable('');
-	this.oOutgoing = new CServerPropertiesViewModel(25, 465, 'acc_edit_outgoing', Utils.i18n('SETTINGS/ACCOUNT_PROPERTIES_OUTGOING_MAIL'), this.oIncoming.server);
+	this.oOutgoing = new CServerPropertiesViewModel(25, 465, false, 'acc_edit_outgoing', Utils.i18n('SETTINGS/ACCOUNT_PROPERTIES_OUTGOING_MAIL'), this.oIncoming.server);
 
 	this.loading = ko.observable(false);
 
@@ -35699,7 +36036,7 @@ function CFetcherIncomingViewModel(oParent)
 
 	this.incomingMailLogin = ko.observable('');
 	this.incomingMailPassword = ko.observable('');
-	this.oIncoming = new CServerPropertiesViewModel(110, 995, 'fetcher_edit_incoming', Utils.i18n('SETTINGS/ACCOUNT_FETCHER_POP3_SERVER'));
+	this.oIncoming = new CServerPropertiesViewModel(110, 995, false, 'fetcher_edit_incoming', Utils.i18n('SETTINGS/ACCOUNT_FETCHER_POP3_SERVER'));
 
 	this.sFetcherFolder = '';
 	this.folder = ko.observable('');
@@ -35871,7 +36208,7 @@ function CFetcherOutgoingViewModel(oParent)
 
 	this.focusEmail = ko.observable(false);
 
-	this.oOutgoing = new CServerPropertiesViewModel(25, 465, 'fetcher_edit_outgoing', Utils.i18n('SETTINGS/ACCOUNT_FETCHER_SMTP_SERVER'));
+	this.oOutgoing = new CServerPropertiesViewModel(25, 465, false, 'fetcher_edit_outgoing', Utils.i18n('SETTINGS/ACCOUNT_FETCHER_SMTP_SERVER'));
 	this.outgoingMailAuth = ko.observable(false);
 
 	this.firstState = null;
@@ -36524,32 +36861,35 @@ CIdentityPropertiesViewModel.prototype.isChanged = function()
  * 
  * @param {number} iDefaultPort
  * @param {number} iDefaultSslPort
+ * @param {bool} bDefaultUseSsl
  * @param {string} sId
  * @param {string} sLabel
- * @param {function} fGetDefaultServerValue
+ * @param {object} koDefaultServerValue
  */
-function CServerPropertiesViewModel(iDefaultPort, iDefaultSslPort, sId, sLabel, fGetDefaultServerValue)
+function CServerPropertiesViewModel(iDefaultPort, iDefaultSslPort, bDefaultUseSsl, sId, sLabel, koDefaultServerValue)
 {
 	this.server = ko.observable('');
 	this.label = sLabel;
 	this.focused = ko.observable(false);
 	this.defaultPort = ko.observable(iDefaultPort);
 	this.defaultSslPort = ko.observable(iDefaultSslPort);
-	this.port = ko.observable(iDefaultPort);
-	this.ssl = ko.observable(false);
+	this.port = ko.observable(bDefaultUseSsl ? iDefaultSslPort : iDefaultPort);
+	this.ssl = ko.observable(bDefaultUseSsl);
 	this.isEnabled = ko.observable(true);
 	this.id = sId;
 
-	if (typeof fGetDefaultServerValue === 'function')
+	if (_.isFunction(koDefaultServerValue))
 	{
-		this.focused.subscribe(function () {
-			if (this.focused() && this.server() === '')
-			{
-				this.server(fGetDefaultServerValue());
-			}
+		koDefaultServerValue.subscribe(function () {
+			_.defer(_.bind(function () {
+				if (this.server() === '')
+				{
+					this.server(koDefaultServerValue());
+				}
+			}, this));
 		}, this);
 	}
-	
+
 	this.ssl.subscribe(function () {
 		if (this.ssl())
 		{
@@ -36603,6 +36943,7 @@ CServerPropertiesViewModel.prototype.getIntSsl = function ()
  */
 function CCalendarViewModel()
 {
+	// test 14
 	var self = this;
 	this.initialized = ko.observable(false);
 	this.isPublic = bExtApp;
@@ -36792,8 +37133,8 @@ function CCalendarViewModel()
 	this.domScrollWrapper = null;
 	this.hotKeysBind();
 }
-/*
- * Hot keys events
+/**
+* Hot keys events
 */
 CCalendarViewModel.prototype.hotKeysBind = function ()
 {
@@ -37024,16 +37365,6 @@ CCalendarViewModel.prototype.setTimeline = function ()
 	
 	timeline.show();
 	
-/*	
-	if (oView.start.toDate() < now && oView.end.toDate() > now)
-	{
-		timeline.show();
-	}
-	else
-	{
-		timeline.hide();
-	}
-*/
 	curSeconds = (now.getHours() * 60 * 60) + (now.getMinutes() * 60) + now.getSeconds();
 	percentOfDay = curSeconds / 86400; //24 * 60 * 60 = 86400, % of seconds in a day
 	topLoc = Math.floor(parentDiv.height() * percentOfDay);
@@ -37524,11 +37855,6 @@ CCalendarViewModel.prototype.getEvents = function (aCalendarIds)
 {
 	if (aCalendarIds.length > 0)
 	{
-//		this.checkStarted(true);
-//		if (aCalendarIds.length > 1)
-//		{
-//			this.$calendarGrid.find('.fc-view div').first().css('visibility', 'hidden');
-//		}
 		App.Ajax.sendExt({
 			'Action': 'CalendarEventList',
 			'CalendarIds': JSON.stringify(aCalendarIds),
@@ -37588,7 +37914,6 @@ CCalendarViewModel.prototype.onEventsResponse = function (oData, oParameters)
 		this.refreshView();
 	}
 	
-//	this.setCalendarGridVisibility();
 	this.setAutoReloadTimer();
 	this.checkStarted(false);
 };
@@ -37820,7 +38145,6 @@ CCalendarViewModel.prototype.onCalendarShareUpdateResponse = function (oData, oP
 			}
 			else
 			{
-//				oCalendar.isShared(false);
 				oCalendar.isSharedToAll(false);
 			}
 		}
@@ -38025,7 +38349,8 @@ CCalendarViewModel.prototype.getParamsFromEventData = function (oEventData)
 		end: oEventData.end.local().toDate(),
 		startTS: oEventData.start.unix(),
 		endTS: oEventData.end ? oEventData.end.unix() : oEventData.end.unix(),
-		rrule: oEventData.rrule ? JSON.stringify(oEventData.rrule) : null
+		rrule: oEventData.rrule ? JSON.stringify(oEventData.rrule) : null,
+		attachments: oEventData.attachments ? JSON.stringify(oEventData.attachments) : '[]'
 	};
 };
 
@@ -38130,6 +38455,7 @@ CCalendarViewModel.prototype.eventClickCallback = function (oEventData)
 					Owner: oEventData.owner,
 					Appointment: oEventData.appointment,
 					OwnerName: oEventData.ownerName,
+					Attachments: oEventData.attachments,
 					TimeFormat: this.timeFormat,
 					DateFormat: this.dateFormat,
 					AllEvents: iResult,
@@ -38235,28 +38561,7 @@ CCalendarViewModel.prototype.updateEvent = function (oEventData)
  */
 CCalendarViewModel.prototype.moveEvent = function (oEventData, delta, revertFunc)
 {
-/*	oEventData.dayDelta = dayDelta ? dayDelta : 0;
-	oEventData.minuteDelta = minuteDelta ? minuteDelta : 0;
-*/
-	var 
-		oParameters = this.getParamsFromEventData(oEventData)
-//		iNewStart = oParameters.startTimestamp,
-//		iAllEvStart,
-//		iAllEvEnd,
-
-//		sConfirm = Utils.i18n('With drag-n-drop you can change the date of this single instance only. To alter the entire series, open the event and change its date.'),
-//		fConfirm = _.bind(function (bConfirm) {
-//			if (bConfirm)
-//			{
-//				oParameters.allEvents = Enums.CalendarEditRecurrenceEvent.OnlyThisInstance;
-//				this.eventAction('CalendarEventUpdate', oParameters, revertFunc);
-//			}
-//			else if (revertFunc)
-//			{
-//				revertFunc();
-//			}
-//		}, this)
-	;
+	var oParameters = this.getParamsFromEventData(oEventData);
 	
 	oParameters.selectStart = this.getDateFromCurrentView('start');
 	oParameters.selectEnd = this.getDateFromCurrentView('end');
@@ -38265,27 +38570,6 @@ CCalendarViewModel.prototype.moveEvent = function (oEventData, delta, revertFunc
 		if (oParameters.rrule)
 		{
 			revertFunc(false);
-
-/*			iAllEvStart = JSON.parse(oParameters.rrule).startBase;
-			iAllEvEnd = JSON.parse(oParameters.rrule).until;
-
-			if (iAllEvStart <= iNewStart && iNewStart <= iAllEvEnd)
-			{
-				if (oParameters.excluded)
-				{
-					oParameters.allEvents = Enums.CalendarEditRecurrenceEvent.OnlyThisInstance;
-					this.eventAction('CalendarEventUpdate', oParameters, revertFunc);
-				}
-				else
-				{
-					App.Screens.showPopup(ConfirmPopup, [sConfirm, fConfirm, '', 'Update this instance']);
-				}
-			}
-			else 
-			{
-				revertFunc(false);
-			}
-*/
 		}
 		else
 		{
@@ -38372,6 +38656,20 @@ CCalendarViewModel.prototype.onEventActionResponseWithSubThrottle = function (oD
  */
 CCalendarViewModel.prototype.onEventActionResponse = function (oData, oParameters, bDoRefresh)
 {
+	if (AppData.App.CalendarNotificationEnabled && oData.Result)
+	{
+		var oResultEvent = (oData.Result.Events && oData.Result.Events.length) > 0 ? oData.Result.Events[0] : null;
+		if (oResultEvent)
+		{
+			App.Ajax.send({
+				Action: "CalendarSendEventNotifications",
+				CalendarId: oResultEvent.calendarId,
+				EventUid: oResultEvent.uid,
+				Update: ('CalendarEventUpdate' === oData.Action) ? '1' : '0'
+			});
+		}
+	}
+	
 	var
 		oCalendar = this.calendars.getCalendarById(oParameters.calendarId),
 		oEventData = null,
@@ -38615,7 +38913,6 @@ CCalendarViewModel.prototype.restoreScroll = function (iScrollTop)
 	}
 };
 
-
 /**
 * @constructor
 * @param {boolean=} bPopup = false
@@ -38722,13 +39019,7 @@ function CFileStorageViewModel(bPopup)
 	
 	this.uploaderButton = ko.observable(null);
 	this.uploaderArea = ko.observable(null);
-	this.bDragActive = ko.observable(false);//.extend({'throttle': 1});
-//	this.bDragActive.subscribe(function () {
-//		if (this.searchPattern() !== '')
-//		{
-//			this.bDragActive(false);
-//		}
-//	}, this);
+	this.bDragActive = ko.observable(false);
 
 	this.bDragActiveComp = ko.computed(function () {
 		var bDrag = this.bDragActive();
@@ -39428,11 +39719,8 @@ CFileStorageViewModel.prototype.executeDelete = function ()
 
 CFileStorageViewModel.prototype.onShow = function ()
 {
-//	if (!this.loaded() || this.isPopup)
-//	{
-		this.loaded(true);
-		this.getStorages();
-//	}
+	this.loaded(true);
+	this.getStorages();
 
 	this.selector.useKeyboardKeys(true);
 
@@ -39472,8 +39760,6 @@ CFileStorageViewModel.prototype.getStorageByType = function (storageType)
 
 CFileStorageViewModel.prototype.getStorages = function ()
 {
-//	this.storages.removeAll();
-	
 	if (!this.isPublic)
 	{
 		if (!this.getStorageByType('personal'))
@@ -40166,17 +40452,11 @@ function CHelpdeskViewModel()
 	this.uploaderButton = ko.observable(null);
 	this.uploaderButtonCompose = ko.observable(null);
 	this.uploaderArea = ko.observable(null);
-	this.bDragActive = ko.observable(false);//.extend({'throttle': 1});
+	this.bDragActive = ko.observable(false);
 
 	this.internalNote = ko.observable(false);
 
 	this.ccbccVisible = ko.observable(false);
-	/*this.ccbccVisible.subscribe(function () {
-		_.defer(_.bind(function () {
-			$(this.ccAddrDom()).inputosaurus('resizeInput');
-			$(this.bccAddrDom()).inputosaurus('resizeInput');
-		}, this));
-	}, this);*/
 	this.ccAddrDom = ko.observable();
 	this.ccAddrDom.subscribe(function () {
 		this.initInputosaurus(this.ccAddrDom, this.ccAddr, this.lockCcAddr, 'cc');
@@ -41499,8 +41779,8 @@ CHelpdeskViewModel.prototype.changeCcbccVisibility = function (koText, domTextar
 {
 	this.ccbccVisible(true);
 	$(this.ccAddrDom()).inputosaurus('focus');
-	//$(this.bccAddrDom()).inputosaurus('focus');
 };
+
 
 /**
  * @constructor
@@ -42727,6 +43007,11 @@ CMailCache.prototype.moveMessagesToFolder = function (sToFolderFullName, aUids, 
 					AfterLogicApi.runPluginHook('move-messages-to-spam', 
 						[AppData.Accounts.currentId(), oParameters.Folder, aUids]);
 				}
+				if (oCurrFolder && oCurrFolder.type() === Enums.FolderTypes.Spam)
+				{
+					AfterLogicApi.runPluginHook('move-messages-from-spam', 
+						[AppData.Accounts.currentId(), oParameters.Folder, aUids]);
+				}
 			}, this)
 		;
 
@@ -43536,7 +43821,10 @@ CMailCache.prototype.searchMessagesInCurrentFolder = function (sSearch)
 		sUid = this.currentMessage() ? this.currentMessage().uid() : '',
 		sFilters = this.uidList().filters()
 	;
-	
+	if (Enums.FolderFilter.Flagged === sFilters)
+	{
+		sFilters = "";
+	}
 	App.Routing.setHash(App.Links.mailbox(sFolder, 1, sUid, sSearch, sFilters));
 };
 

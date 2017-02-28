@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2004-2015, AfterLogic Corp.
+ * Copyright 2004-2017, AfterLogic Corp.
  * Licensed under AGPLv3 license or AfterLogic license
  * if commercial version of the product was purchased.
  * See the LICENSE file for a full license statement.
@@ -317,6 +317,14 @@ class CApiIntegratorManager extends AApiManager
 	}
 
 	/**
+	 * @return bool
+	 */
+	private function getCookieSecure()
+	{
+		return isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off';
+	}
+
+	/**
 	 * @return string
 	 */
 	public function getLoginLanguage()
@@ -434,7 +442,7 @@ class CApiIntegratorManager extends AApiManager
 		if (null === $sToken)
 		{
 			$sToken = md5(rand(1000, 9999).CApi::$sSalt.microtime(true));
-			@setcookie(self::TOKEN_KEY, $sToken, time() + 60 * 60 * 24 * 30, $this->getCookiePath(), null, null, true);
+			@setcookie(self::TOKEN_KEY, $sToken, time() + 60 * 60 * 24 * 30, $this->getCookiePath(), null, $this->getCookieSecure(), true);
 		}
 
 		return $sToken;
@@ -488,8 +496,7 @@ class CApiIntegratorManager extends AApiManager
 			$sKey = \CApi::Cacher()->Delete('AUTHTOKEN:'.$sAuthToken);
 		}
 		
-		@setcookie(self::AUTH_KEY, '', time() - 60 * 60 * 24 * 30, $this->getCookiePath());
-		@setcookie(self::TOKEN_LANGUAGE, '', 0, $this->getCookiePath());
+		@setcookie(self::AUTH_KEY, '', time() - 60 * 60 * 24 * 30, $this->getCookiePath(), null, $this->getCookieSecure());
 		return true;
 	}
 
@@ -619,7 +626,7 @@ class CApiIntegratorManager extends AApiManager
 		$iTime = $bSignMe ? time() + 60 * 60 * 24 * 30 : 0;
 		$sAccountHashTable = \CApi::EncodeKeyValues($aAccountHashTable);
 		$_COOKIE[self::AUTH_KEY] = $sAccountHashTable;
-		@setcookie(self::AUTH_KEY, $sAccountHashTable, $iTime, $this->getCookiePath(), null, null, true);
+		@setcookie(self::AUTH_KEY, $sAccountHashTable, $iTime, $this->getCookiePath(), null, $this->getCookieSecure(), true);
 		
 		$sAuthToken = \md5($oAccount->IdUser.$oAccount->IncomingMailLogin.\microtime(true).\rand(10000, 99999));
 		
@@ -691,13 +698,13 @@ class CApiIntegratorManager extends AApiManager
 			if (isset($aAccountHashTable['sign-me']) && $aAccountHashTable['sign-me'])
 			{
 				@setcookie(self::AUTH_KEY, CApi::EncodeKeyValues($aAccountHashTable),
-					time() + 60 * 60 * 24 * 30, $this->getCookiePath(), null, null, true);
+					time() + 60 * 60 * 24 * 30, $this->getCookiePath(), null, $this->getCookieSecure(), true);
 			}
 
 			$sToken = !empty($_COOKIE[self::TOKEN_KEY]) ? $_COOKIE[self::TOKEN_KEY] : null;
 			if (null !== $sToken)
 			{
-				@setcookie(self::TOKEN_KEY, $sToken, time() + 60 * 60 * 24 * 30, $this->getCookiePath(), null, null, true);
+				@setcookie(self::TOKEN_KEY, $sToken, time() + 60 * 60 * 24 * 30, $this->getCookiePath(), null, $this->getCookieSecure(), true);
 			}
 		}
 
@@ -718,6 +725,7 @@ class CApiIntegratorManager extends AApiManager
 	 * @param string $sIncPassword
 	 * @param string $sIncLogin Default value is empty string.
 	 * @param string $sLanguage Default value is empty string.
+	 * @param array $aExtValues
 	 *
 	 * @throws CApiManagerException(Errs::WebMailManager_AccountDisabled) 1501
 	 * @throws CApiManagerException(Errs::Mail_AccountAuthentication) 4002
@@ -725,7 +733,7 @@ class CApiIntegratorManager extends AApiManager
 	 *
 	 * @return CAccount|null|bool
 	 */
-	public function loginToAccount($sEmail, $sIncPassword, $sIncLogin = '', $sLanguage = '')
+	public function loginToAccount($sEmail, $sIncPassword, $sIncLogin = '', $sLanguage = '', $aExtValues = array())
 	{
 		$oResult = null;
 
@@ -763,6 +771,10 @@ class CApiIntegratorManager extends AApiManager
 			{
 				$oAccount->User->DefaultLanguage = $sLanguage;
 			}
+            if ($this->getLoginLanguage())
+            {
+                @setcookie(self::TOKEN_LANGUAGE, '', 0, $this->getCookiePath());
+            }
 
 			if ($oAccount->Domain->AllowWebMail && $oAccount->AllowMail)
 			{
@@ -802,7 +814,6 @@ class CApiIntegratorManager extends AApiManager
 		}
 		else if (null === $oAccount)
 		{
-			$aExtValues = array();
 			if (0 < strlen($sIncLogin))
 			{
 				$aExtValues['Login'] = $sIncLogin;
@@ -1216,6 +1227,9 @@ class CApiIntegratorManager extends AApiManager
 
 			$aResult['SettingsFilesAppsEnabled'] = (bool) CApi::GetConf('settings.files-apps-enabled', true);
 			$aResult['SettingsMobilesyncAppsEnabled'] = (bool) CApi::GetConf('settings.mobilesync-apps-enabled', true);
+			
+			$aResult['CalendarAttachFileToEventEnabled'] = (bool) CApi::GetConf('calendar.attach-file-to-event-enabled', true);
+			$aResult['CalendarNotificationEnabled'] = (bool) CApi::GetConf('calendar.notification-enabled', true);
 			
 			$aResult['AllowContactsSharing'] = $oApiCapabilityManager->isSharedContactsSupported($oDefaultAccount);
 
@@ -1642,8 +1656,20 @@ class CApiIntegratorManager extends AApiManager
 				'OutlookSyncPlugin32' => \CApi::GetConf('links.outlook-sync-plugin-32', ''),
 				'OutlookSyncPlugin64' => \CApi::GetConf('links.outlook-sync-plugin-64', ''),
 				'OutlookSyncPluginReadMore' => \CApi::GetConf('links.outlook-sync-read-more', '')
-			)
+			),
+			'LoginAdvanced' => CApi::GetConf('login.advanced', false),
 		);
+		
+		if (is_array($aAppData['LoginAdvanced']))
+		{
+			$sHostsFile = CApi::DataPath().'/settings/hosts.txt';
+			if (@file_exists($sHostsFile))
+			{
+				$sHosts = file_get_contents($sHostsFile);
+				$aHosts = preg_split('/\n|\r\n?/', $sHosts);
+				$aAppData['LoginAdvanced']['Hosts'] = $aHosts;
+			}
+		}
 		
 		CApi::Plugin()->RunHook('api-pre-app-data', array(&$aAppData));
 
@@ -1967,7 +1993,7 @@ class CApiIntegratorManager extends AApiManager
 			}
 
 			$sLanguage = $this->validatedLanguageValue($sLanguage);
-            $this->setLoginLanguage($sLanguage); // todo: sash
+
 			$sTheme = $this->validatedThemeValue($sTheme);
 		}
 		
