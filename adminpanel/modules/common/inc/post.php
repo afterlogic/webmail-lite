@@ -95,7 +95,8 @@ class CCommonPostAction extends ap_CoreModuleHelper
 					$bDoSave = false;
 					$this->LastError = CM_PASSWORDS_NOT_MATCH;
 				} else if (AP_DUMMYPASSWORD !== (string)CPost::get('txtNewPassword')) {
-					if (empty($this->oSettings->GetConf('Common/AdminPassword')) || crypt(trim(CPost::get('txtOldPassword')), \CApi::$sSalt) === $this->oSettings->GetConf('Common/AdminPassword'))
+					$sCommonAdminPassword = $this->oSettings->GetConf('Common/AdminPassword');
+					if (empty($sCommonAdminPassword) || crypt(trim(CPost::get('txtOldPassword')), \CApi::$sSalt) === $this->oSettings->GetConf('Common/AdminPassword'))
 					{
 						$this->oSettings->SetConf('Common/AdminPassword', crypt(trim(CPost::get('txtNewPassword')), CApi::$sSalt));
 					}

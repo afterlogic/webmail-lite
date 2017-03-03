@@ -16,7 +16,7 @@ namespace MailSo\Base;
 class HtmlUtils
 {
 	static $KOS = '@@_KOS_@@';
-	static $aHrefProtocolsAvailable = ['http', 'https', 'ftp', 'skype', 'mailto', 'qiwi'];
+//	static $aHrefProtocolsAvailable = array('http', 'https', 'ftp', 'skype', 'mailto', 'qiwi');
 	/**
 	 * @access private
 	 */
@@ -591,13 +591,14 @@ class HtmlUtils
 
 				if ($oElement->hasAttribute('href'))
 				{
-					$sHref = \trim($oElement->getAttribute('href'));
-					if (!\preg_match('/^(' . implode('|', self::$aHrefProtocolsAvailable) . '):/i', $sHref))
-					{
-						$oElement->setAttribute('data-x-broken-href', $sHref);
-						$oElement->setAttribute('href', 'javascript:false');
-					}
-					else if ('a' === $sTagNameLower)
+//					$sHref = \trim($oElement->getAttribute('href'));
+//					if (!\preg_match('/^(' . implode('|', self::$aHrefProtocolsAvailable) . '):/i', $sHref))
+//					{
+//						$oElement->setAttribute('data-x-broken-href', $sHref);
+//						$oElement->setAttribute('href', 'javascript:false');
+//					}
+//					else
+					if ('a' === $sTagNameLower)
 					{
 						$oElement->setAttribute('rel', 'external');
 					}

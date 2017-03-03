@@ -4764,12 +4764,12 @@ ko.bindingHandlers.autocompleteSimple = {
 			fDataAccessor = oOptions.dataAccessor ? oOptions.dataAccessor : Utils.emptyFunction(),
 			fDeleteAccessor = oOptions.deleteAccessor ? oOptions.deleteAccessor : Utils.emptyFunction(),
 			fSourceResponse = Utils.emptyFunction(),
+			aSourceResponseItems = null,
+			oSelectedItem = null,
 			fDelete = function () {
 				fDeleteAccessor(oSelectedItem);
 				$.ui.autocomplete.prototype.__response.call(jqEl.data('autocomplete'), _.filter(aSourceResponseItems, function(oItem){ return oItem.value !== oSelectedItem.value; }));
-			},
-			aSourceResponseItems = null,
-			oSelectedItem = null
+			}
 		;
 
 		if (fCallback && jqEl && jqEl[0])
@@ -4995,19 +4995,6 @@ ko.bindingHandlers.fade = {
 			),
 			oColor = oOptions.color,
 			sCss = oOptions.css,
-			updateColor = function (sColor)
-			{
-				if (sColor === '') {
-					return;
-				}
-
-				var
-					oHex2Rgb = hex2Rgb(sColor),
-					sRGBColor = "rgba(" + oHex2Rgb.r + "," + oHex2Rgb.g + "," + oHex2Rgb.b
-				;
-
-				colorIt(sColor, sRGBColor);
-			},
 			hex2Rgb = function (sHex) {
 				// Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
 				var
@@ -5047,6 +5034,19 @@ ko.bindingHandlers.fade = {
 						.css("background-image", "-ms-linear-gradient(left, " + rgb + ",0)" + "0%," + rgb + ",1)" + "100%)")
 						.css("background-image", "linear-gradient(left, " + rgb + ",0)" + "0%," + rgb + ",1)" + "100%)");
 				}
+			},
+			updateColor = function (sColor)
+			{
+				if (sColor === '') {
+					return;
+				}
+
+				var
+					oHex2Rgb = hex2Rgb(sColor),
+					sRGBColor = "rgba(" + oHex2Rgb.r + "," + oHex2Rgb.g + "," + oHex2Rgb.b
+				;
+
+				colorIt(sColor, sRGBColor);
 			}
 		;
 
@@ -5089,97 +5089,7 @@ ko.bindingHandlers.highlighter = {
 			aTabooLang = ['zh', 'zh-TW', 'zh-CN', 'zh-HK', 'zh-SG', 'zh-MO', 'ja', 'ja-JP', 'ko', 'ko-KR', 'vi', 'vi-VN', 'th', 'th-TH'],// , 'ru', 'ru-RU'
 			bHighlight = !_.include(aTabooLang, sUserLanguage)
 		;
-
-		$(oElement)
-			.on('keydown', function (oEvent) {
-				return oEvent.keyCode !== Enums.Key.Enter;
-			})
-			.on('keyup', function (oEvent) {
-				var
-					aMoveKeys = [Enums.Key.Left, Enums.Key.Right, Enums.Key.Home, Enums.Key.End],
-					bMoveKeys = -1 !== Utils.inArray(oEvent.keyCode, aMoveKeys)
-				;
-
-				if (!(
-						oEvent.keyCode === Enums.Key.Shift					||
-						oEvent.keyCode === Enums.Key.Ctrl					||
-						// for international english -------------------------
-//						oEvent.keyCode === Enums.Key.Dash					||
-//						oEvent.keyCode === Enums.Key.Apostrophe				||
-//						oEvent.keyCode === Enums.Key.Six && oEvent.shiftKey	||
-						// ---------------------------------------------------
-						bMoveKeys											||
-						((oEvent.ctrlKey || iPrevKeyCode === Enums.Key.Ctrl) && oEvent.keyCode === Enums.Key.a)
-					))
-				{
-					oValueObserver(fClear(jqEl.text()));
-					highlight(false);
-				}
-				iPrevKeyCode = oEvent.keyCode;
-				return true;
-			})
-				// firefox fix for html paste
-			.on('paste', function (oEvent) {
-				setTimeout(function () {
-					oValueObserver(fClear(jqEl.text()));
-					highlight(false);
-				}, 0);
-				return true;
-			})
-		;
-
-		// highlight on init
-		setTimeout(function () {
-			highlight(true);
-		}, 0);
-
-		function highlight(bNotRestoreSel) {
-			if(bHighlight)
-			{
-				var
-					iCaretPos = 0,
-					sContent = jqEl.text(),
-					aContent = sContent.split(rPattern),
-					aDividedContent = [],
-					sReplaceWith = '<span class="search_highlight"' + '>$&</span>'
-				;
-
-				$.each(aContent, function (i, sEl) {
-					if (_.any(aHighlightWords, function (oAnyEl) {return oAnyEl === sEl;}))
-					{
-						$.each(sEl, function (i, sElem) {
-							aDividedContent.push($(sElem.replace(/(.)/, sReplaceWith)));
-						});
-					}
-					else
-					{
-						$.each(sEl, function(i, sElem) {
-							if(sElem === ' ')
-							{
-								// space fix for firefox
-								aDividedContent.push(document.createTextNode('\u00A0'));
-							}
-							else
-							{
-								aDividedContent.push(document.createTextNode(sElem));
-							}
-						});
-					}
-				});
-
-				if (bNotRestoreSel)
-				{
-					jqEl.empty().append(aDividedContent);
-				}
-				else
-				{
-					iCaretPos = getCaretOffset();
-					jqEl.empty().append(aDividedContent);
-					setCursor(iCaretPos);
-				}
-			}
-		}
-
+		
 		function getCaretOffset() {
 			var
 				caretOffset = 0,
@@ -5247,6 +5157,96 @@ ko.bindingHandlers.highlighter = {
 
 			return false;
 		}
+		
+		function highlight(bNotRestoreSel) {
+			if(bHighlight)
+			{
+				var
+					iCaretPos = 0,
+					sContent = jqEl.text(),
+					aContent = sContent.split(rPattern),
+					aDividedContent = [],
+					sReplaceWith = '<span class="search_highlight"' + '>$&</span>'
+				;
+
+				$.each(aContent, function (i, sEl) {
+					if (_.any(aHighlightWords, function (oAnyEl) {return oAnyEl === sEl;}))
+					{
+						$.each(sEl, function (i, sElem) {
+							aDividedContent.push($(sElem.replace(/(.)/, sReplaceWith)));
+						});
+					}
+					else
+					{
+						$.each(sEl, function(i, sElem) {
+							if(sElem === ' ')
+							{
+								// space fix for firefox
+								aDividedContent.push(document.createTextNode('\u00A0'));
+							}
+							else
+							{
+								aDividedContent.push(document.createTextNode(sElem));
+							}
+						});
+					}
+				});
+
+				if (bNotRestoreSel)
+				{
+					jqEl.empty().append(aDividedContent);
+				}
+				else
+				{
+					iCaretPos = getCaretOffset();
+					jqEl.empty().append(aDividedContent);
+					setCursor(iCaretPos);
+				}
+			}
+		}
+		
+		$(oElement)
+			.on('keydown', function (oEvent) {
+				return oEvent.keyCode !== Enums.Key.Enter;
+			})
+			.on('keyup', function (oEvent) {
+				var
+					aMoveKeys = [Enums.Key.Left, Enums.Key.Right, Enums.Key.Home, Enums.Key.End],
+					bMoveKeys = -1 !== Utils.inArray(oEvent.keyCode, aMoveKeys)
+				;
+
+				if (!(
+						oEvent.keyCode === Enums.Key.Shift					||
+						oEvent.keyCode === Enums.Key.Ctrl					||
+						// for international english -------------------------
+//						oEvent.keyCode === Enums.Key.Dash					||
+//						oEvent.keyCode === Enums.Key.Apostrophe				||
+//						oEvent.keyCode === Enums.Key.Six && oEvent.shiftKey	||
+						// ---------------------------------------------------
+						bMoveKeys											||
+						((oEvent.ctrlKey || iPrevKeyCode === Enums.Key.Ctrl) && oEvent.keyCode === Enums.Key.a)
+					))
+				{
+					oValueObserver(fClear(jqEl.text()));
+					highlight(false);
+				}
+				iPrevKeyCode = oEvent.keyCode;
+				return true;
+			})
+				// firefox fix for html paste
+			.on('paste', function (oEvent) {
+				setTimeout(function () {
+					oValueObserver(fClear(jqEl.text()));
+					highlight(false);
+				}, 0);
+				return true;
+			})
+		;
+
+		// highlight on init
+		setTimeout(function () {
+			highlight(true);
+		}, 0);
 
 		oHighlightTrigger.notifySubscribers();
 
@@ -8221,19 +8221,61 @@ CSelector.prototype.scrollToSelected = function ()
 			nPreviousNewPosition = 0,
 			oLastState = {},
 			oLastStateReserve = {},
-			startSplitMouse = function (e) {
-				bIsMouseSplit = true;
-				bar.addClass(opts['activeClass']);
+			splitter = $(this),
+			panes = $(">*:not(css3pie)", splitter).each(function(){this.$ = $(this);}),
+			vh = (args.splitHorizontal ? 'h' : args.splitVertical ? 'v' : args.type) || 'v',
+			bar = $('.resize_handler', panes.get(0))
+				.attr({'unselectable': 'on'}),
+			rtl = splitter.css('direction') === 'rtl',
+			opts = $.extend({
+				'activeClass': 'active',	// class name for active splitter
+				'pxPerKey': 8,				// splitter px moved per keypress
+				'tabIndex': 0,				// tab order indicator
+				'accessKey': ''				// accessKey for splitbar
+			},{
+				v: {						// Vertical splitters:
+					'keyLeft': 39, 'keyRight': 37,
+					'type': 'v', 'eventPos': "pageX", 'origin': "left",
+					'split': "width",  'pxSplit': "offsetWidth",  'side1': "Left", 'side2': "Right",
+					'fixed': "height", 'pxFixed': "offsetHeight", 'side3': "Top",  'side4': "Bottom"
+				},
+				h: {						// Horizontal splitters:
+					'keyTop': 40, 'keyBottom': 38,
+					'type': 'h', 'eventPos': "pageY", 'origin': "top",
+					'split': "height", 'pxSplit': "offsetHeight", 'side1': "Top",  'side2': "Bottom",
+					'fixed': "width",  'pxFixed': "offsetWidth",  'side3': "Left", 'side4': "Right"
+				}
+			}[vh], args),
+			resplit = function (newPosition, bIgnoreSizeLimits) {
 
-				opts['_posSplit'] = -((rtl ? splitter._overallWidth - e[opts['eventPos']] : e[opts['eventPos']]) - panes.get(0)[opts['pxSplit']] );
+				var iLeftMin = panes.get(0)._min;
+
+				nPreviousNewPosition = newPosition;
+				if (bCollapse && (iLeftMin - newPosition) > 150) //Collapse
+				{
+					newPosition = 5;
+					bIgnoreSizeLimits = true;
+				}
+
+				if (!bIgnoreSizeLimits) { //Constrain new splitbar position to fit pane size limits
+					newPosition = window.Math.max(
+						iLeftMin,
+						splitter._overallWidth - panes.get(1)._max,
+						window.Math.min(
+							newPosition,
+							panes.get(0)._max,
+							splitter._overallWidth - panes.get(1)._min
+						)
+					);
+				}
+
+				panes.get(0).$.css(opts['split'], newPosition);
+				panes.get(1).$.css(opts['split'], splitter._overallWidth - newPosition);
 				
-				$('body')
-					.attr({'unselectable': "on"})
-					.addClass('unselectable');
-
-				$(document)
-					.bind('mousemove', doSplitMouse)
-					.bind('mouseup', endSplitMouse);
+				if (!App.browser.ie8AndBelow)
+				{
+					panes.trigger('resize');
+				}
 			},
 			doSplitMouse = function (e) {
 				var newPos = (rtl ? splitter._overallWidth - e[opts['eventPos']] : e[opts['eventPos']]) + opts['_posSplit'];
@@ -8266,36 +8308,19 @@ CSelector.prototype.scrollToSelected = function ()
 					args.resizeFunc();
 				}
 			},
-			resplit = function (newPosition, bIgnoreSizeLimits) {
+			startSplitMouse = function (e) {
+				bIsMouseSplit = true;
+				bar.addClass(opts['activeClass']);
 
-				var iLeftMin = panes.get(0)._min;
-
-				nPreviousNewPosition = newPosition;
-				if (bCollapse && (iLeftMin - newPosition) > 150) //Collapse
-				{
-					newPosition = 5;
-					bIgnoreSizeLimits = true;
-				}
-
-				if (!bIgnoreSizeLimits) { //Constrain new splitbar position to fit pane size limits
-					newPosition = window.Math.max(
-						iLeftMin,
-						splitter._overallWidth - panes.get(1)._max,
-						window.Math.min(
-							newPosition,
-							panes.get(0)._max,
-							splitter._overallWidth - panes.get(1)._min
-						)
-					);
-				}
-
-				panes.get(0).$.css(opts['split'], newPosition);
-				panes.get(1).$.css(opts['split'], splitter._overallWidth - newPosition);
+				opts['_posSplit'] = -((rtl ? splitter._overallWidth - e[opts['eventPos']] : e[opts['eventPos']]) - panes.get(0)[opts['pxSplit']] );
 				
-				if (!App.browser.ie8AndBelow)
-				{
-					panes.trigger('resize');
-				}
+				$('body')
+					.attr({'unselectable': "on"})
+					.addClass('unselectable');
+
+				$(document)
+					.bind('mousemove', doSplitMouse)
+					.bind('mouseup', endSplitMouse);
 			},
 			dimSum = function (elem, dims) {
 				// Opera returns -1 for missing min/max width, turn into 0
@@ -8306,36 +8331,9 @@ CSelector.prototype.scrollToSelected = function ()
 				}
 				
 				return sum;
-			},
-			vh = (args.splitHorizontal ? 'h' : args.splitVertical ? 'v' : args.type) || 'v',
-			opts = $.extend({
-				'activeClass': 'active',	// class name for active splitter
-				'pxPerKey': 8,				// splitter px moved per keypress
-				'tabIndex': 0,				// tab order indicator
-				'accessKey': ''				// accessKey for splitbar
-			},{
-				v: {						// Vertical splitters:
-					'keyLeft': 39, 'keyRight': 37,
-					'type': 'v', 'eventPos': "pageX", 'origin': "left",
-					'split': "width",  'pxSplit': "offsetWidth",  'side1': "Left", 'side2': "Right",
-					'fixed': "height", 'pxFixed': "offsetHeight", 'side3': "Top",  'side4': "Bottom"
-				},
-				h: {						// Horizontal splitters:
-					'keyTop': 40, 'keyBottom': 38,
-					'type': 'h', 'eventPos': "pageY", 'origin': "top",
-					'split': "height", 'pxSplit': "offsetHeight", 'side1': "Top",  'side2': "Bottom",
-					'fixed': "width",  'pxFixed': "offsetWidth",  'side3': "Left", 'side4': "Right"
-				}
-			}[vh], args),
-			
-			splitter = $(this),
-			panes = $(">*:not(css3pie)", splitter).each(function(){this.$ = $(this);}),
-			bar = $('.resize_handler', panes.get(0))
-				.attr({'unselectable': 'on'})
-				.bind('mousedown', startSplitMouse),
-			rtl = splitter.css('direction') === 'rtl'
+			}
 		;
-
+		bar.bind('mousedown', startSplitMouse);
 		panes.get(0)._paneName = opts['side1'];
 		panes.get(1)._paneName = opts['side2'];
 		

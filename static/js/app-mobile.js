@@ -4719,12 +4719,12 @@ ko.bindingHandlers.autocompleteSimple = {
 			fDataAccessor = oOptions.dataAccessor ? oOptions.dataAccessor : Utils.emptyFunction(),
 			fDeleteAccessor = oOptions.deleteAccessor ? oOptions.deleteAccessor : Utils.emptyFunction(),
 			fSourceResponse = Utils.emptyFunction(),
+			aSourceResponseItems = null,
+			oSelectedItem = null,
 			fDelete = function () {
 				fDeleteAccessor(oSelectedItem);
 				$.ui.autocomplete.prototype.__response.call(jqEl.data('autocomplete'), _.filter(aSourceResponseItems, function(oItem){ return oItem.value !== oSelectedItem.value; }));
-			},
-			aSourceResponseItems = null,
-			oSelectedItem = null
+			}
 		;
 
 		if (fCallback && jqEl && jqEl[0])
@@ -4950,19 +4950,6 @@ ko.bindingHandlers.fade = {
 			),
 			oColor = oOptions.color,
 			sCss = oOptions.css,
-			updateColor = function (sColor)
-			{
-				if (sColor === '') {
-					return;
-				}
-
-				var
-					oHex2Rgb = hex2Rgb(sColor),
-					sRGBColor = "rgba(" + oHex2Rgb.r + "," + oHex2Rgb.g + "," + oHex2Rgb.b
-				;
-
-				colorIt(sColor, sRGBColor);
-			},
 			hex2Rgb = function (sHex) {
 				// Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
 				var
@@ -5002,6 +4989,19 @@ ko.bindingHandlers.fade = {
 						.css("background-image", "-ms-linear-gradient(left, " + rgb + ",0)" + "0%," + rgb + ",1)" + "100%)")
 						.css("background-image", "linear-gradient(left, " + rgb + ",0)" + "0%," + rgb + ",1)" + "100%)");
 				}
+			},
+			updateColor = function (sColor)
+			{
+				if (sColor === '') {
+					return;
+				}
+
+				var
+					oHex2Rgb = hex2Rgb(sColor),
+					sRGBColor = "rgba(" + oHex2Rgb.r + "," + oHex2Rgb.g + "," + oHex2Rgb.b
+				;
+
+				colorIt(sColor, sRGBColor);
 			}
 		;
 
@@ -5044,97 +5044,7 @@ ko.bindingHandlers.highlighter = {
 			aTabooLang = ['zh', 'zh-TW', 'zh-CN', 'zh-HK', 'zh-SG', 'zh-MO', 'ja', 'ja-JP', 'ko', 'ko-KR', 'vi', 'vi-VN', 'th', 'th-TH'],// , 'ru', 'ru-RU'
 			bHighlight = !_.include(aTabooLang, sUserLanguage)
 		;
-
-		$(oElement)
-			.on('keydown', function (oEvent) {
-				return oEvent.keyCode !== Enums.Key.Enter;
-			})
-			.on('keyup', function (oEvent) {
-				var
-					aMoveKeys = [Enums.Key.Left, Enums.Key.Right, Enums.Key.Home, Enums.Key.End],
-					bMoveKeys = -1 !== Utils.inArray(oEvent.keyCode, aMoveKeys)
-				;
-
-				if (!(
-						oEvent.keyCode === Enums.Key.Shift					||
-						oEvent.keyCode === Enums.Key.Ctrl					||
-						// for international english -------------------------
-//						oEvent.keyCode === Enums.Key.Dash					||
-//						oEvent.keyCode === Enums.Key.Apostrophe				||
-//						oEvent.keyCode === Enums.Key.Six && oEvent.shiftKey	||
-						// ---------------------------------------------------
-						bMoveKeys											||
-						((oEvent.ctrlKey || iPrevKeyCode === Enums.Key.Ctrl) && oEvent.keyCode === Enums.Key.a)
-					))
-				{
-					oValueObserver(fClear(jqEl.text()));
-					highlight(false);
-				}
-				iPrevKeyCode = oEvent.keyCode;
-				return true;
-			})
-				// firefox fix for html paste
-			.on('paste', function (oEvent) {
-				setTimeout(function () {
-					oValueObserver(fClear(jqEl.text()));
-					highlight(false);
-				}, 0);
-				return true;
-			})
-		;
-
-		// highlight on init
-		setTimeout(function () {
-			highlight(true);
-		}, 0);
-
-		function highlight(bNotRestoreSel) {
-			if(bHighlight)
-			{
-				var
-					iCaretPos = 0,
-					sContent = jqEl.text(),
-					aContent = sContent.split(rPattern),
-					aDividedContent = [],
-					sReplaceWith = '<span class="search_highlight"' + '>$&</span>'
-				;
-
-				$.each(aContent, function (i, sEl) {
-					if (_.any(aHighlightWords, function (oAnyEl) {return oAnyEl === sEl;}))
-					{
-						$.each(sEl, function (i, sElem) {
-							aDividedContent.push($(sElem.replace(/(.)/, sReplaceWith)));
-						});
-					}
-					else
-					{
-						$.each(sEl, function(i, sElem) {
-							if(sElem === ' ')
-							{
-								// space fix for firefox
-								aDividedContent.push(document.createTextNode('\u00A0'));
-							}
-							else
-							{
-								aDividedContent.push(document.createTextNode(sElem));
-							}
-						});
-					}
-				});
-
-				if (bNotRestoreSel)
-				{
-					jqEl.empty().append(aDividedContent);
-				}
-				else
-				{
-					iCaretPos = getCaretOffset();
-					jqEl.empty().append(aDividedContent);
-					setCursor(iCaretPos);
-				}
-			}
-		}
-
+		
 		function getCaretOffset() {
 			var
 				caretOffset = 0,
@@ -5202,6 +5112,96 @@ ko.bindingHandlers.highlighter = {
 
 			return false;
 		}
+		
+		function highlight(bNotRestoreSel) {
+			if(bHighlight)
+			{
+				var
+					iCaretPos = 0,
+					sContent = jqEl.text(),
+					aContent = sContent.split(rPattern),
+					aDividedContent = [],
+					sReplaceWith = '<span class="search_highlight"' + '>$&</span>'
+				;
+
+				$.each(aContent, function (i, sEl) {
+					if (_.any(aHighlightWords, function (oAnyEl) {return oAnyEl === sEl;}))
+					{
+						$.each(sEl, function (i, sElem) {
+							aDividedContent.push($(sElem.replace(/(.)/, sReplaceWith)));
+						});
+					}
+					else
+					{
+						$.each(sEl, function(i, sElem) {
+							if(sElem === ' ')
+							{
+								// space fix for firefox
+								aDividedContent.push(document.createTextNode('\u00A0'));
+							}
+							else
+							{
+								aDividedContent.push(document.createTextNode(sElem));
+							}
+						});
+					}
+				});
+
+				if (bNotRestoreSel)
+				{
+					jqEl.empty().append(aDividedContent);
+				}
+				else
+				{
+					iCaretPos = getCaretOffset();
+					jqEl.empty().append(aDividedContent);
+					setCursor(iCaretPos);
+				}
+			}
+		}
+		
+		$(oElement)
+			.on('keydown', function (oEvent) {
+				return oEvent.keyCode !== Enums.Key.Enter;
+			})
+			.on('keyup', function (oEvent) {
+				var
+					aMoveKeys = [Enums.Key.Left, Enums.Key.Right, Enums.Key.Home, Enums.Key.End],
+					bMoveKeys = -1 !== Utils.inArray(oEvent.keyCode, aMoveKeys)
+				;
+
+				if (!(
+						oEvent.keyCode === Enums.Key.Shift					||
+						oEvent.keyCode === Enums.Key.Ctrl					||
+						// for international english -------------------------
+//						oEvent.keyCode === Enums.Key.Dash					||
+//						oEvent.keyCode === Enums.Key.Apostrophe				||
+//						oEvent.keyCode === Enums.Key.Six && oEvent.shiftKey	||
+						// ---------------------------------------------------
+						bMoveKeys											||
+						((oEvent.ctrlKey || iPrevKeyCode === Enums.Key.Ctrl) && oEvent.keyCode === Enums.Key.a)
+					))
+				{
+					oValueObserver(fClear(jqEl.text()));
+					highlight(false);
+				}
+				iPrevKeyCode = oEvent.keyCode;
+				return true;
+			})
+				// firefox fix for html paste
+			.on('paste', function (oEvent) {
+				setTimeout(function () {
+					oValueObserver(fClear(jqEl.text()));
+					highlight(false);
+				}, 0);
+				return true;
+			})
+		;
+
+		// highlight on init
+		setTimeout(function () {
+			highlight(true);
+		}, 0);
 
 		oHighlightTrigger.notifySubscribers();
 
