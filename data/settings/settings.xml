@@ -4,7 +4,7 @@
 		<SiteName>AfterLogic WebMail Lite</SiteName>
 		<LicenseKey />
 		<AdminLogin>mailadm</AdminLogin>
-		<AdminPassword>12345</AdminPassword>
+		<AdminPassword></AdminPassword>
 		<DBType>MySQL</DBType>
 		<DBPrefix />
 		<DBHost />
