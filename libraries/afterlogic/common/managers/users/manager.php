@@ -436,6 +436,7 @@ class CApiUsersManager extends AApiManagerWithStorage
 
 					$bConnectValid = true;
 					$aConnectErrors = array(false, false);
+					$aClientQuota = null;
 					if ($bWithMailConnection && !$oAccount->IsMailingList && !$oAccount->IsInternal && !$oAccount->Domain->IsDefaultTenantDomain)
 					{
 						$bConnectValid = false;
