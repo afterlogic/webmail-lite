@@ -475,7 +475,8 @@ class api_Settings
 						foreach ($aValue as $sSubKey => $sSubValue)
 						{
 							$sSubValue = api_Utils::EncodeSpecialXmlChars((string) $sSubValue);
-							$aNodeItems[$sArrayKey]->AppendChild(new CXmlDomNode($sSubKey, $sSubValue));
+							$oNewNode = new CXmlDomNode($sSubKey, $sSubValue);
+							$aNodeItems[$sArrayKey]->AppendChild($oNewNode);
 						}
 					}
 					$oNode->AppendChild($aNodeItems[$sArrayKey]);

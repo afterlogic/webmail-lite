@@ -36,7 +36,7 @@
 
 {%INCLUDE-START/Header-Middle/INCLUDE-END%}
 
-<span class="item logout">
+<span class="item logout" data-bind="visible: !hideLogout">
 	<span class="link" data-i18n="HEADER/LOGOUT" data-bind="i18n: 'text', click: logout" id="selenium_logout_button"></span>
 </span>
 <span class="item settings" data-bind="css: {'current': currentTab() === Enums.Screens.Settings}">

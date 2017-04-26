@@ -5421,7 +5421,7 @@ class Actions extends ActionsBase
 		$iUid =	$this->getParamValue('MessageUid');
 		$sFileName =	$this->getParamValue('Name');
 		
-		$oAccount = $this->getDefaultAccountFromParam();
+		$oAccount = $this->getAccountFromParam();
 		
 		$sTempName = md5($sFolder.$iUid);
 		if (!$this->ApiFileCache()->isFileExists($oAccount, $sTempName))

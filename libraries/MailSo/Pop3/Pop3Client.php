@@ -77,7 +77,7 @@ class Pop3Client extends \MailSo\Net\NetClient
 		$this->validateResponse();
 
 		if (\MailSo\Net\Enumerations\ConnectionSecurityType::UseStartTLS(
-			in_array('STLS', $this->Capa()), $this->iSecurityType))
+			in_array('STLS',$this->Capa()), $this->iSecurityType))
 		{
 			$this->sendRequestWithCheck('STLS');
 			$this->EnableCrypto();
@@ -179,6 +179,7 @@ class Pop3Client extends \MailSo\Net\NetClient
 	 */
 	public function Capa()
 	{
+		return array();
 		if (null === $this->aCapa)
 		{
 			$this->sendRequestWithCheck('CAPA');

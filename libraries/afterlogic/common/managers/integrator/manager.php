@@ -831,7 +831,7 @@ class CApiIntegratorManager extends AApiManager
 			{
 				$oException = $oApiWebmailManager->GetLastException();
 
-				CApi::Plugin()->RunHook('api-integrator-login-error-post-create-account-call', array(&$oException));
+				CApi::Plugin()->RunHook('api-integrator-login-error-post-create-account-call', array(&$oException, $sEmail));
 
 				throw (is_object($oException))
 					? $oException
@@ -842,7 +842,148 @@ class CApiIntegratorManager extends AApiManager
 		{
 			$oException = $oApiUsersManager->GetLastException();
 
-			CApi::Plugin()->RunHook('api-integrator-login-error-post-create-account-call', array(&$oException));
+			CApi::Plugin()->RunHook('api-integrator-login-error-post-create-account-call', array(&$oException, $sEmail));
+
+			throw (is_object($oException))
+				? $oException
+				: new CApiManagerException(Errs::WebMailManager_AccountCreateOnLogin);
+		}
+
+		if ($oResult instanceof CAccount)
+		{
+			CApi::Plugin()->RunHook('statistics.login', array(&$oResult, null));
+		}
+
+		CApi::Plugin()->RunHook('api-integrator-login-to-account-result', array(&$oResult));
+
+		return $oResult;
+	}
+
+	/**
+	 * @param string $sEmail
+	 * @param string $sIncPassword
+	 * @param string $sIncLogin Default value is empty string.
+	 * @param string $sLanguage Default value is empty string.
+	 * @param array $aExtValues
+	 *
+	 * @throws CApiManagerException(Errs::WebMailManager_AccountDisabled) 1501
+	 * @throws CApiManagerException(Errs::Mail_AccountAuthentication) 4002
+	 * @throws CApiManagerException(Errs::WebMailManager_AccountCreateOnLogin) 1503
+	 *
+	 * @return CAccount|null|bool
+	 */
+	public function loginToAccountCpanel($sEmail, $sIncPassword, $sIncLogin = '', $sLanguage = '', $aExtValues = array())
+	{
+		$oResult = null;
+		/* @var $oApiUsersManager CApiUsersManager */
+		$oApiUsersManager = CApi::Manager('users');
+
+		/* @var $oApiWebmailManager CApiWebmailManager */
+		$oApiWebmailManager = CApi::Manager('webmail');
+
+		$bAuthResult = false;
+		CApi::Plugin()->RunHook('api-integrator-login-to-account', array(&$sEmail, &$sIncPassword, &$sIncLogin, &$sLanguage, &$bAuthResult));
+
+		$oAccount = $oApiUsersManager->getAccountByEmail($sEmail);
+		if ($oAccount instanceof CAccount)
+		{
+			if ($oAccount->IsDisabled || ($oAccount->Domain && $oAccount->Domain->IsDisabled))
+			{
+				throw new CApiManagerException(Errs::WebMailManager_AccountDisabled);
+			}
+
+			if (0 < $oAccount->IdTenant)
+			{
+				$oApiTenantsManager = /* @var $oApiTenantsManager CApiTenantsManager */ CApi::Manager('tenants');
+				if ($oApiTenantsManager)
+				{
+					$oTenant = $oApiTenantsManager->getTenantById($oAccount->IdTenant);
+					if ($oTenant && ($oTenant->IsDisabled || (0 < $oTenant->Expared && $oTenant->Expared < \time())))
+					{
+						throw new CApiManagerException(Errs::WebMailManager_AccountDisabled);
+					}
+				}
+			}
+
+			if (0 < strlen($sLanguage) && $sLanguage !== $oAccount->User->DefaultLanguage)
+			{
+				$oAccount->User->DefaultLanguage = $sLanguage;
+			}
+			if ($this->getLoginLanguage())
+			{
+				@setcookie(self::TOKEN_LANGUAGE, '', 0, $this->getCookiePath());
+			}
+
+			if ($oAccount->Domain->AllowWebMail && $oAccount->AllowMail)
+			{
+
+				$oAccount->IncomingMailLogin = $sIncLogin;
+
+				if ($sIncPassword !== $oAccount->IncomingMailPassword)
+				{
+					$oAccount->IncomingMailPassword = $sIncPassword;
+				}
+				$oApiMailManager = CApi::Manager('mail');
+				try
+				{
+					$oApiMailManager->validateAccountConnection($oAccount);
+				}
+				catch (Exception $oException)
+				{
+					\CApi::Plugin()->RunHook('api-integrator-login-authentication-error', array($sEmail));
+					throw $oException;
+				}
+			}
+			else if ($sIncPassword !== $oAccount->IncomingMailPassword)
+			{
+				\CApi::Plugin()->RunHook('api-integrator-login-authentication-error', array($sEmail));
+				throw new CApiManagerException(Errs::Mail_AccountAuthentication);
+			}
+
+			$sObsoleteIncPassword = $oAccount->GetObsoleteValue('IncomingMailPassword');
+			$sObsoleteLanguage = $oAccount->User->GetObsoleteValue('DefaultLanguage');
+			if (null !== $sObsoleteIncPassword && $sObsoleteIncPassword !== $oAccount->IncomingMailPassword ||
+				null !== $sObsoleteLanguage && $sObsoleteLanguage !== $oAccount->User->DefaultLanguage ||
+				$oAccount->ForceSaveOnLogin)
+			{
+				$oApiUsersManager->updateAccount($oAccount);
+			}
+
+			$oApiUsersManager->updateAccountLastLoginAndCount($oAccount->IdUser);
+
+			$oResult = $oAccount;
+		}
+		else if (null === $oAccount)
+		{
+			if (0 < strlen($sIncLogin))
+			{
+				$aExtValues['Login'] = $sIncLogin;
+			}
+			$aExtValues['ApiIntegratorLoginToAccountResult'] = $bAuthResult;
+
+			$oAccount = $oApiWebmailManager->createAccount($sEmail, $sIncPassword, $sLanguage, $aExtValues);
+			if ($oAccount instanceof CAccount)
+			{
+				CApi::Plugin()->RunHook('api-integrator-login-success-post-create-account-call', array(&$oAccount));
+
+				$oResult = $oAccount;
+			}
+			else
+			{
+				$oException = $oApiWebmailManager->GetLastException();
+
+				CApi::Plugin()->RunHook('api-integrator-login-error-post-create-account-call', array(&$oException, $sEmail));
+
+				throw (is_object($oException))
+					? $oException
+					: new CApiManagerException(Errs::WebMailManager_AccountCreateOnLogin);
+			}
+		}
+		else
+		{
+			$oException = $oApiUsersManager->GetLastException();
+
+			CApi::Plugin()->RunHook('api-integrator-login-error-post-create-account-call', array(&$oException, $sEmail));
 
 			throw (is_object($oException))
 				? $oException
@@ -1238,7 +1379,8 @@ class CApiIntegratorManager extends AApiManager
 				$aResult['IosDetectOnLogin'] = isset($_COOKIE['skip_ios']) &&
 					'1' === (string) $_COOKIE['skip_ios'] ? false : true;
 			}
-
+			$aResult['HideLogout'] = (bool) CApi::GetConf('webmail.hide-logout', false);
+			
 			$sCustomLanguage = $this->getLoginLanguage();
 			if (!empty($sCustomLanguage))
 			{

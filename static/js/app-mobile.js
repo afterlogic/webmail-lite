@@ -10390,6 +10390,7 @@ function CAppSettingsModel(bAllowOpenPgp)
 	
 	this.CalendarAttachFileToEventEnabled = false;
 	this.CalendarNotificationEnabled = false;
+	this.HideLogout = false;
 }
 	
 /**
@@ -10462,6 +10463,8 @@ CAppSettingsModel.prototype.parse = function (oData)
 	
 	this.CalendarAttachFileToEventEnabled = !!oData.CalendarAttachFileToEventEnabled;
 	this.CalendarNotificationEnabled = !!oData.CalendarNotificationEnabled;
+	
+	this.HideLogout = !!oData.HideLogout;
 };
 
 /**
@@ -17323,6 +17326,7 @@ function CHeaderBaseViewModel()
 	var self = this;
 	this.mobileApp = bMobileApp;
 	this.mobileDevice = AppData.AllowMobile && bMobileDevice;
+	this.hideLogout = AppData.App.HideLogout;
 
 	this.allowWebMail = AppData.App.AllowWebMail;
 	this.currentAccountId = AppData.Accounts.currentId;
@@ -26833,6 +26837,7 @@ CMailCache.prototype.init = function ()
 				{
 					this.checkMailStarted(false);
 					this.folderListLoading.removeAll();
+					this.messagesLoading(false);
 				}
 			}, this), 10);
 		}

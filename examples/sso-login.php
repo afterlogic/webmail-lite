@@ -13,7 +13,7 @@
 	// Example of logging into WebMail account using email and password for incorporating into another web application (SSO)
 
 	// utilizing API
-	include_once __DIR__.'../libraries/afterlogic/api.php';
+	include_once __DIR__.'/../libraries/afterlogic/api.php';
 
 	if (class_exists('CApi') && CApi::IsValid())
 	{

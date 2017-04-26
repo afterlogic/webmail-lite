@@ -15897,6 +15897,7 @@ function CAppSettingsModel(bAllowOpenPgp)
 	
 	this.CalendarAttachFileToEventEnabled = false;
 	this.CalendarNotificationEnabled = false;
+	this.HideLogout = false;
 }
 	
 /**
@@ -15969,6 +15970,8 @@ CAppSettingsModel.prototype.parse = function (oData)
 	
 	this.CalendarAttachFileToEventEnabled = !!oData.CalendarAttachFileToEventEnabled;
 	this.CalendarNotificationEnabled = !!oData.CalendarNotificationEnabled;
+	
+	this.HideLogout = !!oData.HideLogout;
 };
 
 /**
@@ -23837,6 +23840,7 @@ function CHeaderBaseViewModel()
 	var self = this;
 	this.mobileApp = bMobileApp;
 	this.mobileDevice = AppData.AllowMobile && bMobileDevice;
+	this.hideLogout = AppData.App.HideLogout;
 
 	this.allowWebMail = AppData.App.AllowWebMail;
 	this.currentAccountId = AppData.Accounts.currentId;
@@ -34352,6 +34356,7 @@ function CMobileSyncSettingsViewModel()
 	
 	this.davLogin = ko.observable('');
 	this.davServer = ko.observable('');
+	this.appPath = Utils.Common.getAppPath();
 	
 	this.davCalendars = ko.observable([]);
 	this.visibleCalendars = ko.computed(function () {
@@ -36526,7 +36531,8 @@ function CCloudStorageSettingsViewModel()
 	this.allowFiles = AppData.User.IsFilesSupported;	
 
 	this.enableFiles = ko.observable(AppData.User.filesEnable());
-	
+	this.appPath = Utils.Common.getAppPath();
+	this.credentialsHintText = ko.observable(Utils.i18n('SETTINGS/MOBILE_CREDENTIALS_TITLE', {'EMAIL': AppData.Accounts.getDefault().email()}));
 	this.firstState = this.getState();
 	
 	if (AfterLogicApi.runPluginHook)
@@ -42474,6 +42480,7 @@ CMailCache.prototype.init = function ()
 				{
 					this.checkMailStarted(false);
 					this.folderListLoading.removeAll();
+					this.messagesLoading(false);
 				}
 			}, this), 10);
 		}
