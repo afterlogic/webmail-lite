@@ -477,6 +477,7 @@ class api_Settings
 							$sSubValue = api_Utils::EncodeSpecialXmlChars((string) $sSubValue);
 							$oNewNode = new CXmlDomNode($sSubKey, $sSubValue);
 							$aNodeItems[$sArrayKey]->AppendChild($oNewNode);
+							unset($oNewNode);
 						}
 					}
 					$oNode->AppendChild($aNodeItems[$sArrayKey]);

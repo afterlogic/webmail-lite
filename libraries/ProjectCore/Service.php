@@ -575,15 +575,15 @@ class Service
 						$aMatch = array();
 						if (\preg_match('/:([\d]+)$/', $sIncMailServer, $aMatch) && !empty($aMatch[1]) && is_numeric($aMatch[1]))
 						{
-							$sIncMailServer = preg_replace('/:[\d]+$/', $sIncMailServer, '');
 							$iIncMailPort = (int) $aMatch[1];
+							$sIncMailServer = str_replace(':' . $iIncMailPort, '', $sIncMailServer);
 						}
 
 						$aMatch = array();
 						if (\preg_match('/:([\d]+)$/', $sOutMailServer, $aMatch) && !empty($aMatch[1]) && is_numeric($aMatch[1]))
 						{
-							$sOutMailServer = preg_replace('/:[\d]+$/', $sOutMailServer, '');
 							$iOutMailPort = (int) $aMatch[1];
+							$sOutMailServer = str_replace(':' . $iOutMailPort, '', $sOutMailServer);
 						}
 
 						$sResult = \implode("\n", array(
