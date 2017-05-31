@@ -2686,9 +2686,9 @@ class CApiMailManager extends AApiManagerWithStorage
 		$oSettings =& CApi::GetSettings();
 		$oImapClient =& $this->_getImapClient($oAccount, 20, 60 * 2);
 
-		$aList = $this->_getFolderInformation($oImapClient, $sFolderFullNameRaw);
-
 		$oImapClient->FolderSelect($sFolderFullNameRaw);
+
+		$aList = $this->_getFolderInformation($oImapClient, $sFolderFullNameRaw);
 
 		$iMessageCount = $aList[0];
 		$iRealMessageCount = $aList[0];

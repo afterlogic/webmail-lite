@@ -320,10 +320,10 @@ class CApi
 	/**
 	 * @return bool
 	 */
-	public static function IsHelpdeskModule()
+	public static function  IsHelpdeskModule()
 	{
 		$oHttp = \MailSo\Base\Http::NewInstance();
-		return $oHttp->HasQuery('helpdesk') && 0 < strlen($oHttp->GetQuery('helpdesk'));
+		return $oHttp->HasQuery('helpdesk');
 	}
 
 	/**

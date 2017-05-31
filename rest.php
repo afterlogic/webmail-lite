@@ -33,6 +33,8 @@ $bMethod = in_array($sMethod, array(
 	'POST /tenant',
 	'PATCH /tenant',
 	'DELETE /tenant',
+	'GET /tenant/exists',
+	'GET /tenant/list',
 	'GET /account',
 	'POST /domain',
 	'PUT /domain/update',
@@ -265,30 +267,32 @@ else if (class_exists('CApi') && CApi::IsValid() && $bMethod)
 			case 'PATCH /tenant':
 				$sLogin = isset($aInputData['tenantLogin']) ? trim($aInputData['tenantLogin']) : null;
 
-				// ToDo : Get a give a default && max limit for user count
-				$iUserCountLimit = isset($aInputData['tenantUserCountLimit']) ? trim($aInputData['tenantUserCountLimit']) : 1;
-				// ToDo : Give a default && max limit for quota
-				$iQuotaInMB = isset($aInputData['tenantQuotaInMB']) ? trim($aInputData['tenantQuotaInMB']) : 1;
+				if (!isset($aInputData['tenantUserCountLimit']) && !isset($aInputData['tenantQuotaInMB']) && !isset($aInputData['IsDisabled']) && !isset($aInputData['tenantPassword']))
+				{
+					$aResult['message'] = getErrorMessage('Tenant : Nothing to update', $oApiTenantsManager);
+					$aResult['errorCode'] = \ProjectCore\Notifications::RestOtherError;
+					break;
+				}
 
 				// is required properties empty
 				if (!isset($sLogin))
 				{
-					$aResult['message'] = 'Tenant : Required parameters cannot be empty';
-					$aResult['errorCode'] = 400;
+					$aResult['message'] = getErrorMessage('Tenant : Required parameters cannot be empty', $oApiTenantsManager);
+					$aResult['errorCode'] = \ProjectCore\Notifications::RestOtherError;
 					break;
 				}
 
 				if (!isset($oApiTenantsManager))
 				{
-					$aResult['message'] = 'Tenant : Required manager cant loaded';
-					$aResult['errorCode'] = 500;
+					$aResult['message'] = getErrorMessage('Tenant : Required manager cant loaded', $oApiTenantsManager);
+					$aResult['errorCode'] = \ProjectCore\Notifications::RestOtherError;
 					break;
 				}
 
 				if (!class_exists('CTenant'))
 				{
-					$aResult['message'] = 'Tenant : Required classes not found';
-					$aResult['errorCode'] = 500;
+					$aResult['message'] = getErrorMessage('Tenant : Required classes not found', $oApiTenantsManager);
+					$aResult['errorCode'] = \ProjectCore\Notifications::RestOtherError;
 					break;
 				}
 
@@ -296,29 +300,42 @@ else if (class_exists('CApi') && CApi::IsValid() && $bMethod)
 				$iTenantId = $oApiTenantsManager->getTenantIdByLogin($sLogin);
 				if ($iTenantId == 0)
 				{
-					$aResult['message'] = 'Tenant : not found';
-					$aResult['errorCode'] = 404;
+					$aResult['message'] = getErrorMessage('Tenant : Required classes not found', $oApiTenantsManager);
+					$aResult['errorCode'] = \ProjectCore\Notifications::RestTenantFindFailed;
 					break;
 				}
 
 				/* @var $oTenant CTenant */
 				$oTenant = $oApiTenantsManager->getTenantById($iTenantId);
 
-				// Non-nullable properties
-				$oTenant->UserCountLimit = $iUserCountLimit;
-				$oTenant->QuotaInMB = $iQuotaInMB;
+				if (isset($aInputData['tenantUserCountLimit']))
+				{
+					$oTenant->UserCountLimit = (int) trim($aInputData['tenantUserCountLimit']);
+				}
+				if (isset($aInputData['tenantQuotaInMB']))
+				{
+					$oTenant->QuotaInMB = (int) trim($aInputData['tenantQuotaInMB']);
+				}
+				if (isset($aInputData['IsDisabled']))
+				{
+					$oTenant->IsDisabled = filter_var($aInputData['IsDisabled'], FILTER_VALIDATE_BOOLEAN);
+				}
+				if (isset($aInputData['tenantPassword']))
+				{
+					$oTenant->setPassword(trim($aInputData['tenantPassword']));
+				}
 
-				// Try create a tenant
+				// Try to update a tenant
 				$isTenantUpdated = $oApiTenantsManager->updateTenant($oTenant);
 
 				if (!$isTenantUpdated)
 				{
-					$aResult['message'] = 'Tenant Manager : Not updated';
-					$aResult['errorCode'] = 500;
+					$aResult['message'] = getErrorMessage('Tenant Manager : Not updated', $oApiTenantsManager);
+					$aResult['errorCode'] = \ProjectCore\Notifications::RestTenantFindFailed;
 					break;
 				}
 
-				// Tenant created and ready
+				// Tenant updated
 				$aResult['result'] = array(
 					'tenantId' => $iTenantId
 				);
@@ -360,6 +377,86 @@ else if (class_exists('CApi') && CApi::IsValid() && $bMethod)
 				$aResult['result'] = array(
 					'tenantId' => $iTenantId
 				);
+
+				break;
+
+			case 'GET /tenant/exists':
+
+				$sLogin = isset($aInputData['tenantLogin']) ? trim($aInputData['tenantLogin']) : null;
+
+				// is required properties empty
+				if (!isset($sLogin))
+				{
+					$aResult['message'] = getErrorMessage('invalid input parameters', $oApiTenantsManager);
+					$aResult['errorCode'] = \ProjectCore\Notifications::RestInvalidParameters;
+					break;
+				}
+
+				if (!isset($oApiTenantsManager))
+				{
+					$aResult['message'] = getErrorMessage('Tenant : Required manager cant loaded', $oApiTenantsManager);
+					$aResult['errorCode'] = \ProjectCore\Notifications::RestOtherError;
+					break;
+				}
+
+				if (!class_exists('CTenant'))
+				{
+					$aResult['message'] = getErrorMessage('Tenant : Required classes not found', $oApiTenantsManager);
+					$aResult['errorCode'] = \ProjectCore\Notifications::RestOtherError;
+					break;
+				}
+
+				// Try get tenant by taken tenant login
+				$iTenantId = $oApiTenantsManager->getTenantIdByLogin($sLogin);
+				if ($iTenantId > 0)
+				{
+					$aResult['result'] = true;
+				}
+				else
+				{
+					$aResult['message'] = getErrorMessage('cannot find tenant', $oApiTenantsManager);
+					$aResult['errorCode'] = \ProjectCore\Notifications::RestTenantFindFailed;
+					break;
+				}
+
+
+				break;
+
+			case 'GET /tenant/list':
+
+				$iPage = isset($aInputData['page']) ? (int) trim ($aInputData['page']) : 1;
+				$iTenantsPerPage = isset($aInputData['tenantsPerPage']) ? (int) trim ($aInputData['tenantsPerPage']) : 100;
+				$sOrderBy = isset($aInputData['orderBy']) ? strtolower (trim ($aInputData['orderBy'])) : 'Login';
+				$bOrderType = (isset($aInputData['orderType']) && trim($aInputData['orderType']) === 'false') ? false : true;
+				$sSearchDesc = isset($aInputData['searchDesc']) ? trim ($aInputData['searchDesc']) : '';
+
+				if (!class_exists('CTenant'))
+				{
+					$aResult['message'] = getErrorMessage('Tenant : Required classes not found', $oApiTenantsManager);
+					$aResult['errorCode'] = \ProjectCore\Notifications::RestOtherError;
+					break;
+				}
+
+				
+				$aResult['result'] = $oApiTenantsManager->getTenantList($iPage, $iTenantsPerPage, $sOrderBy, $bOrderType, $sSearchDesc);
+				if (!$aResult['result'])
+				{
+					$aResult['message'] = getErrorMessage('cannot get tenant list', $oApiTenantsManager);
+					$aResult['errorCode'] = \ProjectCore\Notifications::RestOtherError;
+				}
+				else
+				{
+					$aList = array();
+
+					foreach ($aResult['result'] as $iKey => $mValue){
+						$aList[] = array(
+							"Id" => $iKey,
+							"Login" => $mValue[0],
+							"Description" => $mValue[1]
+						);
+					}
+					$aResult['result'] = $aList;
+				}
 
 				break;
 
@@ -907,7 +1004,7 @@ else if (class_exists('CApi') && CApi::IsValid() && $bMethod)
 				$iPage = isset($aInputData['page']) ? (int) trim ($aInputData['page']) : 1;
 				$iUsersPerPage = isset($aInputData['usersPerPage']) ? (int) trim ($aInputData['usersPerPage']) : 100;
 				$sOrderBy = isset($aInputData['orderBy']) ? strtolower (trim ($aInputData['orderBy'])) : 'email';
-				$bOrderType = isset($aInputData['orderType']) ? (bool) trim ($aInputData['orderType']) : true;
+				$bOrderType = (isset($aInputData['orderType']) && trim($aInputData['orderType']) === 'false') ? false : true;
 				$sSearchDesc = isset($aInputData['searchDesc']) ? trim ($aInputData['searchDesc']) : '';
 				$sDomain = isset($aInputData['domain']) ? trim ($aInputData['domain']) : '';
 
@@ -916,7 +1013,7 @@ else if (class_exists('CApi') && CApi::IsValid() && $bMethod)
 
 				if (!$iAuthTenantId || $oDomain && $oDomain->IdTenant === $iAuthTenantId)
 				{
-					$aResult['result'] = $oApiUsersManager->getUserList($iDomainId, $iPage, $iUsersPerPage, $sOrderBy = 'email', $bOrderType = true, $sSearchDesc = '');
+					$aResult['result'] = $oApiUsersManager->getUserList($iDomainId, $iPage, $iUsersPerPage, $sOrderBy, $bOrderType, $sSearchDesc = '');
 					if (!$aResult['result'])
 					{
 						$aResult['message'] = getErrorMessage('cannot get account list', $oApiUsersManager);
@@ -1196,8 +1293,8 @@ else if (class_exists('CApi') && CApi::IsValid() && $bMethod)
 
 				$iPage = isset($aInputData['page']) ? (int) trim ($aInputData['page']) : 1;
 				$iDomainsPerPage = isset($aInputData['domainsPerPage']) ? (int) trim ($aInputData['domainsPerPage']) : 100;
-				$sOrderBy = isset($aInputData['orderBy']) ? strtolower (trim ($aInputData['orderBy'])) : 'name';
-				$bOrderType = isset($aInputData['orderType']) ? (bool) trim ($aInputData['orderType']) : true;
+//				$sOrderBy = isset($aInputData['orderBy']) ? strtolower (trim ($aInputData['orderBy'])) : 'name';
+				$bOrderType = (isset($aInputData['orderType']) && trim($aInputData['orderType']) === 'false') ? false : true;
 				$sSearchDesc = isset($aInputData['searchDesc']) ? trim ($aInputData['searchDesc']) : '';
 				$sTenant = isset($aInputData['tenant']) ? trim ($aInputData['tenant']) : '';
 
@@ -1205,7 +1302,7 @@ else if (class_exists('CApi') && CApi::IsValid() && $bMethod)
 
 				if (!$iAuthTenantId || $iIdTenant === $iAuthTenantId)
 				{
-					$aResult['result'] = $oApiDomainsManager->getDomainsList($iPage, $iDomainsPerPage, $sOrderBy, $bOrderType, $sSearchDesc, $iIdTenant);
+					$aResult['result'] = $oApiDomainsManager->getDomainsList($iPage, $iDomainsPerPage, 'name', $bOrderType, $sSearchDesc, $iIdTenant);
 					if (!$aResult['result'])
 					{
 						$aResult['message'] = getErrorMessage('cannot get domain list', $oApiDomainsManager);

@@ -140,6 +140,7 @@ class CCommonPopulateData extends ap_CoreModuleHelper
 
 		$sLanguageOptions = '';
 		$aLangs = $this->oModule->GetLangsList();
+		array_unshift($aLangs, 'Autodetect');
 		if (is_array($aLangs))
 		{
 			foreach ($aLangs as $sLang)

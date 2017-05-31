@@ -16,7 +16,7 @@
 		<DBSlaveName />
 		<DBSlaveLogin>root</DBSlaveLogin>
 		<DBSlavePassword />
-		<DefaultLanguage>English</DefaultLanguage>
+		<DefaultLanguage>Autodetect</DefaultLanguage>
 		<DefaultTimeZone>0</DefaultTimeZone>
 		<DefaultTimeFormat>F12</DefaultTimeFormat>
 		<DefaultDateFormat>MM/DD/YYYY</DefaultDateFormat>

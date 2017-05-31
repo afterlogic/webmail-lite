@@ -84,8 +84,7 @@ var
 		'image/jpeg', 'image/png', 'image/gif',
 		'text/html', 'text/plain', 'text/css',
 		'text/rfc822-headers', 'message/delivery-status',
-		'application/x-httpd-php', 'application/javascript',
-		'application/pdf'
+		'application/x-httpd-php', 'application/javascript'
 	]
 ;
 
@@ -97,6 +96,7 @@ if (window.Modernizr && navigator)
 		{
 			if ('application/pdf' === aMimes[iIndex].type)
 			{
+				aViewMimeTypes.push('application/pdf');
 				return true;
 			}
 		}
@@ -20920,7 +20920,7 @@ function CIcalModel()
 	
 	this.calendarId = ko.observable('');
 	this.calendars = ko.observableArray([]);
-	if (AppData.SingleMode && window.opener)
+	if (AppData.SingleMode && window.opener && window.opener.App)
 	{
 		this.calendars(window.opener.App.CalendarCache.calendars());
 		window.opener.App.CalendarCache.calendars.subscribe(function () {
@@ -21070,7 +21070,7 @@ CIcalModel.prototype.changeAndSaveConfig = function (sConfig)
 CIcalModel.prototype.changeConfig = function (sConfig)
 {
 	this.type(this.icalType() + '-' + sConfig);
-	if (AppData.SingleMode && window.opener)
+	if (AppData.SingleMode && window.opener && window.opener.App)
 	{
 		window.opener.App.CalendarCache.markIcalTypeByFile(this.file(), this.type(), this.cancelDecision(),
 									this.replyDecision(), this.calendarId(), this.selectedCalendarId());
@@ -21275,7 +21275,7 @@ CVcardModel.prototype.addContact = function ()
 	
 	App.ContactsCache.recivedAnim(true);
 	
-	if (AppData.SingleMode && window.opener)
+	if (AppData.SingleMode && window.opener && window.opener.App)
 	{
 		window.opener.App.ContactsCache.markVcardExistentByFile(this.file());
 	}
@@ -27970,7 +27970,7 @@ CMessagePaneViewModel.prototype.executeDeleteMessage = function ()
 {
 	if (this.currentMessage())
 	{
-		if (this.singleMode() && window.opener && window.opener.App && window.opener.App.MailCache)
+		if (this.singleMode() && window.opener && window.opener.App)
 		{
 			App.Api.deleteMessages([this.currentMessage().uid()], window.opener.App, function () {window.close();});
 		}
@@ -42486,7 +42486,7 @@ CMailCache.prototype.init = function ()
 		}
 	}, this);
 	
-	if (AppData.SingleMode && window.opener)
+	if (AppData.SingleMode && window.opener && window.opener.App)
 	{
 		oMailCache = window.opener.App.MailCache;
 		
@@ -44469,7 +44469,7 @@ AppBase.prototype.run = function ()
 	{
 		AppData.SingleMode = this.Routing.isSingleMode();
 		
-		if (AppData.SingleMode && window.opener)
+		if (AppData.SingleMode && window.opener && window.opener.App)
 		{
 			AppData.Accounts.populateIdentitiesFromSourceAccount(window.opener.App.getAccounts());
 		}

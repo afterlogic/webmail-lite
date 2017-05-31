@@ -146,7 +146,7 @@ class CHelpdeskUser extends api_AContainer
 
 		if (0 < $this->IdTenant)
 		{
-			$sHash = substr(md5($this->IdTenant.CApi::$sSalt), 0, 8);
+			$sHash = substr(md5($this->IdTenant.CApi::$sSaltShort), 0, 8);
 			$sPath .= '='.$sHash;
 		}
 
@@ -167,7 +167,7 @@ class CHelpdeskUser extends api_AContainer
 
 		if (0 < $this->IdTenant)
 		{
-			$sHash = substr(md5($this->IdTenant.CApi::$sSalt), 0, 8);
+			$sHash = substr(md5($this->IdTenant.CApi::$sSaltShort), 0, 8);
 			$sPath .= '='.$sHash;
 		}
 
@@ -190,7 +190,7 @@ class CHelpdeskUser extends api_AContainer
 
 		if (0 < $this->IdTenant)
 		{
-			$sHash = substr(md5($this->IdTenant.CApi::$sSalt), 0, 8);
+			$sHash = substr(md5($this->IdTenant.CApi::$sSaltShort), 0, 8);
 			$sPath .= '='.$sHash;
 		}
 

@@ -771,10 +771,10 @@ class CApiIntegratorManager extends AApiManager
 			{
 				$oAccount->User->DefaultLanguage = $sLanguage;
 			}
-            if ($this->getLoginLanguage())
-            {
-                @setcookie(self::TOKEN_LANGUAGE, '', 0, $this->getCookiePath());
-            }
+			if ($this->getLoginLanguage())
+			{
+				@setcookie(self::TOKEN_LANGUAGE, '', 0, $this->getCookiePath());
+			}
 
 			if ($oAccount->Domain->AllowWebMail && $oAccount->AllowMail)
 			{
@@ -823,6 +823,7 @@ class CApiIntegratorManager extends AApiManager
 			$oAccount = $oApiWebmailManager->createAccount($sEmail, $sIncPassword, $sLanguage, $aExtValues);
 			if ($oAccount instanceof CAccount)
 			{
+				$oApiUsersManager->updateAccountLastLoginAndCount($oAccount->IdUser);
 				CApi::Plugin()->RunHook('api-integrator-login-success-post-create-account-call', array(&$oAccount));
 
 				$oResult = $oAccount;
@@ -964,6 +965,7 @@ class CApiIntegratorManager extends AApiManager
 			$oAccount = $oApiWebmailManager->createAccount($sEmail, $sIncPassword, $sLanguage, $aExtValues);
 			if ($oAccount instanceof CAccount)
 			{
+				$oApiUsersManager->updateAccountLastLoginAndCount($oAccount->IdUser);
 				CApi::Plugin()->RunHook('api-integrator-login-success-post-create-account-call', array(&$oAccount));
 
 				$oResult = $oAccount;
@@ -2120,7 +2122,7 @@ class CApiIntegratorManager extends AApiManager
 					$sTheme = $oDomain->DefaultSkin;
 					$sLanguage = $this->getLoginLanguage();
 
-					if (empty($sLanguage))
+					if (empty($sLanguage) && $oDomain->DefaultLanguage === 'Autodetect')
 					{
 						$sLanguage = $this->getBrowserLanguage();
 					}

@@ -79,7 +79,7 @@ class CHelpdeskThread extends api_AContainer
 
 		if (0 < $this->IdTenant)
 		{
-			$sPath .= '='.substr(md5($this->IdTenant.CApi::$sSalt), 0, 8);
+			$sPath .= '='.substr(md5($this->IdTenant.CApi::$sSaltShort), 0, 8);
 		}
 
 		return $sPath;

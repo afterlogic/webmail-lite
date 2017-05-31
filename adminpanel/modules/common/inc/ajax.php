@@ -100,7 +100,7 @@ class CCommonAjaxAction extends ap_CoreModuleHelper
 			if (!empty($sSelLanguage))
 			{
 				$aLangs = $this->oModule->GetLangsList();
-				if (is_array($aLangs) && in_array($sSelLanguage, $aLangs))
+				if ((is_array($aLangs) && in_array($sSelLanguage, $aLangs)) || $sSelLanguage === 'Autodetect')
 				{
 					$oDomain->DefaultLanguage = $sSelLanguage;
 				}

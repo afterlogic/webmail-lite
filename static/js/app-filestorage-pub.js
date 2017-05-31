@@ -84,8 +84,7 @@ var
 		'image/jpeg', 'image/png', 'image/gif',
 		'text/html', 'text/plain', 'text/css',
 		'text/rfc822-headers', 'message/delivery-status',
-		'application/x-httpd-php', 'application/javascript',
-		'application/pdf'
+		'application/x-httpd-php', 'application/javascript'
 	]
 ;
 
@@ -97,6 +96,7 @@ if (window.Modernizr && navigator)
 		{
 			if ('application/pdf' === aMimes[iIndex].type)
 			{
+				aViewMimeTypes.push('application/pdf');
 				return true;
 			}
 		}

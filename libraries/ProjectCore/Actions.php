@@ -869,7 +869,7 @@ class Actions extends ActionsBase
 
 		return $this->DefaultResponse($oAccount, __FUNCTION__, array(
 			'Counts' => $aResult,
-			'New' => isset($oReturnInboxNewData) ? $oReturnInboxNewData->getData() : 0
+			'New' => (isset($oReturnInboxNewData) && $oReturnInboxNewData instanceof \ProjectCore\Base\DataByRef) ? $oReturnInboxNewData->getData() : 0
 		));
 	}
 
@@ -946,7 +946,7 @@ class Actions extends ActionsBase
 	 */
 	public function AjaxFolderRename()
 	{
-		$sPrevFolderFullNameRaw = (string) $this->getParamValue('PrevFolderFullNameRaw', '');
+		$sPrevFolderFullNameRaw = urldecode((string) $this->getParamValue('PrevFolderFullNameRaw', ''));
 		$sNewFolderNameInUtf8 = trim($this->getParamValue('NewFolderNameInUtf8', ''));
 		
 		if (0 === strlen($sPrevFolderFullNameRaw) || 0 === strlen($sNewFolderNameInUtf8))
@@ -969,7 +969,7 @@ class Actions extends ActionsBase
 	 */
 	public function AjaxFolderDelete()
 	{
-		$sFolderFullNameRaw = (string) $this->getParamValue('Folder', '');
+		$sFolderFullNameRaw = urldecode((string) $this->getParamValue('Folder', ''));
 
 		if (0 === strlen(trim($sFolderFullNameRaw)))
 		{
@@ -5171,8 +5171,8 @@ class Actions extends ActionsBase
 		}
 
 		$sType = $this->getParamValue('Type');
-		$sPath = $this->getParamValue('Path');
-		$sFolderName = $this->getParamValue('FolderName');
+		$sPath = urldecode($this->getParamValue('Path'));
+		$sFolderName = urldecode($this->getParamValue('FolderName'));
 		$oResult = null;
 		
 		$oResult = $this->oApiFilestorage->createFolder($oAccount, $sType, $sPath, $sFolderName);
@@ -5211,7 +5211,7 @@ class Actions extends ActionsBase
 		
 		foreach ($aItems as $oItem)
 		{
-			$oResult = $this->oApiFilestorage->delete($oAccount, $sType, $oItem['Path'], $oItem['Name']);
+			$oResult = $this->oApiFilestorage->delete($oAccount, $sType, urldecode($oItem['Path']), urldecode($oItem['Name']));
 		}
 		
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $oResult);
@@ -5226,9 +5226,9 @@ class Actions extends ActionsBase
 		}
 		
 		$sType = $this->getParamValue('Type');
-		$sPath = $this->getParamValue('Path');
-		$sName = $this->getParamValue('Name');
-		$sNewName = $this->getParamValue('NewName');
+		$sPath = urldecode($this->getParamValue('Path'));
+		$sName = urldecode($this->getParamValue('Name'));
+		$sNewName = urldecode($this->getParamValue('NewName'));
 		$bIsLink = !!$this->getParamValue('IsLink');
 		$oResult = null;
 
@@ -6672,7 +6672,7 @@ class Actions extends ActionsBase
 				$sUploadName = $aFileData['name'];
 				$iSize = (int) $aFileData['size'];
 				$sType = isset($mAdditionalData['Type']) ? $mAdditionalData['Type'] : 'personal';
-				$sPath = isset($mAdditionalData['Path']) ? $mAdditionalData['Path'] : '';
+				$sPath = isset($mAdditionalData['Path']) ? urldecode($mAdditionalData['Path']) : '';
 				$bOverwrite = isset($mAdditionalData['Overwrite']) ? (bool) $mAdditionalData['Overwrite'] : false;
 				$sMimeType = \MailSo\Base\Utils::MimeContentType($sUploadName);
 

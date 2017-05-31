@@ -994,6 +994,8 @@ class ImapClient extends \MailSo\Net\NetClient
 
 			$aReturn = array(0, 0);
 			$oImapResponse = null;
+			$defaultQuotaName =  (string) \CApi::GetConf('webmail.default-imap-quota-name', '');
+
 			foreach ($aResult as /* @var $oImapResponse \MailSo\Imap\Response */ $oImapResponse)
 			{
 				if (\MailSo\Imap\Enumerations\ResponseType::UNTAGGED === $oImapResponse->ResponseType
@@ -1005,6 +1007,7 @@ class ImapClient extends \MailSo\Net\NetClient
 					&& 'STORAGE' === \strtoupper($oImapResponse->ResponseList[3][0])
 					&& \is_numeric($oImapResponse->ResponseList[3][1])
 					&& \is_numeric($oImapResponse->ResponseList[3][2])
+					&& (($aReturn[0]==0)&&($aReturn[1]==0)) || ($defaultQuotaName !== '' && $oImapResponse->ResponseList[2] == $defaultQuotaName)
 				)
 				{
 					$aReturn = array(

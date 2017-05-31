@@ -345,7 +345,7 @@ class CApiCapabilityManager extends AApiManager
 	 */
 	public function isOutlookSyncSupported($oAccount = null)
 	{
-		return $this->isMobileSyncSupported($oAccount);
+		return $this->isMobileSyncSupported($oAccount) && $this->isNotLite() && $this->isDavSupported() && $this->isCollaborationSupported();
 //		$bResult = $this->isNotLite() && $this->isDavSupported() && $this->isCollaborationSupported();
 //		if ($bResult && $oAccount)
 //		{
