@@ -58,6 +58,11 @@ class CDbCreator
 					CApi::Inc('common.db.pdo.postgres');
 					$oConnector = new CDbPdoPostgres($aData['DBHost'], $aData['DBLogin'], $aData['DBPassword'], $aData['DBName'], $aData['DBTablePrefix']);
 				}
+				else if (EDbType::SQLite === $iDbType)
+				{
+					CApi::Inc('common.db.pdo.sqlite');
+					$oConnector = new CDbPdoSQLite($aData['DBName'], $aData['DBTablePrefix']);
+				}
 				else
 				{
 					CApi::Inc('common.db.pdo.mysql');
@@ -80,6 +85,11 @@ class CDbCreator
 		{
 			CApi::Inc('common.db.pdo.postgres_helper');
 			$oHelper = new CPdoPostgresHelper();
+		}
+		else if (EDbType::SQLite === $iDbType)
+		{
+			CApi::Inc('common.db.pdo.sqlite_helper');
+			$oHelper = new CPdoSQLiteHelper();
 		}
 		else
 		{

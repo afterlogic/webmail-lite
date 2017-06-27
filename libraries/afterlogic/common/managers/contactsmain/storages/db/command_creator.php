@@ -1221,3 +1221,14 @@ class CApiContactsmainCommandCreatorPostgreSQL  extends CApiContactsmainCommandC
 {
 	// TODO
 }
+
+/**
+ * @todo Do it
+ *
+ * @package Contacts
+ * @subpackage Storages
+ */
+class CApiContactsmainCommandCreatorSQLite  extends CApiContactsmainCommandCreatorMySQL
+{
+	// TODO
+}

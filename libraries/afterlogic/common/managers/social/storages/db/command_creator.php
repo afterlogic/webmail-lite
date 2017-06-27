@@ -169,3 +169,12 @@ class CApiSocialCommandCreatorPostgreSQL  extends CApiSocialCommandCreatorMySQL
 {
 	// TODO
 }
+
+/**
+ * @package Social
+ * @subpackage Storages
+ */
+class CApiSocialCommandCreatorSQLite  extends CApiSocialCommandCreatorMySQL
+{
+	// TODO
+}

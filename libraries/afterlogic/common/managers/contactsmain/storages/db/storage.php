@@ -34,7 +34,8 @@ class CApiContactsmainDbStorage extends CApiContactsmainStorage
 		$this->oCommandCreator =& $oManager->GetCommandCreator(
 			$this, array(
 				EDbType::MySQL => 'CApiContactsmainCommandCreatorMySQL',
-				EDbType::PostgreSQL => 'CApiContactsmainCommandCreatorPostgreSQL'
+				EDbType::PostgreSQL => 'CApiContactsmainCommandCreatorPostgreSQL',
+				EDbType::SQLite => 'CApiContactsmainCommandCreatorSQLite'
 			)
 		);
 	}

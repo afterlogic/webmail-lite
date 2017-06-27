@@ -273,10 +273,18 @@ class CApi
 		{
 			try
 			{
-				$oPdo = @new PDO((EDbType::PostgreSQL === $iDbType ? 'pgsql' : 'mysql').':dbname='.$sDbName.
-					(empty($sDbHost) ? '' : ';host='.$sDbHost).
-					(empty($sDbPort) ? '' : ';port='.$sDbPort).
-					(empty($sUnixSocket) ? '' : ';unix_socket='.$sUnixSocket), $sDbLogin, $sDbPassword);
+				if ($iDbType === EDbType::SQLite)
+				{
+					$sPdoString = 'sqlite:' . \CApi::DataPath() . "/" . $sDbName . ".db";
+					$oPdo = @new PDO($sPdoString);
+				}
+				else
+				{
+					$oPdo = @new PDO((EDbType::PostgreSQL === $iDbType ? 'pgsql' : 'mysql').':dbname='.$sDbName.
+						(empty($sDbHost) ? '' : ';host='.$sDbHost).
+						(empty($sDbPort) ? '' : ';port='.$sDbPort).
+						(empty($sUnixSocket) ? '' : ';unix_socket='.$sUnixSocket), $sDbLogin, $sDbPassword);
+				}
 
 				if ($oPdo)
 				{

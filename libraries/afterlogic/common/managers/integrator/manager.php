@@ -1348,6 +1348,8 @@ class CApiIntegratorManager extends AApiManager
 			$aResult['MaxSubjectSize'] = (int) $oSettings->GetConf('WebMail/MaxSubjectSize');
 			$aResult['JoinReplyPrefixes'] = (bool) CApi::GetConf('webmail.join-reply-prefixes', true);
 
+			$aResult['AllowTemplateFolders'] = (bool) CApi::GetConf('webmail.allow-template-folders', false);
+			$aResult['AllowSaveAttachmentToServer'] = (bool) CApi::GetConf('webmail.save-attachment-to-server-path', '');
 			$aResult['AllowAppRegisterMailto'] = (bool) CApi::GetConf('webmail.allow-app-register-mailto', true);
 			$aResult['AllowPrefetch'] = (bool) CApi::GetConf('webmail.use-prefetch', true);
 			$aResult['AllowLanguageOnLogin'] = (bool) $oSettings->GetConf('WebMail/AllowLanguageOnLogin');

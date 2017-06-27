@@ -42,7 +42,8 @@ class CApiMailDbStorage extends CApiMailStorage
 		$this->oCommandCreator =& $oManager->GetCommandCreator(
 			$this, array(
 				EDbType::MySQL => 'CApiMailCommandCreatorMySQL',
-				EDbType::PostgreSQL => 'CApiMailCommandCreatorPostgreSQL'
+				EDbType::PostgreSQL => 'CApiMailCommandCreatorPostgreSQL',
+				EDbType::SQLite => 'CApiMailCommandCreatorSQLite'
 			)
 		);
 	}
@@ -87,6 +88,30 @@ class CApiMailDbStorage extends CApiMailStorage
 		$aSystemNames['INBOX'] = 'INBOX';
 
 		$this->oConnection->Execute($this->oCommandCreator->getUpdateSystemFoldersQuery($oAccount, $aSystemNames));
+		$this->throwDbExceptionIfExist();
+		
+		return true;
+	}
+	
+	/**
+	 * Updates system folder.
+	 * @param CAccount $oAccount Account object.
+	 * @param string $sFolderFullName Folder full name.
+	 * @param int $iFolderType Folder type.
+	 * @param boolean $bRemove Indicates if folder should be set or unset as system.
+	 * @return boolean
+	 */
+	public function updateSystemFolder($oAccount, $sFolderFullName, $iFolderType, $bRemove)
+	{
+		if ($bRemove)
+		{
+			$this->oConnection->Execute($this->oCommandCreator->getRemoveSystemFolderQuery($oAccount, $sFolderFullName, $iFolderType));
+		}
+		else
+		{
+			$this->oConnection->Execute($this->oCommandCreator->getSetSystemFolderQuery($oAccount, $sFolderFullName, $iFolderType));
+		}
+		
 		$this->throwDbExceptionIfExist();
 		
 		return true;

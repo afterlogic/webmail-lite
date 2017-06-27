@@ -34,7 +34,8 @@ class CApiWebmailDbStorage extends CApiWebmailStorage
 		$this->oCommandCreator =& $oManager->GetCommandCreator(
 			$this, array(
 				EDbType::MySQL => 'CApiWebmailCommandCreatorMySQL',
-				EDbType::PostgreSQL => 'CApiWebmailCommandCreatorPostgreSQL'
+				EDbType::PostgreSQL => 'CApiWebmailCommandCreatorPostgreSQL',
+				EDbType::SQLite => 'CApiWebmailCommandCreatorSQLite'
 			)
 		);
 	}

@@ -2,8 +2,15 @@
 	 visible: !bVirtual">
 	<span class="title">
 		<span class="controls">
-			<span class="button subscribe" data-bind="customTooltip: subscribeButtonHint(), css: {'subscribed': subscribed(), 'disabled': !canSubscribe()}, click: function(oFolder) { $root.onSubscribeFolderClick(oFolder); }"></span>
-			<span class="button disabled"  data-bind="customTooltip: deleteButtonHint(), css: {'delete': !isSystem() && bSelectable, 'disabled': !canDelete()}, click: function(oFolder) { $root.onDeleteFolderClick(oFolder, $parent); }"></span>
+			<span class="button" data-bind="customTooltip: templateButtonHint, 
+				css: {'turned-on': isTemplateStorage(), 'template': visibleTemplateTrigger}, 
+				click: triggerTemplateState, visible: bAllowTemplateFolders"></span>
+			<span class="button subscribe" data-bind="customTooltip: subscribeButtonHint, 
+				css: {'subscribed': subscribed(), 'disabled': !canSubscribe()}, 
+				click: function(oFolder) { $root.onSubscribeFolderClick(oFolder); }"></span>
+			<span class="button disabled"  data-bind="customTooltip: deleteButtonHint(), 
+				css: {'delete': !isSystem() && bSelectable, 'disabled': !canDelete()}, 
+				click: function(oFolder) { $root.onDeleteFolderClick(oFolder, $parent); }"></span>
 			<span class="button up" data-bind="
 				  visible: $root.allowFolderListOrder(),
 				  css: {'disabled': !$root.canMoveFolderUp($data, $index(), $parent)}, 

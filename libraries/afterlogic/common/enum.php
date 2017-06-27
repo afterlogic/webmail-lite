@@ -162,13 +162,15 @@ class EDbType extends AEnumeration
 {
 	const MySQL = 3;
 	const PostgreSQL = 4;
+	const SQLite = 5;
 
 	/**
 	 * @var array
 	 */
 	protected $aConsts = array(
 		'MySQL' => self::MySQL,
-		'PostgreSQL' => self::PostgreSQL
+		'PostgreSQL' => self::PostgreSQL,
+		'SQLite' => self::SQLite
 	);
 }
 
@@ -474,6 +476,7 @@ class EFolderType extends AEnumeration
 	const Spam = 4;
 	const Trash = 5;
 	const Virus = 6;
+	const Template = 8;
 	const System = 9;
 	const Custom = 10;
 

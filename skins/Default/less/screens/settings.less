@@ -525,6 +525,18 @@
 					}
 				}
 
+				&.template {
+					&:before {
+						content: "\e901";
+					}
+				
+					&.turned-on {
+						&:before {
+							content: "\e900";
+						}
+					}
+				}
+
 				&.up {
 					background-position: -680px -120px;
 					
@@ -544,10 +556,17 @@
 		
 		.total .count {
 			margin-right: 62px !important;
+			
+			&.allow-template-folders {
+				margin-right: 85px !important;
+			}
 
 			html.rtl & {
 				margin-right: 0px;
 				margin-left: 62px !important;
+			}
+			html.rtl &.allow-template-folders {
+				margin-left: 85px !important;
 			}
 		}
 	}

@@ -110,3 +110,12 @@ class CApiSubscriptionsCommandCreatorPostgreSQL  extends CApiSubscriptionsComman
 {
 	
 }
+
+/**
+ * @package Subscriptions
+ * @subpackage Storages
+ */
+class CApiSubscriptionsCommandCreatorSQLite  extends CApiSubscriptionsCommandCreator
+{
+
+}

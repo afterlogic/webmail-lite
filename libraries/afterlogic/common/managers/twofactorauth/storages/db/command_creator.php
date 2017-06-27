@@ -131,3 +131,12 @@ class CApiTwofactorauthCommandCreatorMySQL extends api_CommandCreator
 		return sprintf($sSql, implode(', ', $aMap), $this->prefix(), $sWhere);
 	}	
 }
+
+/**
+ * @package Twofactorauth
+ * @subpackage Storages
+ */
+class CApiTwofactorauthCommandCreatorSQLite  extends CApiTwofactorauthCommandCreatorMySQL
+{
+	// TODO
+}

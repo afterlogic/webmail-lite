@@ -34,7 +34,8 @@ class CApiTwofactorauthDbStorage extends CApiTwofactorauthStorage
 		$this->oCommandCreator =& $oManager->GetCommandCreator(
 			$this, array(
 				EDbType::MySQL => 'CApiTwofactorauthCommandCreatorMySQL',
-				EDbType::PostgreSQL => 'CApiTwofactorauthCommandCreatorPostgreSQL'
+				EDbType::PostgreSQL => 'CApiTwofactorauthCommandCreatorPostgreSQL',
+				EDbType::SQLite => 'CApiTwofactorauthCommandCreatorSQLite'
 			)
 		);
 	}

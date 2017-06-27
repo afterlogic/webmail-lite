@@ -34,7 +34,8 @@ class CApiFetchersDbStorage extends CApiFetchersStorage
 		$this->oCommandCreator =& $oManager->GetCommandCreator(
 			$this, array(
 				EDbType::MySQL => 'CApiFetchersCommandCreatorMySQL',
-				EDbType::PostgreSQL => 'CApiFetchersCommandCreatorPostgreSQL'
+				EDbType::PostgreSQL => 'CApiFetchersCommandCreatorPostgreSQL',
+				EDbType::SQLite => 'CApiFetchersCommandCreatorSQLite'
 			)
 		);
 	}

@@ -672,6 +672,7 @@ Enums.FolderTypes = {
 	'Trash': 5,
 	'Virus': 6,
 	'Starred': 7,
+	'Template': 8,
 	'System': 9,
 	'User': 10
 };
@@ -9367,6 +9368,7 @@ function CCommonFileModel()
 	this.visibleDownloadLink = ko.computed(function () {
 		return !this.isPopupItem() && !this.visibleOpenLink();
 	}, this);
+	this.visibleSaveToServerLink = ko.observable(false);
 
 	this.subFiles = ko.observableArray([]);
 	this.allowExpandSubFiles = ko.observable(false);
@@ -9810,6 +9812,8 @@ CCommonFileModel.prototype.onImageLoad = function (oAttachmentModel, oEvent)
 		Utils.thumbQueue(this.thumbnailSessionUid());
 	}
 };
+
+CCommonFileModel.prototype.saveToServer = function () {};
 
 /**
  * @constructor

@@ -22,6 +22,11 @@
 			value="<?php echo EnumConvert::ToPost(EDbType::PostgreSQL, 'EDbType'); ?>" <?php
 			$this->Data->PrintCheckedValue('radioSqlTypePostgreSQL'); ?>  x-data-label="radioSqlType_label" />
 		<label id="radioSqlTypePostgreSQL_label" for="radioSqlTypePostgreSQL">PostgreSQL (experimental)</label>
+		&nbsp;&nbsp;&nbsp;
+		<input type="radio" class="wm_checkbox" name="radioSqlType" id="radioSqlTypeSQLite"
+			value="<?php echo EnumConvert::ToPost(EDbType::SQLite, 'EDbType'); ?>" <?php
+			$this->Data->PrintCheckedValue('radioSqlTypeSQLite'); ?>  x-data-label="radioSqlType_label" />
+		<label id="radioSqlTypeSQLite_label" for="radioSqlTypeSQLite">SQLite (experimental)</label>
 	</td>
 </tr>
 <tr>
@@ -29,7 +34,7 @@
 		<span id="txtSqlLogin_label"><?php echo CApi::I18N('ADMIN_PANEL/SCREEN_DATABASE_USER'); ?></span>
 	</td>
 	<td>
-		<input type="text" class="wm_input" name="txtSqlLogin" id="txtSqlLogin" value="<?php $this->Data->PrintInputValue('txtSqlLogin') ?>" size="35" />
+		<input type="text" class="wm_input" name="txtSqlLogin" id="txtSqlLogin" value="<?php $this->Data->PrintInputValue('txtSqlLogin') ?>" size="35" <?php if ($this->Data->getValue('radioSqlTypeSQLite')) { echo "disabled"; } ?> />
 	</td>
 </tr>
 <tr>
@@ -37,7 +42,7 @@
 		<span id="txtSqlPassword_label"><?php echo CApi::I18N('ADMIN_PANEL/SCREEN_DATABASE_PASS'); ?></span>
 	</td>
 	<td>
-		<input type="password" class="wm_input" name="txtSqlPassword" id="txtSqlPassword" value="<?php $this->Data->PrintInputValue('txtSqlPassword') ?>" size="35" />
+		<input type="password" class="wm_input" name="txtSqlPassword" id="txtSqlPassword" value="<?php $this->Data->PrintInputValue('txtSqlPassword') ?>" size="35" <?php if ($this->Data->getValue('radioSqlTypeSQLite')) { echo "disabled"; } ?> />
 	</td>
 </tr>
 <tr>
@@ -53,7 +58,7 @@
 		<span id="txtSqlSrc_label"><?php echo CApi::I18N('ADMIN_PANEL/SCREEN_DATABASE_HOST'); ?></span>
 	</td>
 	<td>
-		<input type="text" class="wm_input" name="txtSqlSrc" id="txtSqlSrc" value="<?php $this->Data->PrintInputValue('txtSqlSrc') ?>" size="35" />
+		<input type="text" class="wm_input" name="txtSqlSrc" id="txtSqlSrc" value="<?php $this->Data->PrintInputValue('txtSqlSrc') ?>" size="35" <?php if ($this->Data->getValue('radioSqlTypeSQLite')) { echo "disabled"; } ?> />
 	</td>
 </tr>
 

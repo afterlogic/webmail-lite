@@ -34,7 +34,8 @@ class CApiTenantsDbStorage extends CApiTenantsStorage
 		$this->oCommandCreator =& $oManager->GetCommandCreator(
 			$this, array(
 				EDbType::MySQL => 'CApiTenantsCommandCreatorMySQL',
-				EDbType::PostgreSQL => 'CApiTenantsCommandCreatorPostgreSQL'
+				EDbType::PostgreSQL => 'CApiTenantsCommandCreatorPostgreSQL',
+				EDbType::SQLite => 'CApiTenantsCommandCreatorSQLite'
 			)
 		);
 	}

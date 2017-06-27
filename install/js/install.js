@@ -50,11 +50,11 @@
 		
 		$('#next-btn-server-check').click(function () {
 			if (window.__awm_lite) {
-				window.open('http://www.afterlogic.com/congratulations/webmail-lite-php');
+				window.open('https://afterlogic.com/congratulations/afterlogic-webmail-lite-php');
 			} else if (window.__awm_au) {
-				window.open('http://www.afterlogic.com/congratulations/aurora');
+				window.open('https://afterlogic.com/congratulations/aurora');
 			} else {
-				window.open('http://www.afterlogic.com/congratulations/webmail-pro-php');
+				window.open('https://afterlogic.com/congratulations/afterlogic-webmail-pro-php');
 			}
 		});
 		
@@ -62,8 +62,23 @@
 			window.location = '../adminpanel/';
 		});
 
-		$('#chSqlTypeMySQL, #chSqlTypePostgreSQL').click(fCheckDbType);
+		$('#chSqlTypeMySQL, #chSqlTypePostgreSQL, #chSqlTypeSQLite').click(fCheckDbType);
 		fCheckDbType();
+		
+		$('#chSqlTypeMySQL, #chSqlTypePostgreSQL, #chSqlTypeSQLite').change(function () {
+			if ($('#chSqlTypeSQLite').attr("checked"))
+			{
+				$('#txtSqlLogin').attr('disabled', true);
+				$('#txtSqlPassword').attr('disabled', true);
+				$('#txtSqlSrc').attr('disabled', true);
+			}
+			else
+			{
+				$('#txtSqlLogin').attr('disabled', false);
+				$('#txtSqlPassword').attr('disabled', false);
+				$('#txtSqlSrc').attr('disabled',false);
+			}
+		});
 	});
 
 }(window, jQuery));

@@ -39,7 +39,8 @@ class CApiDbDbStorage extends CApiDbStorage
 		$this->oCommandCreator =& $oManager->GetCommandCreator(
 			$this, array(
 				EDbType::MySQL => 'CApiDbCommandCreatorMySQL',
-				EDbType::PostgreSQL => 'CApiDbCommandCreatorPostgreSQL'
+				EDbType::PostgreSQL => 'CApiDbCommandCreatorPostgreSQL',
+				EDbType::SQLite => 'CApiDbCommandCreatorSQLite'
 			)
 		);
 

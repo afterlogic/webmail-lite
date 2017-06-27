@@ -16,20 +16,23 @@
 					&nbsp;&nbsp;&nbsp;
 					<input type="radio" name="chSqlType" id="chSqlTypePostgreSQL" value="PostgreSQL" {{SqlTypePostgreSQLCheched}} />
 					<label for="chSqlTypePostgreSQL">PostgreSQL (experimental)</label>
+					&nbsp;&nbsp;&nbsp;
+					<input type="radio" name="chSqlType" id="chSqlTypeSQLite" value="SQLite" {{SqlTypeSQLiteCheched}} />
+					<label for="chSqlTypeSQLite">SQLite (experimental)</label>
 				</span>
 			</div>
 
 			<div class="row">
 				<label class="field_label_tiny">SQL login:</label>
 				<span class="field_value">
-					<input type="text" class="wm_input" name="txtSqlLogin" value="{{Login}}" size="45" />
+					<input type="text" class="wm_input" name="txtSqlLogin" id="txtSqlLogin" value="{{Login}}" {{SqlTypeSQLiteDisable}} size="45" />
 				</span>
 			</div>
 
 			<div class="row">
 				<label class="field_label_tiny">SQL password:</label>
 				<span class="field_value">
-					<input type="password" class="wm_input" name="txtSqlPassword" value="{{Password}}" size="45" />
+					<input type="password" class="wm_input" name="txtSqlPassword" id="txtSqlPassword" value="{{Password}}" {{SqlTypeSQLiteDisable}} size="45" />
 				</span>
 			</div>
 
@@ -47,7 +50,7 @@
 			<div class="row">
 				<label class="field_label_tiny">Host:</label>
 				<span class="field_value">
-					<input type="text" class="wm_input" name="txtSqlSrc" value="{{Host}}" size="45" />
+					<input type="text" class="wm_input" name="txtSqlSrc" id="txtSqlSrc" value="{{Host}}" {{SqlTypeSQLiteDisable}} size="45" />
 				</span>
 			</div>
 		</div>

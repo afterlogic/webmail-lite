@@ -31,3 +31,11 @@ class CApiWebmailCommandCreatorMySQL extends CApiWebmailCommandCreator
 class CApiWebmailCommandCreatorPostgreSQL extends CApiWebmailCommandCreator
 {
 }
+
+/**
+ * @package WebMail
+ * @subpackage Storages
+ */
+class CApiWebmailCommandCreatorSQLite extends CApiWebmailCommandCreator
+{
+}

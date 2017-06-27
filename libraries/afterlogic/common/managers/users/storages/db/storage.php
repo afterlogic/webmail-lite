@@ -38,7 +38,8 @@ class CApiUsersDbStorage extends CApiUsersStorage
 		$this->oCommandCreator =& $oManager->GetCommandCreator(
 			$this, array(
 				EDbType::MySQL => 'CApiUsersCommandCreatorMySQL',
-				EDbType::PostgreSQL => 'CApiUsersCommandCreatorPostgreSQL'
+				EDbType::PostgreSQL => 'CApiUsersCommandCreatorPostgreSQL',
+				EDbType::SQLite => 'CApiUsersCommandCreatorSQLite'
 			)
 		);
 	}

@@ -401,3 +401,12 @@ class CApiTenantsCommandCreatorPostgreSQL extends CApiTenantsCommandCreatorMySQL
 {
 	// TODO
 }
+
+/**
+ * @package Tenants
+ * @subpackage Storages
+ */
+class CApiTenantsCommandCreatorSQLite extends CApiTenantsCommandCreatorMySQL
+{
+	// TODO
+}

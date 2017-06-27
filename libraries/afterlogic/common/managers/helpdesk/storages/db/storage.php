@@ -36,7 +36,8 @@ class CApiHelpdeskDbStorage extends CApiHelpdeskStorage
 		$this->oCommandCreator =& $oManager->GetCommandCreator(
 			$this, array(
 				EDbType::MySQL => 'CApiHelpdeskCommandCreatorMySQL',
-				EDbType::PostgreSQL => 'CApiHelpdeskCommandCreatorPostgreSQL'
+				EDbType::PostgreSQL => 'CApiHelpdeskCommandCreatorPostgreSQL',
+				EDbType::SQLite => 'CApiHelpdeskCommandCreatorSQLite'
 			)
 		);
 	}

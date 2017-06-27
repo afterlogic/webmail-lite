@@ -34,7 +34,8 @@ class CApiSubscriptionsDbStorage extends CApiSubscriptionsStorage
 		$this->oCommandCreator =& $oManager->GetCommandCreator(
 			$this, array(
 				EDbType::MySQL => 'CApiSubscriptionsCommandCreatorMySQL',
-				EDbType::PostgreSQL => 'CApiSubscriptionsCommandCreatorPostgreSQL'
+				EDbType::PostgreSQL => 'CApiSubscriptionsCommandCreatorPostgreSQL',
+				EDbType::SQLite => 'CApiSubscriptionsCommandCreatorSQLite'
 			)
 		);
 	}

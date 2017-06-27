@@ -169,6 +169,11 @@ class CApiMailManager extends AApiManagerWithStorage
 		return $this->oStorage->setSystemFolderNames($oAccount, $aSystemNames);
 	}
 
+	public function updateSystemFolder($oAccount, $sFolderFullName, $iFolderType, $bRemove)
+	{
+		return $this->oStorage->updateSystemFolder($oAccount, $sFolderFullName, $iFolderType, $bRemove);
+	}
+
 	/**
 	 * Gets information about system folders of the account.
 	 * 
@@ -204,6 +209,7 @@ class CApiMailManager extends AApiManagerWithStorage
 			}
 
 			$aTypes = array_keys($aFoldersMap);
+			$aTypes[] = EFolderType::Template;
 
 			$aUnExistenSystemNames = array();
 			$aSystemNames = $this->getSystemFolderNames($oAccount);
@@ -224,9 +230,12 @@ class CApiMailManager extends AApiManagerWithStorage
 						$oFolder = /* @var $oFolder CApiMailFolder */ $oFolderCollection->getFolder($sSystemFolderFullName, true);
 						if ($oFolder)
 						{
-							unset($aTypes[$iKey]);
-							unset($aFoldersMap[$iKey]);
-							unset($aUnExistenSystemNames[$sSystemFolderFullName]);
+							if ($iFolderType !== EFolderType::Template)
+							{
+								unset($aTypes[$iKey]);
+								unset($aFoldersMap[$iKey]);
+								unset($aUnExistenSystemNames[$sSystemFolderFullName]);
+							}
 							
 							$oFolder->setType($iFolderType);
 						}
@@ -242,8 +251,11 @@ class CApiMailManager extends AApiManagerWithStorage
 
 						if (false !== $iKey && EFolderType::Custom === $oFolder->getType() && isset($aFoldersMap[$iXListType]))
 						{
-							unset($aTypes[$iKey]);
-							unset($aFoldersMap[$iXListType]);
+							if ($iXListType !== EFolderType::Template)
+							{
+								unset($aTypes[$iKey]);
+								unset($aFoldersMap[$iXListType]);
+							}
 							
 							$oFolder->setType($iXListType);
 						}
@@ -273,7 +285,10 @@ class CApiMailManager extends AApiManagerWithStorage
 									{
 										if (in_array($oFolder->getRawName(), $aList) || in_array($oFolder->getName(), $aList))
 										{
-											unset($aFoldersMap[$iFolderType]);
+											if ($iFolderType !== EFolderType::Template)
+											{
+												unset($aFoldersMap[$iFolderType]);
+											}
 
 											$oFolder->setType($iFolderType);
 										}

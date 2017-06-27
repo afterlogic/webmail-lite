@@ -47,8 +47,13 @@ class DateTimeHelper
 	 */
 	public static function ParseRFC2822DateString($sDateTime)
 	{
+		$sFormat = 'D, d M Y H:i:s O';
+		if (\version_compare(\PHP_VERSION, '5.3.9') >= 0)
+		{
+			$sFormat .= '+';
+		}
 		$sDateTime = \trim(\preg_replace('/ \([a-zA-Z0-9]+\)$/', '', \trim($sDateTime)));
-		$oDateTime = \DateTime::createFromFormat('D, d M Y H:i:s O+', $sDateTime, \MailSo\Base\DateTimeHelper::GetUtcTimeZoneObject());
+		$oDateTime = \DateTime::createFromFormat($sFormat, $sDateTime, \MailSo\Base\DateTimeHelper::GetUtcTimeZoneObject());
 		return $oDateTime ? $oDateTime->getTimestamp() : 0;
 	}
 
@@ -67,8 +72,12 @@ class DateTimeHelper
 		{
 			return \MailSo\Base\DateTimeHelper::ParseRFC2822DateString($sDateTime);
 		}
-
-		$oDateTime = \DateTime::createFromFormat('d-M-Y H:i:s O+', $sDateTime, \MailSo\Base\DateTimeHelper::GetUtcTimeZoneObject());
+		$sFormat = 'd-M-Y H:i:s O';
+		if (\version_compare(\PHP_VERSION, '5.3.9')  >= 0)
+		{
+			$sFormat .= '+';
+		}
+		$oDateTime = \DateTime::createFromFormat($sFormat, $sDateTime, \MailSo\Base\DateTimeHelper::GetUtcTimeZoneObject());
 		return $oDateTime ? $oDateTime->getTimestamp() : 0;
 	}
 
@@ -81,7 +90,12 @@ class DateTimeHelper
 	 */
 	public static function ParseDateStringType1($sDateTime)
 	{
-		$oDateTime = \DateTime::createFromFormat('Y-m-d H:i:s O+', \trim($sDateTime), \MailSo\Base\DateTimeHelper::GetUtcTimeZoneObject());
+		$sFormat = 'Y-m-d H:i:s O';
+		if (\version_compare(\PHP_VERSION, '5.3.9')  >= 0)
+		{
+			$sFormat .= '+';
+		}
+		$oDateTime = \DateTime::createFromFormat($sFormat, \trim($sDateTime), \MailSo\Base\DateTimeHelper::GetUtcTimeZoneObject());
 		return $oDateTime ? $oDateTime->getTimestamp() : 0;
 	}
 }

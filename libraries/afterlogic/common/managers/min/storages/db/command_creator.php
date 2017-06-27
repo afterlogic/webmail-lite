@@ -134,3 +134,12 @@ class CApiMinCommandCreatorPostgreSQL extends CApiMinCommandCreator
 {
 
 }
+
+/**
+ * @package Min
+ * @subpackage Storages
+ */
+class CApiMinCommandCreatorSQLite extends CApiMinCommandCreator
+{
+
+}

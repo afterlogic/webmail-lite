@@ -34,7 +34,8 @@ class CApiMinDbStorage extends CApiMinStorage
 		$this->oCommandCreator =& $oManager->GetCommandCreator(
 			$this, array(
 				EDbType::MySQL => 'CApiMinCommandCreatorMySQL',
-				EDbType::PostgreSQL => 'CApiMinCommandCreatorPostgreSQL'
+				EDbType::PostgreSQL => 'CApiMinCommandCreatorPostgreSQL',
+				EDbType::SQLite => 'CApiMinCommandCreatorSQLite'
 			)
 		);
 	}

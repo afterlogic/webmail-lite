@@ -896,3 +896,11 @@ class CApiHelpdeskCommandCreatorMySQL extends CApiHelpdeskCommandCreator
 class CApiHelpdeskCommandCreatorPostgreSQL extends CApiHelpdeskCommandCreator
 {
 }
+
+/**
+ * @package Helpdesk
+ * @subpackage Storages
+ */
+class CApiHelpdeskCommandCreatorSQLite extends CApiHelpdeskCommandCreator
+{
+}

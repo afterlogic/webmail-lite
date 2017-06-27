@@ -17,8 +17,20 @@ class CDbStep extends AInstallerStep
 
 	protected function initDbSettings()
 	{
-		$this->oSettings->SetConf('Common/DBType', 
-			'PostgreSQL' === CPost::get('chSqlType') ? EDbType::PostgreSQL : EDbType::MySQL);
+		switch (CPost::get('chSqlType'))
+		{
+			case 'PostgreSQL':
+				$this->oSettings->SetConf('Common/DBType', EDbType::PostgreSQL);
+				break;
+
+			case 'SQLite':
+				$this->oSettings->SetConf('Common/DBType', EDbType::SQLite);
+				break;
+
+			case 'MySQL':
+			default:
+				$this->oSettings->SetConf('Common/DBType', EDbType::MySQL);
+		}
 		
 		if (CPost::Has('txtSqlLogin'))
 		{
@@ -172,6 +184,8 @@ class CDbStep extends AInstallerStep
 		return array(
 			'SqlTypeMySQLCheched' => EDbType::MySQL === $this->oSettings->GetConf('Common/DBType')  ? 'checked="cheched"' : '',
 			'SqlTypePostgreSQLCheched' => EDbType::PostgreSQL === $this->oSettings->GetConf('Common/DBType') ? 'checked="cheched"' : '',
+			'SqlTypeSQLiteCheched' => EDbType::SQLite === $this->oSettings->GetConf('Common/DBType') ? 'checked="cheched"' : '',
+			'SqlTypeSQLiteDisable' => EDbType::SQLite === $this->oSettings->GetConf('Common/DBType') ? 'disabled' : '',
 			'Login' => $this->oSettings->GetConf('Common/DBLogin'),
 			'Password' => API_DUMMY,
 			'DbName' => $this->oSettings->GetConf('Common/DBName'),

@@ -20,6 +20,7 @@ class CCommonPopulateData extends ap_CoreModuleHelper
 		{
 			$oScreen->Data->SetValue('radioSqlTypeMySQL', EDbType::MySQL === $this->oSettings->GetConf('Common/DBType'));
 			$oScreen->Data->SetValue('radioSqlTypePostgreSQL', EDbType::PostgreSQL === $this->oSettings->GetConf('Common/DBType'));
+			$oScreen->Data->SetValue('radioSqlTypeSQLite', EDbType::SQLite === $this->oSettings->GetConf('Common/DBType'));
 		}
 		
 		$oScreen->Data->SetValue('txtSqlLogin', $this->oSettings->GetConf('Common/DBLogin'));

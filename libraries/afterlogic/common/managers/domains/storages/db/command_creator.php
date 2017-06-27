@@ -294,3 +294,16 @@ class CApiDomainsCommandCreatorPostgreSQL  extends CApiDomainsCommandCreatorMySQ
 {
 	// TODO
 }
+
+/**
+ * @todo make it
+ *
+ * @internal
+ *
+ * @package Domains
+ * @subpackage Storages
+ */
+class CApiDomainsCommandCreatorSQLite  extends CApiDomainsCommandCreatorMySQL
+{
+	// TODO
+}

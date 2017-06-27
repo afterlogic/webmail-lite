@@ -799,6 +799,38 @@ class Actions extends ActionsBase
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $mResult);
 	}
 
+	public function AjaxMessageAttachmentSaveToServer()
+	{
+		$bResult = false;
+		$oAccount = null;
+		$sFilePath = \CApi::GetConf('webmail.save-attachment-to-server-path', '');
+		
+		if (!empty($sFilePath) && file_exists($sFilePath))
+		{
+			$this->rawCallback((string) $this->getParamValue('RawKey', ''), function ($oAccount, $sContentType, $sFileName, $rSource) use ($sFilePath, &$bResult) {
+				
+				$iIndex = 0;
+				$sFileNamePathInfo = pathinfo($sFileName);
+				$sFileExtension = isset($sFileNamePathInfo['extension']) ? '.' . $sFileNamePathInfo['extension'] : '';
+				$sFileNameBeforeDot = isset($sFileNamePathInfo['filename']) ? $sFileNamePathInfo['filename'] : $sFileName;
+				$sFileNameToSave = $sFileNameBeforeDot . $sFileExtension;
+
+				while (file_exists($sFilePath . $sFileNameToSave))
+				{
+					$sFileNameToSave = $sFileNameBeforeDot . '_' . $iIndex . $sFileExtension;
+					$iIndex++;
+				}
+
+				$rOpenOutput = fopen($sFilePath . '/' . $sFileNameToSave, 'w');
+				$bResult = (false !== \MailSo\Base\Utils::MultipleStreamWriter($rSource, array($rOpenOutput)));
+				fclose($rOpenOutput);
+
+			}, false, $oAccount);
+		}
+
+		return $this->DefaultResponse($oAccount, __FUNCTION__, $bResult);
+	}
+	
 	/**
 	 * @return array
 	 */
@@ -830,6 +862,19 @@ class Actions extends ActionsBase
 		}
 
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $this->oApiMail->setSystemFolderNames($oAccount, $aData));
+	}
+
+	/**
+	 * @return array
+	 */
+	public function AjaxFolderSetTemplateType()
+	{
+		$oAccount = $this->getAccountFromParam();
+		
+		$sFolder = (string) $this->getParamValue('Folder', '');
+		$bRemove = '1' === (string) $this->getParamValue('Remove', '0');
+
+		return $this->DefaultResponse($oAccount, __FUNCTION__, $this->oApiMail->updateSystemFolder($oAccount, $sFolder, \EFolderType::Template, $bRemove));
 	}
 
 	/**

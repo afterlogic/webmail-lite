@@ -1076,3 +1076,11 @@ class CApiUsersCommandCreatorPostgreSQL extends CApiUsersCommandCreatorMySQL
 	// TODO
 }
 
+/**
+ * @package Users
+ * @subpackage Storages
+ */
+class CApiUsersCommandCreatorSQLite extends CApiUsersCommandCreatorMySQL
+{
+	// TODO
+}

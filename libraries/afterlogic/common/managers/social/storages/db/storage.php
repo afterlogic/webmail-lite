@@ -34,7 +34,8 @@ class CApiSocialDbStorage extends CApiSocialStorage
 		$this->oCommandCreator =& $oManager->GetCommandCreator(
 			$this, array(
 				EDbType::MySQL => 'CApiSocialCommandCreatorMySQL',
-				EDbType::PostgreSQL => 'CApiSocialCommandCreatorPostgreSQL'
+				EDbType::PostgreSQL => 'CApiSocialCommandCreatorPostgreSQL',
+				EDbType::SQLite => 'CApiSocialCommandCreatorSQLite'
 			)
 		);
 	}

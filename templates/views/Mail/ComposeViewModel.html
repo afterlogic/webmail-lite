@@ -30,6 +30,10 @@
 						<span class="icon" data-bind="customTooltip: 'COMPOSE/TOOL_SAVE'"></span>
 						<span class="text" data-bind="i18n: 'text'" data-i18n="COMPOSE/TOOL_SAVE"></span>
 					</span>
+					<span class="item save" data-bind="command: saveTemplateCommand, css: {'disabled': !isEnableSaving()}, visible: templateFolderName() !== ''">
+						<span class="icon" data-bind="customTooltip: 'COMPOSE/TOOL_SAVE_TEMPLATE'"></span>
+						<span class="text" data-bind="i18n: 'text'" data-i18n="COMPOSE/TOOL_SAVE_TEMPLATE"></span>
+					</span>
 					<!-- ko if: !mobileApp -->
 					<span class="item importance" data-bind="dropdown: {'control': false}">
 						<span class="icon" data-bind="customTooltip: 'COMPOSE/TOOL_IMPORTANCE'"></span>

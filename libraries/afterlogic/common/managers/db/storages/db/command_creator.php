@@ -50,3 +50,20 @@ class CApiDbCommandCreatorPostgreSQL extends CApiDbCommandCreator
 		return sprintf($oSql, $this->escapeColumn($sName));
 	}
 }
+
+/**
+ * @package Db
+ * @subpackage Storages
+ */
+class CApiDbCommandCreatorSQLite extends CApiDbCommandCreator
+{
+	/**
+	 * @param string $sName
+	 *
+	 * @return string
+	 */
+	public function createDatabase($sName)
+	{
+		return "SELECT * FROM sqlite_master LIMIT 1";
+	}
+}

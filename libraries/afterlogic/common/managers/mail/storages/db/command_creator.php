@@ -141,6 +141,43 @@ class CApiMailCommandCreator extends api_CommandCreator
 	}
 
 	/**
+	 * Returns query for removing system folder information in database.
+	 * @param CAccount $oAccount Account object.
+	 * @param string $sFolderFullName Folder full name.
+	 * @param int $iFolderType Folder type.
+	 * @return string
+	 */
+	public function getRemoveSystemFolderQuery($oAccount, $sFolderFullName, $iFolderType)
+	{
+		$sSql = sprintf('DELETE FROM %sawm_system_folders WHERE id_acct = %d AND folder_full_name = \'%s\' AND system_type = %d',
+				$this->prefix(),
+				$oAccount->IdAccount,
+				$sFolderFullName,
+				$iFolderType);
+
+		return $sSql;
+	}
+
+	/**
+	 * Returns query for setting system folder information in database.
+	 * @param CAccount $oAccount Account object.
+	 * @param string $sFolderFullName Folder full name.
+	 * @param int $iFolderType Folder type.
+	 * @return string
+	 */
+	public function getSetSystemFolderQuery($oAccount, $sFolderFullName, $iFolderType)
+	{
+		$sSql = 'INSERT INTO %sawm_system_folders
+(id_acct, id_user, folder_full_name, system_type)
+VALUES ('.((int) $oAccount->IdAccount).', '.((int) $oAccount->IdUser).', '.
+				($this->oHelper->EscapeString($sFolderFullName)).', '.((int) $iFolderType).')';
+		
+		$sSql = sprintf($sSql, $this->prefix());
+		
+		return $sSql;
+	}
+	
+	/**
 	 * Returns query for updating information about system folder in database.
 	 * 
 	 * @param CAccount $oAccount Account object.
@@ -189,5 +226,15 @@ class CApiMailCommandCreatorMySQL extends CApiMailCommandCreator
  * @subpackage Storages
  */
 class CApiMailCommandCreatorPostgreSQL extends CApiMailCommandCreator
+{
+}
+
+/**
+ * CApiMailCommandCreatorSQLite class for generating query strings for SQLite database.
+ *
+ * @package Mail
+ * @subpackage Storages
+ */
+class CApiMailCommandCreatorSQLite extends CApiMailCommandCreator
 {
 }

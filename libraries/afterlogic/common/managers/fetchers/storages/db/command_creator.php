@@ -92,3 +92,12 @@ class CApiFetchersCommandCreatorPostgreSQL extends CApiFetchersCommandCreator
 {
 
 }
+
+/**
+ * @package Fetchers
+ * @subpackage Storages
+ */
+class CApiFetchersCommandCreatorSQLite extends CApiFetchersCommandCreator
+{
+
+}
