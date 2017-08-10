@@ -746,6 +746,12 @@ class CApiIntegratorManager extends AApiManager
 		$bAuthResult = false;
 		CApi::Plugin()->RunHook('api-integrator-login-to-account', array(&$sEmail, &$sIncPassword, &$sIncLogin, &$sLanguage, &$bAuthResult));
 
+        // where only username is used for login, need to use the appropriate lookup
+        if (0 === strlen($sEmail))
+        {
+            $sEmail = $sIncLogin;
+        }
+            
 		$oAccount = $oApiUsersManager->getAccountByEmail($sEmail);
 		if ($oAccount instanceof CAccount)
 		{
