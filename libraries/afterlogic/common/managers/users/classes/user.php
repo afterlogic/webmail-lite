@@ -35,6 +35,7 @@
  * @property string $ClientTimeZone
  * @property bool $UseThreads
  * @property bool $SaveRepliedMessagesToCurrentFolder
+ * @property bool $ComposePlainTextDefault
  * @property bool $DesktopNotifications
  * @property bool $AllowChangeInputDirection
  * @property bool $EnableOpenPgp
@@ -100,7 +101,7 @@ class CUser extends api_AContainer
 			'LoginsCount'						=> 0,
 
 			'DefaultSkin'						=> $oDomain->DefaultSkin,
-			'DefaultLanguage'					=> $oDomain->DefaultLanguage,
+			'DefaultLanguage'					=> $oDomain->DefaultLanguage === "Autodetect" ?  \CApi::Manager('integrator')->getAutodetectLanguage() : $oDomain->DefaultLanguage,
 			'DefaultEditor'						=> EUserHtmlEditor::Html,
 			'SaveMail'							=> $iSaveMail,
 			'Layout'							=> $oDomain->Layout,
@@ -127,6 +128,7 @@ class CUser extends api_AContainer
 			'ClientTimeZone'					=> '',
 			'UseThreads'						=> $oDomain->UseThreads,
 			'SaveRepliedMessagesToCurrentFolder'=> false,
+			'ComposePlainTextDefault'			=> (bool) CApi::GetConf('webmail.allow-compose-plain-text', false) && (bool) CApi::GetConf('webmail.compose-plain-text-default', false),
 			'DesktopNotifications'				=> false,
 			'AllowChangeInputDirection'			=> false,
 			'EnableOpenPgp'						=> false,
@@ -393,6 +395,7 @@ class CUser extends api_AContainer
 
 			'UseThreads'						=> array('bool', 'use_threads'),
 			'SaveRepliedMessagesToCurrentFolder'=> array('bool', 'save_replied_messages_to_current_folder'),
+			'ComposePlainTextDefault'			=> array('bool', 'compose_plain_text_default'),
 			'DesktopNotifications'				=> array('bool', 'desktop_notifications'),
 			'AllowChangeInputDirection'			=> array('bool', 'allow_change_input_direction'),
 			'AllowHelpdeskNotifications'		=> array('bool', 'allow_helpdesk_notifications'),

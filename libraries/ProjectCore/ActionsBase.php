@@ -582,6 +582,7 @@ abstract class ActionsBase
 					'Email' => $mResponse->Email,
 					'Signature' => $mResponse->Signature,
 					'SignatureOptions' => $mResponse->SignatureOptions,
+					'SignatureType' => $mResponse->SignatureType,
 					'LeaveMessagesOnServer' => $mResponse->LeaveMessagesOnServer,
 					'IncomingMailServer' => $mResponse->IncomingMailServer,
 					'IncomingMailPort' => $mResponse->IncomingMailPort,
@@ -731,6 +732,7 @@ abstract class ActionsBase
 					'Email' => $mResponse->Email,
 					'FriendlyName' => $mResponse->FriendlyName,
 					'UseSignature' => $mResponse->UseSignature,
+					'SignatureType' => $mResponse->SignatureType,
 					'Signature' => $mResponse->Signature
 				));
 			}
@@ -886,6 +888,16 @@ abstract class ActionsBase
 					'Owner' => $mResponse->Owner,
 					'Content' => $mResponse->Content,
 					'IsExternal' => $mResponse->IsExternal
+				));
+			}			
+			else if ('CAccount' === $sClassName)
+			{
+				$mResult = array_merge($this->objectWrapper($oAccount, $mResponse, $sParent, $aParameters), 
+						array(
+							'UserId' => $mResponse->IdUser,
+							'AccountId' => $mResponse->IdAccount,
+							'Email' => $mResponse->Email,
+							'FriendlyName' => $mResponse->FriendlyName
 				));
 			}			
 			else

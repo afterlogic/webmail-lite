@@ -205,7 +205,7 @@ class CApiIntegratorManager extends AApiManager
 	 *
 	 * @return string
 	 */
-	private function validatedLanguageValue($sLanguage)
+	private function validateLanguageValue($sLanguage)
 	{
 		if ('' === $sLanguage || !in_array($sLanguage, $this->getLanguageList()))
 		{
@@ -223,7 +223,7 @@ class CApiIntegratorManager extends AApiManager
 	private function compileLanguage($sLanguage)
 	{
 
-		$sLanguage = $this->validatedLanguageValue($sLanguage);
+		$sLanguage = $this->validateLanguageValue($sLanguage);
 		
 		$sCacheFileName = '';
 		if (CApi::GetConf('labs.cache.i18n', $this->bCache))
@@ -330,7 +330,7 @@ class CApiIntegratorManager extends AApiManager
 	public function getLoginLanguage()
 	{
 		$sLanguage = empty($_COOKIE[self::TOKEN_LANGUAGE]) ? '' : $_COOKIE[self::TOKEN_LANGUAGE];
-		return '' === $sLanguage ? '' : $this->validatedLanguageValue($sLanguage);
+		return '' === $sLanguage ? '' : $this->validateLanguageValue($sLanguage);
 	}
 
 	/**
@@ -338,7 +338,7 @@ class CApiIntegratorManager extends AApiManager
 	 */
 	public function setLoginLanguage($sLanguage)
 	{
-		$sLanguage = $this->validatedLanguageValue($sLanguage);
+		$sLanguage = $this->validateLanguageValue($sLanguage);
 		@setcookie(self::TOKEN_LANGUAGE, $sLanguage, 0, $this->getCookiePath(), null, null, true);
 	}
 
@@ -746,12 +746,6 @@ class CApiIntegratorManager extends AApiManager
 		$bAuthResult = false;
 		CApi::Plugin()->RunHook('api-integrator-login-to-account', array(&$sEmail, &$sIncPassword, &$sIncLogin, &$sLanguage, &$bAuthResult));
 
-        // where only username is used for login, need to use the appropriate lookup
-        if (0 === strlen($sEmail))
-        {
-            $sEmail = $sIncLogin;
-        }
-            
 		$oAccount = $oApiUsersManager->getAccountByEmail($sEmail);
 		if ($oAccount instanceof CAccount)
 		{
@@ -1361,6 +1355,8 @@ class CApiIntegratorManager extends AApiManager
 			$aResult['AllowLanguageOnLogin'] = (bool) $oSettings->GetConf('WebMail/AllowLanguageOnLogin');
 			$aResult['FlagsLangSelect'] = (bool) $oSettings->GetConf('WebMail/FlagsLangSelect');
 
+			$aResult['AllowComposePlainText'] = (bool) CApi::GetConf('webmail.allow-compose-plain-text', false);
+			
 			$aResult['LoginFormType'] = (int) $oSettings->GetConf('WebMail/LoginFormType');
 			$aResult['LoginSignMeType'] = (int) $oSettings->GetConf('WebMail/LoginSignMeType');
 			$aResult['LoginAtDomainValue'] = (string) $oSettings->GetConf('WebMail/LoginAtDomainValue');
@@ -1496,6 +1492,12 @@ class CApiIntegratorManager extends AApiManager
 			{
 				$aResult['UseThreads'] = (bool) $oAccount->User->UseThreads;
 				$aResult['SaveRepliedMessagesToCurrentFolder'] = (bool) $oAccount->User->SaveRepliedMessagesToCurrentFolder;
+			}
+			
+			$aResult['ComposePlainTextDefault'] = false;
+			if ((bool) CApi::GetConf('webmail.allow-compose-plain-text', false))
+			{
+				$aResult['ComposePlainTextDefault'] = (bool) $oAccount->User->ComposePlainTextDefault;
 			}
 
 			$aResult['OutlookSyncEnable'] = $oApiCapabilityManager->isOutlookSyncSupported($oAccount);
@@ -2143,8 +2145,11 @@ class CApiIntegratorManager extends AApiManager
 					$sSiteName = $oDomain->SiteName;
 				}
 			}
-
-			$sLanguage = $this->validatedLanguageValue($sLanguage);
+			if ($sLanguage === 'Autodetect')
+			{
+				$sLanguage = $this->getBrowserLanguage();
+			}
+			$sLanguage = $this->validateLanguageValue($sLanguage);
 
 			$sTheme = $this->validatedThemeValue($sTheme);
 		}
@@ -2315,5 +2320,15 @@ $this->compileAppData($bHelpdesk, $iHelpdeskIdTenant, $sHelpdeskHash, $sCalendar
 	{
 		return self::AUTH_KEY;
 	}
-	
+
+	/**
+	 * @return string
+	 */
+	public function getAutodetectLanguage()
+	{
+		$sLanguage = $this->getBrowserLanguage();
+		$sLanguage = $this->validateLanguageValue($sLanguage);
+
+		return $sLanguage;
+	}
 }

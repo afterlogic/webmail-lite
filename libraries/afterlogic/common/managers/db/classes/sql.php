@@ -260,6 +260,7 @@ class CDbSchema
 
 			new CDbField('use_threads', CDbField::BIT, 1),
 			new CDbField('save_replied_messages_to_current_folder', CDbField::BIT, 0),
+			new CDbField('compose_plain_text_default', CDbField::BIT, 0),
 			new CDbField('desktop_notifications', CDbField::BIT, 0),
 			new CDbField('allow_change_input_direction', CDbField::BIT, 0),
 			new CDbField('allow_helpdesk_notifications', CDbField::BIT, 0),
@@ -634,6 +635,7 @@ class CDbSchema
 			new CDbField('frienly_name', CDbField::VAR_CHAR, ''),
 			new CDbField('email', CDbField::VAR_CHAR, ''),
 			new CDbField('signature', CDbField::TEXT_MEDIUM),
+			new CDbField('signature_type', CDbField::INT_SHORT, 1),
 			new CDbField('signature_opt', CDbField::INT_SHORT, 0),
 			new CDbField('inc_host', CDbField::VAR_CHAR, ''),
 			new CDbField('inc_port', CDbField::INT, 110),

@@ -89,6 +89,27 @@
 		}
 	}
 	
+	.plaintext {
+		height: 100%;
+		width: 100%;
+		
+		textarea {
+			border: 0;
+			height: 98%;
+			outline: none;
+			padding: 1%;
+			resize: none;
+			width: 98%;
+		}
+	}
+	
+	.plaintext_switcher {
+		bottom: 0;
+		position: absolute;
+		margin: 6px;
+		right: 0;
+	}
+	
 	.inline_popup {
 		padding: 4px 8px;
 		position: absolute;
@@ -133,9 +154,10 @@
 		border: 1px solid #CCCCCC;
 		border-bottom: 1px solid #ddd;
 		border-radius: 4px 4px 0 0;
-		padding: 0px 4px;
+		padding: 0px;
 		cursor: default;
 		background: #fdfdfd;
+		position: relative;
 		
 		.content {
 			padding: 0px;

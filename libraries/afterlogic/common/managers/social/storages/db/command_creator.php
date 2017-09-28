@@ -119,7 +119,7 @@ class CApiSocialCommandCreator extends api_CommandCreator
 	public function getSocialById($sIdSocial, $sType)
 	{
 		return $this->getSocialByWhere(sprintf('%s = %s AND %s = %s', 
-				$this->escapeColumn('id_social'), $sIdSocial,
+				$this->escapeColumn('id_social'), $this->escapeString($sIdSocial),
 				$this->escapeColumn('type_str'), $this->escapeString(strtolower($sType))
 		));
 	}	

@@ -1230,5 +1230,59 @@ class CApiContactsmainCommandCreatorPostgreSQL  extends CApiContactsmainCommandC
  */
 class CApiContactsmainCommandCreatorSQLite  extends CApiContactsmainCommandCreatorMySQL
 {
-	// TODO
+	/**
+	 * @param int $iUserId
+	 * @param string $sSearch
+	 * @param int $iRequestLimit
+	 * @param bool $bPhoneOnly = false
+	 * @param int $iSharedTenantId = null
+	 * @param bool $bAll = false
+	 * @return string
+	 */
+	public function GetSuggestContactItems($iUserId, $sSearch, $iRequestLimit, $bPhoneOnly = false, $iSharedTenantId = null, $bAll = false)
+	{
+		$sUserWhere = $this->sharedItemsSqlHelper($iUserId, null, is_int($iSharedTenantId), true, '', $bAll);
+
+		$sSearchAdd = '';
+		if (0 < strlen($sSearch))
+		{
+			$bPhone = api_Utils::IsPhoneSearch($sSearch);
+			$sPhoneSearch = $bPhone ? api_Utils::ClearPhoneSearch($sSearch) : '';
+
+			$sSearch = '\'%'.$this->escapeString($sSearch, true, true).'%\'';
+
+			if ($bPhoneOnly)
+			{
+				$sSearchAdd .= '(b_phone <> \'\' OR h_phone <> \'\' OR h_mobile <> \'\') AND ';
+			}
+
+			$sSearchAdd .= sprintf('(h_email <> \'\' OR b_email <> \'\' OR other_email <> \'\') '.
+' AND (fullname LIKE %s OR firstname LIKE %s'.
+' OR surname LIKE %s OR nickname LIKE %s'.
+' OR h_email LIKE %s OR b_email LIKE %s'.
+' OR other_email LIKE %s)', $sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch, $sSearch);
+
+			if (0 < strlen($sPhoneSearch))
+			{
+				$sPhoneSearch = '\'%'.$this->escapeString($sPhoneSearch, true, true).'%\'';
+
+				$sSearchAdd = '('.$sSearchAdd.sprintf(') OR '.
+					 '(b_phone <> \'\' AND REPLACE(REPLACE(REPLACE(REPLACE(b_phone, \'(\', \'\'), \')\', \'\'), \'+\', \'\'), \' \', \'\') LIKE %s) OR '.
+					 '(h_phone <> \'\' AND REPLACE(REPLACE(REPLACE(REPLACE(h_phone, \'(\', \'\'), \')\', \'\'), \'+\', \'\'), \' \', \'\') LIKE %s) OR '.
+					 '(h_mobile <> \'\' AND REPLACE(REPLACE(REPLACE(REPLACE(h_mobile, \'(\', \'\'), \')\', \'\'), \'+\', \'\'), \' \', \'\') LIKE %s)',
+					 $sPhoneSearch, $sPhoneSearch, $sPhoneSearch);
+			}
+		}
+
+		$sSql = 'SELECT id_addr, str_id, id_user, auto_create, view_email, primary_email, h_email, b_email, other_email,
+use_frequency, fullname, firstname, use_friendly_nm, type, type_id, b_phone, h_phone, h_mobile, shared_to_all,
+(use_frequency/CAST((julianday(\'+1 day\') - julianday(date_modified)/30) + 0.5 AS INT)) as age_score
+FROM %sawm_addr_book
+WHERE %s AND deleted = 0 AND hide_in_gab = 0%s AND use_frequency >= 0
+ORDER BY age_score DESC, type ASC, shared_to_all ASC
+LIMIT %d OFFSET %d';
+// ORDER BY shared_to_all ASC, age_score DESC
+
+		return sprintf($sSql, $this->prefix(), $sUserWhere, 0 < strlen($sSearchAdd) ? ' AND ('.$sSearchAdd.')' : '', $iRequestLimit, 0);
+	}
 }

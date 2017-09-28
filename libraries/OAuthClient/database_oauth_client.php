@@ -2,25 +2,9 @@
 /*
  * database_oauth_client.php
  *
- * @(#) $Id: database_oauth_client.php,v 1.8 2015/04/30 09:47:13 mlemos Exp $
+ * @(#) $Id: database_oauth_client.php,v 1.9 2015/10/16 20:05:49 mlemos Exp $
  *
  */
-
-class oauth_session_value_class
-{
-	var $id;
-	var $session;
-	var $state;
-	var $access_token;
-	var $access_token_secret;
-	var $authorized;
-	var $expiry;
-	var $type;
-	var $server;
-	var $creation;
-	var $refresh_token;
-	var $access_token_response;
-};
 
 class database_oauth_client_class extends oauth_client_class
 {
@@ -36,34 +20,6 @@ class database_oauth_client_class extends oauth_client_class
 		return $this->SetError('Database Query is not implemented');
 	}
 
-	Function SetupSession(&$session)
-	{
-		if(strlen($this->session)
-		|| IsSet($_COOKIE[$this->session_cookie]))
-		{
-			if($this->debug)
-				$this->OutputDebug(strlen($this->session) ? 'Checking OAuth session '.$this->session : 'Checking OAuth session from cookie '.$_COOKIE[$this->session_cookie]);
-			if(!$this->GetOAuthSession(strlen($this->session) ? $this->session : $_COOKIE[$this->session_cookie], $this->server, $session))
-				return($this->SetError('OAuth session error: '.$this->error));
-		}
-		else
-		{
-			if($this->debug)
-				$this->OutputDebug('No OAuth session is set');
-			$session = null;
-		}
-		if(!IsSet($session))
-		{
-			if($this->debug)
-				$this->OutputDebug('Creating a new OAuth session');
-			if(!$this->CreateOAuthSession($this->server, $session))
-				return($this->SetError('OAuth session error: '.$this->error));
-			SetCookie($this->session_cookie, $session->session, 0, $this->session_path);
-		}
-		$this->session = $session->session;
-		return true;
-	}
-
 	Function GetStoredState(&$state)
 	{
 		if(!$this->SetupSession($session))
@@ -74,18 +30,7 @@ class database_oauth_client_class extends oauth_client_class
 
 	Function CreateOAuthSession($user, &$session)
 	{
-		$session = new oauth_session_value_class;
-		$session->state = md5(time().rand());
-		$session->session = md5($session->state.time().rand());
-		$session->access_token = '';
-		$session->access_token_secret = '';
-		$session->authorized = null;
-		$session->expiry = null;
-		$session->type = '';
-		$session->server = $this->server;
-		$session->creation = gmstrftime("%Y-%m-%d %H:%M:%S");
-		$session->refresh_token = '';
-		$session->access_token_response = null;
+		$this->InitializeOAuthSession($session);
 		$parameters = array(
 			's', $session->session,
 			's', $session->state,

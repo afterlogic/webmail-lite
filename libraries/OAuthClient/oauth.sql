@@ -6,7 +6,7 @@ CREATE TABLE `oauth_session` (
   `access_token` mediumtext NOT NULL,
   `expiry` datetime DEFAULT NULL,
   `type` char(12) NOT NULL DEFAULT '',
-  `server` char(12) NOT NULL DEFAULT '',
+  `server` char(20) NOT NULL DEFAULT '',
   `creation` datetime NOT NULL DEFAULT '2000-01-01 00:00:00',
   `access_token_secret` mediumtext NOT NULL,
   `authorized` char(1) DEFAULT NULL,

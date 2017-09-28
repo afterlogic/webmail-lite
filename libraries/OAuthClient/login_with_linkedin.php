@@ -2,7 +2,7 @@
 /*
  * login_with_linkedin.php
  *
- * @(#) $Id: login_with_linkedin.php,v 1.4 2014/12/05 03:34:00 mlemos Exp $
+ * @(#) $Id: login_with_linkedin.php,v 1.5 2015/07/27 19:27:07 mlemos Exp $
  *
  */
 
@@ -38,7 +38,7 @@
 	/*  API permission scopes
 	 *  Separate scopes with a space, not with +
 	 */
-	$client->scope = 'r_fullprofile r_emailaddress';
+	$client->scope = 'r_basicprofile r_emailaddress';
 
 	if(strlen($client->client_id) == 0
 	|| strlen($client->client_secret) == 0)

@@ -3363,6 +3363,51 @@ Utils.encodeHtml = function (sText)
 };
 
 /**
+ * Converts plaintext to HTML text.
+ * @param {string} sText
+ * @returns {string}
+ */
+Utils.plainToHtml = function (sText)
+{
+	if (sText)
+	{
+		return sText.toString()
+					.replace(/&/g, '&amp;')
+					.replace(/</g, '&lt;')
+					.replace(/>/g, '&gt;')
+					.replace(/"/g, '&quot;')
+					.replace(/'/g, '&#039;')
+					.replace(/\r\n/gi, '<br />')
+					.replace(/\n/gi, '<br />');
+	}
+	return '';
+};
+
+/**
+ * Converts HTML text to plaintext.
+ * @param {string} sHtml
+ * @returns {string}
+ */
+Utils.HtmlToPlain = function (sHtml)
+{
+	if (sHtml)
+	{
+		return sHtml.toString()
+					.replace(/<style[^>]*>[^<]*<\/style>/gi, '\n')
+					.replace(/<br *\/{0,1}>/gi, '\n')
+					.replace(/<\/p>/gi, '\n')
+					.replace(/<a [^>]*href="([^"]*?)"[^>]*>(.*?)<\/a>/gi, '$2 ($1)')
+					.replace(/<[^>]*>/g, '')
+					.replace(/&nbsp;/g, ' ')
+					.replace(/&lt;/g, '<')
+					.replace(/&gt;/g, '>')
+					.replace(/&amp;/g, '&')
+					.replace(/&quot;/g, '"');
+	}
+	return '';
+};
+
+/**
  * @param {string} sKey
  * @param {?Object=} oValueList
  * @param {?string=} sDefaultValue
@@ -6367,6 +6412,10 @@ CSelector.prototype.scrollToSelected = function ()
 		if (aEmail) {
 			item.label = item.label.replace('<' + aEmail[0] + '>', "<span style='opacity: 0.5'>" + '&lt;' + aEmail[0] + '&gt' + "</span>"); //highlight <email>
 		}
+		else
+		{
+			item.label = item.label.replace(new RegExp("<", 'g'), '&lt;').replace(new RegExp(">", 'g'), '&gt;');
+		}
 		
 		return $('<li>')
 			.append('<a>' + item.label + (item.global === false ? '<span class="del"></span>' : '') + '</a>')
@@ -8781,6 +8830,7 @@ function CUserSettingsModel()
 	this.ThreadsEnabled = true;
 	this.useThreads = ko.observable(true);
 	this.SaveRepliedToCurrFolder = true;
+	this.ComposePlainTextDefault = false;
 	this.AllowChangeInputDirection = false;
 	this.DesktopNotifications = false;
 	this.EmailNotification = '';
@@ -8953,6 +9003,7 @@ CUserSettingsModel.prototype.parse = function (oData)
 		this.ThreadsEnabled = !!oData.ThreadsEnabled;
 		this.useThreads(!!oData.UseThreads);
 		this.SaveRepliedToCurrFolder = !!oData.SaveRepliedMessagesToCurrentFolder;
+		this.ComposePlainTextDefault = !!AppData.App && AppData.App.AllowComposePlainText && !!oData.ComposePlainTextDefault;
 		this.DesktopNotifications = !!oData.DesktopNotifications;
 		this.EmailNotification = Utils.pString(oData.EmailNotification);
 		this.AllowChangeInputDirection = !!oData.AllowChangeInputDirection;
@@ -9036,13 +9087,14 @@ CUserSettingsModel.prototype.parse = function (oData)
  * @param {string} sDefaultTimeFormat
  * @param {string} sUseThreads
  * @param {string} sSaveRepliedToCurrFolder
+ * @param {string} sComposePlainTextDefault
  * @param {string} sDesktopNotifications
  * @param {string} sAllowChangeInputDirection
  * @param {string} sEmailNotification
  */
 CUserSettingsModel.prototype.updateCommonSettings = function (iMailsPerPage, iContactsPerPage,
 	iAutoCheckMailInterval, sDefaultTheme, sDefaultLanguage, sDefaultDateFormat, sDefaultTimeFormat, 
-	sUseThreads, sSaveRepliedToCurrFolder, sDesktopNotifications, sAllowChangeInputDirection, sEmailNotification)
+	sUseThreads, sSaveRepliedToCurrFolder, sComposePlainTextDefault, sDesktopNotifications, sAllowChangeInputDirection, sEmailNotification)
 {
 	var bNeedToUpdateMessageDates = this.defaultTimeFormat() !== sDefaultTimeFormat;
 	
@@ -9057,6 +9109,7 @@ CUserSettingsModel.prototype.updateCommonSettings = function (iMailsPerPage, iCo
 	this.useThreads('1' === sUseThreads);
 	
 	this.SaveRepliedToCurrFolder = '1' === sSaveRepliedToCurrFolder;
+	this.ComposePlainTextDefault = '1' === sComposePlainTextDefault;
 	this.AllowChangeInputDirection = '1' === sAllowChangeInputDirection;
 	this.DesktopNotifications = '1' === sDesktopNotifications;
 	this.EmailNotification = sEmailNotification;
@@ -9360,13 +9413,13 @@ function CCommonFileModel()
 	}, this);
 	this.isMessageType = ko.observable(false);
 	this.visibleViewLink = ko.computed(function () {
-		return this.isVisibleViewLink() && !this.isPopupItem();
+		return this.hash() !== '' && this.isVisibleViewLink() && !this.isPopupItem();
 	}, this);
 	this.visibleOpenLink = ko.computed(function () {
 		return this.linkUrl() !== '';
 	}, this);
 	this.visibleDownloadLink = ko.computed(function () {
-		return !this.isPopupItem() && !this.visibleOpenLink();
+		return this.hash() !== '' && !this.isPopupItem() && !this.visibleOpenLink();
 	}, this);
 	this.visibleSaveToServerLink = ko.observable(false);
 
@@ -11019,7 +11072,7 @@ CFileStorageViewModel.prototype.getFiles = function (sType, oPath, sPattern, bLo
 	App.Ajax.sendExt({
 			'Action': 'Files',
 			'Type': sType,
-			'Path': this.path(),
+			'Path': !Utils.isUnd(oPath) && oPath.isFolder() ? oPath.fullPath() : this.path(),
 			'Pattern': this.searchPattern()
 		}, this.onFilesResponse, this
 	);

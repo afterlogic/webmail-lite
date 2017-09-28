@@ -2,7 +2,7 @@
 /*
  * login_with_paypal.php
  *
- * @(#) $Id: login_with_paypal.php,v 1.1 2014/11/07 08:26:17 mlemos Exp $
+ * @(#) $Id: login_with_paypal.php,v 1.2 2016/01/14 21:34:04 mlemos Exp $
  *
  */
 
@@ -15,20 +15,16 @@
 	$client = new oauth_client_class;
 
 	 // Use 'PaypalApplication' for application only authorization
-	$client->server = 'PaypalApplication';
+	 // Use 'PaypalSandbox' for sandbox access authorization
+	$client->server = 'Paypal';
 
-	$client->debug = false;
+	$client->debug = true;
 	$client->debug_http = true;
 	$client->redirect_uri = 'http://'.$_SERVER['HTTP_HOST'].
 		dirname(strtok($_SERVER['REQUEST_URI'],'?')).'/login_with_paypal.php';
 
 	$client->client_id = ''; $application_line = __LINE__;
 	$client->client_secret = '';
-
-	/*
-	 *  Set the grant_type to client_credentials to obtain application only authorization
-	 */ 
-	// $client->grant_type = 'client_credentials';
 
 	if(strlen($client->client_id) == 0
 	|| strlen($client->client_secret) == 0)
@@ -40,7 +36,7 @@
 
 	/* API permissions
 	 */
-	$client->scope = 'profile email address';
+	$client->scope = 'openid profile email address';
 	if(($success = $client->Initialize()))
 	{
 		if(($success = $client->Process()))

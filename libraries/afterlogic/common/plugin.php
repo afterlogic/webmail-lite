@@ -1072,6 +1072,10 @@ abstract class AApiPlugin
 		}
 
 		$sLangFile = rtrim(trim($this->GetPath()), '\\/').'/i18n/'.$sLanguage.'.ini';
+		if (!@file_exists($sLangFile))
+		{
+			$sLangFile = rtrim(trim($this->GetPath()), '\\/').'/i18n/English.ini';
+		}
 		if (@file_exists($sLangFile))
 		{
 			$aLang = CApi::convertIniToLang($sLangFile);

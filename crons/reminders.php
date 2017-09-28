@@ -368,7 +368,7 @@ class CReminder
 					$sDefaultTimeZone = new \DateTimeZone($oAccount->getDefaultStrTimeZone());
 					$dt->setTimezone($sDefaultTimeZone);
 
-					$aEventClear = [];
+					$aEventClear = Array();
 					if (is_array($aCacheEvents[$sEventId]['data']))
 					{
 						foreach ($aCacheEvents[$sEventId]['data'] as $key =>$val)

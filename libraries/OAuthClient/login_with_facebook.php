@@ -2,7 +2,7 @@
 /*
  * login_with_facebook.php
  *
- * @(#) $Id: login_with_facebook.php,v 1.4 2015/04/08 23:28:52 mlemos Exp $
+ * @(#) $Id: login_with_facebook.php,v 1.6 2016/08/07 04:37:14 mlemos Exp $
  *
  */
 
@@ -16,6 +16,12 @@
 	$client->debug = false;
 	$client->debug_http = true;
 	$client->server = 'Facebook';
+
+	// set the reauthenticate access only if you need to force the user to
+	// authenticate again even after the user has authorized the application
+	// before.
+	$client->reauthenticate = false;
+
 	$client->redirect_uri = 'http://'.$_SERVER['HTTP_HOST'].
 		dirname(strtok($_SERVER['REQUEST_URI'],'?')).'/login_with_facebook.php';
 
@@ -38,7 +44,7 @@
 			if(strlen($client->access_token))
 			{
 				$success = $client->CallAPI(
-					'https://graph.facebook.com/v2.3/me', 
+					'https://graph.facebook.com/v2.3/me?fields=id,first_name,gender,last_name,link,locale,name,timezone,updated_time,verified,email', 
 					'GET', array(), array('FailOnAccessError'=>true), $user);
 /*
 				if($success)
@@ -67,7 +73,6 @@
 						'https://graph.facebook.com/v2.3/me/feed', 
 						'POST', $values, array('FailOnAccessError'=>true), $post);
 				}
-
 /*
 				if($success)
 				{

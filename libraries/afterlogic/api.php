@@ -139,6 +139,11 @@ class CApi
 
 			require_once CApi::RootPath().'DAV/autoload.php';
 			
+			if (file_exists(\CApi::WebMailPath().'vendor/autoload.php'))
+			{
+				require_once \CApi::WebMailPath().'vendor/autoload.php';
+			}
+			
 			CApi::RemoveOldLogs();
 		}
 	}

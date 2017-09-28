@@ -1189,6 +1189,51 @@ Utils.encodeHtml = function (sText)
 };
 
 /**
+ * Converts plaintext to HTML text.
+ * @param {string} sText
+ * @returns {string}
+ */
+Utils.plainToHtml = function (sText)
+{
+	if (sText)
+	{
+		return sText.toString()
+					.replace(/&/g, '&amp;')
+					.replace(/</g, '&lt;')
+					.replace(/>/g, '&gt;')
+					.replace(/"/g, '&quot;')
+					.replace(/'/g, '&#039;')
+					.replace(/\r\n/gi, '<br />')
+					.replace(/\n/gi, '<br />');
+	}
+	return '';
+};
+
+/**
+ * Converts HTML text to plaintext.
+ * @param {string} sHtml
+ * @returns {string}
+ */
+Utils.HtmlToPlain = function (sHtml)
+{
+	if (sHtml)
+	{
+		return sHtml.toString()
+					.replace(/<style[^>]*>[^<]*<\/style>/gi, '\n')
+					.replace(/<br *\/{0,1}>/gi, '\n')
+					.replace(/<\/p>/gi, '\n')
+					.replace(/<a [^>]*href="([^"]*?)"[^>]*>(.*?)<\/a>/gi, '$2 ($1)')
+					.replace(/<[^>]*>/g, '')
+					.replace(/&nbsp;/g, ' ')
+					.replace(/&lt;/g, '<')
+					.replace(/&gt;/g, '>')
+					.replace(/&amp;/g, '&')
+					.replace(/&quot;/g, '"');
+	}
+	return '';
+};
+
+/**
  * @param {string} sKey
  * @param {?Object=} oValueList
  * @param {?string=} sDefaultValue
@@ -8497,6 +8542,10 @@ CSelector.prototype.scrollToSelected = function ()
 		var aEmail = item.label.match(/[a-zA-Z0-9.\-_]+@[a-zA-Z0-9.\-]+/g);
 		if (aEmail) {
 			item.label = item.label.replace('<' + aEmail[0] + '>', "<span style='opacity: 0.5'>" + '&lt;' + aEmail[0] + '&gt' + "</span>"); //highlight <email>
+		}
+		else
+		{
+			item.label = item.label.replace(new RegExp("<", 'g'), '&lt;').replace(new RegExp(">", 'g'), '&gt;');
 		}
 		
 		return $('<li>')
@@ -15886,6 +15935,8 @@ function CAppSettingsModel(bAllowOpenPgp)
 	this.AllowAppRegisterMailto = true;
 	this.AllowPrefetch = true;
 	this.MaxPrefetchBodiesSize = 50000;
+	
+	this.AllowComposePlainText = false;
 
 	this.LoginFormType = Enums.LoginFormType.Email;
 	this.LoginAtDomainValue = '';
@@ -15962,6 +16013,8 @@ CAppSettingsModel.prototype.parse = function (oData)
 	this.AllowSaveAttachmentToServer = !!oData.AllowSaveAttachmentToServer;
 	this.AllowAppRegisterMailto = !!oData.AllowAppRegisterMailto;
 	this.AllowPrefetch = !!oData.AllowPrefetch;
+	
+	this.AllowComposePlainText = !!oData.AllowComposePlainText;
 
 	this.LoginFormType = Utils.pInt(oData.LoginFormType);
 	this.LoginSignMeType = Utils.pInt(oData.LoginSignMeType);
@@ -16029,6 +16082,7 @@ function CUserSettingsModel()
 	this.ThreadsEnabled = true;
 	this.useThreads = ko.observable(true);
 	this.SaveRepliedToCurrFolder = true;
+	this.ComposePlainTextDefault = false;
 	this.AllowChangeInputDirection = false;
 	this.DesktopNotifications = false;
 	this.EmailNotification = '';
@@ -16201,6 +16255,7 @@ CUserSettingsModel.prototype.parse = function (oData)
 		this.ThreadsEnabled = !!oData.ThreadsEnabled;
 		this.useThreads(!!oData.UseThreads);
 		this.SaveRepliedToCurrFolder = !!oData.SaveRepliedMessagesToCurrentFolder;
+		this.ComposePlainTextDefault = !!AppData.App && AppData.App.AllowComposePlainText && !!oData.ComposePlainTextDefault;
 		this.DesktopNotifications = !!oData.DesktopNotifications;
 		this.EmailNotification = Utils.pString(oData.EmailNotification);
 		this.AllowChangeInputDirection = !!oData.AllowChangeInputDirection;
@@ -16284,13 +16339,14 @@ CUserSettingsModel.prototype.parse = function (oData)
  * @param {string} sDefaultTimeFormat
  * @param {string} sUseThreads
  * @param {string} sSaveRepliedToCurrFolder
+ * @param {string} sComposePlainTextDefault
  * @param {string} sDesktopNotifications
  * @param {string} sAllowChangeInputDirection
  * @param {string} sEmailNotification
  */
 CUserSettingsModel.prototype.updateCommonSettings = function (iMailsPerPage, iContactsPerPage,
 	iAutoCheckMailInterval, sDefaultTheme, sDefaultLanguage, sDefaultDateFormat, sDefaultTimeFormat, 
-	sUseThreads, sSaveRepliedToCurrFolder, sDesktopNotifications, sAllowChangeInputDirection, sEmailNotification)
+	sUseThreads, sSaveRepliedToCurrFolder, sComposePlainTextDefault, sDesktopNotifications, sAllowChangeInputDirection, sEmailNotification)
 {
 	var bNeedToUpdateMessageDates = this.defaultTimeFormat() !== sDefaultTimeFormat;
 	
@@ -16305,6 +16361,7 @@ CUserSettingsModel.prototype.updateCommonSettings = function (iMailsPerPage, iCo
 	this.useThreads('1' === sUseThreads);
 	
 	this.SaveRepliedToCurrFolder = '1' === sSaveRepliedToCurrFolder;
+	this.ComposePlainTextDefault = '1' === sComposePlainTextDefault;
 	this.AllowChangeInputDirection = '1' === sAllowChangeInputDirection;
 	this.DesktopNotifications = '1' === sDesktopNotifications;
 	this.EmailNotification = sEmailNotification;
@@ -17176,7 +17233,8 @@ CAccountListModel.prototype.onAccountIdentitiesGetResponse = function (oResponse
 			IdAccount: oAccount.id(),
 			IdIdentity: oAccount.id() * 100000,
 			Signature: oAccount.signature() ? oAccount.signature().signature() : '',
-			UseSignature: oAccount.signature() ? !!oAccount.signature().options() : false
+			UseSignature: oAccount.signature() ? !!oAccount.signature().options() : false,
+			SignatureType: oAccount.signature() ? !!oAccount.signature().type() : false
 		});
 		aIdentities.unshift(oIdentity);
 
@@ -17653,6 +17711,7 @@ function CIdentityModel()
 	this.id = ko.observable(-1);
 	this.signature = ko.observable('');
 	this.useSignature = ko.observable(false);
+	this.signatureType = ko.observable(!AppData.User.ComposePlainTextDefault);
 }
 
 /**
@@ -17671,6 +17730,7 @@ CIdentityModel.prototype.parse = function (oData)
 		this.id(Utils.pInt(oData.IdIdentity));
 		this.signature(Utils.pString(oData.Signature));
 		this.useSignature(!!oData.UseSignature);
+		this.signatureType(!!oData.SignatureType);
 	}
 };
 
@@ -17764,13 +17824,13 @@ function CCommonFileModel()
 	}, this);
 	this.isMessageType = ko.observable(false);
 	this.visibleViewLink = ko.computed(function () {
-		return this.isVisibleViewLink() && !this.isPopupItem();
+		return this.hash() !== '' && this.isVisibleViewLink() && !this.isPopupItem();
 	}, this);
 	this.visibleOpenLink = ko.computed(function () {
 		return this.linkUrl() !== '';
 	}, this);
 	this.visibleDownloadLink = ko.computed(function () {
-		return !this.isPopupItem() && !this.visibleOpenLink();
+		return this.hash() !== '' && !this.isPopupItem() && !this.visibleOpenLink();
 	}, this);
 	this.visibleSaveToServerLink = ko.observable(false);
 
@@ -20307,7 +20367,7 @@ function CMessageModel()
 	this.inReplyTo = ko.observable('');
 	this.references = ko.observable('');
 	this.readingConfirmation = ko.observable('');
-	this.isPlain = ko.observable(false);
+	this.isPlain = ko.observable(AppData.User.ComposePlainTextDefault);
 	this.text = ko.observable('');
 	this.textBodyForNewWindow = ko.observable('');
 	this.$text = null;
@@ -23536,7 +23596,7 @@ function CSignatureModel()
 {
 	this.iAccountId = 0;
 
-	this.type = ko.observable(true);
+	this.type = ko.observable(!AppData.User.ComposePlainTextDefault);
 	this.options = ko.observable(0);
 	this.signature = ko.observable('');
 	
@@ -23552,6 +23612,7 @@ CSignatureModel.prototype.parse = function (iAccountId, oData)
 {
 	this.iAccountId = iAccountId;
 	
+	this.type(parseInt(oData.Type, 10) === 1);
 	this.options(parseInt(oData.Options, 10));
 	this.signature(oData.Signature);
 };
@@ -23597,6 +23658,7 @@ function CFetcherModel()
 	this.userName = ko.observable('');
 	this.folder = ko.observable('');
 	this.signatureOptions = ko.observable(false);
+	this.signatureType = ko.observable(!AppData.User.ComposePlainTextDefault);
 	this.signature = ko.observable('');
 	this.incomingMailServer = ko.observable('');
 	this.incomingMailPort = ko.observable(0);
@@ -23627,6 +23689,7 @@ CFetcherModel.prototype.parse = function (oData)
 	this.userName(Utils.pString(oData.Name));
 	this.folder(Utils.pString(oData.Folder));
 	this.signatureOptions(!!oData.SignatureOptions);
+	this.signatureType(!!oData.SignatureType);
 	this.signature(Utils.pString(oData.Signature));
 	this.incomingMailServer(Utils.pString(oData.IncomingMailServer));
 	this.incomingMailPort(Utils.pInt(oData.IncomingMailPort));
@@ -24323,6 +24386,7 @@ function CHtmlEditorViewModel(bInsertImageAsBase64, oParent)
 	this.creaId = 'creaId' + Math.random().toString().replace('.', '');
 	this.textFocused = ko.observable(false);
 	this.workareaDom = ko.observable();
+	this.plaintextDom = ko.observable();
 	this.uploaderAreaDom = ko.observable();
 	this.editorUploaderBodyDragOver = ko.observable(false);
 	this.editorUploaderProgress = ko.observable(false);
@@ -24428,6 +24492,12 @@ function CHtmlEditorViewModel(bInsertImageAsBase64, oParent)
 	
 	this.textChanged = ko.observable(false);
 	
+	this.bAllowComposePlainText = !!AppData.App && AppData.App.AllowComposePlainText;
+	this.plainTextMode = ko.observable(AppData.User.ComposePlainTextDefault);
+	this.changeTextModeTitle = ko.computed(function () {
+		return this.plainTextMode() ? Utils.i18n('COMPOSE/LINK_TURNOFF_PLAINTEXT') : Utils.i18n('COMPOSE/LINK_TURNON_PLAINTEXT');
+	}, this);
+	
 	if (AfterLogicApi.runPluginHook)
 	{
 		AfterLogicApi.runPluginHook('view-model-defined', [this.__name, this]);
@@ -24435,6 +24505,48 @@ function CHtmlEditorViewModel(bInsertImageAsBase64, oParent)
 }
 
 CHtmlEditorViewModel.prototype.__name = 'CHtmlEditorViewModel';
+
+/**
+ * Changes text mode - html or plain text.
+ */
+CHtmlEditorViewModel.prototype.changeTextMode = function ()
+{
+	var
+		sConfirm = Utils.i18n('COMPOSE/CONFIRM_HTML_TO_PLAIN_FORMATTING'),
+		fChangeTextMode = _.bind(function () {
+			var sText = this.plainTextMode() ? this.getText() : this.getPlainText();
+			this.plainTextMode(!this.plainTextMode());
+			if (!this.plainTextMode())
+			{
+				sText = '<div>' + Utils.plainToHtml(sText) + '</div>';
+			}
+			this.setText(sText);
+		}, this)
+	;
+	
+	if (!this.plainTextMode())
+	{
+		App.Screens.showPopup(ConfirmPopup, [sConfirm, function (bResult) {
+			if (bResult)
+			{
+				fChangeTextMode();
+			}
+		}]);
+	}
+	else
+	{
+		fChangeTextMode();
+	}
+};
+
+/**
+ * Turns on/off plain text mode.
+ * @param {boolean} bPlainTextMode
+ */
+CHtmlEditorViewModel.prototype.setPlainTextMode = function (bPlainTextMode)
+{
+	this.plainTextMode(bPlainTextMode);
+};
 
 CHtmlEditorViewModel.prototype.hasOpenedPopup = function ()
 {
@@ -24668,10 +24780,9 @@ CHtmlEditorViewModel.prototype.commit = function ()
 
 /**
  * @param {string} sText
- * @param {boolean} bPlain
  * @param {string} sTabIndex
  */
-CHtmlEditorViewModel.prototype.initCrea = function (sText, bPlain, sTabIndex)
+CHtmlEditorViewModel.prototype.initCrea = function (sText, sTabIndex)
 {
 	if (!this.oCrea)
 	{
@@ -24701,7 +24812,7 @@ CHtmlEditorViewModel.prototype.initCrea = function (sText, bPlain, sTabIndex)
 
 	this.oCrea.setTabIndex(sTabIndex);
 	this.oCrea.clearUndoRedo();
-	this.setText(sText, bPlain);
+	this.setText(sText);
 	this.setFontValuesFromText();
 	this.uploadedImagePathes([]);
 	this.selectedFont(this.sDefaultFont);
@@ -24723,9 +24834,24 @@ CHtmlEditorViewModel.prototype.setFocus = function ()
  */
 CHtmlEditorViewModel.prototype.changeSignatureContent = function (sNewSignatureContent, sOldSignatureContent)
 {
-	if (this.oCrea)
+	if (this.plainTextMode())
 	{
-		this.oCrea.changeSignatureContent(sNewSignatureContent, sOldSignatureContent);
+		var sVal = $(this.plaintextDom()).val();
+		if (sVal.indexOf(sOldSignatureContent) === -1)
+		{
+			$(this.plaintextDom()).val(sVal + '\r\n\r\n' + sNewSignatureContent);
+		}
+		else
+		{
+			$(this.plaintextDom()).val(sVal.replace(sOldSignatureContent, sNewSignatureContent));
+		}
+	}
+	else
+	{
+		if (this.oCrea)
+		{
+			this.oCrea.changeSignatureContent(sNewSignatureContent, sOldSignatureContent);
+		}
 	}
 };
 
@@ -24750,6 +24876,11 @@ CHtmlEditorViewModel.prototype.isUndoAvailable = function ()
 
 CHtmlEditorViewModel.prototype.getPlainText = function ()
 {
+	if (this.plainTextMode())
+	{
+		return $(this.plaintextDom()).val();
+	}
+	
 	if (this.oCrea)
 	{
 		return this.oCrea.getPlainText();
@@ -24763,23 +24894,35 @@ CHtmlEditorViewModel.prototype.getPlainText = function ()
  */
 CHtmlEditorViewModel.prototype.getText = function (bRemoveSignatureAnchor)
 {
+	if (this.plainTextMode())
+	{
+		return this.plaintextDom() ? $(this.plaintextDom()).val() : '';
+	}
+	
 	return this.oCrea ? this.oCrea.getText(bRemoveSignatureAnchor) : '';
 };
 
 /**
  * @param {string} sText
- * @param {boolean} bPlain
  */
-CHtmlEditorViewModel.prototype.setText = function (sText, bPlain)
+CHtmlEditorViewModel.prototype.setText = function (sText)
 {
 	if (this.oCrea)
 	{
-		if (bPlain)
+		if (this.plainTextMode())
 		{
-			this.oCrea.setPlainText(sText);
+			if (sText.indexOf('<br') !== -1 || sText.indexOf('<div') !== -1 || sText.indexOf('<span') !== -1)
+			{
+				sText = Utils.HtmlToPlain(sText);
+			}
+			$(this.plaintextDom()).val(sText);
 		}
 		else
 		{
+			if (sText.indexOf('<br') === -1 && sText.indexOf('<div') === -1 && sText.indexOf('<span') === -1)
+			{
+				sText = Utils.plainToHtml(sText);
+			}
 			this.oCrea.setText(sText);
 		}
 		this.inactive.valueHasMutated();
@@ -28789,7 +28932,7 @@ CMailViewModel.prototype.hotKeysBind = function ()
 		}
 		else if (bComputed && sKey === Enums.Key.n)
 		{
-			window.location.href = '#compose';
+			this.executeCompose();
 		}
 	},this));
 };
@@ -28973,6 +29116,21 @@ function CComposeViewModel()
     ko.computed(function () {
         var sSignature = App.MessageSender.getClearSignature(this.senderAccountId(), this.selectedFetcherOrIdentity());
 
+		if (this.oHtmlEditor.plainTextMode())
+		{
+			if (sSignature.indexOf('<br') !== -1 || sSignature.indexOf('<div') !== -1)
+			{
+				sSignature = Utils.HtmlToPlain(sSignature);
+			}
+		}
+		else
+		{
+			if (sSignature.indexOf('<br') === -1 && sSignature.indexOf('<div') === -1)
+			{
+				sSignature = Utils.plainToHtml(sSignature);
+			}
+		}
+		
         if (this.prevSignature() === null)
         {
             this.prevSignature(sSignature);
@@ -29036,10 +29194,9 @@ function CComposeViewModel()
     }, this);
     this.subject = ko.observable('').extend({'reversible': true});
     this.counter = ko.observable(0);
-    this.plainText = ko.observable(false);
     this.textBody = ko.observable('');
     this.textBody.subscribe(function () {
-        this.oHtmlEditor.setText(this.textBody(), this.plainText());
+        this.oHtmlEditor.setText(this.textBody());
         this.oHtmlEditor.commit();
     }, this);
 
@@ -29248,7 +29405,7 @@ CComposeViewModel.prototype.isEnableSending = function ()
     var
         bRecipientIsEmpty = this.toAddr().length === 0 && this.ccAddr().length === 0 && this.bccAddr().length === 0,
         bFoldersLoaded = this.folderList() && this.folderList().iAccountId !== 0
-        ;
+	;
 
     return bFoldersLoaded && !this.sending() && !bRecipientIsEmpty && this.allAttachmentsUploaded();
 };
@@ -29400,7 +29557,7 @@ CComposeViewModel.prototype.onShow = function ()
     this.useSaveMailInSentItems(AppData.User.getUseSaveMailInSentItems());
     this.saveMailInSentItems(AppData.User.getSaveMailInSentItems());
 
-    this.oHtmlEditor.initCrea(this.textBody(), this.plainText(), '7');
+    this.oHtmlEditor.initCrea(this.textBody(), '7');
     this.oHtmlEditor.commit();
 
     this.initUploader();
@@ -29429,8 +29586,8 @@ CComposeViewModel.prototype.onRoute = function (aParams)
 		sSignature = '',
 		oToAddr = {}
 	;
-
-    this.plainText(false);
+	
+    this.oHtmlEditor.setPlainTextMode(AppData.User.ComposePlainTextDefault);
     this.pgpSecured(false);
     this.pgpEncrypted(false);
     this.fromDrafts(false);
@@ -29845,7 +30002,7 @@ CComposeViewModel.prototype.setDataFromMessage = function (oMessage)
     this.attachments(_.map(oMessage.attachments(), function (oAttach) {
 		return oAttach.getCopy();
 	}));
-    this.plainText(oMessage.isPlain());
+    this.oHtmlEditor.setPlainTextMode(oMessage.isPlain());
     this.textBody(sTextBody);
     this.selectedImportance(oMessage.importance());
     this.selectedSensitivity(oMessage.sensitivity());
@@ -30442,8 +30599,8 @@ CComposeViewModel.prototype.getSendSaveParameters = function (bRemoveSignatureAn
         'Cc': this.ccAddr(),
         'Bcc': this.bccAddr(),
         'Subject': this.subject(),
-        'Text': this.plainText() ? this.oHtmlEditor.getPlainText() : this.oHtmlEditor.getText(bRemoveSignatureAnchor),
-        'IsHtml': this.plainText() ? '0' : '1',
+        'Text': this.oHtmlEditor.plainTextMode() ? this.oHtmlEditor.getPlainText() : this.oHtmlEditor.getText(bRemoveSignatureAnchor),
+        'IsHtml': this.oHtmlEditor.plainTextMode() ? '0' : '1',
         'Importance': this.selectedImportance(),
         'Sensitivity': this.selectedSensitivity(),
         'ReadingConfirmation': this.readingConfirmation() ? '1' : '0',
@@ -30835,14 +30992,21 @@ CComposeViewModel.prototype.confirmOpenPgp = function ()
                 this.openPgpPopup(false);
             }
         }, this)
-        ;
+    ;
 
     if (this.notInlineAttachments().length > 0)
     {
         sConfirm += '\r\n\r\n' + Utils.i18n('OPENPGP/CONFIRM_HTML_TO_PLAIN_ATTACHMENTS');
     }
 
-    App.Screens.showPopup(ConfirmPopup, [sConfirm, fOpenPgpEncryptPopup]);
+	if (!this.oHtmlEditor.plainTextMode())
+	{
+		App.Screens.showPopup(ConfirmPopup, [sConfirm, fOpenPgpEncryptPopup]);
+	}
+	else
+	{
+		this.openPgpPopup(false);
+	}
 };
 
 /**
@@ -30858,7 +31022,7 @@ CComposeViewModel.prototype.openPgpPopup = function (bSignAndSend)
                 this.stopAutosaveTimer();
                 this.executeSave(true);
             }
-            this.plainText(true);
+            this.oHtmlEditor.setPlainTextMode(true);
             this.textBody(oSignedEncryptedText);
             this.pgpSecured(true);
             this.pgpEncrypted(bEncrypted);
@@ -30885,11 +31049,11 @@ CComposeViewModel.prototype.undoPgp = function ()
     var
         sText = this.textBody(),
         aText = []
-        ;
+    ;
 
     if (this.pgpSecured())
     {
-        this.plainText(false);
+        this.oHtmlEditor.setPlainTextMode(false);
         if (this.fromDrafts() && !this.pgpEncrypted())
         {
             aText = sText.split('-----BEGIN PGP SIGNED MESSAGE-----');
@@ -30961,6 +31125,7 @@ CComposeViewModel.prototype.fillFieldsFromObject = function (aParams)
 				oAttach.fileName(oAttachmentData.Name);
 				oAttach.tempName(oAttachmentData.TempName);
 				oAttach.type(oAttachmentData.MimeType);
+				oAttach.uploaded(true);
 				this.attachments.push(oAttach);
 			}, this);
 		}
@@ -33570,6 +33735,8 @@ function CCommonSettingsViewModel()
 
 	this.useThreads = ko.observable(AppData.User.useThreads());
 	this.saveRepliedToCurrFolder = ko.observable(AppData.User.SaveRepliedToCurrFolder);
+	this.bAllowComposePlainText = !!AppData.App && AppData.App.AllowComposePlainText;
+	this.composePlainTextDefault = ko.observable(AppData.User.ComposePlainTextDefault);
 	this.allowChangeInputDirection = ko.observable(AppData.User.AllowChangeInputDirection);
 	
 	this.desktopNotifications = ko.observable(AppData.User.DesktopNotifications);
@@ -33676,6 +33843,7 @@ CCommonSettingsViewModel.prototype.init = function ()
 	this.dateFormat(AppData.User.DefaultDateFormat);
 	this.useThreads(AppData.User.useThreads());
 	this.saveRepliedToCurrFolder(AppData.User.SaveRepliedToCurrFolder);
+	this.composePlainTextDefault(AppData.User.ComposePlainTextDefault);
 	this.allowChangeInputDirection(AppData.User.AllowChangeInputDirection);
 	this.desktopNotifications(AppData.User.DesktopNotifications);
 	this.emailNotification(AppData.User.EmailNotification);
@@ -33693,6 +33861,7 @@ CCommonSettingsViewModel.prototype.getState = function ()
 		this.dateFormat(),
 		this.useThreads(),
 		this.saveRepliedToCurrFolder(),
+		this.composePlainTextDefault(),
 		this.allowChangeInputDirection(),
 		this.desktopNotifications(),
 		this.emailNotification()
@@ -33754,7 +33923,7 @@ CCommonSettingsViewModel.prototype.onResponse = function (oResponse, oRequest)
 			AppData.User.updateCommonSettings(oRequest.MailsPerPage, oRequest.ContactsPerPage,
 				oRequest.AutoCheckMailInterval,
 				oRequest.DefaultTheme, oRequest.DefaultLanguage, oRequest.DefaultDateFormat,
-				oRequest.DefaultTimeFormat, oRequest.UseThreads, oRequest.SaveRepliedMessagesToCurrentFolder,
+				oRequest.DefaultTimeFormat, oRequest.UseThreads, oRequest.SaveRepliedMessagesToCurrentFolder, oRequest.ComposePlainTextDefault,
 				oRequest.DesktopNotifications, oRequest.AllowChangeInputDirection, oRequest.EmailNotification);
 
 			App.Api.showReport(Utils.i18n('SETTINGS/COMMON_REPORT_UPDATED_SUCCESSFULLY'));
@@ -33779,6 +33948,7 @@ CCommonSettingsViewModel.prototype.onSaveClick = function ()
 			'DefaultTimeFormat': this.timeFormat(),
 			'UseThreads': this.useThreads() ? '1' : '0',
 			'SaveRepliedMessagesToCurrentFolder': this.saveRepliedToCurrFolder() ? '1' : '0',
+			'ComposePlainTextDefault': this.bAllowComposePlainText && this.composePlainTextDefault() ? '1' : '0',
 			'AllowChangeInputDirection': this.allowChangeInputDirection() ? '1' : '0',
 			'DesktopNotifications': this.desktopNotifications() ? '1' : '0',
 			'EmailNotification': this.emailNotification()
@@ -35290,7 +35460,6 @@ function CAccountSignatureViewModel(oParent)
 
 	this.account = ko.observable(0);
 
-	this.type = ko.observable(false);
 	this.useSignature = ko.observable(0);
 	this.signature = ko.observable('');
 
@@ -35323,7 +35492,7 @@ CAccountSignatureViewModel.prototype.onShow = function (oAccount)
 {
 	this.account(oAccount);
 
-	this.oHtmlEditor.initCrea(this.signature(), false, '');
+	this.oHtmlEditor.initCrea(this.signature(), '');
 	this.oHtmlEditor.setActivitySource(this.useSignature);
 	this.oHtmlEditor.resize();
 	this.enableImageDragNDrop(this.oHtmlEditor.editorUploader.isDragAndDropSupported() && !App.browser.ie10AndAbove);
@@ -35334,7 +35503,7 @@ CAccountSignatureViewModel.prototype.onShow = function (oAccount)
 CAccountSignatureViewModel.prototype.getState = function ()
 {
 	var aState = [
-		this.type(),
+		this.oHtmlEditor.plainTextMode(),
 		this.useSignature(),
 		this.oHtmlEditor.getText()
 	];
@@ -35364,7 +35533,7 @@ CAccountSignatureViewModel.prototype.getSignature = function ()
 	{
 		if (this.account().signature() !== null)
 		{
-			this.type(this.account().signature().type());
+			this.oHtmlEditor.setPlainTextMode(!this.account().signature().type());
 			this.useSignature(this.account().signature().options());
 			this.signature(this.account().signature().signature());
 			this.updateFirstState();
@@ -35407,7 +35576,7 @@ CAccountSignatureViewModel.prototype.onAccountSignatureGetResponse = function (o
 
 			this.account().signature(oSignature);
 
-			this.type(this.account().signature().type());
+			this.oHtmlEditor.setPlainTextMode(!this.account().signature().type());
 			this.useSignature(this.account().signature().options());
 			this.signature(this.account().signature().signature());
 			this.updateFirstState();
@@ -35421,7 +35590,7 @@ CAccountSignatureViewModel.prototype.prepareParameters = function ()
 		oParameters = {
 			'Action': 'AccountSignatureUpdate',
 			'AccountID': this.account().id(),
-			'Type': this.type() ? 1 : 0,
+			'Type': this.oHtmlEditor.plainTextMode() ? 0 : 1,
 			'Options': this.useSignature(),
 			'Signature': this.signature()
 		}
@@ -35447,7 +35616,7 @@ CAccountSignatureViewModel.prototype.onSaveClick = function ()
 
 		this.signature(this.oHtmlEditor.getNotDefaultText());
 		
-		this.account().signature().type(this.type());
+		this.account().signature().type(!this.oHtmlEditor.plainTextMode());
 		this.account().signature().options(this.useSignature());
 		this.account().signature().signature(this.signature());
 		
@@ -36563,7 +36732,6 @@ function CFetcherSignatureViewModel(oParent)
 
 	this.loading = ko.observable(false);
 
-	this.type = ko.observable(false);
 	this.useSignature = ko.observable(0);
 
 	this.oHtmlEditor = new CHtmlEditorViewModel(true);
@@ -36590,6 +36758,7 @@ CFetcherSignatureViewModel.prototype.onSaveClick = function ()
 		'AccountID': this.defaultAccountId(),
 		'FetcherID': this.idFetcher(),
 		'SignatureOptions': this.useSignature(),
+		'SignatureType': this.oHtmlEditor.plainTextMode() ? 0 : 1,
 		'Signature': this.oHtmlEditor.getNotDefaultText()
 	};
 
@@ -36628,7 +36797,8 @@ CFetcherSignatureViewModel.prototype.populate = function (oFetcher)
 		this.fetcher(oFetcher);
 		this.idFetcher(oFetcher.id());
 		this.signature(oFetcher.signature());
-		this.useSignature(oFetcher.signatureOptions());
+		this.useSignature(oFetcher.signatureOptions() ? 1 : 0);
+		this.oHtmlEditor.setPlainTextMode(!oFetcher.signatureType());
 
 		setTimeout(function () {
 			this.updateFirstState();
@@ -36642,7 +36812,7 @@ CFetcherSignatureViewModel.prototype.populate = function (oFetcher)
  */
 CFetcherSignatureViewModel.prototype.onShow = function (aParams, oAccount)
 {
-	this.oHtmlEditor.initCrea(this.signature(), false, '');
+	this.oHtmlEditor.initCrea(this.signature(), '');
 	this.oHtmlEditor.setActivitySource(this.useSignature);
 	this.oHtmlEditor.resize();
 	this.enableImageDragNDrop(this.oHtmlEditor.editorUploader.isDragAndDropSupported() && !App.browser.ie10AndAbove);
@@ -36653,7 +36823,7 @@ CFetcherSignatureViewModel.prototype.onShow = function (aParams, oAccount)
 CFetcherSignatureViewModel.prototype.getState = function ()
 {
 	return [
-		this.type(),
+		this.oHtmlEditor.plainTextMode(),
 		this.useSignature(),
 		this.oHtmlEditor.getNotDefaultText()
 	].join(':');
@@ -36899,7 +37069,7 @@ CIdentityPropertiesViewModel.prototype.__name = 'CIdentityPropertiesViewModel';
  */
 CIdentityPropertiesViewModel.prototype.onShow = function (aParams, oAccount)
 {
-	this.oHtmlEditor.initCrea(this.signature(), false, '');
+	this.oHtmlEditor.initCrea(this.signature(), '');
 	this.oHtmlEditor.setActivitySource(this.useSignature);
 	this.oHtmlEditor.resize();
 	this.enableImageDragNDrop(this.oHtmlEditor.editorUploader.isDragAndDropSupported() && !App.browser.ie10AndAbove);
@@ -36922,13 +37092,14 @@ CIdentityPropertiesViewModel.prototype.onSaveClick = function ()
 		this.loading(true);
 		this.signature(this.oHtmlEditor.getNotDefaultText());
 		oAccount.signature().options(this.useSignature());
+		oAccount.signature().type(this.oHtmlEditor.plainTextMode());
 		oAccount.signature().signature(this.signature());
 
 		oParameters = {
 			'Action': 'AccountIdentityLoyalUpdate',
 			'AccountID': oAccount.id(),
 			'FriendlyName': this.friendlyName(),
-			'Type': oAccount.signature().type() ? 1 : 0,
+			'Type': this.oHtmlEditor.plainTextMode() ? 1 : 0,
 			'Signature': this.signature(),
 			'Options': this.useSignature(),
 			'Loyal': 1,
@@ -36948,6 +37119,7 @@ CIdentityPropertiesViewModel.prototype.onSaveClick = function ()
 			'Email': this.email(),
 			'Signature': this.signature(),
 			'UseSignature': this.useSignature(),
+			'SignatureType': this.oHtmlEditor.plainTextMode() ? 0 : 1,
 			'FriendlyName': this.friendlyName(),
 			'Loyal': 0,
 			'Default': this.isDefault() ? 1 : 0
@@ -37016,6 +37188,7 @@ CIdentityPropertiesViewModel.prototype.populate = function (oIdentity)
 		this.email(oIdentity.email());
 		this.loyal(oIdentity.loyal());
 		this.friendlyName(oIdentity.friendlyName());
+		this.oHtmlEditor.setPlainTextMode(!oIdentity.signatureType());
 		this.signature(oIdentity.signature());
 		this.useSignature(oIdentity.useSignature() ? 1 : 0);
 
@@ -40135,7 +40308,7 @@ CFileStorageViewModel.prototype.getFiles = function (sType, oPath, sPattern, bLo
 	App.Ajax.sendExt({
 			'Action': 'Files',
 			'Type': sType,
-			'Path': this.path(),
+			'Path': !Utils.isUnd(oPath) && oPath.isFolder() ? oPath.fullPath() : this.path(),
 			'Pattern': this.searchPattern()
 		}, this.onFilesResponse, this
 	);

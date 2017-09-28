@@ -106,7 +106,16 @@ class CApiFilecacheFileStorage extends CApiFilecacheStorage
 	public function getFile($oAccount, $sKey, $sFileSuffix = '', $sFolder = '')
 	{
 		$mResult = false;
-		$sFileName = $this->generateFileName($oAccount, $sKey, false, $sFileSuffix, $sFolder);
+		$sFileName = $sKey;
+		if (!@file_exists($sFileName))
+		{
+			$sSaveAttachmentToServerPath = CApi::GetConf('webmail.save-attachment-to-server-path', '');
+			$sFileName = $sSaveAttachmentToServerPath . '/' . $sFileName;
+		}
+		if (!@file_exists($sFileName))
+		{
+			$sFileName = $this->generateFileName($oAccount, $sKey, false, $sFileSuffix, $sFolder);
+		}
 		if (@file_exists($sFileName))
 		{
 			$mResult = @fopen($sFileName, 'rb');
@@ -155,7 +164,20 @@ class CApiFilecacheFileStorage extends CApiFilecacheStorage
 	 */
 	public function fileSize($oAccount, $sKey, $sFileSuffix = '', $sFolder = '')
 	{
-		return @filesize($this->generateFileName($oAccount, $sKey, false, $sFileSuffix));
+		$sFileName = $sKey;
+		if (!file_exists($sFileName))
+		{
+			$sSaveAttachmentToServerPath = CApi::GetConf('webmail.save-attachment-to-server-path', '');
+			$sFileName = $sSaveAttachmentToServerPath . '/' . $sFileName;
+		}
+		if (file_exists($sFileName))
+		{
+			return @filesize($sFileName);
+		}
+		else
+		{
+			return @filesize($this->generateFileName($oAccount, $sKey, false, $sFileSuffix));
+		}
 	}
 
 	/**

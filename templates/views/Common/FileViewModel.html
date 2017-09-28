@@ -78,7 +78,7 @@
 			   data-bind="visible: subFilesCollapsed(), i18n: 'text', click: collapseFile"
 			   data-i18n="MESSAGE/ATTACHMENT_COLLAPSE"></a>
 			
-			<!--ko if: !visibleSaveToServerLink -->
+			<!--ko if: visibleSaveToServerLink -->
 			<a class="button view" href="javascript: void(0)" style="padding-top: 4px;"
 			   data-bind="text: saveToServerText, click: saveToServer"></a>
 			<!-- /ko -->

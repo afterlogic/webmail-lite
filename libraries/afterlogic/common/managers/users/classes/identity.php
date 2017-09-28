@@ -16,7 +16,7 @@
  * @property string $Email Email of identity.
  * @property string $FriendlyName Display name of identity.
  * @property string $Signature Signature of identity.
- * @property int $SignatureType Deprecated.
+ * @property int $SignatureType
  * @property bool $UseSignature If **true** and this identity is used for message sending the identity signature will be attached to message body.
  *
  * @package Users

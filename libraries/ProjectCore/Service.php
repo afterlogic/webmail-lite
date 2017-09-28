@@ -325,7 +325,7 @@ class Service
 					}
 
 					\CApi::Log('AJAX: Action: '.$sAction);
-					if ('SystemGetAppData' !== $sAction &&
+					if ('SystemGetAppData' !== $sAction && 'DefaultAccountGet' !== $sAction && 
 						\CApi::GetConf('labs.webmail.csrftoken-protection', true) &&
 						!$this->validateToken())
 					{

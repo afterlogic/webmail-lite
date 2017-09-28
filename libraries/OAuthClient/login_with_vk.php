@@ -2,7 +2,7 @@
 /*
  * login_with_vk.php
  *
- * @(#) $Id: login_with_vk.php,v 1.1 2014/01/27 09:56:20 mlemos Exp $
+ * @(#) $Id: login_with_vk.php,v 1.2 2017/08/20 20:15:53 mlemos Exp $
  *
  */
 
@@ -29,8 +29,14 @@
 			' set the client_id to App ID/API Key and client_secret with App Secret');
 
 	/* API permissions
+	 *
+	 * Check for the numbers for each permission to add at
+	 *
+	 * https://vk.com/dev/permissions
+	 *
+	 * email - 4194304
 	 */
-	$client->scope = '';
+	$client->scope = strval(4194304+0);
 	if(($success = $client->Initialize()))
 	{
 		if(($success = $client->Process()))
@@ -59,6 +65,8 @@
 		echo '<h1>', HtmlSpecialChars($user->response[0]->first_name), 
 			' you have logged in successfully with VK!</h1>';
 		echo '<pre>', HtmlSpecialChars(print_r($user, 1)), '</pre>';
+		echo '<p>User email and other details returned with the access token:</p>';
+		echo '<pre>', HtmlSpecialChars(print_r($client->access_token_response, 1)), '</pre>';
 ?>
 </body>
 </html>

@@ -2,7 +2,7 @@
 /*
  * login_with_dropbox.php
  *
- * @(#) $Id: login_with_dropbox.php,v 1.3 2014/01/12 09:59:09 mlemos Exp $
+ * @(#) $Id: login_with_dropbox.php,v 1.4 2016/07/04 00:00:45 mlemos Exp $
  *
  */
 
@@ -15,7 +15,7 @@
 	$client = new oauth_client_class;
 	$client->debug = 1;
 	$client->debug_http = 1;
-	$client->server = 'Dropbox2';
+	$client->server = 'Dropbox2v2';
 	$client->redirect_uri = 'https://'.$_SERVER['HTTP_HOST'].
 		dirname(strtok($_SERVER['REQUEST_URI'],'?')).'/login_with_dropbox.php';
 
@@ -37,8 +37,8 @@
 			if(strlen($client->access_token))
 			{
 				$success = $client->CallAPI(
-					'https://api.dropbox.com/1/account/info', 
-					'GET', array(), array('FailOnAccessError'=>true), $user);
+					'https://api.dropboxapi.com/2/users/get_current_account', 
+					'POST', null, array('FailOnAccessError'=>true, 'RequestContentType'=>'application/json'), $user);
 			}
 		}
 		$success = $client->Finalize($success);
@@ -55,7 +55,7 @@
 </head>
 <body>
 <?php
-		echo '<h1>', HtmlSpecialChars($user->display_name), 
+		echo '<h1>', HtmlSpecialChars($user->name->display_name), 
 			' you have logged in successfully with Dropbox!</h1>';
 		echo '<pre>', HtmlSpecialChars(print_r($user, 1)), '</pre>';
 ?>

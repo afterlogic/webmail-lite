@@ -1621,8 +1621,7 @@ function handler(event) {
 	{
 		var
 			$Anchor = this.$editableArea.find('div[data-anchor="signature"]'),
-			$NewSignature = $(sNewSignatureContent).closest('div[data-crea="font-wrapper"]'),
-			$OldSignature = $(sOldSignatureContent).closest('div[data-crea="font-wrapper"]'),
+			$NewSignature, $OldSignature,
 			sClearOldSignature, sClearNewSignature,
 			sAnchorHtml,
 			$SignatureContainer,
@@ -1630,6 +1629,19 @@ function handler(event) {
 			sFoundOldSignature,
 			$AnchorBlockquoteParent
 		;
+		
+		try {
+			$NewSignature = $(sNewSignatureContent).closest('div[data-crea="font-wrapper"]');
+		}
+		catch (e) {
+			$NewSignature = $(document.createTextNode(sNewSignatureContent));
+		}
+		try {
+			$OldSignature = $(sOldSignatureContent).closest('div[data-crea="font-wrapper"]');
+		}
+		catch (e) {
+			$OldSignature = $(document.createTextNode(sOldSignatureContent));
+		}
 		
 		/*** there is a signature container in the message ***/
 		if ($Anchor.length > 0)

@@ -232,7 +232,7 @@ class CXmlDocument
 	public function ParseFromString($sXmlText)
 	{
 		$bResult = false;
-		if (!empty($sXmlText))
+		if (!empty($sXmlText) && function_exists('xml_parser_create'))
 		{
 			$oParser = xml_parser_create();
 			xml_parser_set_option($oParser, XML_OPTION_CASE_FOLDING, false);

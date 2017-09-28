@@ -903,4 +903,12 @@ class CApiHelpdeskCommandCreatorPostgreSQL extends CApiHelpdeskCommandCreator
  */
 class CApiHelpdeskCommandCreatorSQLite extends CApiHelpdeskCommandCreator
 {
+	/**
+	 * @return string
+	 */
+	public function clearUnregistredUsers()
+	{
+		$sSql = 'DELETE FROM %sahd_users WHERE activated = 0 AND datetime(%s, \'+%d day\') > datetime(\'now\')';
+		return sprintf($sSql, $this->prefix(), $this->escapeColumn('created'), 3);
+	}
 }

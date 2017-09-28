@@ -75,6 +75,15 @@
 			<div class="hint row" data-bind="visible: allowWebMail">
 				<span class="value offset" data-bind="i18n: 'text'" data-i18n="SETTINGS/COMMON_SAVE_REPLIED_TO_CURR_FOLDER_HINT"></span>
 			</div>
+			<div class="row" data-bind="visible: allowWebMail && bAllowComposePlainText">
+				<span class="value offset">
+					<label class="custom_checkbox" data-bind="css: {'checked': composePlainTextDefault}">
+						<span class="icon"></span>
+						<input type="checkbox" id="composePlainTextDefault" data-bind="checked: composePlainTextDefault" />
+					</label>
+					<label for="composePlainTextDefault" data-i18n="SETTINGS/COMMON_COMPOSE_PLAIN_TEXT_DEFAULT" data-bind="i18n: 'text'"></label>
+				</span>
+			</div>
 			<div class="row" data-bind="visible: window.Notification">
 				<span class="value offset" data-bind="css: {'disabled': !desktopNotificationsIsEnable()}">
 					<label class="custom_checkbox" data-bind="css: {'checked': desktopNotifications}">

@@ -20,7 +20,7 @@ class Actions extends ActionsBase
 	protected $oApiUsers;
 
 	/**
-	 * @var \CApiTenantsManager
+	 * @var \CApiTenantsManagers
 	 */
 	protected $oApiTenants;
 	
@@ -572,6 +572,7 @@ class Actions extends ActionsBase
 			$oFetcher->Email = (string) $this->oHttp->GetPost('Email', $oFetcher->Email);
 			$oFetcher->Signature = (string) $this->oHttp->GetPost('Signature', $oFetcher->Signature);
 			$oFetcher->SignatureOptions = (string) $this->oHttp->GetPost('SignatureOptions', $oFetcher->SignatureOptions);
+			$oFetcher->SignatureType = (string) $this->oHttp->GetPost('SignatureType', $oFetcher->SignatureType);
 
 			$oFetcher->IsOutgoingEnabled = '1' === (string) $this->oHttp->GetPost('IsOutgoingEnabled', $oFetcher->IsOutgoingEnabled ? '1' : '0');
 			$oFetcher->OutgoingMailServer = (string) $this->oHttp->GetPost('OutgoingMailServer', $oFetcher->OutgoingMailServer);
@@ -2795,6 +2796,11 @@ class Actions extends ActionsBase
 		$oAccount->User->AutoCheckMailInterval = $iAutoCheckMailInterval;
 		$oAccount->User->UseThreads = $bUseThreads;
 		$oAccount->User->SaveRepliedMessagesToCurrentFolder = $bSaveRepliedMessagesToCurrentFolder;
+		if ((bool) \CApi::GetConf('webmail.allow-compose-plain-text', false))
+		{
+			$bComposePlainTextDefault = '1' === (string) $this->oHttp->GetPost('ComposePlainTextDefault', $oAccount->User->ComposePlainTextDefault ? '1' : '0');
+			$oAccount->User->ComposePlainTextDefault = $bComposePlainTextDefault;
+		}
 		$oAccount->User->DesktopNotifications = $bDesktopNotifications;
 		$oAccount->User->AllowChangeInputDirection = $bAllowChangeInputDirection;
 
@@ -4532,6 +4538,7 @@ class Actions extends ActionsBase
 		$oIdentity->Email = $sEmail;
 		$oIdentity->Signature = (string) $this->getParamValue('Signature', '');
 		$oIdentity->UseSignature = '1' === (string) $this->getParamValue('UseSignature', '0');
+		$oIdentity->SignatureType = '1' === (string) $this->getParamValue('SignatureType', '0');
 		$oIdentity->FriendlyName = (string) $this->getParamValue('FriendlyName', '');
 
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $this->oApiUsers->createIdentity($oIdentity));
@@ -4557,6 +4564,7 @@ class Actions extends ActionsBase
 		$oIdentity->Email = trim((string)$this->getParamValue('Email', ''));
 		$oIdentity->Signature = (string)$this->getParamValue('Signature', '');
 		$oIdentity->UseSignature = '1' === (string)$this->getParamValue('UseSignature', '0');
+		$oIdentity->SignatureType = '1' === (string) $this->getParamValue('SignatureType', '0');
 		$oIdentity->FriendlyName = (string)$this->getParamValue('FriendlyName', '');
 
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $this->oApiUsers->updateIdentity($oIdentity));
@@ -5352,7 +5360,11 @@ class Actions extends ActionsBase
 		$sName = $this->getParamValue('Name');
 		$sSize = $this->getParamValue('Size');
 		$bIsFolder = $this->getParamValue('IsFolder', '0') === '1' ? true : false;
-		
+
+		if (is_null($sType) || is_null($sPath) || is_null($sName) || is_null($sSize) || is_null($bIsFolder))
+		{
+			return false;
+		}
 		$mResult = $this->oApiFilestorage->createPublicLink($oAccount, $sType, $sPath, $sName, $sSize, $bIsFolder);
 		
 		return $this->DefaultResponse($oAccount, __FUNCTION__, $mResult);
@@ -6209,7 +6221,7 @@ class Actions extends ActionsBase
 	{
 		$mData = $this->getParamValue('Result', false);
 
-		if ($mData && isset($mData['__hash__'], $mData['Name'], $mData['Size']))
+		if ($mData && isset($mData['__hash__'], $mData['Name']))
 		{
 			$bUseUrlRewrite = (bool) \CApi::GetConf('labs.server-use-url-rewrite', false);			
 			$sUrl = '?/Min/Download/';
@@ -6228,12 +6240,15 @@ class Actions extends ActionsBase
 				'Template' => 'templates/FilesPub.html',
 				'{{Url}}' => $sUrl.$mData['__hash__'], 
 				'{{FileName}}' => $mData['Name'],
-				'{{FileSize}}' => \api_Utils::GetFriendlySize($mData['Size']),
+				'{{FileSize}}' => isset($mData['Size']) ? \api_Utils::GetFriendlySize($mData['Size']) : \CApi::ClientI18N('FILESTORAGE/INFO_UNKNOWN_SIZE'),
 				'{{FileType}}' => \api_Utils::GetFileExtension($mData['Name']),
 				'{{BaseUrl}}' => $sUrlRewriteBase 
 			);
 		}
-		return false;
+		return array(
+				'Template' => 'templates/NotFound.html',
+				'{{NotFound}}' => \CApi::ClientI18N('FILESTORAGE/INFO_NOT_FOUND')
+			);
 	}
 	
 	public function MinDownload()
@@ -8372,39 +8387,11 @@ class Actions extends ActionsBase
 		}
 		return $this->DefaultResponse(null, __FUNCTION__, $mResult);
 	}	
-	
-	public function AjaxHelpdeskForgot()
+
+	public function AjaxDefaultAccountGet()
 	{
-		$sTenantHash = trim($this->getParamValue('TenantHash', ''));
-		if ($this->oApiCapability->isHelpdeskSupported())
-		{
-			$sEmail = trim($this->getParamValue('Email', ''));
-
-			if (0 === strlen($sEmail))
-			{
-				throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::InvalidInputParameter);
-			}
-
-			$mIdTenant = $this->oApiIntegrator->getTenantIdByHash($sTenantHash);
-			if (!is_int($mIdTenant))
-			{
-				throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::InvalidInputParameter);
-			}
-
-			$oHelpdesk = $this->ApiHelpdesk();
-			if ($oHelpdesk)
-			{
-				$oUser = $oHelpdesk->getUserByEmail($mIdTenant, $sEmail);
-				if (!($oUser instanceof \CHelpdeskUser))
-				{
-					throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::HelpdeskUnknownUser);
-				}
-
-				return $this->DefaultResponse(null, __FUNCTION__, $oHelpdesk->forgotUser($oUser));
-			}
-		}
-		
-		return $this->FalseResponse(null, __FUNCTION__);
+		$sAuthToken = trim($this->getParamValue('AuthToken', ''));
+		return $this->DefaultResponse(null, __FUNCTION__, $this->GetDefaultAccount($sAuthToken));
 	}
 
 	public function AjaxHelpdeskForgotChangePassword()
