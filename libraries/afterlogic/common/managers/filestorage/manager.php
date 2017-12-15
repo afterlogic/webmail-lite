@@ -465,7 +465,19 @@ class CApiFilestorageManager extends AApiManagerWithStorage
 	}
 	
 	/**
-	 * Returns general quota information for the account, used and available space. 
+	 * Returns general quota information for the account (user level), used and available space.
+	 * 
+	 * @param CAccount $oAccount Account object
+	 * 
+	 * @return array array( $iUsageSize, $iFreeSize ); 
+	 */
+	public function getUserQuota($oAccount)
+	{
+		return $this->oStorage->getUserQuota($oAccount);
+	}
+	
+	/**
+	 * Returns general quota information for the account (tenant or user level), used and available space.
 	 * 
 	 * @param CAccount $oAccount Account object
 	 * 
@@ -473,18 +485,19 @@ class CApiFilestorageManager extends AApiManagerWithStorage
 	 */
 	public function getQuota($oAccount)
 	{
-		$iUsageSize = 0;
-		$iFreeSize = 0;
-		
 		$oApiTenants = \CApi::Manager('tenants');
 		$oTenant = $oApiTenants ? $oApiTenants->getTenantById($oAccount->IdTenant) : null;
 		if ($oTenant)
 		{
 			$iUsageSize = $oTenant->FilesUsageInMB * 1024 * 1024;
 			$iFreeSize = ($oTenant->FilesUsageDynamicQuotaInMB * 1024 * 1024) - $iUsageSize;
+			
+			return array($iUsageSize, $iFreeSize);
 		}
-		
-		return array($iUsageSize, $iFreeSize);
+		else
+		{
+			return $this->getUserQuota($oAccount);
+		}
 	}
 	
 	/**

@@ -408,9 +408,15 @@ class CCommonModule extends ap_Module
 						$oScreen->Main->AddSwitcher(
 							WM_SWITCHER_MODE_EDIT_DOMAIN_GENERAL, WM_SWITCHER_MODE_EDIT_DOMAIN_GENERAL_NAME,
 							$this->sPath.'/templates/main-edit-domain-general-webmail.php');
-						$oScreen->Main->AddSwitcher(
-							WM_SWITCHER_MODE_EDIT_DOMAIN_GENERAL, WM_SWITCHER_MODE_EDIT_DOMAIN_GENERAL_NAME,
-							$this->sPath.'/templates/main-edit-domain-general-regional.php');
+							if (!!CApi::Manager('collaboration'))
+							{
+								$oScreen->Main->AddSwitcher(
+									WM_SWITCHER_MODE_EDIT_DOMAIN_GENERAL, WM_SWITCHER_MODE_EDIT_DOMAIN_GENERAL_NAME,
+									$this->sPath.'/templates/main-edit-domain-general-collaboration.php');
+							}
+							$oScreen->Main->AddSwitcher(
+								WM_SWITCHER_MODE_EDIT_DOMAIN_GENERAL, WM_SWITCHER_MODE_EDIT_DOMAIN_GENERAL_NAME,
+								$this->sPath.'/templates/main-edit-domain-general-regional.php');
 					}
 					break;
 			}

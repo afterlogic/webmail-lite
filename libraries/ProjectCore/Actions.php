@@ -398,8 +398,13 @@ class Actions extends ActionsBase
 		if ($oAccount)
 		{
 			$sUrl = trim($this->getParamValue('Url', ''));
+			if (substr($sUrl, 0, 11) === 'javascript:')
+			{
+				$sUrl = substr($sUrl, 11);
+			}
 
-			if (!empty($sUrl))
+			$sUrlHost = parse_url($sUrl, PHP_URL_HOST);
+			if (!empty($sUrl) && strtolower($sUrlHost) !== 'localhost' && strtolower($sUrlHost) !== '127.0.0.1')
 			{
 				$iLinkType = \api_Utils::GetLinkType($sUrl);
 				if ($iLinkType === \EFileStorageLinkType::GoogleDrive)
@@ -5244,6 +5249,10 @@ class Actions extends ActionsBase
 		$sType = $this->getParamValue('Type');
 		$sPath = $this->getParamValue('Path');
 		$sLink = $this->getParamValue('Link');
+		if (substr($sLink, 0, 11) === 'javascript:')
+		{
+			$sLink = substr($sLink, 11);
+		}
 		$sName = $this->getParamValue('Name');
 		$oResult = $this->oApiFilestorage->createLink($oAccount, $sType, $sPath, $sLink, $sName);
 		
@@ -5334,9 +5343,16 @@ class Actions extends ActionsBase
 		$sToPath = $this->getParamValue('ToPath');
 		$aItems = @json_decode($this->getParamValue('Files'), true);
 		$oResult = null;
+		$aQuota = $this->oApiFilestorage->getUserQuota($oAccount);
 		
 		foreach ($aItems as $aItem)
 		{
+			$iSize = isset($aItem['Size']) ? (int) $aItem['Size'] : 0;
+			if ($sToType !== $sFromType && $sToType === \EFileStorageTypeStr::Personal && $aQuota[1] !== 0 && $iSize > $aQuota[1])
+			{
+				throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::FilesQuotaLimit);
+			}
+			
 			$bFolderIntoItself = $aItem['IsFolder'] && $sToPath === $sFromPath.'/'.$aItem['Name'];
 			if (!$bFolderIntoItself)
 			{
@@ -6098,7 +6114,7 @@ class Actions extends ActionsBase
 					}
 					else
 					{
-						if ($sContentType === 'text/html')
+						if (!$bDownload && $sContentType === 'text/html')
 						{
 							echo(\MailSo\Base\HtmlUtils::ClearHtmlSimple(stream_get_contents($mResult)));
 						}
@@ -6386,6 +6402,11 @@ class Actions extends ActionsBase
 	 */
 	public function UploadContacts()
 	{
+		if (!$this->validateCsrfToken($this->getParamValue('Token', '')))
+		{
+			throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::InvalidToken);
+		}
+
 		$oAccount = $this->getDefaultAccountFromParam();
 
 		if (!$this->oApiCapability->isPersonalContactsSupported($oAccount))
@@ -6477,6 +6498,11 @@ class Actions extends ActionsBase
 	 */
 	public function UploadCalendars()
 	{
+		if (!$this->validateCsrfToken($this->getParamValue('Token', '')))
+		{
+			throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::InvalidToken);
+		}
+
 		$oAccount = $this->getDefaultAccountFromParam();
 		
 		$aFileData = $this->getParamValue('FileData', null);
@@ -6552,6 +6578,11 @@ class Actions extends ActionsBase
 	 */
 	public function UploadEventAttachment()
 	{
+		if (!$this->validateCsrfToken($this->getParamValue('Token', '')))
+		{
+			throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::InvalidToken);
+		}
+
 		$oAccount = $this->getAccountFromParam();
 
 		$aFileData = $this->getParamValue('FileData', null);
@@ -6631,6 +6662,11 @@ class Actions extends ActionsBase
 	 */
 	public function UploadAttachment()
 	{
+		if (!$this->validateCsrfToken($this->getParamValue('Token', '')))
+		{
+			throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::InvalidToken);
+		}
+
 		$oAccount = $this->getAccountFromParam();
 
 		$oSettings =& \CApi::GetSettings();
@@ -6718,6 +6754,11 @@ class Actions extends ActionsBase
 			throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::FilesNotAllowed);
 		}
 
+		if (!$this->validateCsrfToken($this->getParamValue('Token', '')))
+		{
+			throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::InvalidToken);
+		}
+
 		$aFileData = $this->getParamValue('FileData', null);
 		$mAdditionalData = $this->getParamValue('AdditionalData', '{}');
 		$mAdditionalData = @json_decode($mAdditionalData, true);
@@ -6731,37 +6772,46 @@ class Actions extends ActionsBase
 			{
 				$sUploadName = $aFileData['name'];
 				$iSize = (int) $aFileData['size'];
-				$sType = isset($mAdditionalData['Type']) ? $mAdditionalData['Type'] : 'personal';
-				$sPath = isset($mAdditionalData['Path']) ? urldecode($mAdditionalData['Path']) : '';
-				$bOverwrite = isset($mAdditionalData['Overwrite']) ? (bool) $mAdditionalData['Overwrite'] : false;
-				$sMimeType = \MailSo\Base\Utils::MimeContentType($sUploadName);
-
-				$sSavedName = 'upload-post-'.md5($aFileData['name'].$aFileData['tmp_name']);
-				$rData = false;
-				if (is_resource($aFileData['tmp_name']))
+				$sType = isset($mAdditionalData['Type']) ? $mAdditionalData['Type'] : \EFileStorageTypeStr::Personal;
+				
+				$aQuota = $this->oApiFilestorage->getUserQuota($oAccount);
+				if ($sType === \EFileStorageTypeStr::Personal && $aQuota[1] !== 0 && $iSize > $aQuota[1])
 				{
-					$rData = $aFileData['tmp_name'];
+					$sError = 'quota';
 				}
-				else if ($this->ApiFileCache()->moveUploadedFile($oAccount, $sSavedName, $aFileData['tmp_name']))
+				else
 				{
-					$rData = $this->ApiFileCache()->getFile($oAccount, $sSavedName);
-				}
-				if ($rData)
-				{
-					$this->oApiFilestorage->createFile($oAccount, $sType, $sPath, $sUploadName, $rData, $bOverwrite);
+					$sPath = isset($mAdditionalData['Path']) ? urldecode($mAdditionalData['Path']) : '';
+					$bOverwrite = isset($mAdditionalData['Overwrite']) ? (bool) $mAdditionalData['Overwrite'] : false;
+					$sMimeType = \MailSo\Base\Utils::MimeContentType($sUploadName);
 
-					$aResponse['File'] = array(
-						'Name' => $sUploadName,
-						'TempName' => $sSavedName,
-						'MimeType' => $sMimeType,
-						'Size' =>  (int) $iSize,
-						'Hash' => \CApi::EncodeKeyValues(array(
-							'TempFile' => true,
-							'AccountID' => $oAccount->IdAccount,
+					$sSavedName = 'upload-post-'.md5($aFileData['name'].$aFileData['tmp_name']);
+					$rData = false;
+					if (is_resource($aFileData['tmp_name']))
+					{
+						$rData = $aFileData['tmp_name'];
+					}
+					else if ($this->ApiFileCache()->moveUploadedFile($oAccount, $sSavedName, $aFileData['tmp_name']))
+					{
+						$rData = $this->ApiFileCache()->getFile($oAccount, $sSavedName);
+					}
+					if ($rData)
+					{
+						$this->oApiFilestorage->createFile($oAccount, $sType, $sPath, $sUploadName, $rData, $bOverwrite);
+
+						$aResponse['File'] = array(
 							'Name' => $sUploadName,
-							'TempName' => $sSavedName
-						))
-					);
+							'TempName' => $sSavedName,
+							'MimeType' => $sMimeType,
+							'Size' =>  (int) $iSize,
+							'Hash' => \CApi::EncodeKeyValues(array(
+								'TempFile' => true,
+								'AccountID' => $oAccount->IdAccount,
+								'Name' => $sUploadName,
+								'TempName' => $sSavedName
+							))
+						);
+					}
 				}
 			}
 		}
@@ -6780,6 +6830,11 @@ class Actions extends ActionsBase
 
 	public function UploadMessage()
 	{
+		if (!$this->validateCsrfToken($this->getParamValue('Token', '')))
+		{
+			throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::InvalidToken);
+		}
+
 		$aFileData = $this->getParamValue('FileData', null);
 		$sAccountId = (int) $this->getParamValue('AccountID', '0');
 		$sAdditionalData = $this->getParamValue('AdditionalData', '{}');
@@ -8438,6 +8493,11 @@ class Actions extends ActionsBase
 	 */
 	public function UploadHelpdeskFile()
 	{
+		if (!$this->validateCsrfToken($this->getParamValue('Token', '')))
+		{
+			throw new \ProjectCore\Exceptions\ClientException(\ProjectCore\Notifications::InvalidToken);
+		}
+
 		$oAccount = null;
 		$oUser = $this->getHelpdeskAccountFromParam($oAccount);
 

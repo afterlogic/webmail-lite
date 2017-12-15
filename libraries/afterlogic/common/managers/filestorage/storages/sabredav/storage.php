@@ -921,6 +921,33 @@ class CApiFilestorageSabredavStorage extends CApiFilestorageStorage
 
 	/**
 	 * @param CAccount $oAccount
+	 *
+	 * @return array
+	 */
+	public function getUserQuota($oAccount)
+	{
+		$iUsageSize = 0;
+		$iFreeSize = 0;
+		
+		$iSizeLimitMb = (int) \CApi::GetConf('webmail.user-files-size-limit-mb', 0);
+		if ($iSizeLimitMb < 0)
+		{
+			$iSizeLimitMb = 0;
+		}
+		
+		if ($iSizeLimitMb > 0 && $oAccount)
+		{
+			$sRootPath = $this->getRootPath($oAccount, \EFileStorageTypeStr::Personal, true);
+			$aSize = \api_Utils::GetDirectorySize($sRootPath);
+			$iUsageSize = (int) $aSize['size'];
+			$iFreeSize = ($iSizeLimitMb * 1024 * 1024) - $iUsageSize;
+		}
+		
+		return array($iUsageSize, $iFreeSize);
+	}
+
+	/**
+	 * @param CAccount $oAccount
 	 * @param int $iType
 	 * @param string $sPath
 	 * @param string $sFileName

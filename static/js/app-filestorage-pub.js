@@ -656,6 +656,7 @@ Enums.Errors = {
 	'HelpdeskUserNotExists': 807,
 	'HelpdeskUserNotActivated': 808,
 	'IncorrectFileExtension': 811,
+	'FilesQuotaLimit': 812,
 	'MailServerError': 901,
 	'DataTransferFailed': 1100,
 	'NotDisplayedError': 1155
@@ -3136,7 +3137,8 @@ ko.bindingHandlers.adjustHeightToContent = {
 ko.bindingHandlers.customTooltip = {
 	'init': (bMobileDevice || bMobileApp) ? null : function (oElement, fValueAccessor) {
 		var
-			sTooltipText = Utils.i18n(fValueAccessor()),
+			mTooltip = fValueAccessor(),
+			sTooltipText = Utils.encodeHtml(_.isFunction(mTooltip) ? mTooltip() : Utils.i18n(mTooltip)),
 			$Element = $(oElement),
 			$Dropdown = $Element.find('span.dropdown'),
 			bShown = false,
@@ -3191,17 +3193,12 @@ ko.bindingHandlers.customTooltip = {
 			fSubscribtion = null
 		;
 		
-		if (typeof sTooltipText === 'function')
-		{
-			sTooltipText = sTooltipText();
-		}
-		
 		fBindEvents();
 		
-		if (typeof fValueAccessor().subscribe === 'function' && fSubscribtion === null)
+		if (_.isFunction(mTooltip) && _.isFunction(mTooltip.subscribe) && fSubscribtion === null)
 		{
 			fSubscribtion = fValueAccessor().subscribe(function (sValue) {
-				sTooltipText = sValue;
+				sTooltipText = Utils.encodeHtml(sValue);
 				fBindEvents();
 			});
 		}
@@ -6660,10 +6657,12 @@ CApi.prototype.pgp = function (fCallback, sUserUid)
 
 /**
  * @param {string} sLoading
+ * @param {boolean} bHtml
+ * @param {boolean} bClose
  */
-CApi.prototype.showLoading = function (sLoading)
+CApi.prototype.showLoading = function (sLoading, bHtml, bClose)
 {
-	App.Screens.showLoading(sLoading);
+	App.Screens.showLoading(sLoading, bHtml, bClose);
 };
 
 CApi.prototype.hideLoading = function ()
@@ -6915,7 +6914,11 @@ CApi.prototype.showErrorByCode = function (oResponse, sDefaultError, bNotHide)
 			break;
 	}
 	
-	if (sResultError !== '')
+	if (iErrorCode === Enums.Errors.InvalidToken)
+	{
+		App.tokenProblem();
+	}
+	else if (sResultError !== '')
 	{
 		if (sResponseError !== '')
 		{
@@ -8860,6 +8863,8 @@ function CUserSettingsModel()
 
 	this.LastLogin = 0;
 	this.LoginsCount = 0;
+	this.LastLoginIp = '';
+	this.LastLoginUa = '';
 	this.SocialName = 0;
 	this.IsDemo = false;
 
@@ -9030,6 +9035,8 @@ CUserSettingsModel.prototype.parse = function (oData)
 
 		this.LastLogin = Utils.pInt(oData.LastLogin);
 		this.LoginsCount = Utils.pInt(oData.LoginsCount);
+		this.LastLoginIp = Utils.pString(oData.LastLoginIp);
+		this.LastLoginUa = Utils.pString(oData.LastLoginUa);
 		this.SocialName = Utils.pString(oData.SocialName);
 		this.AllowCalendar = !!oData.AllowCalendar && !bMobileApp;
 
@@ -9802,7 +9809,7 @@ CCommonFileModel.prototype.onUploadProgress = function (iUploadedSize, iTotalSiz
 CCommonFileModel.prototype.onUploadComplete = function (sFileUid, bResponseReceived, oResult)
 {
 	var
-		bError = !bResponseReceived || !oResult || !!oResult.Error || false,
+		bError = !bResponseReceived || !oResult || !!oResult.Error || (!!oResult.Result && !!oResult.Result.Error) || false,
 		sError = Utils.i18n('COMPOSE/UPLOAD_ERROR_UNKNOWN')
 	;
 	
@@ -9813,11 +9820,11 @@ CCommonFileModel.prototype.onUploadComplete = function (sFileUid, bResponseRecei
 	this.uploaded(true);
 	this.uploadError(bError);
 	
-
 	if (bError && oResult)
 	{
-		switch (oResult.Error)
+		switch (oResult.Error || oResult.Result && oResult.Result.Error)
 		{
+			case 'quota':
 			case 'size':
 				sError = Utils.i18n('COMPOSE/UPLOAD_ERROR_SIZE');
 				break;
@@ -9825,6 +9832,11 @@ CCommonFileModel.prototype.onUploadComplete = function (sFileUid, bResponseRecei
 				if (oResult.ErrorCode === 110)
 				{
 					sError = Utils.i18n('FILESTORAGE/UPLOAD_ERROR_MAXPATHLEN');
+				}
+				if (oResult.ErrorCode === Enums.Errors.InvalidToken)
+				{
+					sError = '';
+					App.tokenProblem();
 				}
 				break;
 		}
@@ -10380,6 +10392,15 @@ CFileStorageViewModel.prototype.onFileUploadSelect = function (sFileUid, oFileDa
 		return false;
 	}	
 	
+	var iFree = this.quota() - this.used();
+	if (this.storageType() === Enums.FileStorageType.Personal && this.quota() !== 0 && oFileData.Size > iFree)
+	{
+		App.Screens.showPopup(AlertPopup, [
+			iFree > 0 ? Utils.i18n('FILESTORAGE/ERROR_SIZE_QUOTA_LIMIT', {'FRIENDLYSIZE': Utils.friendlySize(iFree)}) : Utils.i18n('COMPOSE/UPLOAD_ERROR_SIZE')
+		]);
+		return false;
+	}
+	
 	if (this.searchPattern() === '')
 	{
 		var 
@@ -10528,7 +10549,9 @@ CFileStorageViewModel.prototype.filesDrop = function (oFolder, oEvent, oUi)
 			bFolderIntoItself = false,
 			sToPath = oFolder.fullPath(),
 			aChecked = [],
-			aItems = []
+			aItems = [],
+			iAllSize = 0,
+			iFree = 0
 		;
 		
 		if (this.path() !== sToPath && this.storageType() === oFolder.storageType() || this.storageType() !== oFolder.storageType())
@@ -10537,6 +10560,18 @@ CFileStorageViewModel.prototype.filesDrop = function (oFolder, oEvent, oUi)
 			Utils.uiDropHelperAnim(oEvent, oUi);
 
 			aChecked = this.selector.listCheckedAndSelected();
+			if (this.quota() > 0 && this.storageType() !== oFolder.storageType() && oFolder.storageType() === Enums.FileStorageType.Personal)
+			{
+				iAllSize = _.reduce(aChecked, function(iSum, oItem){ return iSum + (oItem.isFolder() ? 0 : oItem.size()); }, 0);
+				iFree = this.quota() - this.used();
+				if (iFree < iAllSize)
+				{
+					App.Screens.showPopup(AlertPopup, [
+						iFree > 0 ? Utils.i18n('FILESTORAGE/ERROR_SIZE_QUOTA_LIMIT', {'FRIENDLYSIZE': Utils.friendlySize(iFree)}) : Utils.i18n('FILESTORAGE/ERROR_MOVE_QUOTA_LIMIT')
+					]);
+					return;
+				}
+			}
 			_.each(aChecked, function (oItem) {
 				sFromPath = oItem.path();
 				bFolderIntoItself = oItem.isFolder() && sToPath === sFromPath + '/' + oItem.id();
@@ -10555,7 +10590,8 @@ CFileStorageViewModel.prototype.filesDrop = function (oFolder, oEvent, oUi)
 					}
 					aItems.push({
 						'Name':  oItem.id(),
-						'IsFolder': oItem.isFolder()
+						'IsFolder': oItem.isFolder(),
+						'Size': oItem.isFolder() ? 0 : oItem.size()
 					});
 				}
 			});
@@ -10579,11 +10615,26 @@ CFileStorageViewModel.prototype.filesDrop = function (oFolder, oEvent, oUi)
 };
 
 /**
- * @param {Object} oData
+ * @param {Object} oResponse
  * @param {Object} oParameters
  */
-CFileStorageViewModel.prototype.onFilesMoveResponse = function (oData, oParameters)
+CFileStorageViewModel.prototype.onFilesMoveResponse = function (oResponse, oParameters)
 {
+	if (!oResponse.Result)
+	{
+		if (oParameters.ToType === Enums.FileStorageType.Personal && oResponse.ErrorCode === Enums.Errors.FilesQuotaLimit)
+		{
+			var iFree = this.quota() - this.used();
+			App.Screens.showPopup(AlertPopup, [
+				iFree > 0 ? Utils.i18n('FILESTORAGE/ERROR_SIZE_QUOTA_LIMIT', {'FRIENDLYSIZE': Utils.friendlySize(iFree)}) : Utils.i18n('FILESTORAGE/ERROR_MOVE_QUOTA_LIMIT')
+			]);
+		}
+		else
+		{
+			App.Api.showErrorByCode(oResponse);
+		}
+		this.getFiles(this.storageType(), this.getPathItemByIndex(this.iPathIndex()));
+	}
 	this.getQuota(this.storageType());
 };
 
@@ -10767,6 +10818,7 @@ CFileStorageViewModel.prototype.onFilesDeleteResponse = function (oData, oParame
 	if (oData.Result)
 	{
 		this.expungeFileItems();
+		this.getQuota(this.storageType());
 	}
 	else
 	{
@@ -10927,23 +10979,23 @@ CFileStorageViewModel.prototype.getStorages = function ()
 {
 	if (!this.isPublic)
 	{
-		if (!this.getStorageByType('personal'))
+		if (!this.getStorageByType(Enums.FileStorageType.Personal))
 		{
 			this.storages.push(
 				new CFileModel()
 					.isFolder(true)
-					.storageType('personal')
+					.storageType(Enums.FileStorageType.Personal)
 					.displayName(Utils.i18n('FILESTORAGE/TAB_PERSONAL_FILES'))
 			);
 		}
 		if (this.IsCollaborationSupported)
 		{
-			if (!this.getStorageByType('corporate'))
+			if (!this.getStorageByType(Enums.FileStorageType.Corporate))
 			{
 				this.storages.push(
 					new CFileModel()
 						.isFolder(true)
-						.storageType('corporate')
+						.storageType(Enums.FileStorageType.Corporate)
 						.displayName(Utils.i18n('FILESTORAGE/TAB_CORPORATE_FILES'))
 				);
 			}
@@ -11006,7 +11058,7 @@ CFileStorageViewModel.prototype.onExternalStoragesResponse = function (oData, oP
 	}
 	if (!this.getStorageByType(this.storageType()))
 	{
-		this.storageType('personal');
+		this.storageType(Enums.FileStorageType.Personal);
 		this.pathItems([]);
 		this.iPathIndex(-1);
 	}
@@ -11393,6 +11445,8 @@ function CInformationViewModel()
 	this.loadingMessage = ko.observable('');
 	this.loadingHidden = ko.observable(true);
 	this.loadingVisible = ko.observable(false);
+	this.isHtmlLoading = ko.observable(false);
+	this.loadingVisibleClose = ko.observable(false);
 	this.reportMessage = ko.observable('');
 	this.reportHidden = ko.observable(true);
 	this.reportVisible = ko.observable(false);
@@ -11408,8 +11462,10 @@ function CInformationViewModel()
 
 /**
  * @param {string} sMessage
+ * @param {boolean} bHtml
+ * @param {boolean} bClose
  */
-CInformationViewModel.prototype.showLoading = function (sMessage)
+CInformationViewModel.prototype.showLoading = function (sMessage, bHtml, bClose)
 {
 	if (sMessage && sMessage !== '')
 	{
@@ -11420,6 +11476,8 @@ CInformationViewModel.prototype.showLoading = function (sMessage)
 		this.loadingMessage(Utils.i18n('MAIN/LOADING'));
 	}
 	this.loadingVisible(true);
+	this.isHtmlLoading(!!bHtml);
+	this.loadingVisibleClose(!!bClose);
 	_.defer(_.bind(function () {
 		this.loadingHidden(false);
 	}, this));
@@ -11881,12 +11939,14 @@ CScreens.prototype.hidePopup = function (CPopupViewModel)
 
 /**
  * @param {string} sMessage
+ * @param {boolean} bHtml
+ * @param {boolean} bClose
  */
-CScreens.prototype.showLoading = function (sMessage)
+CScreens.prototype.showLoading = function (sMessage, bHtml, bClose)
 {
 	if (this.informationScreen())
 	{
-		this.informationScreen().showLoading(sMessage);
+		this.informationScreen().showLoading(sMessage, bHtml, bClose);
 	}
 };
 

@@ -560,6 +560,7 @@ class api_Settings
 
 			'Common/PasswordMinLength' => array(0, 'int'),
 			'Common/PasswordMustBeComplex' => array(false, 'bool'),
+			'Common/Collaboration' => array(true, 'bool'),
 
 			// WebMail
 			'WebMail/AllowWebMail' => array(true, 'bool'),

@@ -162,6 +162,25 @@ class CApiUsersCommandCreator extends api_CommandCreator
 		return sprintf($sSql, $this->prefix(), implode(', ', $aResult), $oAccount->IdAccount);
 	}
 
+	protected function _getClientIp() {
+		$ipaddress = '';
+		if (isset($_SERVER['HTTP_CLIENT_IP']))
+			$ipaddress = $_SERVER['HTTP_CLIENT_IP'];
+		else if(isset($_SERVER['HTTP_X_FORWARDED_FOR']))
+			$ipaddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		else if(isset($_SERVER['HTTP_X_FORWARDED']))
+			$ipaddress = $_SERVER['HTTP_X_FORWARDED'];
+		else if(isset($_SERVER['HTTP_FORWARDED_FOR']))
+			$ipaddress = $_SERVER['HTTP_FORWARDED_FOR'];
+		else if(isset($_SERVER['HTTP_FORWARDED']))
+			$ipaddress = $_SERVER['HTTP_FORWARDED'];
+		else if(isset($_SERVER['REMOTE_ADDR']))
+			$ipaddress = $_SERVER['REMOTE_ADDR'];
+		else
+			$ipaddress = 'UNKNOWN';
+		return $ipaddress;
+	}
+
 	/**
 	 * Returns query-string for updating login-related information including time of last login. 
 	 * 
@@ -171,10 +190,12 @@ class CApiUsersCommandCreator extends api_CommandCreator
 	 */
 	public function updateAccountLastLoginAndCountQuery($iUserId)
 	{
-		$sSql = 'UPDATE %sawm_settings SET last_login = last_login_now, last_login_now = %s, logins_count = logins_count + 1 WHERE id_user = %d';
+		$sSql = 'UPDATE %sawm_settings SET last_login = last_login_now, last_login_now = %s, logins_count = logins_count + 1, last_login_ip = last_login_ip_now, last_login_ip_now = %s, last_login_ua = last_login_ua_now, last_login_ua_now = %s WHERE id_user = %d';
 
 		return sprintf($sSql, $this->prefix(),
 			$this->escapeString($this->oHelper->TimeStampToDateFormat(gmdate('U'))),
+			$this->escapeString($this->_getClientIp()),
+			$this->escapeString($_SERVER['HTTP_USER_AGENT']),
 			$iUserId);
 	}
 

@@ -49,7 +49,21 @@ class CApiCapabilityManager extends AApiManager
 	 */
 	public function isCollaborationSupported()
 	{
-		return $this->isNotLite() && !!CApi::Manager('collaboration');
+		$oDomain = null;
+		$bCollaboration = true;
+		
+		$oApiIntegrator = /* @var $oApiIntegrator CApiIntegratorManager */ \CApi::Manager('integrator');
+		$oAccount = $oApiIntegrator->getLogginedDefaultAccount();
+		if ($oAccount)
+		{
+			$oDomain = $oApiIntegrator->getDefaultAccountDomain($oAccount);
+			if ($oDomain)
+			{
+				$bCollaboration = $oDomain->Collaboration;
+			}
+		}
+
+		return $this->isNotLite() && !!CApi::Manager('collaboration') && $bCollaboration;
 	}
 
 	/**

@@ -229,6 +229,10 @@ class CDbSchema
 			new CDbField('last_login', CDbField::DATETIME),
 			new CDbField('last_login_now', CDbField::DATETIME),
 			new CDbField('logins_count', CDbField::INT, 0),
+			new CDbField('last_login_ip', CDbField::VAR_CHAR),
+			new CDbField('last_login_ip_now', CDbField::VAR_CHAR),
+			new CDbField('last_login_ua', CDbField::VAR_CHAR),
+			new CDbField('last_login_ua_now', CDbField::VAR_CHAR),
 			new CDbField('auto_checkmail_interval', CDbField::INT, 0),
 			new CDbField('def_skin', CDbField::VAR_CHAR, API_DEFAULT_SKIN),
 			new CDbField('def_editor', CDbField::BIT, 1),
@@ -874,7 +878,10 @@ class CDbSchema
 			
 			new CDbField('default_tab', CDbField::VAR_CHAR, 'mailbox'),
 			
-			new CDbField('is_default_for_tenant', CDbField::BIT, 0)
+			new CDbField('is_default_for_tenant', CDbField::BIT, 0),
+			
+			new CDbField('collaboration', CDbField::BIT, 1)
+
 
 //			new CDbField('password_min_length', CDbField::INT_SHORT, 0),
 //			new CDbField('password_must_be_complex', CDbField::BIT, 0)

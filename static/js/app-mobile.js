@@ -665,6 +665,7 @@ Enums.Errors = {
 	'HelpdeskUserNotExists': 807,
 	'HelpdeskUserNotActivated': 808,
 	'IncorrectFileExtension': 811,
+	'FilesQuotaLimit': 812,
 	'MailServerError': 901,
 	'DataTransferFailed': 1100,
 	'NotDisplayedError': 1155
@@ -5358,7 +5359,8 @@ ko.bindingHandlers.adjustHeightToContent = {
 ko.bindingHandlers.customTooltip = {
 	'init': (bMobileDevice || bMobileApp) ? null : function (oElement, fValueAccessor) {
 		var
-			sTooltipText = Utils.i18n(fValueAccessor()),
+			mTooltip = fValueAccessor(),
+			sTooltipText = Utils.encodeHtml(_.isFunction(mTooltip) ? mTooltip() : Utils.i18n(mTooltip)),
 			$Element = $(oElement),
 			$Dropdown = $Element.find('span.dropdown'),
 			bShown = false,
@@ -5413,17 +5415,12 @@ ko.bindingHandlers.customTooltip = {
 			fSubscribtion = null
 		;
 		
-		if (typeof sTooltipText === 'function')
-		{
-			sTooltipText = sTooltipText();
-		}
-		
 		fBindEvents();
 		
-		if (typeof fValueAccessor().subscribe === 'function' && fSubscribtion === null)
+		if (_.isFunction(mTooltip) && _.isFunction(mTooltip.subscribe) && fSubscribtion === null)
 		{
 			fSubscribtion = fValueAccessor().subscribe(function (sValue) {
-				sTooltipText = sValue;
+				sTooltipText = Utils.encodeHtml(sValue);
 				fBindEvents();
 			});
 		}
@@ -6771,7 +6768,7 @@ CMessageSender.prototype.getForwardMessageBody = function (oMessage, iAccountId,
 			'TOADDR': Utils.encodeHtml(oMessage.oTo.getFull()),
 			'CCPART': sCcPart,
 			'FULLDATE': oMessage.oDateModel.getFullDate(),
-			'SUBJECT': oMessage.subject()
+			'SUBJECT': Utils.encodeHtml(oMessage.subject())
 		}),
 		sForwardBody = '<br /><br />' + this.getSignatureText(iAccountId, oFetcherOrIdentity, true) + '<br /><br />' + 
 			'<div data-anchor="reply-title">' + sForwardTitle + '</div><br /><br />' + oMessage.getConvertedHtml()
@@ -8417,10 +8414,12 @@ CApi.prototype.pgp = function (fCallback, sUserUid)
 
 /**
  * @param {string} sLoading
+ * @param {boolean} bHtml
+ * @param {boolean} bClose
  */
-CApi.prototype.showLoading = function (sLoading)
+CApi.prototype.showLoading = function (sLoading, bHtml, bClose)
 {
-	App.Screens.showLoading(sLoading);
+	App.Screens.showLoading(sLoading, bHtml, bClose);
 };
 
 CApi.prototype.hideLoading = function ()
@@ -8672,7 +8671,11 @@ CApi.prototype.showErrorByCode = function (oResponse, sDefaultError, bNotHide)
 			break;
 	}
 	
-	if (sResultError !== '')
+	if (iErrorCode === Enums.Errors.InvalidToken)
+	{
+		App.tokenProblem();
+	}
+	else if (sResultError !== '')
 	{
 		if (sResponseError !== '')
 		{
@@ -10601,6 +10604,8 @@ function CUserSettingsModel()
 
 	this.LastLogin = 0;
 	this.LoginsCount = 0;
+	this.LastLoginIp = '';
+	this.LastLoginUa = '';
 	this.SocialName = 0;
 	this.IsDemo = false;
 
@@ -10771,6 +10776,8 @@ CUserSettingsModel.prototype.parse = function (oData)
 
 		this.LastLogin = Utils.pInt(oData.LastLogin);
 		this.LoginsCount = Utils.pInt(oData.LoginsCount);
+		this.LastLoginIp = Utils.pString(oData.LastLoginIp);
+		this.LastLoginUa = Utils.pString(oData.LastLoginUa);
 		this.SocialName = Utils.pString(oData.SocialName);
 		this.AllowCalendar = !!oData.AllowCalendar && !bMobileApp;
 
@@ -12702,7 +12709,7 @@ CCommonFileModel.prototype.onUploadProgress = function (iUploadedSize, iTotalSiz
 CCommonFileModel.prototype.onUploadComplete = function (sFileUid, bResponseReceived, oResult)
 {
 	var
-		bError = !bResponseReceived || !oResult || !!oResult.Error || false,
+		bError = !bResponseReceived || !oResult || !!oResult.Error || (!!oResult.Result && !!oResult.Result.Error) || false,
 		sError = Utils.i18n('COMPOSE/UPLOAD_ERROR_UNKNOWN')
 	;
 	
@@ -12713,11 +12720,11 @@ CCommonFileModel.prototype.onUploadComplete = function (sFileUid, bResponseRecei
 	this.uploaded(true);
 	this.uploadError(bError);
 	
-
 	if (bError && oResult)
 	{
-		switch (oResult.Error)
+		switch (oResult.Error || oResult.Result && oResult.Result.Error)
 		{
+			case 'quota':
 			case 'size':
 				sError = Utils.i18n('COMPOSE/UPLOAD_ERROR_SIZE');
 				break;
@@ -12725,6 +12732,11 @@ CCommonFileModel.prototype.onUploadComplete = function (sFileUid, bResponseRecei
 				if (oResult.ErrorCode === 110)
 				{
 					sError = Utils.i18n('FILESTORAGE/UPLOAD_ERROR_MAXPATHLEN');
+				}
+				if (oResult.ErrorCode === Enums.Errors.InvalidToken)
+				{
+					sError = '';
+					App.tokenProblem();
 				}
 				break;
 		}
@@ -17370,6 +17382,8 @@ function CInformationViewModel()
 	this.loadingMessage = ko.observable('');
 	this.loadingHidden = ko.observable(true);
 	this.loadingVisible = ko.observable(false);
+	this.isHtmlLoading = ko.observable(false);
+	this.loadingVisibleClose = ko.observable(false);
 	this.reportMessage = ko.observable('');
 	this.reportHidden = ko.observable(true);
 	this.reportVisible = ko.observable(false);
@@ -17385,8 +17399,10 @@ function CInformationViewModel()
 
 /**
  * @param {string} sMessage
+ * @param {boolean} bHtml
+ * @param {boolean} bClose
  */
-CInformationViewModel.prototype.showLoading = function (sMessage)
+CInformationViewModel.prototype.showLoading = function (sMessage, bHtml, bClose)
 {
 	if (sMessage && sMessage !== '')
 	{
@@ -17397,6 +17413,8 @@ CInformationViewModel.prototype.showLoading = function (sMessage)
 		this.loadingMessage(Utils.i18n('MAIN/LOADING'));
 	}
 	this.loadingVisible(true);
+	this.isHtmlLoading(!!bHtml);
+	this.loadingVisibleClose(!!bClose);
 	_.defer(_.bind(function () {
 		this.loadingHidden(false);
 	}, this));
@@ -18937,7 +18955,11 @@ CHtmlEditorViewModel.prototype.onFileUploadComplete = function (sUid, bResponseR
 {
 	var sError = '';
 	
-	if (oData && oData.Result)
+	if (oData && oData.ErrorCode === Enums.Errors.InvalidToken)
+	{
+		App.tokenProblem();
+	}
+	else if (oData && oData.Result)
 	{
 		if (oData.Result.Error)
 		{
@@ -19313,7 +19335,7 @@ function CWrapLoginViewModel()
 
 	this.emailVisible = this.oLoginViewModel.emailVisible;
 	this.loginVisible = this.oLoginViewModel.loginVisible;
-	this.loginDescription = ko.observable(AppData.App.LoginDescription || '');
+	this.loginDescription = ko.observable(Utils.encodeHtml(AppData.App.LoginDescription) || '');
 
 	this.aLanguages = AppData.App.Languages;
 	this.currentLanguage = ko.observable(AppData.App.DefaultLanguage);
@@ -20152,7 +20174,7 @@ function CMessageListViewModel(fOpenMessageInNewWindowBinded)
 
 		return Utils.i18n('MAILBOX/INFO_SEARCH_RESULT', {
 			'SEARCH': this.calculateSearchStringForDescription(),
-			'FOLDER': this.folderList().currentFolder() ? this.folderList().currentFolder().displayName() : ''
+			'FOLDER': this.folderList().currentFolder() ? Utils.encodeHtml(this.folderList().currentFolder().displayName()) : ''
 		});
 		
 	}, this);
@@ -20162,14 +20184,14 @@ function CMessageListViewModel(fOpenMessageInNewWindowBinded)
 		if (this.search() === '')
 		{
 			return Utils.i18n('MAILBOX/INFO_UNSEEN_FILTER_RESULT', {
-				'FOLDER': this.folderList().currentFolder() ? this.folderList().currentFolder().displayName() : ''
+				'FOLDER': this.folderList().currentFolder() ? Utils.encodeHtml(this.folderList().currentFolder().displayName()) : ''
 			});
 		}
 		else
 		{
 			return Utils.i18n('MAILBOX/INFO_SEARCH_UNSEEN_FILTER_RESULT', {
 				'SEARCH': this.calculateSearchStringForDescription(),
-				'FOLDER': this.folderList().currentFolder() ? this.folderList().currentFolder().displayName() : ''
+				'FOLDER': this.folderList().currentFolder() ? Utils.encodeHtml(this.folderList().currentFolder().displayName()) : ''
 			});
 		}
 		
@@ -20894,7 +20916,7 @@ CMessageListViewModel.prototype.onFileUploadComplete = function (sFileUid, bResp
 		}
 		else
 		{
-			App.Api.showError(Utils.i18n('WARNING/ERROR_UPLOAD_FILE'));
+			App.Api.showErrorByCode(oResponse, Utils.i18n('WARNING/ERROR_UPLOAD_FILE'));
 		}
 	}
 };
@@ -21073,6 +21095,11 @@ function CMessagePaneViewModel(fOpenMessageInNewWindowBinded)
 	this.currentAccountEmail = ko.observable();
 	this.meSender = Utils.i18n('MESSAGE/ME_SENDER');
 	this.meRecipient = Utils.i18n('MESSAGE/ME_RECIPIENT');
+	
+	this.bAllowBlockSender = AppData.AllowBlockSender;
+	this.blockSenderText = ko.computed(function () {
+		return Utils.i18n('MESSAGE/ACTION_BLOCK_EMAIL', { 'EMAIL': this.fromEmail() });
+	}, this);
 	
 	this.fullDate = ko.observable('');
 	this.midDate = ko.observable('');
@@ -22050,6 +22077,71 @@ CMessagePaneViewModel.prototype.showSourceHeaders = function ()
 	if (oWin)
 	{
 		$(oWin.document.body).html('<pre>' + Utils.encodeHtml(oMessage.sourceHeaders()) + '</pre>');
+	}
+};
+
+CMessagePaneViewModel.prototype.blockSender = function ()
+{
+	var
+		oCurrentAccount = AppData.Accounts.getCurrent(),
+		fUpdateFilters = _.bind(function () {
+			var
+				aExistenFilters = oCurrentAccount.filters() ? oCurrentAccount.filters().collection() : [],
+				aFiltersParams =_.map(aExistenFilters, function (oItem) {
+					return {
+						'Enable': oItem.enable() ? '1' : '0',
+						'Field': oItem.field(),
+						'Filter': oItem.filter(),
+						'Condition': oItem.condition(),
+						'Action': oItem.action(),
+						'FolderFullName': oItem.folder()
+					};
+				}),
+				oParameters = null
+			;
+
+			aFiltersParams.push({
+				'Enable': '1',
+				'Field': 0,
+				'Filter': this.fromEmail(),
+				'Condition': 0,
+				'Action': 1,
+				'FolderFullName': ''
+			});
+
+			oParameters = {
+				'Action': 'AccountSieveFiltersUpdate',
+				'AccountID': oCurrentAccount.id(),
+				'Filters': aFiltersParams
+			};
+
+			App.Ajax.send(oParameters, function (oResponse) {
+				if (oResponse.Result)
+				{
+					App.Api.showReport(Utils.i18n('SETTINGS/ACCOUNT_FILTERS_SUCCESS_REPORT'));
+				}
+				else
+				{
+					App.Api.showErrorByCode(oResponse);
+				}
+				var oAccount = AppData.Accounts.getCurrent();
+				if (oAccount && oAccount.allowMail() && oAccount.extensionExists('AllowSieveFiltersExtension'))
+				{
+					oAccount.requestFilters();
+				}
+			}, this);
+		}, this)
+	;
+	if (!oCurrentAccount.filters())
+	{
+		var sbscr = oCurrentAccount.filters.subscribe(function () {
+			fUpdateFilters();
+			sbscr.dispose();
+		});
+	}
+	else
+	{
+		fUpdateFilters();
 	}
 };
 
@@ -23464,7 +23556,14 @@ CComposeViewModel.prototype.setDataFromMessage = function (oMessage)
         }
         else
         {
-            sTextBody = oMessage.textRaw();
+			if (AppData.App.AllowComposePlainText && oMessage.isPlain())
+			{
+				sTextBody = oMessage.textRaw();
+			}
+			else
+			{
+				sTextBody = oMessage.text();
+			}
         }
     }
     else
@@ -23482,7 +23581,7 @@ CComposeViewModel.prototype.setDataFromMessage = function (oMessage)
     this.attachments(_.map(oMessage.attachments(), function (oAttach) {
 		return oAttach.getCopy();
 	}));
-    this.oHtmlEditor.setPlainTextMode(oMessage.isPlain());
+    this.oHtmlEditor.setPlainTextMode(AppData.App.AllowComposePlainText && oMessage.isPlain());
     this.textBody(sTextBody);
     this.selectedImportance(oMessage.importance());
     this.selectedSensitivity(oMessage.sensitivity());
@@ -24864,7 +24963,7 @@ CContactsImportViewModel.prototype.onFileUploadComplete = function (sFileUid, bR
 		}
 		else
 		{
-			App.Api.showError(Utils.i18n('WARNING/ERROR_UPLOAD_FILE'));
+			App.Api.showErrorByCode(oResponse, Utils.i18n('WARNING/ERROR_UPLOAD_FILE'));
 		}
 	}
 };
@@ -26420,9 +26519,9 @@ CContactsViewModel.prototype.initUploader = function ()
 	}
 };
 
-CContactsViewModel.prototype.onContactUploadComplete = function (sFileUid, bResponseReceived, bResponse)
+CContactsViewModel.prototype.onContactUploadComplete = function (sFileUid, bResponseReceived, oResponse)
 {
-	var bError = !bResponseReceived || !bResponse || bResponse.Error|| bResponse.Result.Error || false;
+	var bError = !bResponseReceived || !oResponse || oResponse.Error|| oResponse.Result.Error || false;
 
 	if (!bError)
 	{
@@ -26430,13 +26529,13 @@ CContactsViewModel.prototype.onContactUploadComplete = function (sFileUid, bResp
 	}
 	else
 	{
-		if (bResponse.ErrorCode)
+		if (oResponse.ErrorCode === Enums.Errors.IncorrectFileExtension)
 		{
-			App.Api.showErrorByCode(bResponse, Utils.i18n('The file must have .CSV or .VCF extension.'));
+			App.Api.showError(Utils.i18n('CONTACTS/ERROR_INCORRECT_FILE_EXTENSION'));
 		}
 		else
 		{
-			App.Api.showError(Utils.i18n('WARNING/UNKNOWN_ERROR'));
+			App.Api.showErrorByCode(oResponse, Utils.i18n('WARNING/ERROR_UPLOAD_FILE'));
 		}
 	}
 };
@@ -26875,12 +26974,14 @@ CScreens.prototype.hidePopup = function (CPopupViewModel)
 
 /**
  * @param {string} sMessage
+ * @param {boolean} bHtml
+ * @param {boolean} bClose
  */
-CScreens.prototype.showLoading = function (sMessage)
+CScreens.prototype.showLoading = function (sMessage, bHtml, bClose)
 {
 	if (this.informationScreen())
 	{
-		this.informationScreen().showLoading(sMessage);
+		this.informationScreen().showLoading(sMessage, bHtml, bClose);
 	}
 };
 
@@ -29286,6 +29387,8 @@ AppBase.prototype.run = function ()
 	this.startResetPass();
 	
 	this.displaySocialWelcome();
+	
+	this.displayLastLoginInfo();
 };
 
 AppBase.prototype.startResetPass = function ()
@@ -29323,6 +29426,20 @@ AppBase.prototype.displaySocialWelcome = function ()
 		]);
 		
 		App.Storage.setData('SocialWelcomeShowed' + oDefaultAccount.id(), '1');
+	}
+};
+
+AppBase.prototype.displayLastLoginInfo = function ()
+{
+	if (AppData.User.LastLogin > 0 && AppData.User.LastLoginIp !== '')
+	{
+		setTimeout(function () {
+			App.Api.showLoading(Utils.i18n('MAIN/SESSION_INFO', {
+				'DATETIME': Utils.encodeHtml(CDateModel.prototype.convertDate(AppData.User.LastLogin)),
+				'IP': Utils.encodeHtml(AppData.User.LastLoginIp),
+				'USERAGENT': Utils.encodeHtml(AppData.User.LastLoginUa)
+			}), true, true);
+		}, 500);
 	}
 };
 

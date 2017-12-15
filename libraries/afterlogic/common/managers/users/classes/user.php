@@ -18,6 +18,10 @@
  * @property int $LastLogin
  * @property int $LastLoginNow
  * @property int $LoginsCount
+ * @property string $LastLoginIp
+ * @property string $LastLoginIpNow
+ * @property string $LastLoginUa
+ * @property string $LastLoginUaNow
  * @property string $DefaultSkin
  * @property string $DefaultLanguage
  * @property int $DefaultEditor
@@ -99,6 +103,10 @@ class CUser extends api_AContainer
 			'LastLogin'							=> 0,
 			'LastLoginNow'						=> 0,
 			'LoginsCount'						=> 0,
+			'LastLoginIp'						=> '',
+			'LastLoginIpNow'					=> '',
+			'LastLoginUa'						=> '',
+			'LastLoginUaNow'					=> '',
 
 			'DefaultSkin'						=> $oDomain->DefaultSkin,
 			'DefaultLanguage'					=> $oDomain->DefaultLanguage === "Autodetect" ?  \CApi::Manager('integrator')->getAutodetectLanguage() : $oDomain->DefaultLanguage,
@@ -367,6 +375,10 @@ class CUser extends api_AContainer
 			'LastLogin'							=> array('datetime', 'last_login', true, false),
 			'LastLoginNow'						=> array('datetime', 'last_login_now', true, false),
 			'LoginsCount'						=> array('int', 'logins_count', true, false),
+			'LastLoginIp'						=> array('string(255)', 'last_login_ip'),
+			'LastLoginIpNow'					=> array('string(255)', 'last_login_ip_now'),
+			'LastLoginUa'						=> array('string(255)', 'last_login_ua'),
+			'LastLoginUaNow'					=> array('string(255)', 'last_login_ua_now'),
 
 			'DefaultSkin'						=> array('string(255)', 'def_skin'),
 			'DefaultLanguage'					=> array('string(255)', 'def_lang'),

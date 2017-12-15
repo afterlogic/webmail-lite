@@ -135,6 +135,11 @@
 											<span class="text" data-i18n="MESSAGE/LINK_VIEW_MESSAGE_HEADERS" data-bind="i18n: 'text'"></span>
 										</span>
 										
+										<span class="item block-sender" data-bind="click: blockSender, visible: bAllowBlockSender">
+											<span class="icon"></span>
+											<span class="text" data-bind="text: blockSenderText"></span>
+										</span>
+										
 										{%INCLUDE-START/Message-Pane-More-Actions-Menu/INCLUDE-END%}
 
 									</span>

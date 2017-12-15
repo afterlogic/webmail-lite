@@ -111,6 +111,8 @@ class CCommonPopulateData extends ap_CoreModuleHelper
 			$oScreen->Data->SetValue('optDateFormatDDMMYY', EDateFormat::DDMMYY === $oDomain->DefaultDateFormat);
 			$oScreen->Data->SetValue('optDateFormatMMDDYYYY', EDateFormat::MMDDYYYY === $oDomain->DefaultDateFormat);
 			$oScreen->Data->SetValue('optDateFormatDDMMYYYY', EDateFormat::DDMMYYYY === $oDomain->DefaultDateFormat);
+			
+			$oScreen->Data->SetValue('chAllowCollaboration', $oDomain->Collaboration);
 		}
 
 		$sSkinsOptions = '';

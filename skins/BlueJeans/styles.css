@@ -5,14 +5,14 @@
 }
 .panel.calendar_manager .item .title {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.7.6) repeat-y top right;
-  -o-mask: url(images/mask.png?7.7.6) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.7) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.7) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .panel.calendar_manager .item .title {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .message_viewer .message_header {
@@ -725,15 +725,15 @@ html.rtl .items_list .use_threads .threaded {
 .items_list .item .from,
 .items_list .item .subject {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.7.6) repeat-y top right;
-  -o-mask: url(images/mask.png?7.7.6) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.7) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.7) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .items_list .item .from,
 html.rtl .items_list .item .subject {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .items_list .item .from .other_senders {
@@ -749,15 +749,15 @@ html.rtl .items_list .item .subject {
 .items_list .item.unseen .from,
 .items_list .item.unseen .subject {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.7.6) repeat-y top right;
-  -o-mask: url(images/mask.png?7.7.6) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.7) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.7) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .items_list .item.unseen .from,
 html.rtl .items_list .item.unseen .subject {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .items_list .item.deleted {
@@ -774,15 +774,15 @@ html.rtl .items_list .item.unseen .subject {
 .items_list .item.checked .from,
 .items_list .item.checked .subject {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.7.6) repeat-y top right;
-  -o-mask: url(images/mask.png?7.7.6) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.7) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.7) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .items_list .item.checked .from,
 html.rtl .items_list .item.checked .subject {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .items_list .item.checked .custom_checkbox .icon {
@@ -796,15 +796,15 @@ html.rtl .items_list .item.checked .subject {
 .items_list .item.selected .from,
 .items_list .item.selected .subject {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.7.6) repeat-y top right;
-  -o-mask: url(images/mask.png?7.7.6) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.7) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.7) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .items_list .item.selected .from,
 html.rtl .items_list .item.selected .subject {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .items_list .item.selected .custom_checkbox .icon {
@@ -1366,7 +1366,7 @@ html.rtl .toolbar .content .group > .item:last-child {
 }
 .no-cssanimations .toolbar .group.checkmail .icon,
 .no-cssanimations .toolbar .item.checkmail .icon {
-  background: url("images/check.png?7.7.6") no-repeat 0px 0px;
+  background: url("images/check.png?7.7.7") no-repeat 0px 0px;
   overflow: hidden;
   width: 19px !important;
   height: 19px !important;
@@ -1499,6 +1499,17 @@ html.rtl .toolbar .content .group > .item:last-child {
 }
 .toolbar .group.save_and_close .icon:before,
 .toolbar .item.save_and_close .icon:before {
+  content: "\e66b";
+}
+.toolbar .group.block-sender .icon,
+.toolbar .item.block-sender .icon {
+  margin-top: 0;
+  margin-bottom: -6px;
+  margin-left: 3px;
+  margin-right: 3px;
+}
+.toolbar .group.block-sender .icon:before,
+.toolbar .item.block-sender .icon:before {
   content: "\e66b";
 }
 .toolbar .group.minimize .icon:before,
@@ -2573,11 +2584,11 @@ html.rtl .custom_selector .dropdown_content {
   width: 16px;
   height: 11px;
   margin-right: 4px;
-  background: url("images/sprites.png?7.7.6") no-repeat 40px -400px;
+  background: url("images/sprites.png?7.7.7") no-repeat 40px -400px;
 }
 @media only screen and (-webkit-min-device-pixel-ratio: 1.3), only screen and (-moz-min-device-pixel-ratio: 1.3), only screen and (-o-min-device-pixel-ratio: 1.3/1), only screen and (min-resolution: 1.3dppx), only screen and (min-resolution: 125dpi) {
   .languages .icon {
-    background-image: url("images/sprites2x.png?7.7.6");
+    background-image: url("images/sprites2x.png?7.7.7");
     background-size: 1440px 560px;
   }
 }
@@ -2909,7 +2920,7 @@ html.rtl .custom_selector .dropdown_content {
   content: "\e63e";
 }
 .attachments .item .spinner {
-  background: url("images/wait.gif?7.7.6") no-repeat left top;
+  background: url("images/wait.gif?7.7.7") no-repeat left top;
   display: inline-block;
   width: 20px;
   height: 20px;
@@ -3178,8 +3189,7 @@ html.rtl .attachments .item .buttons .button.download {
   border-color: #e26464;
   color: #fff;
 }
-.report.report_panel .content .close,
-.error.report_panel .content .close {
+.report_panel .content .close {
   position: absolute;
   cursor: pointer;
   right: 2px;
@@ -3187,8 +3197,7 @@ html.rtl .attachments .item .buttons .button.download {
   height: 16px;
   width: 16px;
 }
-.report.report_panel .content .close:before,
-.error.report_panel .content .close:before {
+.report_panel .content .close:before {
   speak: none;
   font-style: normal;
   font-weight: normal;
@@ -3201,8 +3210,7 @@ html.rtl .attachments .item .buttons .button.download {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-.report.report_panel .content .close:before,
-.error.report_panel .content .close:before {
+.report_panel .content .close:before {
   font-size: 16px;
   display: inline-block;
   content: "\e63e";
@@ -3922,7 +3930,7 @@ html.rtl .folders .children .children .children .children .children .children .c
   vertical-align: middle;
   width: 16px;
   height: 16px;
-  background-image: url("images/sprites.png?7.7.6");
+  background-image: url("images/sprites.png?7.7.7");
   background-repeat: no-repeat;
 }
 .html_editor .toolbar .content .item.link .icon {
@@ -5826,7 +5834,7 @@ html.rtl .panel.folders .customscroll-scrollbar-vertical {
   position: absolute;
   right: 2px;
   top: 0px;
-  background: url('images/sprites.png?7.7.6') no-repeat 0px -200px;
+  background: url('images/sprites.png?7.7.7') no-repeat 0px -200px;
 }
 .messages .items_list .item.answered .marker {
   display: inline-block;
@@ -6093,14 +6101,14 @@ html.rtl .message_viewer .message_header .message_info {
   white-space: nowrap;
   overflow: hidden;
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.7.6) repeat-y top right;
-  -o-mask: url(images/mask.png?7.7.6) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.7) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.7) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .message_viewer .message_header .message_info .message_info_line {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .message_viewer .message_header .message_info.message_detail_info .message_info_line {
@@ -7643,7 +7651,7 @@ html.rtl .panel.contacts .panel_top .search_block {
 /*=== END Contacts screen CSS ===*/
 /*=== Contact viewer CSS ===*/
 .panel.contact_viewer .panel_content {
-  background: url("images/contacts-bg.png?7.7.6") repeat 0 0;
+  background: url("images/contacts-bg.png?7.7.7") repeat 0 0;
   margin: 0 !important;
   padding: 2px 4px 0 2px !important;
 }
@@ -7918,6 +7926,16 @@ html.rtl .contact_data_groups .link.call {
 }
 /*=== END Files public view CSS ===*/
 /*=== Files screen CSS ===*/
+.panel.storages .middle_bar.quota_visible {
+  padding-bottom: 47px;
+  margin-bottom: -47px;
+}
+.panel.storages .middle_bar.quota_visible .panel_bottom {
+  height: 42px;
+  background: none;
+  border: none;
+  padding: 10px 0;
+}
 .panel.files {
   width: 85%;
   position: relative;
@@ -8206,7 +8224,7 @@ html.rtl .panel.files .items_list .item {
   display: inline-block;
   width: 35px;
   height: 30px;
-  background: url("images/sprites.png?7.7.6");
+  background: url("images/sprites.png?7.7.7");
   background-position: -440px -360px;
 }
 .panel.files .items_list .item.folder .name {
@@ -8251,7 +8269,7 @@ html.rtl .panel.files .items_list .item {
   width: 280px;
   margin: 0px auto;
   padding: 130px 20px 20px;
-  background: url("images/logo.png?7.7.6") no-repeat center 20px;
+  background: url("images/logo.png?7.7.7") no-repeat center 20px;
   text-align: center;
 }
 .sharing_panel .item {
@@ -8267,7 +8285,7 @@ html.rtl .panel.files .items_list .item {
 .sharing_panel .item .icon {
   display: inline-block;
   float: left;
-  background: url("images/sprites.png?7.7.6") no-repeat 80px 0px;
+  background: url("images/sprites.png?7.7.7") no-repeat 80px 0px;
   width: 55px;
   height: 65px;
   background-position: -480px -200px;
@@ -8302,26 +8320,26 @@ html.rtl .panel.files .items_list .item {
 }
 .popup.files .popup_panel .panels .panel.storages .items_list .item .title .name {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.7.6) repeat-y top right;
-  -o-mask: url(images/mask.png?7.7.6) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.7) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.7) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .popup.files .popup_panel .panels .panel.storages .items_list .item .title .name {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .popup.files .popup_panel .panels .panel.storages .items_list .item.selected .title .name {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.7.6) repeat-y top right;
-  -o-mask: url(images/mask.png?7.7.6) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.7) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.7) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .popup.files .popup_panel .panels .panel.storages .items_list .item.selected .title .name {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .popup.files .popup_panel .panels .panel.files {
@@ -8510,7 +8528,7 @@ html.rtl .panel.thread_viewer .panel_center .buttons .new_post {
   vertical-align: middle;
   width: 16px;
   height: 16px;
-  background: url("images/sprites.png?7.7.6") no-repeat -120px -120px;
+  background: url("images/sprites.png?7.7.7") no-repeat -120px -120px;
 }
 .panel.thread_viewer .new_request .placeholder {
   font-size: 10pt;
@@ -8784,7 +8802,7 @@ html.rtl .panel.thread_viewer .post .header .date {
 }
 .panel.thread_viewer .post.internal .content::before {
   float: left;
-  background: url("images/sprites.png?7.7.6") repeat -280px -200px;
+  background: url("images/sprites.png?7.7.7") repeat -280px -200px;
   content: "";
   width: 60px;
   height: 40px;
@@ -8831,7 +8849,7 @@ html.rtl .panel.thread_viewer .quick_reply .buttons .button.upload {
   vertical-align: middle;
   width: 16px;
   height: 16px;
-  background: url("images/sprites.png?7.7.6") no-repeat -120px -120px;
+  background: url("images/sprites.png?7.7.7") no-repeat -120px -120px;
 }
 .panel.thread_viewer .quick_reply.active .attachments {
   max-height: inherit;
@@ -9049,7 +9067,7 @@ html.rtl .panel.thread_viewer .quick_reply .buttons .button.upload {
   width: 31px;
   height: 31px;
   margin-right: 4px;
-  background: url("images/sprites.png?7.7.6") no-repeat -400px -411px;
+  background: url("images/sprites.png?7.7.7") no-repeat -400px -411px;
 }
 .HelpdeskLayout .products .product .name {
   font-size: 12pt;
@@ -10275,7 +10293,7 @@ html.rtl .popup.calendar_event .additional_buttons {
 }
 .popup.calendar_select .additional_buttons .item.repeat .icon,
 .popup.calendar_event .additional_buttons .item.repeat .icon {
-  background: url("images/sprites.png?7.7.6") no-repeat 40px 40px;
+  background: url("images/sprites.png?7.7.7") no-repeat 40px 40px;
   background-position: -280px -120px;
 }
 .popup.calendar_select .additional_buttons .item.repeat.selected .icon,
@@ -10517,7 +10535,7 @@ html.rtl .popup.calendar_event .subforms .dates_form .ui-datepicker-trigger {
 }
 .popup.calendar_event .main_panel .icon.repeat {
   display: block;
-  background: url("images/sprites.png?7.7.6") no-repeat -980px -240px;
+  background: url("images/sprites.png?7.7.7") no-repeat -980px -240px;
   width: 16px;
   height: 12px;
   position: absolute;
@@ -11021,8 +11039,8 @@ html.rtl .settings .panel.navigation .items_list .item > .title .name {
 .settings .folders .items_list .item > .title.droppableHover .name,
 .settings .panel.navigation .items_list .item > .title.droppableHover .name {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.7.6) repeat-y top right;
-  -o-mask: url(images/mask.png?7.7.6) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.7) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.7) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .panel.folders .items_list .item > .title.droppableHover .name,
@@ -11032,8 +11050,8 @@ html.rtl .panel.calendar_manager .items_list .item > .title.droppableHover .name
 html.rtl .settings .folders .items_list .item > .title.droppableHover .name,
 html.rtl .settings .panel.navigation .items_list .item > .title.droppableHover .name {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .panel.folders .items_list .item > .title .text,
@@ -11152,8 +11170,8 @@ html.rtl .settings .panel.navigation .items_list .item > .title.droppableHover .
 .settings .folders .items_list .item.selected > .title .name,
 .settings .panel.navigation .items_list .item.selected > .title .name {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.7.6) repeat-y top right;
-  -o-mask: url(images/mask.png?7.7.6) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.7) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.7) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .panel.folders .items_list .item.selected > .title .name,
@@ -11163,8 +11181,8 @@ html.rtl .panel.calendar_manager .items_list .item.selected > .title .name,
 html.rtl .settings .folders .items_list .item.selected > .title .name,
 html.rtl .settings .panel.navigation .items_list .item.selected > .title .name {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .panel.folders .items_list .item.selected > .title.droppableHover .name,
@@ -11174,8 +11192,8 @@ html.rtl .settings .panel.navigation .items_list .item.selected > .title .name {
 .settings .folders .items_list .item.selected > .title.droppableHover .name,
 .settings .panel.navigation .items_list .item.selected > .title.droppableHover .name {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.7.6) repeat-y top right;
-  -o-mask: url(images/mask.png?7.7.6) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.7) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.7) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .panel.folders .items_list .item.selected > .title.droppableHover .name,
@@ -11185,8 +11203,8 @@ html.rtl .panel.calendar_manager .items_list .item.selected > .title.droppableHo
 html.rtl .settings .folders .items_list .item.selected > .title.droppableHover .name,
 html.rtl .settings .panel.navigation .items_list .item.selected > .title.droppableHover .name {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .panel.folders .items_list .item.selected > .title .icon.type10,
@@ -11288,40 +11306,40 @@ html.rtl .settings .panel.navigation .items_list .item .count {
 .panel.groups .items_list .item .title .name,
 .panel.storages .items_list .item .title .name {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.7.6) repeat-y top right;
-  -o-mask: url(images/mask.png?7.7.6) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.7) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.7) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .panel.folders .items_list .item .title .name,
 html.rtl .panel.groups .items_list .item .title .name,
 html.rtl .panel.storages .items_list .item .title .name {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .panels.settings .folders .items_list .item .title .name {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.7.6) repeat-y top right;
-  -o-mask: url(images/mask.png?7.7.6) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.7) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.7) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .panels.settings .folders .items_list .item .title .name {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .panels.settings .folders .items_list .item.canDrag .title:hover .name {
   mask: url(images/filters.svg#masking);
-  -webkit-mask: url(images/mask.png?7.7.6) repeat-y top right;
-  -o-mask: url(images/mask.png?7.7.6) repeat-y top right;
+  -webkit-mask: url(images/mask.png?7.7.7) repeat-y top right;
+  -o-mask: url(images/mask.png?7.7.7) repeat-y top right;
   -ms-mask: url(images/mask.png%VERSION%) repeat-y top right;
 }
 html.rtl .panels.settings .folders .items_list .item.canDrag .title:hover .name {
   mask: url(images/filters.svg#masking_rtl);
-  -webkit-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
-  -o-mask: url(images/mask_rtl.png?7.7.6) repeat-y top left;
+  -webkit-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
+  -o-mask: url(images/mask_rtl.png?7.7.7) repeat-y top left;
   -ms-mask: url(images/mask_rtl.png%VERSION%) repeat-y top left;
 }
 .folders {
@@ -11481,7 +11499,7 @@ html.rtl .panel.threads .customscroll-scrollbar-vertical {
 /*=== retina displays ===*/
 @media only screen and (-webkit-min-device-pixel-ratio: 1.3), only screen and (-moz-min-device-pixel-ratio: 1.3), only screen and (-o-min-device-pixel-ratio: 1.3/1), only screen and (min-resolution: 1.3dppx), only screen and (min-resolution: 125dpi) {
   .spritesX2 {
-    background-image: url("images/sprites2x.png?7.7.6");
+    background-image: url("images/sprites2x.png?7.7.7");
     background-size: 1440px 560px;
   }
 }
@@ -11490,7 +11508,7 @@ html.rtl .panel.threads .customscroll-scrollbar-vertical {
   .messages .items_list .item .marker,
   .panel.files .items_list .folder .icon,
   .html_editor .toolbar .item .icon {
-    background-image: url("images/sprites2x.png?7.7.6");
+    background-image: url("images/sprites2x.png?7.7.7");
     background-size: 1440px 560px;
   }
 }

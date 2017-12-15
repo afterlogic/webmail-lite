@@ -9,11 +9,11 @@
 					</a>
 				</span>
 			</div>
-			<div class="middle_bar" data-bind="">
+			<div class="middle_bar" data-bind="css: {'quota_visible': -1 < quotaProc()}">
 				<!-- ko template: { name: 'FileStorage_StorageList'} --><!-- /ko -->
 				<div class="panel_bottom">
 					<span class="volumer" data-bind="visible: -1 < quotaProc()">
-						<span class="volumer_conteiner" data-bind="customTooltip: quotaDesc()">
+						<span class="volumer_conteiner" data-bind="customTooltip: quotaDesc">
 							<span class="used" data-bind="style: {'width': '' + (-1 < quotaProc() ? quotaProc() : 0) + '%' }"></span>
 						</span>
 					</span>

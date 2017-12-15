@@ -260,8 +260,9 @@ class CDomain extends api_AContainer
 			'AllowFiles'			=> array('bool', 'allow_files'),
 			'AllowHelpdesk'			=> array('bool', 'allow_helpdesk'),
 			
-			'DefaultTab'			=> array('string(100)', 'default_tab')
+			'DefaultTab'			=> array('string(100)', 'default_tab'),
 			
+			'Collaboration'			=> array('bool', 'collaboration'),
 		);
 	}
 
@@ -384,6 +385,8 @@ class CDomain extends api_AContainer
 			'DefaultTimeFormat'		=> 'Common/DefaultTimeFormat',
 			'AllowRegistration'		=> 'Common/AllowRegistration',
 			'AllowPasswordReset'	=> 'Common/AllowPasswordReset',
+			
+			'Collaboration'			=> 'Common/Collaboration',
 			
 			'DefaultTab'			=> 'Common/DefaultTab',
 			

@@ -1220,7 +1220,7 @@ class CApiIntegratorManager extends AApiManager
 	 *
 	 * @return CDomain
 	 */
-	private function getDefaultAccountDomain($oAccount)
+	public function getDefaultAccountDomain($oAccount)
 	{
 		/* @var $oApiDomainsManager CApiDomainsManager */
 		$oApiDomainsManager = CApi::Manager('domains');
@@ -1520,6 +1520,12 @@ class CApiIntegratorManager extends AApiManager
 			{
 				$aResult['LastLogin'] = $oAccount->User->LastLogin;
 			}
+			if (CApi::GetConf('webmail.show-previous-session-info', false))
+			{
+				$aResult['LastLogin'] = $oAccount->User->LastLogin;
+				$aResult['LastLoginIp'] = $oAccount->User->LastLoginIp;
+				$aResult['LastLoginUa'] = $oAccount->User->LastLoginUa;
+			}
 
 			$aResult['AllowVoice'] = false;
 			$aResult['VoiceProvider'] = '';
@@ -1812,6 +1818,7 @@ class CApiIntegratorManager extends AApiManager
 				'OutlookSyncPluginReadMore' => \CApi::GetConf('links.outlook-sync-read-more', '')
 			),
 			'LoginAdvanced' => CApi::GetConf('login.advanced', false),
+			'AllowBlockSender' => !!\CApi::GetConf('webmail.allow-block-sender', false),
 		);
 		
 		if (is_array($aAppData['LoginAdvanced']))

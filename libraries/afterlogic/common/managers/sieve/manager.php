@@ -542,6 +542,7 @@ class CApiSieveManager extends AApiManager
 	protected function _setSieveFile($oAccount, $sText)
 	{
 		$sText = str_replace("\r", '', $sText);
+		$sText = rtrim(str_replace("\n", "\r\n", $sText));
 
 		try
 		{

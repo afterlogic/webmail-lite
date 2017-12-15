@@ -1,7 +1,9 @@
 <div class="report_panel loading" data-bind="visible: loadingVisible(), css: {'hide': loadingHidden()}">
 	<span class="content">
 		<span class="icon"></span>
-		<span class="text" data-bind="text: loadingMessage"></span>
+		<span class="text" data-bind="html: loadingMessage, visible: isHtmlLoading"></span>
+		<span class="text" data-bind="text: loadingMessage, visible: !isHtmlLoading()"></span>
+		<span class="close" data-bind="visible: loadingVisibleClose, click: hideLoading"></span>
 	</span>
 </div>
 <div class="report_panel report" data-bind="visible: reportVisible(), css: {'hide': reportHidden()}" id="selenium_report">

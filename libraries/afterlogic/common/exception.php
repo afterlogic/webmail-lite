@@ -212,6 +212,7 @@ class CApiErrorCodes
 				self::WebMailManager_AccountAuthentication => CApi::I18N('API/WEBMAILMANAGER_ACCOUNT_AUTHENTICATION'),
 				self::WebMailManager_DomainDoesNotExist => CApi::I18N('API/WEBMAILMANAGER_DOMAIN_DOES_NOT_EXIST'),
 				self::WebMailManager_AccountConnectToMailServerFailed => CApi::I18N('API/WEBMAILMANAGER_ACCOUNT_CONNECT_TO_MAIL_SERVER_FAILED'),
+				self::WebMailManager_NewUserRegistrationDisabled => CApi::I18N('API/WEBMAILMANAGER_NEW_USER_REGISTRATION_DISABLED'),
 
 				self::Validation_InvalidPort => CApi::I18N('API/VALIDATION_INVALID_PORT'),
 				self::Validation_InvalidEmail => CApi::I18N('API/VALIDATION_INVALID_EMAIL'),
@@ -243,7 +244,9 @@ class CApiErrorCodes
 				self::Fetcher_AuthError => CApi::I18N('API/FETCHER_AUTH_ERROR'),
 
 				self::Sabre_Exception => CApi::I18N('API/SABRE_EXCEPTION'),
-				self::Sabre_PreconditionFailed => CApi::I18N('API/SABRE_PRECONDITION_FAILED')
+				self::Sabre_PreconditionFailed => CApi::I18N('API/SABRE_PRECONDITION_FAILED'),
+
+				self::HelpdeskManager_AccountCannotBeDeleted => CApi::I18N('API/HELPDESK_ACCOUNT_CANNOT_BE_DELETED')
 
 				/*self::Rest_InvalidParameters => CApi::I18N('API/REST_INVALID_PARAMETERS'),
 				self::Rest_InvalidCredentials => CApi::I18N('API/REST_INVALID_CREDENTIALS'),

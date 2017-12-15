@@ -16,7 +16,7 @@ namespace MailSo\Base;
 class HtmlUtils
 {
 	static $KOS = '@@_KOS_@@';
-//	static $aHrefProtocolsAvailable = array('http', 'https', 'ftp', 'skype', 'mailto', 'qiwi');
+	
 	/**
 	 * @access private
 	 */
@@ -580,7 +580,8 @@ class HtmlUtils
 				}
 
 				foreach (array(
-					'load', 'blur', 'error', 'focus', 'formchange', 'change',
+					'load', 'blur', 'error', 'focus', 'formchange', 'change', 'start',
+					'copy', 'contextmenu', 'drag', 'cut', 'paste',
 					'click', 'dblclick', 'keydown', 'keypress', 'keyup',
 					'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'mouseup',
 					'move', 'resize', 'resizeend', 'resizestart', 'scroll', 'select', 'submit', 'upload'
@@ -589,18 +590,20 @@ class HtmlUtils
 					@$oElement->removeAttribute('on'.$sAttr);
 				}
 
-				if ($oElement->hasAttribute('href'))
+				$aNotJsAttrs = array('href', 'action');
+				foreach ($aNotJsAttrs as $sAttrName)
 				{
-//					$sHref = \trim($oElement->getAttribute('href'));
-//					if (!\preg_match('/^(' . implode('|', self::$aHrefProtocolsAvailable) . '):/i', $sHref))
-//					{
-//						$oElement->setAttribute('data-x-broken-href', $sHref);
-//						$oElement->setAttribute('href', 'javascript:false');
-//					}
-//					else
-					if ('a' === $sTagNameLower)
+					if ($oElement->hasAttribute($sAttrName))
 					{
-						$oElement->setAttribute('rel', 'external');
+						$sHref = \trim($oElement->getAttribute($sAttrName));
+						if (substr($sHref, 0, 11) === 'javascript:')
+						{
+							$oElement->setAttribute($sAttrName, 'javascript:void(0)');
+						}
+						else if ('a' === $sTagNameLower)
+						{
+							$oElement->setAttribute('rel', 'external');
+						}
 					}
 				}
 

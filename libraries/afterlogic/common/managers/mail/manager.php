@@ -320,7 +320,10 @@ class CApiMailManager extends AApiManagerWithStorage
 			{
 				foreach ($aUnExistenSystemNames as $sFolderFullName => $iFolderType)
 				{
-					$this->createFolderByFullName($oAccount, $sFolderFullName);
+					$sNameToCreate = \MailSo\Base\Utils::ConvertEncoding($sFolderFullName,
+						\MailSo\Base\Enumerations\Charset::UTF_8,
+						\MailSo\Base\Enumerations\Charset::UTF_7_IMAP);
+					$this->createFolderByFullName($oAccount, $sNameToCreate);
 					$bAddSystemFolder = true;
 				}
 			}

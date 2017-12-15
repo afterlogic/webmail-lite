@@ -90,7 +90,8 @@ class CWebMailPopulateData extends ap_CoreModuleHelper
 				$oDomain->AllowUsersChangeInterfaceSettings);
 			$oScreen->Data->SetValue('chAllowUsersAccessAccountsSettings',
 				$oDomain->AllowUsersChangeEmailSettings);
-
+			$oScreen->Data->SetValue('chAllowCollabaration',
+				$oDomain->Collaboration);
 			$oScreen->Data->SetValue('chEnableWebmail', $oDomain->AllowWebMail);
 
 			$oScreen->Data->SetValue('chEnableAddressBook', $oDomain->AllowContacts);

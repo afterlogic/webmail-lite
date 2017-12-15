@@ -75,6 +75,8 @@ class CCommonAjaxAction extends ap_CoreModuleHelper
 
 			$oDomain->SiteName = CPost::get('txtSiteName', $oDomain->SiteName);
 			$oDomain->AllowUsersChangeInterfaceSettings = CPost::GetCheckBox('chAllowUsersAccessInterfaveSettings');
+			
+			$oDomain->Collaboration = CPost::GetCheckBox('chAllowCollaboration');
 
 			$sSelSkin = CPost::get('selSkin', '');
 			if (!empty($sSelSkin))
