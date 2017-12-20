@@ -37205,7 +37205,7 @@ CIdentityPropertiesViewModel.prototype.onSaveClick = function ()
 			'Action': 'AccountIdentityLoyalUpdate',
 			'AccountID': oAccount.id(),
 			'FriendlyName': this.friendlyName(),
-			'Type': this.oHtmlEditor.plainTextMode() ? 1 : 0,
+			'Type': this.oHtmlEditor.plainTextMode() ? 0 : 1,
 			'Signature': this.signature(),
 			'Options': this.useSignature(),
 			'Loyal': 1,
