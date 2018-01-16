@@ -101,6 +101,11 @@ class CContactListItem
 	public $SharedToAll;
 
 	/**
+	 * @var unt
+	 */
+	public $LastModified;
+
+	/**
 	 * @var array
 	 */
 	public $Events;	
@@ -109,6 +114,8 @@ class CContactListItem
 	 * @var int
 	 */
 	public $AgeScore;
+	
+	public $DateModified;
 	
 	public function __construct()
 	{
@@ -132,6 +139,7 @@ class CContactListItem
 		$this->SharedToAll = false;
 		$this->Events = array();
 		$this->AgeScore = 1;
+		$this->DateModified = 0;
 	}
 
 	/**
@@ -324,6 +332,7 @@ class CContactListItem
 					$this->Global = true;
 					$this->Name = (string) $oRow->fullname;
 					$this->Email = (string) $oRow->view_email;
+					$this->DateModified = isset($oRow->date_modified) ? $oRow->date_modified : 0;
 
 					if (!empty($oRow->b_phone))
 					{

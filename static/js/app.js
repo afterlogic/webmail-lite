@@ -25862,7 +25862,7 @@ function CWrapLoginViewModel()
 
 	this.emailVisible = this.oLoginViewModel.emailVisible;
 	this.loginVisible = this.oLoginViewModel.loginVisible;
-	this.loginDescription = ko.observable(Utils.encodeHtml(AppData.App.LoginDescription) || '');
+	this.loginDescription = ko.observable(AppData.App.LoginDescription || '');
 
 	this.aLanguages = AppData.App.Languages;
 	this.currentLanguage = ko.observable(AppData.App.DefaultLanguage);

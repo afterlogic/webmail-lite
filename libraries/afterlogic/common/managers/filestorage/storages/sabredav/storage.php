@@ -816,7 +816,6 @@ class CApiFilestorageSabredavStorage extends CApiFilestorageStorage
 		if ($this->init($oAccount))
 		{
 			$oApiMinManager = $this->getApiMinManager();
-
 			if (empty($sNewName) && !is_numeric($sNewName))
 			{
 				$sNewName = $sName;
@@ -828,7 +827,10 @@ class CApiFilestorageSabredavStorage extends CApiFilestorageStorage
 			$oFromDirectory = $this->getDirectory($oAccount, $sFromType, $sFromPath);
 			$oToDirectory = $this->getDirectory($oAccount, $sToType, $sToPath);
 
-			if ($oToDirectory && $oFromDirectory)
+			$sFullPath = $sFromRootPath . ($sFromPath ? $sFromPath : '') . '/' . trim($sName, '/');
+			$sRealPath = \realpath($sFullPath);
+
+			if ($oToDirectory && $oFromDirectory && $sRealPath && strpos($sRealPath, \realpath($sFromRootPath)) === 0)
 			{
 				$oItem = $oFromDirectory->getChild($sName);
 				if ($oItem !== null)
@@ -839,7 +841,7 @@ class CApiFilestorageSabredavStorage extends CApiFilestorageStorage
 
 						$oItemNew = $oToDirectory->getChild($sNewName);
 						$aProps = $oItem->getProperties(array());
-						if (!$bMove)				
+						if (!$bMove)
 						{
 							$aProps['Owner'] = $oAccount->Email;
 						}
@@ -860,7 +862,7 @@ class CApiFilestorageSabredavStorage extends CApiFilestorageStorage
 								$mMin['Name'] = $oItemNew->getName();
 
 								$oApiMinManager->updateMinByID($sID, $mMin, $sNewID);
-							}					
+							}
 						}
 						$oItemNew->updateProperties($aProps);
 					}

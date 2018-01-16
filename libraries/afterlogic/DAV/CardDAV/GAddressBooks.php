@@ -102,7 +102,7 @@ class GAddressBooks extends \Sabre\DAV\Collection implements \Sabre\CardDAV\IDir
 					array(
 						'uri' => $sUID . '.vcf',
 						'carddata' => $vCard->serialize(),
-						'lastmodified' => strtotime('2001-01-01 00:00:00')
+						'lastmodified' => $oContact->DateModified
 					)
 				);
 			}
@@ -113,6 +113,16 @@ class GAddressBooks extends \Sabre\DAV\Collection implements \Sabre\CardDAV\IDir
     public function getProperties($properties) {
 
         $response = array();
+		$oApiGcontactManager = /* @var \CApiGcontactsManager */ \CApi::Manager('gcontacts');
+		if ($oApiGcontactManager)
+		{
+			$oAccount = $this->getAccount();
+			if ($oAccount)
+			{
+				$this->addressBookInfo['{http://calendarserver.org/ns/}getctag'] = $oApiGcontactManager->getCTag($oAccount);
+			}
+		}
+		
         foreach($properties as $propertyName) {
 
             if (isset($this->addressBookInfo[$propertyName])) {
@@ -122,7 +132,6 @@ class GAddressBooks extends \Sabre\DAV\Collection implements \Sabre\CardDAV\IDir
             }
 
         }
-
         return $response;
 
     }
